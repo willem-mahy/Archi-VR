@@ -1294,7 +1294,7 @@ public class OVRManager : MonoBehaviour
 	private void Awake()
 	{
 		//If OVRPlugin is initialized on Awake(), or if the device is OpenVR, OVRManager should be initialized right away.
-		if (OVRPlugin.initialized || (Settings.enabled && Settings.loadedDeviceName == OPENVR_UNITY_NAME_STR))
+		if (!OVRPlugin.initialized || (Settings.enabled && Settings.loadedDeviceName == OPENVR_UNITY_NAME_STR))
 		{
 			InitOVRManager();
 		}
