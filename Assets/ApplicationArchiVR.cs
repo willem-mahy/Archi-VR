@@ -193,87 +193,9 @@ namespace ArchiVR
 
             UpdateInput_Unity();
             //UpdateInput_OVR();
-        }
 
-        void UpdateInput_Unity()
-        {
-            //var button1ID = "Fire1";
-            //var button2ID = "Fire2";
-            //var button3ID = "Fire3";
-            //var button4ID = "Jump";
+            //-------------------
 
-            var button1ID = "joystick button 0";
-            var button2ID = "joystick button 1";
-            var button3ID = "joystick button 2";
-            var button4ID = "joystick button 3";
-            var startButtonID = "joystick button 7";
-            var thumbstickPID = "joystick button 8";
-            var thumbstickSID = "joystick button 9";
-            var joystickNames = UnityEngine.Input.GetJoystickNames();
-
-            var touchControllersConnected = joystickNames.Length == 2;
-
-            //bool button1Down = touchControllersConnected && UnityEngine.Input.GetButtonDown(button1ID);
-            //bool button2Down = touchControllersConnected && UnityEngine.Input.GetButtonDown(button2ID);
-            //bool button3Down = touchControllersConnected && UnityEngine.Input.GetButtonDown(button3ID);
-            //bool button4Down = touchControllersConnected && UnityEngine.Input.GetButtonDown(button4ID);
-
-            bool button1Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button1ID);
-            bool button2Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button2ID);
-            bool button3Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button3ID);
-            bool button4Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button4ID);
-            bool buttonStartDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(startButtonID);
-            bool buttonThumbstickPDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(thumbstickPID);
-            bool buttonThumbstickSDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(thumbstickSID);
-
-            bool button1Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button1ID);// "Fire1");
-            bool button2Pressed = touchControllersConnected && UnityEngine.Input.GetKey(button2ID);// "joystick button 1");
-            bool button3Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button3ID);//"Fire3");
-            bool button4Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button4ID);// "Jump");
-            bool buttonStartPressed = touchControllersConnected && UnityEngine.Input.GetButton(startButtonID);
-
-            var text = "\nJoysticks:";
-            foreach (var n in joystickNames)
-            {
-                text += "\n -" + n;
-            }
-
-            var leftControllerActive = touchControllersConnected && joystickNames[0] == "";
-            var rightControllerActive = joystickNames.Length == 2 && joystickNames[1] == "";
-
-            text += "\n";
-
-            text += "\nbuttonOneDown: " + button1Down;
-            text += "\nbuttonTwoDown: " + button2Down;
-            text += "\nbuttonThreeDown: " + button3Down;
-            text += "\nbuttonFourDown: " + button4Down;
-            text += "\nbuttonStartDown: " + buttonStartDown;
-
-            text += "\n";
-
-            text += "\nbuttonOnePressed: " + button1Pressed;
-            text += "\nbuttonTwoPressed: " + button2Pressed;
-            text += "\nbuttonThreePressed: " + button3Pressed;
-            text += "\nbuttonFourPressed: " + button4Pressed;
-            text += "\nbuttonStartPressed: " + buttonStartPressed;
-
-            text += "\n";
-
-            text += "version: 190903b";
-
-            var activeProject = GetActiveProject();
-
-            if (activeProject != null)
-            {
-                text += "\n\n" + activeProject.name;
-
-                var activePOI = GetActivePOI();
-
-                if (activePOI != null)
-                {
-                    text += " > " + activePOI.name;
-                }
-            }
 
             // Figure out whether there is something to do.
             bool prevProject = button1Down || Input.GetKeyDown(KeyCode.DownArrow);
@@ -282,13 +204,26 @@ namespace ArchiVR
             bool prev = button3Down || Input.GetKeyDown(KeyCode.LeftArrow);
             bool next = button4Down || Input.GetKeyDown(KeyCode.RightArrow);
 
-            bool toggleModelScale = buttonStartDown || Input.GetKeyDown(KeyCode.S);
+            bool toggleModelScale = buttonThumbstickPDown || buttonThumbstickSDown || Input.GetKeyDown(KeyCode.S);
+            
+            bool toggleCanvas = false;//buttonStartDown || Input.GetKeyDown(KeyCode.M);
+            bool toggleMenu = buttonStartDown || Input.GetKeyDown(KeyCode.M);
+            bool toggleInput = Input.GetKeyDown(KeyCode.I);
 
-            bool toggleCanvas = buttonThumbstickPDown || buttonThumbstickSDown || Input.GetKeyDown(KeyCode.D);
+            if (toggleInput)
+            {
+                inputMode = 1 - inputMode;
+            }
+
 
             if (toggleCanvas)
             {
                 ToggleCanvas();
+            }
+
+            if (toggleMenu)
+            {
+                menuMode = ++menuMode%3;
             }
 
             if (toggleModelScale)
@@ -316,7 +251,250 @@ namespace ArchiVR
                 OffsetActivePOIIndex(-1);
             }
 
+            //----------------------
+
+            UpdateMenu();
+        }
+
+        private int menuMode = MenuDebug;
+
+        const int MenuNone = 0;
+        const int MenuDebug = 1;
+        const int MenuInfo = 2;
+
+        // The HUD menu text
+        string text = "";
+
+        void UpdateMenu()
+        {
+            // Reset HUD menu text.
+            text = "";
+
+            // Update HUD menu text. (if not 'None')
+            switch (menuMode)
+            {
+                case MenuDebug:
+                    UpdateMenuDebug();
+                    break;
+                case MenuInfo:
+                    UpdateMenuInfo();
+                    break;
+                case MenuNone:
+                    break;
+                default:
+                    text += "Unsupported menu mode: " + menuMode.ToString();
+                    break;
+            }
+
+            // Push HUD menu text to UI.
             m_debugText.text = text;
+
+            m_debugPanel.SetActive(MenuNone != menuMode);
+        }
+
+        void UpdateMenuDebug()
+        {
+            text += "\nInput mode: " + (inputMode == InputUnity ? "Unity" : "OVR");
+            text += "\n";
+            text += "\nRemote connection: L=" + (lRemoteConnected ? "OK" : "NA") + " R=" + (rRemoteConnected ? "OK" : "NA");
+            text += "\nTouch connection: L=" + (lTouchConnected ? "OK" : "NA") + " R=" + (rTouchConnected ? "OK" : "NA");
+            text += "\nActive Controller: " + (activeController == OVRInput.Controller.LTouch ? " L" : "") + (activeController == OVRInput.Controller.RTouch ? " R" : "");
+            text += "\n";
+            text += "\nThumbstick: L(" + lThumbStick.x + ", " + lThumbStick.y + ") R(" + rThumbStick.x + ", " + rThumbStick.y + ")";
+            text += "\n";
+            text += "\nL thumbstick:";
+            text += "\n Left: " + (lThumbstickDirectionLeftDown ? "Down" : (lThumbstickDirectionLeftPressed ? "Pressed" : ""));
+            text += "\n Right: " + (lThumbstickDirectionRightDown ? "Down" : (lThumbstickDirectionRightPressed ? "Pressed" : ""));
+            text += "\n Up: " + (lThumbstickDirectionUpDown ? "Down" : (lThumbstickDirectionUpPressed ? "Pressed" : ""));
+            text += "\n Down: " + (lThumbstickDirectionDownDown ? "Down" : (lThumbstickDirectionDownDown ? "Pressed" : ""));
+
+
+            if (inputMode == InputUnity)
+            {
+                text += "\nJoysticks:";
+                foreach (var n in joystickNames)
+                {
+                    text += "\n -" + n;
+                }                
+            }
+            else
+            {
+                
+                // index finger trigger’s current position (range of 0.0f to 1.0f)
+
+                // primary trigger (typically the Left) 
+                text += "\nPrimary IndexTrigger = " + OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) + (OVRInput.GetDown(OVRInput.RawButton.LIndexTrigger) ? " Down" : ""); ;
+                // secondary trigger (typically the Right) 
+                text += "\nSecondary IndexTrigger = " + OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) + (OVRInput.GetDown(OVRInput.RawButton.RIndexTrigger) ? " Down" : ""); ;
+
+                // left
+                text += "\nL IndexTrigger = " + OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger) + (rawButtonLIndexTriggerDown ? " Down" : "");
+
+                // right
+                text += "\nR IndexTrigger = " + OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger) + (rawButtonRIndexTriggerDown ? " Down" : "");
+
+                // returns true if the secondary gamepad button, typically “B”, is currently touched by the user.
+                //text += "\nGetTouchTwo = " + OVRInput.Get(OVRInput.Touch.Two);   
+            }
+
+            text += "\n";
+
+            //TODO Probably obsolete -> Remove?
+            //text += "\nbuttonOneDown: " + button1Down;
+            //text += "\nbuttonTwoDown: " + button2Down;
+            //text += "\nbuttonThreeDown: " + button3Down;
+            //text += "\nbuttonFourDown: " + button4Down;
+            //text += "\nbuttonStartDown: " + buttonStartDown;
+
+            //text += "\n";
+
+            //text += "\nbuttonOnePressed: " + button1Pressed;
+            //text += "\nbuttonTwoPressed: " + button2Pressed;
+            //text += "\nbuttonThreePressed: " + button3Pressed;
+            //text += "\nbuttonFourPressed: " + button4Pressed;
+            //text += "\nbuttonStartPressed: " + buttonStartPressed;
+
+            text += "\nButton 1 = " + (button1Down ? "Down" : (button1Pressed ? "Pressed" : ""));
+            text += "\nButton 2 = " + (button2Down ? "Down" : (button2Pressed ? "Pressed" : ""));
+            text += "\nButton 3 = " + (button3Down ? "Down" : (button3Pressed ? "Pressed" : ""));
+            text += "\nButton 4 = " + (button4Down ? "Down" : (button4Pressed ? "Pressed" : ""));
+
+            // TODO Implement ABXY?
+            //text += "\nA button = " + (aButtonDown ? "Down" : (aButtonPressed ? "Pressed" : ""));
+            //text += "\nB button = " + (bButtonDown ? "Down" : (bButtonPressed ? "Pressed" : ""));
+            //text += "\nX button = " + (xButtonDown ? "Down" : (xButtonPressed ? "Pressed" : ""));
+            //text += "\nY button = " + (yButtonDown ? "Down" : (yButtonPressed ? "Pressed" : ""));
+        }
+
+        void UpdateMenuInfo()
+        {
+            var sceneNames = gameObject.GetComponent<ReadSceneNames>().scenes;
+
+            text += "\nScenes:";
+            foreach (var sceneName in sceneNames)
+                text += "\n - " + sceneName;
+
+            text += "\n";
+
+            text += "\nProjects:";
+            foreach (var sceneName in sceneNames)
+                if (sceneName.StartsWith("Project"))
+                    text += "\n - " + sceneName;
+
+            var activeProject = GetActiveProject();
+
+            if (activeProject != null)
+            {
+                text += "\n";
+                text += "\n" + activeProject.name;
+
+                var activePOI = GetActivePOI();
+
+                if (activePOI != null)
+                {
+                    text += " > " + activePOI.name;
+                }
+            }
+
+            text += "\n";
+            text += "\nversion: 190905a";
+        }
+
+        const int InputUnity = 0;
+        const int InputOVR = 1;
+
+        int inputMode = InputUnity;
+
+        //const string button1ID = "Fire1";
+        //const string button2ID = "Fire2";
+        //const string button3ID = "Fire3";
+        //const string button4ID = "Jump";
+        const string button1ID = "joystick button 0";
+        const string button2ID = "joystick button 1";
+        const string button3ID = "joystick button 2";
+        const string button4ID = "joystick button 3";
+        const string button5ID = "joystick button 4";
+        const string button6ID = "joystick button 5";
+        const string button7ID = "joystick button 6";
+        const string button8ID = "joystick button 7";
+        const string button9ID = "joystick button 8";
+        const string button10ID = "joystick button 9";
+        const string startButtonID = button8ID;
+        const string thumbstickPID = button9ID;
+        const string thumbstickSID = button10ID;
+        string[] joystickNames = null;
+
+        bool touchControllersConnected =false;
+
+        bool button1Down = false;
+        bool button2Down = false;
+        bool button3Down = false;
+        bool button4Down = false;
+        bool buttonStartDown = false;
+        bool buttonThumbstickPDown = false;
+        bool buttonThumbstickSDown = false;
+
+        bool button1Pressed = false;
+        bool button2Pressed = false;
+        bool button3Pressed = false;
+        bool button4Pressed = false;
+        bool buttonStartPressed = false;
+
+        bool leftControllerActive = false;
+        bool rightControllerActive = false;
+
+        OVRInput.Controller activeController = OVRInput.Controller.None;
+
+        bool lRemoteConnected = false;
+        bool rRemoteConnected = false;
+
+        bool lTouchConnected = false;
+        bool rTouchConnected = false;
+
+        bool rawButtonLIndexTriggerDown = false;
+        bool rawButtonRIndexTriggerDown = false;
+
+        Vector2 lThumbStick;
+        Vector2 rThumbStick;
+
+        bool lThumbstickDirectionLeftDown = false;
+        bool lThumbstickDirectionRightDown = false;
+        bool lThumbstickDirectionUpDown = false;
+        bool lThumbstickDirectionDownDown = false;
+
+        bool lThumbstickDirectionLeftPressed = false;
+        bool lThumbstickDirectionRightPressed = false;
+        bool lThumbstickDirectionUpPressed = false;
+        bool lThumbstickDirectionDownPressed = false;
+
+        void UpdateInput_Unity()
+        {
+            // Get the names of the currently connected joystick devices.          
+            joystickNames = UnityEngine.Input.GetJoystickNames();
+
+            touchControllersConnected = joystickNames.Length == 2;
+
+            button1Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button1ID);
+            button2Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button2ID);
+            button3Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button3ID);
+            button4Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button4ID);
+            buttonStartDown =
+                touchControllersConnected && UnityEngine.Input.GetKeyDown(startButtonID)
+                || touchControllersConnected && UnityEngine.Input.GetKeyDown(button5ID)
+                || touchControllersConnected && UnityEngine.Input.GetKeyDown(button6ID)
+                || touchControllersConnected && UnityEngine.Input.GetKeyDown(button7ID);
+
+            buttonThumbstickPDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(thumbstickPID);
+            buttonThumbstickSDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(thumbstickSID);
+
+            button1Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button1ID);// "Fire1");
+            button2Pressed = touchControllersConnected && UnityEngine.Input.GetKey(button2ID);// "joystick button 1");
+            button3Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button3ID);//"Fire3");
+            button4Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button4ID);// "Jump");
+            buttonStartPressed = touchControllersConnected && UnityEngine.Input.GetButton(startButtonID);
+
+            leftControllerActive = touchControllersConnected && joystickNames[0] == "";
+            rightControllerActive = joystickNames.Length == 2 && joystickNames[1] == "";
         }
 
         void UpdateInput_OVR()
@@ -329,14 +507,15 @@ namespace ArchiVR
             var rTouchConnected = OVRInput.IsControllerConnected(OVRInput.Controller.RTouch);
 
             // Get existing button presses.
-            var button1Pressed = OVRInput.Get(OVRInput.Button.One);
+            button1Pressed = OVRInput.Get(OVRInput.Button.One);
+            button2Pressed = OVRInput.Get(OVRInput.Button.Two);
+            button3Pressed = OVRInput.Get(OVRInput.Button.Three);
+            button4Pressed = OVRInput.Get(OVRInput.Button.Four);
+
             var lButton1Pressed = OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTrackedRemote);
-            var rButton1Pressed = OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTrackedRemote);
-            var button2Pressed = OVRInput.Get(OVRInput.Button.Two);
+            var rButton1Pressed = OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTrackedRemote);            
             var lButton2Pressed = OVRInput.Get(OVRInput.Button.Two, OVRInput.Controller.LTrackedRemote);
-            var rButton2Pressed = OVRInput.Get(OVRInput.Button.Two, OVRInput.Controller.LTrackedRemote);
-            var button3Pressed = OVRInput.Get(OVRInput.Button.Three);
-            var button4Pressed = OVRInput.Get(OVRInput.Button.Four);
+            var rButton2Pressed = OVRInput.Get(OVRInput.Button.Two, OVRInput.Controller.LTrackedRemote);            
 
             var aButtonPressed = OVRInput.Get(OVRInput.RawButton.A);
             var bButtonPressed = OVRInput.Get(OVRInput.RawButton.B);
@@ -345,10 +524,10 @@ namespace ArchiVR
             var startButtonPressed = OVRInput.Get(OVRInput.RawButton.Start);
 
             // Get new button presses.
-            var button1Down = OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.Touch);
-            var button2Down = OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.Touch);
-            var button3Down = OVRInput.GetDown(OVRInput.Button.Three, OVRInput.Controller.Touch);
-            var button4Down = OVRInput.GetDown(OVRInput.Button.Four, OVRInput.Controller.Touch);
+           button1Down = OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.Touch);
+           button2Down = OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.Touch);
+           button3Down = OVRInput.GetDown(OVRInput.Button.Three, OVRInput.Controller.Touch);
+           button4Down = OVRInput.GetDown(OVRInput.Button.Four, OVRInput.Controller.Touch);
 
             var aButtonDown = OVRInput.GetDown(OVRInput.RawButton.A);
             var bButtonDown = OVRInput.GetDown(OVRInput.RawButton.B);
@@ -356,8 +535,8 @@ namespace ArchiVR
             var yButtonDown = OVRInput.GetDown(OVRInput.RawButton.Y);
             var startButtonDown = OVRInput.GetDown(OVRInput.RawButton.Start);
 
-            var lThumbstickButtonDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.Touch);
-            var rThumbstickButtonDown = OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick, OVRInput.Controller.Touch);
+            buttonThumbstickPDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.Touch);
+            buttonThumbstickSDown = OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick, OVRInput.Controller.Touch);
 
             // returns true if the left index finger trigger has been pressed more than halfway.  
             // (Interpret the trigger as a button).
@@ -367,105 +546,19 @@ namespace ArchiVR
             // (Interpret the trigger as a button).
             var rawButtonRIndexTriggerDown = OVRInput.GetDown(OVRInput.RawButton.RIndexTrigger);
 
-            var lThumbstickDirectionUp = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickUp, OVRInput.Controller.Touch);
-            var lThumbstickDirectionDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickDown, OVRInput.Controller.Touch);
-            var lThumbstickDirectionLeft = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickLeft, OVRInput.Controller.Touch);
-            var lThumbstickDirectionRight = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickRight, OVRInput.Controller.Touch);
+            lThumbstickDirectionUpDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickUp, OVRInput.Controller.Touch);
+            lThumbstickDirectionDownDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickDown, OVRInput.Controller.Touch);
+            lThumbstickDirectionLeftDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickLeft, OVRInput.Controller.Touch);
+            lThumbstickDirectionRightDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickRight, OVRInput.Controller.Touch);
+
+            lThumbstickDirectionUpPressed = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickUp, OVRInput.Controller.Touch);
+            lThumbstickDirectionDownPressed = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickDown, OVRInput.Controller.Touch);
+            lThumbstickDirectionLeftPressed = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickLeft, OVRInput.Controller.Touch);
+            lThumbstickDirectionRightPressed = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickRight, OVRInput.Controller.Touch);
 
             // Get thumbstick positions. (X/Y range of -1.0f to 1.0f)
-            var lThumbStick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
-            var rThumbStick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
-
-            var text = "";
-            text += "\nRemote connection: L=" + (lRemoteConnected ? "OK" : "NA") + " R=" + (rRemoteConnected ? "OK" : "NA");
-            text += "\nTouch connection: L=" + (lTouchConnected ? "OK" : "NA") + " R=" + (rTouchConnected ? "OK" : "NA");
-            text += "\nActive Controller: " + (activeController == OVRInput.Controller.LTouch ? " L" : "") + (activeController == OVRInput.Controller.RTouch ? " R" : "");
-
-            text += "\nButton 1 = " + (button1Down ? "Down" : (button1Pressed ? "Pressed" : ""));
-            text += "\nButton 2 = " + (button2Down ? "Down" : (button2Pressed ? "Pressed" : ""));
-            text += "\nButton 3 = " + (button3Down ? "Down" : (button3Pressed ? "Pressed" : ""));
-            text += "\nButton 4 = " + (button4Down ? "Down" : (button4Pressed ? "Pressed" : ""));
-
-            text += "\nA button = " + (aButtonDown ? "Down" : (aButtonPressed ? "Pressed" : ""));
-            text += "\nB button = " + (bButtonDown ? "Down" : (bButtonPressed ? "Pressed" : ""));
-            text += "\nX button = " + (xButtonDown ? "Down" : (xButtonPressed ? "Pressed" : ""));
-            text += "\nY button = " + (yButtonDown ? "Down" : (yButtonPressed ? "Pressed" : ""));
-
-            text += "\nL thumbstick: (" + lThumbStick.x + ", " + lThumbStick.y + ")";
-            text += "\nR thumbstick: (" + lThumbStick.x + ", " + lThumbStick.y + ")";
-
-            text += "\nL thumbstick Left Down: " + lThumbstickDirectionLeft;            
-            text += "\nL thumbstick Right Down: " + lThumbstickDirectionRight;
-
-            // returns a float of the index finger trigger’s current state.  
-            // (range of 0.0f to 1.0f)
-
-            // secondary (typically the Right) 
-            text += "\nPrimary IndexTrigger = " + OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) + (OVRInput.GetDown(OVRInput.RawButton.LIndexTrigger) ? " Down" : ""); ;
-            text += "\nSecondary IndexTrigger = " + OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) + (OVRInput.GetDown(OVRInput.RawButton.RIndexTrigger) ? " Down" : ""); ;
-
-            // left
-            text += "\nL IndexTrigger = " + OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger) + (rawButtonLIndexTriggerDown ? " Down" : "");
-
-            // right
-            text += "\nR IndexTrigger = " + OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger) + (rawButtonRIndexTriggerDown ? " Down" : "");
-            
-            // returns true if the secondary gamepad button, typically “B”, is currently touched by the user.
-            //text += "\nGetTouchTwo = " + OVRInput.Get(OVRInput.Touch.Two);
-
-            var activeProject = GetActiveProject();
-
-            if (activeProject != null)
-            {
-                text += "\n\n" + activeProject.name;
-
-                var activePOI = GetActivePOI();
-
-                if (activePOI != null)
-                {
-                    text += " > " + activePOI.name;
-                }
-            }
-
-            // Figure out whether there is something to do.
-            bool prevProject = button1Down || xButtonDown || lThumbstickDirectionUp || Input.GetKeyDown(KeyCode.DownArrow);
-            bool nextProject = yButtonDown || lThumbstickDirectionDown || Input.GetKeyDown(KeyCode.UpArrow);
-            bool prev = button2Down || aButtonDown || lThumbstickDirectionLeft || Input.GetKeyDown(KeyCode.LeftArrow);
-            bool next = bButtonDown || lThumbstickDirectionRight || Input.GetKeyDown(KeyCode.RightArrow);
-            bool toggleModelScale = lThumbstickButtonDown || Input.GetKeyDown(KeyCode.S); ;
-            bool toggleCanvas = startButtonDown || Input.GetKeyDown(KeyCode.D); ;
-
-            if (toggleCanvas)
-            {
-                ToggleCanvas();
-            }
-
-            if (toggleModelScale)
-            {
-                ToggleModelScale();
-            }
-
-            if (nextProject)
-            {
-                ActivateProject(m_activeProjectIndex + 1);
-            }
-
-            if (prevProject)
-            {
-                ActivateProject(m_activeProjectIndex - 1);
-            }
-
-            if (next)
-            {
-                OffsetActivePOIIndex(+1);
-            }
-
-            if (prev)
-            {
-                OffsetActivePOIIndex(-1);
-            }
-
-            m_debugText.text = text;
+            lThumbStick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
+            rThumbStick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
         }
 
         void OffsetActivePOIIndex(int offset)
