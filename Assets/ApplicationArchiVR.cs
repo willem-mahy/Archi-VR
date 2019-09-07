@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace ArchiVR
 {
@@ -366,20 +367,32 @@ namespace ArchiVR
             //text += "\nY button = " + (yButtonDown ? "Down" : (yButtonPressed ? "Pressed" : ""));
         }
 
+        new List<string> GetProjectNames()
+        {
+            var projectNames = new List<string>();
+
+            for (int i = 0; i < SceneManager.sceneCountInBuildSettings; ++i)
+            {
+                string sceneName = System.IO.Path.GetFileNameWithoutExtension(SceneUtility.GetScenePathByBuildIndex(i));
+
+                if (sceneName.StartsWith("Project"))
+                {
+                    projectNames.Add(sceneName);
+                }
+            }
+
+            return projectNames;
+        }
+
         void UpdateMenuInfo()
         {
-            var sceneNames = gameObject.GetComponent<ReadSceneNames>().scenes;
-
-            text += "\nScenes:";
-            foreach (var sceneName in sceneNames)
-                text += "\n - " + sceneName;
-
-            text += "\n";
+            var projectNames = GetProjectNames();
 
             text += "\nProjects:";
-            foreach (var sceneName in sceneNames)
-                if (sceneName.StartsWith("Project"))
-                    text += "\n - " + sceneName;
+            foreach (var projectName in projectNames)
+            {
+                text += "\n - " + projectName;
+            }
 
             var activeProject = GetActiveProject();
 
