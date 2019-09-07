@@ -19,6 +19,7 @@ namespace ArchiVR
 
     public class ApplicationArchiVR : MonoBehaviour
     {
+        #region Variables
         UnityEngine.GameObject m_ovrCameraRig = null;
 
         UnityEngine.GameObject m_hudCanvas = null;
@@ -27,14 +28,17 @@ namespace ArchiVR
 
         UnityEngine.UI.Text m_debugText = null;
 
+        int m_loadingProjectIndex = -1;
         int m_activeProjectIndex = -1;
-        List<UnityEngine.GameObject> m_projects = new List<UnityEngine.GameObject>();
+        List<string> m_projectNames = new List<string>();
 
         int m_activePOIIndex = -1;
         List<UnityEngine.GameObject> m_POI = new List<UnityEngine.GameObject>();
-              
+
         int m_activeScaleIndex = 0;
         List<float> m_scales = new List<float>();
+
+        #endregion Variables
 
         // Start is called before the first frame update
         void Start()
@@ -48,25 +52,22 @@ namespace ArchiVR
             m_scales.Add(1.0f);
             m_scales.Add(0.04f);
 
-            GatherProjects();            
+            GatherProjects();
         }
 
         void GatherProjects()
         {
-            m_projects.Clear();
-
-            // Gather all projects
-            var projects = GameObject.Find("Projects");
-
-            if (projects != null)
-            {
-                foreach (Transform child in projects.transform)
-                {
-                    m_projects.Add(child.gameObject);
-                }
-            }
+            m_projectNames = GetProjectNames();
 
             ActivateProject(0);
+        }
+
+        string GetActiveProjectName()
+        {
+            if (m_activeProjectIndex == -1)
+                return null;
+
+            return m_projectNames[m_activeProjectIndex];
         }
 
         GameObject GetActiveProject()
@@ -74,7 +75,9 @@ namespace ArchiVR
             if (m_activeProjectIndex == -1)
                 return null;
 
-            return m_projects[m_activeProjectIndex];
+            var activeProject = GameObject.Find("Project");
+
+            return activeProject;
         }
 
         GameObject GetActivePOI()
@@ -91,53 +94,61 @@ namespace ArchiVR
 
             var activeProject = GetActiveProject();
 
-            if (activeProject != null)
+            if (activeProject == null)
             {
-                // Gather all POI in the current active project.
-                foreach (Transform childOfActiveProject in activeProject.transform)
+                return;
+            }
+
+            // Gather all POI in the current active project.
+            var pois = new List<GameObject>();
+
+            foreach (Transform childOfActiveProject in activeProject.transform)
+            {
+                var childGameObject = childOfActiveProject.gameObject;
+
+                if (childGameObject.name == "POI")
                 {
-                    var childGameObject = childOfActiveProject.gameObject;
+                    var POIs = childGameObject;
 
-                    if (childGameObject.name == "POI")
+                    foreach (Transform childOfPOIs in POIs.transform)
                     {
-                        var POIs = childGameObject;
-
-                        foreach (Transform childOfPOIs in POIs.transform)
-                        {
-                            m_POI.Add(childOfPOIs.gameObject);
-                        }
-
-                        break;
+                        pois.Add(childOfPOIs.gameObject);
                     }
+
+                    break;
                 }
             }
+
+            SetPOI(pois);
+        }
+
+        void SetPOI(List<GameObject> pois)
+        {
+            m_POI = pois;
 
             SetActivePOI(0);
         }
 
         void ActivateProject(int projectIndex)
         {
-            if (m_projects.Count == 0)
+            if (m_projectNames.Count == 0)
             {
-                m_activeProjectIndex = -1;
+                projectIndex = -1;
+                return;
             }
             else
             {
-                m_activeProjectIndex = (projectIndex) % m_projects.Count;
+                projectIndex = (projectIndex) % m_projectNames.Count;
 
-                while (m_activeProjectIndex < 0)
+                while (projectIndex < 0)
                 {
-                    m_activeProjectIndex += m_projects.Count;
+                    projectIndex += m_projectNames.Count;
                 }
             }
 
-            // Set only the active project visible.
-            for (int i = 0; i < m_projects.Count; ++i)
-            {
-                m_projects[i].SetActive(i == m_activeProjectIndex);
-            }
+            m_loadingProjectIndex = projectIndex;
 
-            GatherActiveProjectPOI();
+            StartCoroutine(LoadProject());
         }
 
         void ToggleCanvas()
@@ -206,7 +217,7 @@ namespace ArchiVR
             bool next = button4Down || Input.GetKeyDown(KeyCode.RightArrow);
 
             bool toggleModelScale = buttonThumbstickPDown || buttonThumbstickSDown || Input.GetKeyDown(KeyCode.S);
-            
+
             bool toggleCanvas = false;//buttonStartDown || Input.GetKeyDown(KeyCode.M);
             bool toggleMenu = buttonStartDown || Input.GetKeyDown(KeyCode.M);
             bool toggleInput = Input.GetKeyDown(KeyCode.I);
@@ -224,7 +235,7 @@ namespace ArchiVR
 
             if (toggleMenu)
             {
-                menuMode = ++menuMode%3;
+                menuMode = ++menuMode % 3;
             }
 
             if (toggleModelScale)
@@ -316,11 +327,11 @@ namespace ArchiVR
                 foreach (var n in joystickNames)
                 {
                     text += "\n -" + n;
-                }                
+                }
             }
             else
             {
-                
+
                 // index finger trigger’s current position (range of 0.0f to 1.0f)
 
                 // primary trigger (typically the Left) 
@@ -394,12 +405,12 @@ namespace ArchiVR
                 text += "\n - " + projectName;
             }
 
-            var activeProject = GetActiveProject();
+            var activeProjectName = GetActiveProjectName();
 
-            if (activeProject != null)
+            if (activeProjectName != null)
             {
                 text += "\n";
-                text += "\n" + activeProject.name;
+                text += "\n" + activeProjectName;
 
                 var activePOI = GetActivePOI();
 
@@ -437,7 +448,7 @@ namespace ArchiVR
         const string thumbstickSID = button10ID;
         string[] joystickNames = null;
 
-        bool touchControllersConnected =false;
+        bool touchControllersConnected = false;
 
         bool button1Down = false;
         bool button2Down = false;
@@ -526,9 +537,9 @@ namespace ArchiVR
             button4Pressed = OVRInput.Get(OVRInput.Button.Four);
 
             var lButton1Pressed = OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTrackedRemote);
-            var rButton1Pressed = OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTrackedRemote);            
+            var rButton1Pressed = OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTrackedRemote);
             var lButton2Pressed = OVRInput.Get(OVRInput.Button.Two, OVRInput.Controller.LTrackedRemote);
-            var rButton2Pressed = OVRInput.Get(OVRInput.Button.Two, OVRInput.Controller.LTrackedRemote);            
+            var rButton2Pressed = OVRInput.Get(OVRInput.Button.Two, OVRInput.Controller.LTrackedRemote);
 
             var aButtonPressed = OVRInput.Get(OVRInput.RawButton.A);
             var bButtonPressed = OVRInput.Get(OVRInput.RawButton.B);
@@ -537,10 +548,10 @@ namespace ArchiVR
             var startButtonPressed = OVRInput.Get(OVRInput.RawButton.Start);
 
             // Get new button presses.
-           button1Down = OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.Touch);
-           button2Down = OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.Touch);
-           button3Down = OVRInput.GetDown(OVRInput.Button.Three, OVRInput.Controller.Touch);
-           button4Down = OVRInput.GetDown(OVRInput.Button.Four, OVRInput.Controller.Touch);
+            button1Down = OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.Touch);
+            button2Down = OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.Touch);
+            button3Down = OVRInput.GetDown(OVRInput.Button.Three, OVRInput.Controller.Touch);
+            button4Down = OVRInput.GetDown(OVRInput.Button.Four, OVRInput.Controller.Touch);
 
             var aButtonDown = OVRInput.GetDown(OVRInput.RawButton.A);
             var bButtonDown = OVRInput.GetDown(OVRInput.RawButton.B);
@@ -595,6 +606,43 @@ namespace ArchiVR
             }
 
             UpdatePosition();
+        }
+
+        IEnumerator LoadProject()
+        {
+            var oldProjectName = GetActiveProjectName();
+
+            if (m_loadingProjectIndex != -1)
+            {
+                var newProjectName = m_projectNames[m_loadingProjectIndex];
+
+                AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(newProjectName, LoadSceneMode.Additive);
+
+                // Wait until asynchronous loading the old project finishes.
+                while (!asyncLoad.isDone)
+                {
+                    yield return null;
+                }
+            }
+
+            m_activeProjectIndex = m_loadingProjectIndex;
+
+            if (oldProjectName != null)
+            {
+                AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(oldProjectName);
+
+                // Wait until asynchronous unloading the old project finishes.
+                while (!asyncUnload.isDone)
+                {
+                    yield return null;
+                }
+            }
+
+            // Gather the POI from the new project.
+            GatherActiveProjectPOI();
+
+            // Apply necessary scaling (we might be in 'Maquette' mode)
+            //ApplyScaling(); 
         }
     }
 }
