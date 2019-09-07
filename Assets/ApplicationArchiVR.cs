@@ -20,7 +20,47 @@ namespace ArchiVR
     public class ApplicationArchiVR : MonoBehaviour
     {
         #region Variables
+
         UnityEngine.GameObject m_ovrCameraRig = null;
+
+        #region Project
+
+        int m_loadingProjectIndex = -1;
+        int m_activeProjectIndex = -1;
+        List<string> m_projectNames = new List<string>();
+
+        #endregion
+
+        #region POI
+
+        int m_activePOIIndex = -1;
+
+        List<UnityEngine.GameObject> m_POI = new List<UnityEngine.GameObject>();
+
+        #endregion
+
+        #region Immersion mode
+
+        const int ImmersionModeWalkthrough = 0;
+        const int ImmersionModeMaquette = 1;
+
+        List<float> m_modelScalesPerImmersionMode = new List<float>();
+
+        // The immersion mode.
+        private int m_immersionMode = ImmersionModeWalkthrough;
+
+        GameObject m_maquettePreviewContext = null;
+
+        #endregion
+
+        #region HUD menu
+
+        const int MenuNone = 0;
+        const int MenuDebug = 1;
+        const int MenuInfo = 2;
+
+        // The menu mode.
+        private int m_menuMode = MenuNone;
 
         UnityEngine.GameObject m_hudCanvas = null;
 
@@ -28,15 +68,87 @@ namespace ArchiVR
 
         UnityEngine.UI.Text m_debugText = null;
 
-        int m_loadingProjectIndex = -1;
-        int m_activeProjectIndex = -1;
-        List<string> m_projectNames = new List<string>();
+        // The HUD menu text
+        string text = "";
 
-        int m_activePOIIndex = -1;
-        List<UnityEngine.GameObject> m_POI = new List<UnityEngine.GameObject>();
+        #endregion
 
-        int m_activeScaleIndex = 0;
-        List<float> m_scales = new List<float>();
+        #region Input
+
+        const int InputUnity = 0;
+        const int InputOVR = 1;
+
+        int inputMode = InputUnity;
+
+        //const string button1ID = "Fire1";
+        //const string button2ID = "Fire2";
+        //const string button3ID = "Fire3";
+        //const string button4ID = "Jump";
+        const string button1ID = "joystick button 0";
+        const string button2ID = "joystick button 1";
+        const string button3ID = "joystick button 2";
+        const string button4ID = "joystick button 3";
+        const string button5ID = "joystick button 4";
+        const string button6ID = "joystick button 5";
+        const string button7ID = "joystick button 6";
+        const string button8ID = "joystick button 7";
+        const string button9ID = "joystick button 8";
+        const string button10ID = "joystick button 9";
+        const string startButtonID = button8ID;
+        const string thumbstickPID = button9ID;
+        const string thumbstickSID = button10ID;
+        string[] joystickNames = null;
+
+        bool touchControllersConnected = false;
+
+        bool button1Down = false;
+        bool button2Down = false;
+        bool button3Down = false;
+        bool button4Down = false;
+        bool button5Down = false;
+        bool button6Down = false;
+        bool button7Down = false;
+        bool buttonStartDown = false;
+        bool buttonThumbstickPDown = false;
+        bool buttonThumbstickSDown = false;
+
+        bool button1Pressed = false;
+        bool button2Pressed = false;
+        bool button3Pressed = false;
+        bool button4Pressed = false;
+        bool button5Pressed = false;
+        bool button6Pressed = false;
+        bool button7Pressed = false;
+        bool buttonStartPressed = false;
+
+        bool leftControllerActive = false;
+        bool rightControllerActive = false;
+
+        OVRInput.Controller activeController = OVRInput.Controller.None;
+
+        bool lRemoteConnected = false;
+        bool rRemoteConnected = false;
+
+        bool lTouchConnected = false;
+        bool rTouchConnected = false;
+
+        bool rawButtonLIndexTriggerDown = false;
+        bool rawButtonRIndexTriggerDown = false;
+
+        Vector2 lThumbStick;
+        Vector2 rThumbStick;
+
+        bool lThumbstickDirectionLeftDown = false;
+        bool lThumbstickDirectionRightDown = false;
+        bool lThumbstickDirectionUpDown = false;
+        bool lThumbstickDirectionDownDown = false;
+
+        bool lThumbstickDirectionLeftPressed = false;
+        bool lThumbstickDirectionRightPressed = false;
+        bool lThumbstickDirectionUpPressed = false;
+        bool lThumbstickDirectionDownPressed = false;
+
+        #endregion
 
         #endregion Variables
 
@@ -49,8 +161,13 @@ namespace ArchiVR
             m_debugPanel = GameObject.Find("DebugPanel");
             m_debugText = GameObject.Find("DebugText").GetComponent<UnityEngine.UI.Text>();
 
-            m_scales.Add(1.0f);
-            m_scales.Add(0.04f);
+            m_modelScalesPerImmersionMode.Add(1.0f);
+            m_modelScalesPerImmersionMode.Add(0.04f);
+
+            if (m_maquettePreviewContext == null)
+            {
+                m_maquettePreviewContext = GameObject.Find("MaquettePreviewContext");
+            }
 
             GatherProjects();
         }
@@ -156,6 +273,15 @@ namespace ArchiVR
             m_hudCanvas.SetActive(!m_hudCanvas.activeSelf);
         }
 
+        void ResetTrackingSpacePosition()
+        {
+            var position = new Vector3(0,0.3f,0);
+            var rotation = new Quaternion();
+
+            m_ovrCameraRig.transform.position = position;
+            m_ovrCameraRig.transform.rotation = rotation;
+        }
+
         void UpdatePosition()
         {
             var activePOI = GetActivePOI();
@@ -178,10 +304,13 @@ namespace ArchiVR
             m_ovrCameraRig.transform.rotation = rotation;
         }
 
-        void ToggleModelScale()
+        float GetModelScale(int immersionMode)
         {
-            m_activeScaleIndex = 1 - m_activeScaleIndex;
+            return m_modelScalesPerImmersionMode[m_immersionMode];
+        }
 
+        void UpdateModelScale()
+        {
             var activeProject = GetActiveProject();
 
             if (activeProject == null)
@@ -189,8 +318,26 @@ namespace ArchiVR
                 return;
             }
 
-            var scale = m_scales[m_activeScaleIndex];
+            var scale = GetModelScale(m_immersionMode);
             activeProject.transform.localScale = new Vector3(scale, scale, scale);
+        }
+
+        void ToggleImmersionMode()
+        {
+            m_immersionMode = 1 - m_immersionMode;
+
+            m_maquettePreviewContext.SetActive(m_immersionMode == ImmersionModeMaquette);
+
+            if (m_immersionMode == ImmersionModeMaquette)
+            {
+                ResetTrackingSpacePosition(); // Move towards model.
+            }
+            else
+            {
+                UpdatePosition(); // Restore active POI position.
+            }
+
+            UpdateModelScale();
         }
 
         private void FixedUpdate()
@@ -203,6 +350,8 @@ namespace ArchiVR
         {
             //OVRInput.Update();
 
+
+            // TODO: depending on input mode, update one or the other...
             UpdateInput_Unity();
             //UpdateInput_OVR();
 
@@ -216,9 +365,8 @@ namespace ArchiVR
             bool prev = button3Down || Input.GetKeyDown(KeyCode.LeftArrow);
             bool next = button4Down || Input.GetKeyDown(KeyCode.RightArrow);
 
-            bool toggleModelScale = buttonThumbstickPDown || buttonThumbstickSDown || Input.GetKeyDown(KeyCode.S);
+            bool toggleImmersionMode = button5Down || buttonThumbstickPDown || buttonThumbstickSDown || Input.GetKeyDown(KeyCode.I);
 
-            bool toggleCanvas = false;//buttonStartDown || Input.GetKeyDown(KeyCode.M);
             bool toggleMenu = buttonStartDown || Input.GetKeyDown(KeyCode.M);
             bool toggleInput = Input.GetKeyDown(KeyCode.I);
 
@@ -227,20 +375,14 @@ namespace ArchiVR
                 inputMode = 1 - inputMode;
             }
 
-
-            if (toggleCanvas)
-            {
-                ToggleCanvas();
-            }
-
             if (toggleMenu)
             {
-                menuMode = ++menuMode % 3;
+                m_menuMode = ++m_menuMode % 3;
             }
 
-            if (toggleModelScale)
+            if (toggleImmersionMode)
             {
-                ToggleModelScale();
+                ToggleImmersionMode();
             }
 
             if (nextProject)
@@ -266,16 +408,7 @@ namespace ArchiVR
             //----------------------
 
             UpdateMenu();
-        }
-
-        private int menuMode = MenuDebug;
-
-        const int MenuNone = 0;
-        const int MenuDebug = 1;
-        const int MenuInfo = 2;
-
-        // The HUD menu text
-        string text = "";
+        }        
 
         void UpdateMenu()
         {
@@ -283,7 +416,7 @@ namespace ArchiVR
             text = "";
 
             // Update HUD menu text. (if not 'None')
-            switch (menuMode)
+            switch (m_menuMode)
             {
                 case MenuDebug:
                     UpdateMenuDebug();
@@ -294,14 +427,14 @@ namespace ArchiVR
                 case MenuNone:
                     break;
                 default:
-                    text += "Unsupported menu mode: " + menuMode.ToString();
+                    text += "Unsupported menu mode: " + m_menuMode.ToString();
                     break;
             }
 
             // Push HUD menu text to UI.
             m_debugText.text = text;
 
-            m_debugPanel.SetActive(MenuNone != menuMode);
+            m_debugPanel.SetActive(MenuNone != m_menuMode);
         }
 
         void UpdateMenuDebug()
@@ -422,74 +555,7 @@ namespace ArchiVR
 
             text += "\n";
             text += "\nversion: 190905a";
-        }
-
-        const int InputUnity = 0;
-        const int InputOVR = 1;
-
-        int inputMode = InputUnity;
-
-        //const string button1ID = "Fire1";
-        //const string button2ID = "Fire2";
-        //const string button3ID = "Fire3";
-        //const string button4ID = "Jump";
-        const string button1ID = "joystick button 0";
-        const string button2ID = "joystick button 1";
-        const string button3ID = "joystick button 2";
-        const string button4ID = "joystick button 3";
-        const string button5ID = "joystick button 4";
-        const string button6ID = "joystick button 5";
-        const string button7ID = "joystick button 6";
-        const string button8ID = "joystick button 7";
-        const string button9ID = "joystick button 8";
-        const string button10ID = "joystick button 9";
-        const string startButtonID = button8ID;
-        const string thumbstickPID = button9ID;
-        const string thumbstickSID = button10ID;
-        string[] joystickNames = null;
-
-        bool touchControllersConnected = false;
-
-        bool button1Down = false;
-        bool button2Down = false;
-        bool button3Down = false;
-        bool button4Down = false;
-        bool buttonStartDown = false;
-        bool buttonThumbstickPDown = false;
-        bool buttonThumbstickSDown = false;
-
-        bool button1Pressed = false;
-        bool button2Pressed = false;
-        bool button3Pressed = false;
-        bool button4Pressed = false;
-        bool buttonStartPressed = false;
-
-        bool leftControllerActive = false;
-        bool rightControllerActive = false;
-
-        OVRInput.Controller activeController = OVRInput.Controller.None;
-
-        bool lRemoteConnected = false;
-        bool rRemoteConnected = false;
-
-        bool lTouchConnected = false;
-        bool rTouchConnected = false;
-
-        bool rawButtonLIndexTriggerDown = false;
-        bool rawButtonRIndexTriggerDown = false;
-
-        Vector2 lThumbStick;
-        Vector2 rThumbStick;
-
-        bool lThumbstickDirectionLeftDown = false;
-        bool lThumbstickDirectionRightDown = false;
-        bool lThumbstickDirectionUpDown = false;
-        bool lThumbstickDirectionDownDown = false;
-
-        bool lThumbstickDirectionLeftPressed = false;
-        bool lThumbstickDirectionRightPressed = false;
-        bool lThumbstickDirectionUpPressed = false;
-        bool lThumbstickDirectionDownPressed = false;
+        }        
 
         void UpdateInput_Unity()
         {
@@ -502,19 +568,22 @@ namespace ArchiVR
             button2Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button2ID);
             button3Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button3ID);
             button4Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button4ID);
-            buttonStartDown =
-                touchControllersConnected && UnityEngine.Input.GetKeyDown(startButtonID)
-                || touchControllersConnected && UnityEngine.Input.GetKeyDown(button5ID)
-                || touchControllersConnected && UnityEngine.Input.GetKeyDown(button6ID)
-                || touchControllersConnected && UnityEngine.Input.GetKeyDown(button7ID);
+            button5Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button5ID);
+            button6Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button6ID);
+            button7Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button7ID);
+            buttonStartDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(startButtonID);
+                
 
             buttonThumbstickPDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(thumbstickPID);
             buttonThumbstickSDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(thumbstickSID);
 
-            button1Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button1ID);// "Fire1");
-            button2Pressed = touchControllersConnected && UnityEngine.Input.GetKey(button2ID);// "joystick button 1");
-            button3Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button3ID);//"Fire3");
-            button4Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button4ID);// "Jump");
+            button1Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button1ID);
+            button2Pressed = touchControllersConnected && UnityEngine.Input.GetKey(button2ID);
+            button3Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button3ID);
+            button4Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button4ID);
+            button5Pressed = touchControllersConnected && UnityEngine.Input.GetKey(button5ID);
+            button6Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button6ID);
+            button7Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button7ID);
             buttonStartPressed = touchControllersConnected && UnityEngine.Input.GetButton(startButtonID);
 
             leftControllerActive = touchControllersConnected && joystickNames[0] == "";
@@ -525,10 +594,10 @@ namespace ArchiVR
         {
             var activeController = OVRInput.GetActiveController();
 
-            var lRemoteConnected = OVRInput.IsControllerConnected(OVRInput.Controller.LTrackedRemote);
-            var rRemoteConnected = OVRInput.IsControllerConnected(OVRInput.Controller.RTrackedRemote);
-            var lTouchConnected = OVRInput.IsControllerConnected(OVRInput.Controller.LTouch);
-            var rTouchConnected = OVRInput.IsControllerConnected(OVRInput.Controller.RTouch);
+            lRemoteConnected = OVRInput.IsControllerConnected(OVRInput.Controller.LTrackedRemote);
+            rRemoteConnected = OVRInput.IsControllerConnected(OVRInput.Controller.RTrackedRemote);
+            lTouchConnected = OVRInput.IsControllerConnected(OVRInput.Controller.LTouch);
+            rTouchConnected = OVRInput.IsControllerConnected(OVRInput.Controller.RTouch);
 
             // Get existing button presses.
             button1Pressed = OVRInput.Get(OVRInput.Button.One);
