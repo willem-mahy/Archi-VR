@@ -284,6 +284,11 @@ namespace ArchiVR
                 }
             }
 
+            if (projectIndex == m_activeProjectIndex)
+            {
+                return;
+            }
+
             m_loadingProjectIndex = projectIndex;
 
             StartCoroutine(LoadProject());
@@ -296,11 +301,8 @@ namespace ArchiVR
 
         void ResetTrackingSpacePosition()
         {
-            var position = new Vector3();
-            var rotation = new Quaternion();
-
-            m_ovrCameraRig.transform.position = position;
-            m_ovrCameraRig.transform.rotation = rotation;
+            m_ovrCameraRig.transform.position = new Vector3();
+            m_ovrCameraRig.transform.rotation = new Quaternion();
         }
 
         void UpdateTrackingSpacePosition()
@@ -313,22 +315,15 @@ namespace ArchiVR
             {
                 var activePOI = GetActivePOI();
 
-                var position = new Vector3();
-                var rotation = new Quaternion();
-
                 if (activePOI == null)
                 {
-                    rotation = Quaternion.identity;
-                    position = Vector3.zero;
+                    ResetTrackingSpacePosition();
                 }
                 else
                 {
-                    rotation = m_POI[m_activePOIIndex].transform.rotation;
-                    position = m_POI[m_activePOIIndex].transform.position;
+                    m_ovrCameraRig.transform.position = activePOI.transform.position;
+                    m_ovrCameraRig.transform.rotation = activePOI.transform.rotation;
                 }
-
-                m_ovrCameraRig.transform.position = position;
-                m_ovrCameraRig.transform.rotation = rotation;
             }
         }
 
@@ -370,11 +365,11 @@ namespace ArchiVR
         {
             m_immersionMode = immersionMode;
 
-            m_maquettePreviewContext.SetActive(m_immersionMode == ImmersionMode.Maquette);
-
-            UpdateTrackingSpacePosition();
+            m_maquettePreviewContext.SetActive(m_immersionMode == ImmersionMode.Maquette);            
 
             UpdateModelLocationAndScale();
+
+            UpdateTrackingSpacePosition();
         }
 
         // Update is called once per frame
