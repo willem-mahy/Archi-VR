@@ -41,13 +41,16 @@ namespace ArchiVR
 
         #region Immersion mode
 
-        const int ImmersionModeWalkthrough = 0;
-        const int ImmersionModeMaquette = 1;
+        enum ImmersionMode : int
+        {
+            Walkthrough = 0,
+            Maquette
+        }
 
         List<float> m_modelScalesPerImmersionMode = new List<float>();
 
         // The immersion mode.
-        private int m_immersionMode = ImmersionModeWalkthrough;
+        private ImmersionMode m_immersionMode = ImmersionMode.Walkthrough;
 
         GameObject m_maquettePreviewContext = null;
 
@@ -55,12 +58,15 @@ namespace ArchiVR
 
         #region HUD menu
 
-        const int MenuNone = 0;
-        const int MenuDebug = 1;
-        const int MenuInfo = 2;
+        enum MenuMode
+        {
+            None = 0,
+            Debug,
+            Info
+        }
 
         // The menu mode.
-        private int m_menuMode = MenuNone;
+        private MenuMode m_menuMode = MenuMode.None;
 
         UnityEngine.GameObject m_hudCanvas = null;
 
@@ -75,15 +81,14 @@ namespace ArchiVR
 
         #region Input
 
-        const int InputUnity = 0;
-        const int InputOVR = 1;
+        enum InputMode
+        {
+            Unity = 0,
+            OVR
+        }
 
-        int inputMode = InputUnity;
+        InputMode m_inputMode = InputMode.OVR;
 
-        //const string button1ID = "Fire1";
-        //const string button2ID = "Fire2";
-        //const string button3ID = "Fire3";
-        //const string button4ID = "Jump";
         const string button1ID = "joystick button 0";
         const string button2ID = "joystick button 1";
         const string button3ID = "joystick button 2";
@@ -108,6 +113,7 @@ namespace ArchiVR
         bool button5Down = false;
         bool button6Down = false;
         bool button7Down = false;
+        bool button8Down = false;
         bool buttonStartDown = false;
         bool buttonThumbstickPDown = false;
         bool buttonThumbstickSDown = false;
@@ -119,7 +125,10 @@ namespace ArchiVR
         bool button5Pressed = false;
         bool button6Pressed = false;
         bool button7Pressed = false;
+        bool button8Pressed = false;
         bool buttonStartPressed = false;
+        bool buttonThumbstickPPressed = false;
+        bool buttonThumbstickSPressed = false;
 
         bool leftControllerActive = false;
         bool rightControllerActive = false;
@@ -148,6 +157,16 @@ namespace ArchiVR
         bool lThumbstickDirectionUpPressed = false;
         bool lThumbstickDirectionDownPressed = false;
 
+        bool rThumbstickDirectionLeftDown = false;
+        bool rThumbstickDirectionRightDown = false;
+        bool rThumbstickDirectionUpDown = false;
+        bool rThumbstickDirectionDownDown = false;
+             
+        bool rThumbstickDirectionLeftPressed = false;
+        bool rThumbstickDirectionRightPressed = false;
+        bool rThumbstickDirectionUpPressed = false;
+        bool rThumbstickDirectionDownPressed = false;
+
         #endregion
 
         #endregion Variables
@@ -170,6 +189,8 @@ namespace ArchiVR
             }
 
             GatherProjects();
+
+            SetImmersionMode(m_immersionMode);
         }
 
         void GatherProjects()
@@ -275,41 +296,48 @@ namespace ArchiVR
 
         void ResetTrackingSpacePosition()
         {
-            var position = new Vector3(0,0.3f,0);
-            var rotation = new Quaternion();
-
-            m_ovrCameraRig.transform.position = position;
-            m_ovrCameraRig.transform.rotation = rotation;
-        }
-
-        void UpdatePosition()
-        {
-            var activePOI = GetActivePOI();
-
             var position = new Vector3();
             var rotation = new Quaternion();
 
-            if (activePOI == null)
-            {
-                rotation = Quaternion.identity;
-                position = Vector3.zero;
-            }
-            else
-            {
-                rotation = m_POI[m_activePOIIndex].transform.rotation;
-                position = m_POI[m_activePOIIndex].transform.position + new Vector3(0, 1.7f, 0);
-            }
-
             m_ovrCameraRig.transform.position = position;
             m_ovrCameraRig.transform.rotation = rotation;
         }
 
-        float GetModelScale(int immersionMode)
+        void UpdateTrackingSpacePosition()
         {
-            return m_modelScalesPerImmersionMode[m_immersionMode];
+            if (m_immersionMode == ImmersionMode.Maquette)
+            {                    
+                ResetTrackingSpacePosition(); // Move towards model.
+            }
+            else
+            {
+                var activePOI = GetActivePOI();
+
+                var position = new Vector3();
+                var rotation = new Quaternion();
+
+                if (activePOI == null)
+                {
+                    rotation = Quaternion.identity;
+                    position = Vector3.zero;
+                }
+                else
+                {
+                    rotation = m_POI[m_activePOIIndex].transform.rotation;
+                    position = m_POI[m_activePOIIndex].transform.position;
+                }
+
+                m_ovrCameraRig.transform.position = position;
+                m_ovrCameraRig.transform.rotation = rotation;
+            }
         }
 
-        void UpdateModelScale()
+        float GetModelScale(ImmersionMode immersionMode)
+        {
+            return m_modelScalesPerImmersionMode[(int)m_immersionMode];
+        }
+
+        void UpdateModelLocationAndScale()
         {
             var activeProject = GetActiveProject();
 
@@ -318,66 +346,113 @@ namespace ArchiVR
                 return;
             }
 
-            var scale = GetModelScale(m_immersionMode);
+            var scale = GetModelScale(m_immersionMode);            
+            var position = new Vector3();
+            var rotation = new Quaternion();
+
+            if (m_immersionMode == ImmersionMode.Maquette)
+            {
+                position.y = 1 + m_maquetteOffset;
+                rotation = Quaternion.AngleAxis(m_maquetteRotation, Vector3.up);
+            }
+
+            activeProject.transform.position = position;
+            activeProject.transform.rotation = rotation;
             activeProject.transform.localScale = new Vector3(scale, scale, scale);
         }
 
         void ToggleImmersionMode()
         {
-            m_immersionMode = 1 - m_immersionMode;
-
-            m_maquettePreviewContext.SetActive(m_immersionMode == ImmersionModeMaquette);
-
-            if (m_immersionMode == ImmersionModeMaquette)
-            {
-                ResetTrackingSpacePosition(); // Move towards model.
-            }
-            else
-            {
-                UpdatePosition(); // Restore active POI position.
-            }
-
-            UpdateModelScale();
+            SetImmersionMode(1 - m_immersionMode);
         }
 
-        private void FixedUpdate()
+        void SetImmersionMode(ImmersionMode immersionMode)
         {
-            //OVRInput.FixedUpdate();
+            m_immersionMode = immersionMode;
+
+            m_maquettePreviewContext.SetActive(m_immersionMode == ImmersionMode.Maquette);
+
+            UpdateTrackingSpacePosition();
+
+            UpdateModelLocationAndScale();
         }
 
         // Update is called once per frame
         void Update()
         {
-            //OVRInput.Update();
+            #region Update input.
 
-
-            // TODO: depending on input mode, update one or the other...
-            UpdateInput_Unity();
-            //UpdateInput_OVR();
-
-            //-------------------
-
-
-            // Figure out whether there is something to do.
-            bool prevProject = button1Down || Input.GetKeyDown(KeyCode.DownArrow);
-            bool nextProject = button2Down || Input.GetKeyDown(KeyCode.UpArrow);
-
-            bool prev = button3Down || Input.GetKeyDown(KeyCode.LeftArrow);
-            bool next = button4Down || Input.GetKeyDown(KeyCode.RightArrow);
-
-            bool toggleImmersionMode = button5Down || buttonThumbstickPDown || buttonThumbstickSDown || Input.GetKeyDown(KeyCode.I);
-
-            bool toggleMenu = buttonStartDown || Input.GetKeyDown(KeyCode.M);
-            bool toggleInput = Input.GetKeyDown(KeyCode.I);
-
-            if (toggleInput)
+            switch (m_inputMode)
             {
-                inputMode = 1 - inputMode;
+                case InputMode.Unity:
+                    UpdateInput_Unity();
+                    break;
+                case InputMode.OVR:
+                    UpdateInput_OVR();
+                    break;
             }
+
+            #endregion
+
+            #region Figure out whether there is something to do.
+
+            bool activatePrevProject = false;
+            bool activateNextProject = false;
+
+            bool activateNextPOI = false;
+            bool activatePrevPOI = false;
+
+            bool toggleImmersionMode = false;
+
+            bool toggleMenu = false;
+
+            bool moveMaquetteUp = false;
+            bool moveMaquetteDown = false;
+
+            bool rotateMaquetteLeft = false;
+            bool rotateMaquetteRight = false;
+
+            if (m_loadingProjectIndex == -1)
+            {
+                activatePrevProject = button1Down || Input.GetKeyDown(KeyCode.LeftArrow);
+                activateNextProject = button2Down || Input.GetKeyDown(KeyCode.RightArrow);
+
+                activateNextPOI = false;
+                activatePrevPOI = false;
+
+                toggleImmersionMode = button8Down || Input.GetKeyDown(KeyCode.I);
+
+                toggleMenu = buttonStartDown || Input.GetKeyDown(KeyCode.M);
+
+                moveMaquetteUp = false;
+                moveMaquetteDown = false;
+
+                rotateMaquetteLeft = false;
+                rotateMaquetteRight = false;
+
+                switch (m_immersionMode)
+                {
+                    case ImmersionMode.Walkthrough:
+                        activateNextPOI = button3Down || rThumbstickDirectionLeftPressed || Input.GetKeyDown(KeyCode.DownArrow);
+                        activatePrevPOI = button4Down || rThumbstickDirectionRightPressed || Input.GetKeyDown(KeyCode.UpArrow);
+                        break;
+
+                    case ImmersionMode.Maquette:
+                        moveMaquetteDown = rThumbstickDirectionUpPressed || Input.GetKey(KeyCode.DownArrow);
+                        moveMaquetteUp = rThumbstickDirectionDownPressed || Input.GetKey(KeyCode.UpArrow);
+
+                        rotateMaquetteLeft = rThumbstickDirectionLeftPressed || Input.GetKey(KeyCode.W);
+                        rotateMaquetteRight = rThumbstickDirectionRightPressed || Input.GetKey(KeyCode.X);
+                        break;
+                }
+            }
+            #endregion
+
+            #region Do it            
 
             if (toggleMenu)
             {
-                m_menuMode = ++m_menuMode % 3;
+                m_menuMode = (MenuMode)(((int)m_menuMode+1) % 3);
             }
 
             if (toggleImmersionMode)
@@ -385,30 +460,64 @@ namespace ArchiVR
                 ToggleImmersionMode();
             }
 
-            if (nextProject)
+            if (activateNextProject)
             {
                 ActivateProject(m_activeProjectIndex + 1);
             }
 
-            if (prevProject)
+            if (activatePrevProject)
             {
                 ActivateProject(m_activeProjectIndex - 1);
             }
 
-            if (next)
+            if (activatePrevPOI)
             {
                 OffsetActivePOIIndex(+1);
             }
 
-            if (prev)
+            if (activateNextPOI)
             {
                 OffsetActivePOIIndex(-1);
+            }
+
+            var maquetteMoveSpeed = 0.001f;
+
+            if (moveMaquetteUp)
+            {
+                m_maquetteOffset = Mathf.Min(1.0f, m_maquetteOffset + maquetteMoveSpeed);
+                UpdateModelLocationAndScale();
+            }
+
+            if (moveMaquetteDown)
+            {
+                m_maquetteOffset = Mathf.Max(-1.0f, m_maquetteOffset - maquetteMoveSpeed);
+                UpdateModelLocationAndScale();
+            }
+
+            var maquetteRotateSpeed = 0.1f;
+
+            if (rotateMaquetteLeft)
+            {
+                m_maquetteRotation+= maquetteRotateSpeed;
+                UpdateModelLocationAndScale();
+            }
+
+            if (rotateMaquetteRight)
+            {
+                m_maquetteRotation -= maquetteRotateSpeed;
+                UpdateModelLocationAndScale();
             }
 
             //----------------------
 
             UpdateMenu();
-        }        
+
+            #endregion
+        }
+
+        float m_maquetteOffset = 0;
+
+        float m_maquetteRotation = 0;
 
         void UpdateMenu()
         {
@@ -418,13 +527,13 @@ namespace ArchiVR
             // Update HUD menu text. (if not 'None')
             switch (m_menuMode)
             {
-                case MenuDebug:
+                case MenuMode.Debug:
                     UpdateMenuDebug();
                     break;
-                case MenuInfo:
+                case MenuMode.Info:
                     UpdateMenuInfo();
                     break;
-                case MenuNone:
+                case MenuMode.None:
                     break;
                 default:
                     text += "Unsupported menu mode: " + m_menuMode.ToString();
@@ -434,27 +543,25 @@ namespace ArchiVR
             // Push HUD menu text to UI.
             m_debugText.text = text;
 
-            m_debugPanel.SetActive(MenuNone != m_menuMode);
+            m_debugPanel.SetActive(MenuMode.None != m_menuMode);
         }
 
         void UpdateMenuDebug()
         {
-            text += "\nInput mode: " + (inputMode == InputUnity ? "Unity" : "OVR");
+            text += "\nInput mode: " + (m_inputMode == InputMode.Unity ? "Unity" : "OVR");
             text += "\n";
-            text += "\nRemote connection: L=" + (lRemoteConnected ? "OK" : "NA") + " R=" + (rRemoteConnected ? "OK" : "NA");
-            text += "\nTouch connection: L=" + (lTouchConnected ? "OK" : "NA") + " R=" + (rTouchConnected ? "OK" : "NA");
-            text += "\nActive Controller: " + (activeController == OVRInput.Controller.LTouch ? " L" : "") + (activeController == OVRInput.Controller.RTouch ? " R" : "");
+            //text += "\nRemote connection: L=" + (lRemoteConnected ? "OK" : "NA") + " R=" + (rRemoteConnected ? "OK" : "NA");
+            text += "\nTouch controllers:" + (lTouchConnected ? "L " : "") + " " + (rTouchConnected ? " R" : "") +
+                    "(Active Controller: " + (activeController == OVRInput.Controller.LTouch ? " L" : "") + (activeController == OVRInput.Controller.RTouch ? " R" : "") + ")";
             text += "\n";
             text += "\nThumbstick: L(" + lThumbStick.x + ", " + lThumbStick.y + ") R(" + rThumbStick.x + ", " + rThumbStick.y + ")";
-            text += "\n";
             text += "\nL thumbstick:";
             text += "\n Left: " + (lThumbstickDirectionLeftDown ? "Down" : (lThumbstickDirectionLeftPressed ? "Pressed" : ""));
             text += "\n Right: " + (lThumbstickDirectionRightDown ? "Down" : (lThumbstickDirectionRightPressed ? "Pressed" : ""));
             text += "\n Up: " + (lThumbstickDirectionUpDown ? "Down" : (lThumbstickDirectionUpPressed ? "Pressed" : ""));
-            text += "\n Down: " + (lThumbstickDirectionDownDown ? "Down" : (lThumbstickDirectionDownDown ? "Pressed" : ""));
-
-
-            if (inputMode == InputUnity)
+            text += "\n Down: " + (lThumbstickDirectionDownDown ? "Down" : (lThumbstickDirectionDownPressed ? "Pressed" : ""));
+            
+            if (m_inputMode == InputMode.Unity)
             {
                 text += "\nJoysticks:";
                 foreach (var n in joystickNames)
@@ -464,13 +571,12 @@ namespace ArchiVR
             }
             else
             {
-
                 // index finger trigger’s current position (range of 0.0f to 1.0f)
 
                 // primary trigger (typically the Left) 
-                text += "\nPrimary IndexTrigger = " + OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) + (OVRInput.GetDown(OVRInput.RawButton.LIndexTrigger) ? " Down" : ""); ;
+                //text += "\nPrimary IndexTrigger = " + OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) + (OVRInput.GetDown(OVRInput.RawButton.LIndexTrigger) ? " Down" : ""); ;
                 // secondary trigger (typically the Right) 
-                text += "\nSecondary IndexTrigger = " + OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) + (OVRInput.GetDown(OVRInput.RawButton.RIndexTrigger) ? " Down" : ""); ;
+                //text += "\nSecondary IndexTrigger = " + OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) + (OVRInput.GetDown(OVRInput.RawButton.RIndexTrigger) ? " Down" : ""); ;
 
                 // left
                 text += "\nL IndexTrigger = " + OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger) + (rawButtonLIndexTriggerDown ? " Down" : "");
@@ -484,25 +590,15 @@ namespace ArchiVR
 
             text += "\n";
 
-            //TODO Probably obsolete -> Remove?
-            //text += "\nbuttonOneDown: " + button1Down;
-            //text += "\nbuttonTwoDown: " + button2Down;
-            //text += "\nbuttonThreeDown: " + button3Down;
-            //text += "\nbuttonFourDown: " + button4Down;
-            //text += "\nbuttonStartDown: " + buttonStartDown;
-
-            //text += "\n";
-
-            //text += "\nbuttonOnePressed: " + button1Pressed;
-            //text += "\nbuttonTwoPressed: " + button2Pressed;
-            //text += "\nbuttonThreePressed: " + button3Pressed;
-            //text += "\nbuttonFourPressed: " + button4Pressed;
-            //text += "\nbuttonStartPressed: " + buttonStartPressed;
-
             text += "\nButton 1 = " + (button1Down ? "Down" : (button1Pressed ? "Pressed" : ""));
             text += "\nButton 2 = " + (button2Down ? "Down" : (button2Pressed ? "Pressed" : ""));
             text += "\nButton 3 = " + (button3Down ? "Down" : (button3Pressed ? "Pressed" : ""));
             text += "\nButton 4 = " + (button4Down ? "Down" : (button4Pressed ? "Pressed" : ""));
+            text += "\nButton 5 = " + (button5Down ? "Down" : (button5Pressed ? "Pressed" : ""));
+            text += "\nButton 6 = " + (button6Down ? "Down" : (button6Pressed ? "Pressed" : ""));
+            text += "\nButton 7 = " + (button7Down ? "Down" : (button7Pressed ? "Pressed" : ""));
+            text += "\nButton 8 = " + (button8Down ? "Down" : (button8Pressed ? "Pressed" : ""));
+            text += "\nButton Start = " + (buttonStartDown ? "Down" : (buttonStartPressed ? "Pressed" : ""));
 
             // TODO Implement ABXY?
             //text += "\nA button = " + (aButtonDown ? "Down" : (aButtonPressed ? "Pressed" : ""));
@@ -511,7 +607,7 @@ namespace ArchiVR
             //text += "\nY button = " + (yButtonDown ? "Down" : (yButtonPressed ? "Pressed" : ""));
         }
 
-        new List<string> GetProjectNames()
+        List<string> GetProjectNames()
         {
             var projectNames = new List<string>();
 
@@ -571,8 +667,9 @@ namespace ArchiVR
             button5Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button5ID);
             button6Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button6ID);
             button7Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button7ID);
-            buttonStartDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(startButtonID);
-                
+            button8Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button8ID);
+
+            buttonStartDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(startButtonID);                
 
             buttonThumbstickPDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(thumbstickPID);
             buttonThumbstickSDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(thumbstickSID);
@@ -584,6 +681,7 @@ namespace ArchiVR
             button5Pressed = touchControllersConnected && UnityEngine.Input.GetKey(button5ID);
             button6Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button6ID);
             button7Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button7ID);
+            button8Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button8ID);
             buttonStartPressed = touchControllersConnected && UnityEngine.Input.GetButton(startButtonID);
 
             leftControllerActive = touchControllersConnected && joystickNames[0] == "";
@@ -599,11 +697,65 @@ namespace ArchiVR
             lTouchConnected = OVRInput.IsControllerConnected(OVRInput.Controller.LTouch);
             rTouchConnected = OVRInput.IsControllerConnected(OVRInput.Controller.RTouch);
 
+            // Get new button presses.
+            bool GetDownWouldWork = false;
+            if (GetDownWouldWork)
+            {
+                button1Down = OVRInput.GetDown(OVRInput.Button.One);
+                button2Down = OVRInput.GetDown(OVRInput.Button.Two);
+                button3Down = OVRInput.GetDown(OVRInput.Button.Three);
+                button4Down = OVRInput.GetDown(OVRInput.Button.Four);
+                button5Down = OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger);
+                button6Down = OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger);
+                button7Down = OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger);
+                button8Down = OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger);
+
+                buttonStartDown = OVRInput.GetDown(OVRInput.Button.Start);
+
+                buttonThumbstickPDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.Touch);
+                buttonThumbstickSDown = OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick, OVRInput.Controller.Touch);
+            }
+            else
+            {
+                button1Down = (!button1Down && !button1Pressed) && OVRInput.Get(OVRInput.Button.One);
+                button2Down = (!button2Down && !button2Pressed) && OVRInput.Get(OVRInput.Button.Two);
+                button3Down = (!button3Down && !button3Pressed) && OVRInput.Get(OVRInput.Button.Three);
+                button4Down = (!button4Down && !button4Pressed) && OVRInput.Get(OVRInput.Button.Four);
+                button5Down = (!button5Down && !button5Pressed) && OVRInput.Get(OVRInput.Button.PrimaryHandTrigger);
+                button6Down = (!button6Down && !button6Pressed) && OVRInput.Get(OVRInput.Button.SecondaryHandTrigger);
+                button7Down = (!button7Down && !button7Pressed) && OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger);
+                button8Down = (!button8Down && !button8Pressed) && OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
+
+                buttonStartDown = (!buttonStartDown && !buttonStartPressed) && OVRInput.Get(OVRInput.Button.Start);                
+
+                buttonThumbstickPDown = (!buttonThumbstickPDown && !buttonThumbstickPPressed) && OVRInput.Get(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.Touch);
+                buttonThumbstickSDown = (!buttonThumbstickPDown && !buttonThumbstickPPressed) && OVRInput.Get(OVRInput.Button.SecondaryThumbstick, OVRInput.Controller.Touch);
+
+                lThumbstickDirectionUpDown      = (!lThumbstickDirectionUpDown && !lThumbstickDirectionUpPressed) && OVRInput.Get(OVRInput.Button.PrimaryThumbstickUp, OVRInput.Controller.Touch);
+                lThumbstickDirectionDownDown    = (!lThumbstickDirectionDownDown && !lThumbstickDirectionDownPressed) && OVRInput.Get(OVRInput.Button.PrimaryThumbstickDown, OVRInput.Controller.Touch);
+                lThumbstickDirectionLeftDown    = (!lThumbstickDirectionLeftDown && !lThumbstickDirectionLeftPressed) && OVRInput.Get(OVRInput.Button.PrimaryThumbstickLeft, OVRInput.Controller.Touch);
+                lThumbstickDirectionRightDown   = (!lThumbstickDirectionRightDown && !lThumbstickDirectionRightPressed) && OVRInput.Get(OVRInput.Button.PrimaryThumbstickRight, OVRInput.Controller.Touch);
+
+                rThumbstickDirectionUpDown = (!rThumbstickDirectionUpDown && !rThumbstickDirectionUpPressed) && OVRInput.Get(OVRInput.Button.SecondaryThumbstickUp, OVRInput.Controller.Touch);
+                rThumbstickDirectionDownDown = (!rThumbstickDirectionDownDown && !rThumbstickDirectionDownPressed) && OVRInput.Get(OVRInput.Button.SecondaryThumbstickDown, OVRInput.Controller.Touch);
+                rThumbstickDirectionLeftDown = (!rThumbstickDirectionLeftDown && !rThumbstickDirectionLeftPressed) && OVRInput.Get(OVRInput.Button.SecondaryThumbstickLeft, OVRInput.Controller.Touch);
+                rThumbstickDirectionRightDown = (!rThumbstickDirectionRightDown && !rThumbstickDirectionRightPressed) && OVRInput.Get(OVRInput.Button.SecondaryThumbstickRight, OVRInput.Controller.Touch);
+            }
+
             // Get existing button presses.
             button1Pressed = OVRInput.Get(OVRInput.Button.One);
             button2Pressed = OVRInput.Get(OVRInput.Button.Two);
             button3Pressed = OVRInput.Get(OVRInput.Button.Three);
             button4Pressed = OVRInput.Get(OVRInput.Button.Four);
+            button5Pressed = OVRInput.Get(OVRInput.Button.PrimaryHandTrigger);
+            button6Pressed = OVRInput.Get(OVRInput.Button.SecondaryHandTrigger);
+            button7Pressed = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger);
+            button8Pressed = OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
+
+            buttonStartPressed = OVRInput.Get(OVRInput.Button.Start);
+
+            buttonThumbstickPPressed = OVRInput.Get(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.Touch);
+            buttonThumbstickSPressed = OVRInput.Get(OVRInput.Button.SecondaryThumbstick, OVRInput.Controller.Touch);
 
             var lButton1Pressed = OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTrackedRemote);
             var rButton1Pressed = OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTrackedRemote);
@@ -614,22 +766,6 @@ namespace ArchiVR
             var bButtonPressed = OVRInput.Get(OVRInput.RawButton.B);
             var xButtonPressed = OVRInput.Get(OVRInput.RawButton.X);
             var yButtonPressed = OVRInput.Get(OVRInput.RawButton.Y);
-            var startButtonPressed = OVRInput.Get(OVRInput.RawButton.Start);
-
-            // Get new button presses.
-            button1Down = OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.Touch);
-            button2Down = OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.Touch);
-            button3Down = OVRInput.GetDown(OVRInput.Button.Three, OVRInput.Controller.Touch);
-            button4Down = OVRInput.GetDown(OVRInput.Button.Four, OVRInput.Controller.Touch);
-
-            var aButtonDown = OVRInput.GetDown(OVRInput.RawButton.A);
-            var bButtonDown = OVRInput.GetDown(OVRInput.RawButton.B);
-            var xButtonDown = OVRInput.GetDown(OVRInput.RawButton.X);
-            var yButtonDown = OVRInput.GetDown(OVRInput.RawButton.Y);
-            var startButtonDown = OVRInput.GetDown(OVRInput.RawButton.Start);
-
-            buttonThumbstickPDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.Touch);
-            buttonThumbstickSDown = OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick, OVRInput.Controller.Touch);
 
             // returns true if the left index finger trigger has been pressed more than halfway.  
             // (Interpret the trigger as a button).
@@ -639,15 +775,15 @@ namespace ArchiVR
             // (Interpret the trigger as a button).
             var rawButtonRIndexTriggerDown = OVRInput.GetDown(OVRInput.RawButton.RIndexTrigger);
 
-            lThumbstickDirectionUpDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickUp, OVRInput.Controller.Touch);
-            lThumbstickDirectionDownDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickDown, OVRInput.Controller.Touch);
-            lThumbstickDirectionLeftDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickLeft, OVRInput.Controller.Touch);
-            lThumbstickDirectionRightDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickRight, OVRInput.Controller.Touch);
+            lThumbstickDirectionUpPressed = OVRInput.Get(OVRInput.Button.PrimaryThumbstickUp, OVRInput.Controller.Touch);
+            lThumbstickDirectionDownPressed = OVRInput.Get(OVRInput.Button.PrimaryThumbstickDown, OVRInput.Controller.Touch);
+            lThumbstickDirectionLeftPressed = OVRInput.Get(OVRInput.Button.PrimaryThumbstickLeft, OVRInput.Controller.Touch);
+            lThumbstickDirectionRightPressed = OVRInput.Get(OVRInput.Button.PrimaryThumbstickRight, OVRInput.Controller.Touch);
 
-            lThumbstickDirectionUpPressed = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickUp, OVRInput.Controller.Touch);
-            lThumbstickDirectionDownPressed = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickDown, OVRInput.Controller.Touch);
-            lThumbstickDirectionLeftPressed = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickLeft, OVRInput.Controller.Touch);
-            lThumbstickDirectionRightPressed = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstickRight, OVRInput.Controller.Touch);
+            rThumbstickDirectionUpPressed = OVRInput.Get(OVRInput.Button.SecondaryThumbstickUp, OVRInput.Controller.Touch);
+            rThumbstickDirectionDownPressed = OVRInput.Get(OVRInput.Button.SecondaryThumbstickDown, OVRInput.Controller.Touch);
+            rThumbstickDirectionLeftPressed = OVRInput.Get(OVRInput.Button.SecondaryThumbstickLeft, OVRInput.Controller.Touch);
+            rThumbstickDirectionRightPressed = OVRInput.Get(OVRInput.Button.SecondaryThumbstickRight, OVRInput.Controller.Touch);
 
             // Get thumbstick positions. (X/Y range of -1.0f to 1.0f)
             lThumbStick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
@@ -674,7 +810,7 @@ namespace ArchiVR
                 m_activePOIIndex += m_POI.Count;
             }
 
-            UpdatePosition();
+            UpdateTrackingSpacePosition();
         }
 
         IEnumerator LoadProject()
@@ -710,8 +846,9 @@ namespace ArchiVR
             // Gather the POI from the new project.
             GatherActiveProjectPOI();
 
-            // Apply necessary scaling (we might be in 'Maquette' mode)
-            //ApplyScaling(); 
+            SetImmersionMode(m_immersionMode);
+
+            m_loadingProjectIndex = -1;
         }
     }
 }
