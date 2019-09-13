@@ -21,6 +21,8 @@ namespace ArchiVR
     {
         #region Variables
 
+        public string m_version = "190908a";
+
         UnityEngine.GameObject m_ovrCameraRig = null;
 
         #region Project
@@ -428,8 +430,8 @@ namespace ArchiVR
                 switch (m_immersionMode)
                 {
                     case ImmersionMode.Walkthrough:
-                        activateNextPOI = button3Down || rThumbstickDirectionLeftPressed || Input.GetKeyDown(KeyCode.DownArrow);
-                        activatePrevPOI = button4Down || rThumbstickDirectionRightPressed || Input.GetKeyDown(KeyCode.UpArrow);
+                        activateNextPOI = button3Down || rThumbstickDirectionLeftDown || Input.GetKeyDown(KeyCode.DownArrow);
+                        activatePrevPOI = button4Down || rThumbstickDirectionRightDown || Input.GetKeyDown(KeyCode.UpArrow);
                         break;
 
                     case ImmersionMode.Maquette:
@@ -645,7 +647,7 @@ namespace ArchiVR
             }
 
             text += "\n";
-            text += "\nversion: 190905a";
+            text += "\nversion: " + m_version;
         }        
 
         void UpdateInput_Unity()
