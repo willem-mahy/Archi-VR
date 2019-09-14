@@ -23,7 +23,17 @@ namespace ArchiVR
 
         public string m_version = "190908a";
 
+        #region Game objects
+
         UnityEngine.GameObject m_ovrCameraRig = null;
+
+        UnityEngine.GameObject m_centerEyeAnchor = null;
+
+        UnityEngine.GameObject m_leftHandAnchor = null;
+
+        UnityEngine.GameObject m_rightHandAnchor = null;
+
+        #endregion
 
         #region Project
 
@@ -176,7 +186,21 @@ namespace ArchiVR
         // Start is called before the first frame update
         void Start()
         {
-            m_ovrCameraRig = GameObject.Find("OVRCameraRig");
+            #region Get handles to game objects
+
+            if (m_ovrCameraRig == null)
+                m_ovrCameraRig = GameObject.Find("OVRCameraRig");
+
+            if (m_centerEyeAnchor == null)
+                m_centerEyeAnchor = GameObject.Find("CenterEyeAnchor");
+
+            if (m_leftHandAnchor == null)
+                m_leftHandAnchor = GameObject.Find("LeftHandAnchor");
+
+            if (m_rightHandAnchor == null)
+                m_rightHandAnchor = GameObject.Find("RightHandAnchor");
+
+            #endregion
 
             m_hudCanvas = GameObject.Find("HUDCanvas");
             m_debugPanel = GameObject.Find("DebugPanel");
@@ -327,6 +351,11 @@ namespace ArchiVR
                     m_ovrCameraRig.transform.rotation = activePOI.transform.rotation;
                 }
             }
+
+            if (Application.isEditor)
+            {
+                m_ovrCameraRig.transform.position = m_ovrCameraRig.transform.position + new Vector3(0, 1.8f, 0);
+            }
         }
 
         float GetModelScale(ImmersionMode immersionMode)
@@ -409,6 +438,13 @@ namespace ArchiVR
             bool rotateMaquetteLeft = false;
             bool rotateMaquetteRight = false;
 
+            bool moveForward= false;
+            bool moveBackward = false;
+            bool moveLeft = false;
+            bool moveRight = false;
+            bool moveUp = false;
+            bool moveDown = false;
+
             if (m_loadingProjectIndex == -1)
             {
                 activatePrevProject = button1Down || Input.GetKeyDown(KeyCode.LeftArrow);
@@ -416,6 +452,13 @@ namespace ArchiVR
 
                 activateNextPOI = false;
                 activatePrevPOI = false;
+
+                moveForward = Input.GetKey(KeyCode.Z);
+                moveBackward = Input.GetKey(KeyCode.S);
+                moveLeft = Input.GetKey(KeyCode.Q);
+                moveRight = Input.GetKey(KeyCode.D);
+                moveUp = Input.GetKey(KeyCode.R);
+                moveDown = Input.GetKey(KeyCode.F);
 
                 toggleImmersionMode = button8Down || Input.GetKeyDown(KeyCode.I);
 
@@ -457,6 +500,8 @@ namespace ArchiVR
                 ToggleImmersionMode();
             }
 
+            #region Activate project
+
             if (activateNextProject)
             {
                 ActivateProject(m_activeProjectIndex + 1);
@@ -466,6 +511,10 @@ namespace ArchiVR
             {
                 ActivateProject(m_activeProjectIndex - 1);
             }
+
+            #endregion
+
+            #region Activate POI
 
             if (activatePrevPOI)
             {
@@ -477,6 +526,62 @@ namespace ArchiVR
                 OffsetActivePOIIndex(-1);
             }
 
+            #endregion
+
+            #region Fly behaviour
+
+            float flySpeed = 0.01f;
+
+            var direction = Vector3.zero;
+
+            if (moveForward)
+            {
+                var c = m_centerEyeAnchor.transform.forward;
+                c.y = 0;
+                direction+= c;
+            }
+
+            if (moveBackward)
+            {
+                var c = -m_centerEyeAnchor.transform.forward;
+                c.y = 0;
+                direction += c;
+            }
+
+            if (moveLeft)
+            {
+                var c = -m_centerEyeAnchor.transform.right;
+                c.y = 0;
+                direction += c;
+            }
+
+            if (moveRight)
+            {
+                var c = m_centerEyeAnchor.transform.right;
+                c.y = 0;
+                direction += c;
+            }
+
+            if (moveUp)
+            {
+                direction+= Vector3.up;
+            }
+
+            if (moveDown)
+            {
+                direction+= Vector3.down;
+            }
+
+            if (direction != Vector3.zero)
+            {
+                TranslateTrackingSpace(flySpeed * direction.normalized);
+            }
+
+            #endregion
+
+            #region Maquette manipulation.
+
+            // Translate Up/Down
             var maquetteMoveSpeed = 0.001f;
 
             if (moveMaquetteUp)
@@ -491,6 +596,7 @@ namespace ArchiVR
                 UpdateModelLocationAndScale();
             }
 
+            // Rotate around 'up' vector.
             var maquetteRotateSpeed = 0.1f;
 
             if (rotateMaquetteLeft)
@@ -505,7 +611,7 @@ namespace ArchiVR
                 UpdateModelLocationAndScale();
             }
 
-            //----------------------
+            #endregion
 
             UpdateMenu();
 
@@ -515,6 +621,11 @@ namespace ArchiVR
         float m_maquetteOffset = 0;
 
         float m_maquetteRotation = 0;
+
+        void TranslateTrackingSpace(Vector3 offset)
+        {
+            m_ovrCameraRig.transform.position = m_ovrCameraRig.transform.position + offset;
+        }
 
         void UpdateMenu()
         {
