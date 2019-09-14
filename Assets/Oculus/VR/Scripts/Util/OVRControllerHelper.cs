@@ -130,6 +130,11 @@ public class OVRControllerHelper : MonoBehaviour
 	{
 		bool controllerConnected = OVRInput.IsControllerConnected(m_controller);
 
+        if (Application.isEditor)
+        {
+            controllerConnected = true; // Force controller visible while in editor mode
+        }
+
 		if ((controllerConnected != m_prevControllerConnected) || !m_prevControllerConnectedCached)
 		{
 			if (activeControllerType == ControllerType.GearVR || activeControllerType == ControllerType.Go)
