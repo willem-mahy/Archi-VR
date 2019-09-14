@@ -615,6 +615,25 @@ namespace ArchiVR
 
             UpdateMenu();
 
+            if (Application.isEditor)
+            {
+                var controllerOffsetForward = 0.3f * m_centerEyeAnchor.transform.forward;
+                var controllerOffsetRight = 0.2f * m_centerEyeAnchor.transform.right;
+                var controllerOffsetUp = 0.2f * m_centerEyeAnchor.transform.up;
+                m_leftHandAnchor.transform.position =
+                    m_centerEyeAnchor.transform.position
+                    + controllerOffsetForward- controllerOffsetRight
+                    - controllerOffsetUp;
+                m_rightHandAnchor.transform.position =
+                    m_centerEyeAnchor.transform.position
+                    + controllerOffsetForward
+                    + controllerOffsetRight
+                    - controllerOffsetUp;
+
+                m_leftHandAnchor.transform.rotation =
+                m_rightHandAnchor.transform.rotation = m_centerEyeAnchor.transform.rotation;
+            }
+
             #endregion
         }
 
