@@ -80,14 +80,34 @@ namespace ArchiVR
         // The menu mode.
         private MenuMode m_menuMode = MenuMode.None;
 
-        UnityEngine.GameObject m_hudCanvas = null;
+        public UnityEngine.GameObject m_centerEyeCanvas = null;
 
-        UnityEngine.GameObject m_debugPanel = null;
+        UnityEngine.GameObject m_centerEyePanel = null;
 
-        UnityEngine.UI.Text m_debugText = null;
+        public UnityEngine.UI.Text m_centerEyeText = null;
 
         // The HUD menu text
         string text = "";
+
+        #endregion
+
+        #region L controller menu
+
+        public UnityEngine.GameObject m_leftControllerCanvas = null;
+
+        UnityEngine.GameObject m_leftControllerPanel = null;
+
+        public UnityEngine.UI.Text m_leftControllerText = null;
+
+        #endregion
+
+        #region R controller menu
+
+        public UnityEngine.GameObject m_rightControllerCanvas = null;
+
+        UnityEngine.GameObject m_rightControllerPanel = null;
+
+        public UnityEngine.UI.Text m_rightControllerText = null;
 
         #endregion
 
@@ -118,6 +138,14 @@ namespace ArchiVR
 
         bool touchControllersConnected = false;
 
+        // button1 = A
+        // button2 = B
+        // button3 = X
+        // button4 = Y
+        // button5 = Right Hand Trigger
+        // button6 = Left Hand Trigger
+        // button7 = Right Index Trigger
+        // button8 = Left Index Trigger
         bool button1Down = false;
         bool button2Down = false;
         bool button3Down = false;
@@ -181,6 +209,10 @@ namespace ArchiVR
 
         #endregion
 
+        float m_maquetteOffset = 0;
+
+        float m_maquetteRotation = 0;
+
         #endregion Variables
 
         // Start is called before the first frame update
@@ -202,9 +234,17 @@ namespace ArchiVR
 
             #endregion
 
-            m_hudCanvas = GameObject.Find("HUDCanvas");
-            m_debugPanel = GameObject.Find("DebugPanel");
-            m_debugText = GameObject.Find("DebugText").GetComponent<UnityEngine.UI.Text>();
+            m_centerEyeCanvas   = GameObject.Find("CenterEyeCanvas");
+            m_centerEyePanel    = GameObject.Find("CenterEyePanel");
+            m_centerEyeText     = GameObject.Find("CenterEyeText").GetComponent<UnityEngine.UI.Text>();
+
+            m_leftControllerCanvas  = GameObject.Find("LeftControllerCanvas");
+            m_leftControllerPanel   = GameObject.Find("LeftControllerPanel");
+            m_leftControllerText    = GameObject.Find("LeftControllerText").GetComponent<UnityEngine.UI.Text>();
+
+            m_rightControllerCanvas     = GameObject.Find("RightControllerCanvas");
+            m_rightControllerPanel      = GameObject.Find("RightControllerPanel");
+            m_rightControllerText       = GameObject.Find("RightControllerText").GetComponent<UnityEngine.UI.Text>();
 
             m_modelScalesPerImmersionMode.Add(1.0f);
             m_modelScalesPerImmersionMode.Add(0.04f);
@@ -322,7 +362,7 @@ namespace ArchiVR
 
         void ToggleCanvas()
         {
-            m_hudCanvas.SetActive(!m_hudCanvas.activeSelf);
+            m_centerEyeCanvas.SetActive(!m_centerEyeCanvas.activeSelf);
         }
 
         void ResetTrackingSpacePosition()
@@ -432,57 +472,83 @@ namespace ArchiVR
 
             bool toggleMenu = false;
 
-            bool moveMaquetteUp = false;
-            bool moveMaquetteDown = false;
+            float magnitudeRotateMaquette = 0.0f;
+            float magnitudeTranslateMaquette = 0.0f;
 
-            bool rotateMaquetteLeft = false;
-            bool rotateMaquetteRight = false;
-
-            bool moveForward= false;
-            bool moveBackward = false;
-            bool moveLeft = false;
-            bool moveRight = false;
-            bool moveUp = false;
-            bool moveDown = false;
+            float magnitudeForward= 0.0f;
+            float magnitudeRight = 0.0f;
+            float magnitudeUp = 0.0f;
 
             if (m_loadingProjectIndex == -1)
             {
-                activatePrevProject = button1Down || Input.GetKeyDown(KeyCode.LeftArrow);
-                activateNextProject = button2Down || Input.GetKeyDown(KeyCode.RightArrow);
+                // While not loading a project...
+
+                activatePrevProject = button3Down || Input.GetKeyDown(KeyCode.F1) || Input.GetKeyDown(KeyCode.LeftControl);
+                activateNextProject = button4Down || Input.GetKeyDown(KeyCode.F2) || Input.GetKeyDown(KeyCode.LeftShift);
 
                 activateNextPOI = false;
                 activatePrevPOI = false;
 
-                moveForward = Input.GetKey(KeyCode.Z);
-                moveBackward = Input.GetKey(KeyCode.S);
-                moveLeft = Input.GetKey(KeyCode.Q);
-                moveRight = Input.GetKey(KeyCode.D);
-                moveUp = Input.GetKey(KeyCode.R);
-                moveDown = Input.GetKey(KeyCode.F);
+                // Under all immersionModes...
 
-                toggleImmersionMode = button8Down || Input.GetKeyDown(KeyCode.I);
+                // ... immersion mode is toggled using I
+                toggleImmersionMode = button7Down || Input.GetKeyDown(KeyCode.I);
 
-                toggleMenu = buttonStartDown || Input.GetKeyDown(KeyCode.M);
+                // ... menu is toggled using M
+                toggleMenu = buttonStartDown || Input.GetKeyDown(KeyCode.F11);
 
-                moveMaquetteUp = false;
-                moveMaquetteDown = false;
+                if (Application.isEditor)
+                {
+                    float mag = 1.0f;
 
-                rotateMaquetteLeft = false;
-                rotateMaquetteRight = false;
+                    // ... viewpoint is translated horizontally with arrow keys
+                    if (Input.GetKey(KeyCode.DownArrow)) magnitudeForward -= mag;
+                    if (Input.GetKey(KeyCode.UpArrow)) magnitudeForward += mag;
+
+                    if (Input.GetKey(KeyCode.LeftArrow)) magnitudeRight -= mag;
+                    if (Input.GetKey(KeyCode.RightArrow)) magnitudeRight += mag;
+                }
+                else
+                {
+                    magnitudeForward = rThumbStick.y;
+                    magnitudeRight = rThumbStick.x;
+                }               
 
                 switch (m_immersionMode)
                 {
-                    case ImmersionMode.Walkthrough:
-                        activateNextPOI = button3Down || rThumbstickDirectionLeftDown || Input.GetKeyDown(KeyCode.DownArrow);
-                        activatePrevPOI = button4Down || rThumbstickDirectionRightDown || Input.GetKeyDown(KeyCode.UpArrow);
+                    case ImmersionMode.Walkthrough:                        
+                        activateNextPOI = button1Down || Input.GetKeyDown(KeyCode.F3);
+                        activatePrevPOI = button2Down || Input.GetKeyDown(KeyCode.F4);
+
+                        if (Application.isEditor)
+                        {
+                            float mag = 1.0f;
+                            magnitudeUp += Input.GetKey(KeyCode.O) ? mag : 0.0f;
+                            magnitudeUp -= Input.GetKey(KeyCode.L) ? mag : 0.0f;
+                        }
+                        else
+                        {
+                            magnitudeUp += OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger);
+                            magnitudeUp -= OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger);
+                        }
                         break;
 
                     case ImmersionMode.Maquette:
-                        moveMaquetteDown = rThumbstickDirectionUpPressed || Input.GetKey(KeyCode.DownArrow);
-                        moveMaquetteUp = rThumbstickDirectionDownPressed || Input.GetKey(KeyCode.UpArrow);
 
-                        rotateMaquetteLeft = rThumbstickDirectionLeftPressed || Input.GetKey(KeyCode.W);
-                        rotateMaquetteRight = rThumbstickDirectionRightPressed || Input.GetKey(KeyCode.X);
+                        if (Application.isEditor)
+                        {
+                            float mag = 1.0f;
+                            magnitudeTranslateMaquette += Input.GetKey(KeyCode.O) ? mag : 0.0f;
+                            magnitudeTranslateMaquette -= Input.GetKey(KeyCode.L) ? mag : 0.0f;
+
+                            magnitudeRotateMaquette += Input.GetKey(KeyCode.K) ? mag : 0.0f;
+                            magnitudeRotateMaquette -= Input.GetKey(KeyCode.M) ? mag : 0.0f;
+                        }
+                        else
+                        {
+                            magnitudeTranslateMaquette += lThumbStick.y;
+                            magnitudeRotateMaquette = lThumbStick.x;
+                        }
                         break;
                 }
             }
@@ -530,99 +596,77 @@ namespace ArchiVR
 
             #region Fly behaviour
 
-            float flySpeed = 0.01f;
+            float flySpeed = 1.0f;
 
-            var direction = Vector3.zero;
+            var offsetR = m_centerEyeAnchor.transform.right;
+            offsetR.y = 0;
+            offsetR.Normalize();
+            offsetR *= magnitudeRight;
 
-            if (moveForward)
+            var offsetF = m_centerEyeAnchor.transform.forward;
+            offsetF.y = 0;
+            offsetF.Normalize();
+            offsetF *= magnitudeForward;
+
+            var offset = offsetR + offsetF;
+
+            // Clamp to X/Y offset vector to length [0, 1].
+            if (offset.magnitude > 1)
             {
-                var c = m_centerEyeAnchor.transform.forward;
-                c.y = 0;
-                direction+= c;
+                offset.Normalize();
             }
 
-            if (moveBackward)
-            {
-                var c = -m_centerEyeAnchor.transform.forward;
-                c.y = 0;
-                direction += c;
-            }
+            var offsetUp = magnitudeUp * Vector3.up;
 
-            if (moveLeft)
-            {
-                var c = -m_centerEyeAnchor.transform.right;
-                c.y = 0;
-                direction += c;
-            }
+            offset += offsetUp;
 
-            if (moveRight)
+            if (offset != Vector3.zero)
             {
-                var c = m_centerEyeAnchor.transform.right;
-                c.y = 0;
-                direction += c;
-            }
-
-            if (moveUp)
-            {
-                direction+= Vector3.up;
-            }
-
-            if (moveDown)
-            {
-                direction+= Vector3.down;
-            }
-
-            if (direction != Vector3.zero)
-            {
-                TranslateTrackingSpace(flySpeed * direction.normalized);
+                TranslateTrackingSpace(flySpeed * Time.deltaTime * offset);
             }
 
             #endregion
 
-            #region Maquette manipulation.
-
-            // Translate Up/Down
-            var maquetteMoveSpeed = 0.001f;
-
-            if (moveMaquetteUp)
+            switch (m_immersionMode)
             {
-                m_maquetteOffset = Mathf.Min(1.0f, m_maquetteOffset + maquetteMoveSpeed);
-                UpdateModelLocationAndScale();
+                case ImmersionMode.Walkthrough:
+                    offset =
+                        rThumbStick.x * offsetR +
+                        rThumbStick.y * offsetF;
+
+                    break;
+
+                case ImmersionMode.Maquette:
+                    #region Maquette manipulation.
+
+                    // Translate Up/Down
+                    var maquetteMoveSpeed = 1.0f;
+
+                    m_maquetteOffset = Mathf.Min(1.0f, m_maquetteOffset + magnitudeTranslateMaquette * maquetteMoveSpeed * Time.deltaTime);
+                    
+                    // Rotate around 'up' vector.
+                    var maquetteRotateSpeed = 60.0f;
+
+                    m_maquetteRotation += magnitudeRotateMaquette * maquetteRotateSpeed * Time.deltaTime;
+
+                    UpdateModelLocationAndScale();
+
+                    #endregion
+                    
+                    break;
             }
-
-            if (moveMaquetteDown)
-            {
-                m_maquetteOffset = Mathf.Max(-1.0f, m_maquetteOffset - maquetteMoveSpeed);
-                UpdateModelLocationAndScale();
-            }
-
-            // Rotate around 'up' vector.
-            var maquetteRotateSpeed = 0.1f;
-
-            if (rotateMaquetteLeft)
-            {
-                m_maquetteRotation+= maquetteRotateSpeed;
-                UpdateModelLocationAndScale();
-            }
-
-            if (rotateMaquetteRight)
-            {
-                m_maquetteRotation -= maquetteRotateSpeed;
-                UpdateModelLocationAndScale();
-            }
-
-            #endregion
 
             UpdateMenu();
 
             if (Application.isEditor)
             {
+                // When running in editor, anchor the controllers at a fixed offset in front of the center eye.
                 var controllerOffsetForward = 0.3f * m_centerEyeAnchor.transform.forward;
                 var controllerOffsetRight = 0.2f * m_centerEyeAnchor.transform.right;
                 var controllerOffsetUp = 0.2f * m_centerEyeAnchor.transform.up;
                 m_leftHandAnchor.transform.position =
                     m_centerEyeAnchor.transform.position
-                    + controllerOffsetForward- controllerOffsetRight
+                    + controllerOffsetForward - controllerOffsetRight
                     - controllerOffsetUp;
                 m_rightHandAnchor.transform.position =
                     m_centerEyeAnchor.transform.position
@@ -635,11 +679,7 @@ namespace ArchiVR
             }
 
             #endregion
-        }
-
-        float m_maquetteOffset = 0;
-
-        float m_maquetteRotation = 0;
+        }        
 
         void TranslateTrackingSpace(Vector3 offset)
         {
@@ -668,9 +708,9 @@ namespace ArchiVR
             }
 
             // Push HUD menu text to UI.
-            m_debugText.text = text;
+            m_centerEyeText.text = text;
 
-            m_debugPanel.SetActive(MenuMode.None != m_menuMode);
+            m_centerEyePanel.SetActive(MenuMode.None != m_menuMode);
         }
 
         void UpdateMenuDebug()
