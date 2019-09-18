@@ -70,6 +70,9 @@ namespace ArchiVR
 
         #region HUD menu
 
+        public ButtonMappingUI leftControllerButtonMapping = null;
+        public ButtonMappingUI rightControllerButtonMapping = null;
+
         enum MenuMode
         {
             None = 0,
@@ -355,6 +358,8 @@ namespace ArchiVR
                 return;
             }
 
+            m_leftControllerText.text = (projectIndex == -1 ? "" : m_projectNames[projectIndex]);
+
             m_loadingProjectIndex = projectIndex;
 
             StartCoroutine(LoadProject());
@@ -432,10 +437,93 @@ namespace ArchiVR
             SetImmersionMode(1 - m_immersionMode);
         }
 
+        void UpdateButtonMappingUI()
+        {
+            if (leftControllerButtonMapping != null)
+            {
+                leftControllerButtonMapping.textHandTrigger.text = "";
+
+                leftControllerButtonMapping.textAX.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.F1) && !button1Pressed);
+                leftControllerButtonMapping.textBY.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.F2) && !button2Pressed);
+                
+                leftControllerButtonMapping.textOculusStart.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.F11) && !button8Pressed);
+
+                leftControllerButtonMapping.textHandTrigger.transform.parent.transform.parent.gameObject.SetActive(!button5Pressed);
+                leftControllerButtonMapping.textIndexTrigger.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.I) && !button7Pressed);
+
+                leftControllerButtonMapping.textThumbDown.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.L) && (lThumbStick.y > -0.01));
+                leftControllerButtonMapping.textThumbUp.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.O) && (lThumbStick.y < 0.01));
+
+                leftControllerButtonMapping.textThumbLeft.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.K) && (lThumbStick.x > -0.01));
+                leftControllerButtonMapping.textThumbRight.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.M) && (lThumbStick.x < 0.01));
+
+                // Left controller
+                leftControllerButtonMapping.textIndexTrigger.text = "Verander shaal";
+
+                leftControllerButtonMapping.textOculusStart.text = "Toggle menu";
+
+                leftControllerButtonMapping.textAX.text = "Vorig project";
+                leftControllerButtonMapping.textBY.text = "Volgend project";
+
+                if (m_immersionMode == ImmersionMode.Maquette)
+                {
+                    leftControllerButtonMapping.textThumbUp.text = "Model omhoog";
+                    leftControllerButtonMapping.textThumbDown.text = "Model omlaag";
+                    leftControllerButtonMapping.textThumbLeft.text = "Model links";
+                    leftControllerButtonMapping.textThumbRight.text = "Model rechts";
+                }
+                else
+                {
+                    leftControllerButtonMapping.textThumbUp.text = "";
+                    leftControllerButtonMapping.textThumbDown.text = "";
+                    leftControllerButtonMapping.textThumbLeft.text = "";
+                    leftControllerButtonMapping.textThumbRight.text = "";
+                }
+            }
+
+            // Right controller
+            if (rightControllerButtonMapping != null)
+            {
+                rightControllerButtonMapping.textAX.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.F3) && !button3Pressed);
+                rightControllerButtonMapping.textBY.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.F4) && !button4Pressed);
+
+                rightControllerButtonMapping.textHandTrigger.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.RightShift) && !button6Pressed);
+                rightControllerButtonMapping.textIndexTrigger.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.Return) && !button8Pressed);
+
+                rightControllerButtonMapping.textThumbDown.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.DownArrow) && (rThumbStick.y > -0.01));
+                rightControllerButtonMapping.textThumbUp.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.UpArrow) && (rThumbStick.y < 0.01));
+
+                rightControllerButtonMapping.textThumbLeft.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.LeftArrow) && (rThumbStick.x > -0.01));
+                rightControllerButtonMapping.textThumbRight.transform.parent.transform.parent.gameObject.SetActive(!Input.GetKey(KeyCode.RightArrow) && (rThumbStick.x < 0.01));
+
+
+                if (m_immersionMode == ImmersionMode.Maquette)
+                {
+                    rightControllerButtonMapping.textIndexTrigger.text = "";
+                    rightControllerButtonMapping.textHandTrigger.text = "";
+                }
+                else
+                {
+                    rightControllerButtonMapping.textIndexTrigger.text = "Beweeg omhoog";
+                    rightControllerButtonMapping.textHandTrigger.text = "Beweeg omlaag";
+                }
+
+                rightControllerButtonMapping.textOculusStart.text = "Exit";
+
+                rightControllerButtonMapping.textAX.text = "Vorige locatie";
+                rightControllerButtonMapping.textBY.text = "Volgende locatie";
+
+                rightControllerButtonMapping.textThumbUp.text = "Beweeg vooruit";
+                rightControllerButtonMapping.textThumbDown.text = "Beweeg achteruit";
+                rightControllerButtonMapping.textThumbLeft.text = "Beweeg links";
+                rightControllerButtonMapping.textThumbRight.text = "Beweeg rechts";
+            }
+        }
+
         void SetImmersionMode(ImmersionMode immersionMode)
         {
-            m_immersionMode = immersionMode;
-
+            m_immersionMode = immersionMode;            
+            
             m_maquettePreviewContext.SetActive(m_immersionMode == ImmersionMode.Maquette);            
 
             UpdateModelLocationAndScale();
@@ -679,6 +767,8 @@ namespace ArchiVR
             }
 
             #endregion
+
+            UpdateButtonMappingUI();
         }        
 
         void TranslateTrackingSpace(Vector3 offset)
@@ -978,6 +1068,8 @@ namespace ArchiVR
             }
 
             UpdateTrackingSpacePosition();
+
+            m_rightControllerText.text = (m_activePOIIndex == -1 ? "" : m_POI[m_activePOIIndex].name);
         }
 
         IEnumerator LoadProject()
