@@ -5,17 +5,11 @@ using UnityEngine.SceneManagement;
 
 namespace ArchiVR
 {
-    //public class ApplicationStateWalkaround
-    //{
-    //}
-
-    //public class ApplicationStateDefinePOI
-    //{
-    //}
-
-    //public class ApplicationStateMaquette
-    //{
-    //}
+    public class LoadingProjectInfo
+    {
+        public int ProjectIndex { get; set; } = 0;
+        public string POIName { get; set; } = null;
+    }
 
     public class ApplicationArchiVR : MonoBehaviour
     {
@@ -38,7 +32,7 @@ namespace ArchiVR
         #region Project
 
         //! -1 when not loading a project.
-        public int m_loadingProjectIndex = -1;
+        public LoadingProjectInfo m_loadingProjectInfo = null;
 
         // The index of the currently active project.
         int m_activeProjectIndex = -1;
@@ -217,7 +211,7 @@ namespace ArchiVR
             return m_POI[m_activePOIIndex];
         }
 
-        void GatherActiveProjectPOI()
+        void GatherActiveProjectPOI(string poiName)
         {
             m_POI.Clear();
 
@@ -248,14 +242,43 @@ namespace ArchiVR
                 }
             }
 
-            SetPOI(pois);
+            SetPOI(pois, poiName);
         }
 
-        void SetPOI(List<GameObject> pois)
+        void SetPOI(
+            List<GameObject> pois,
+            string poiName)
         {
             m_POI = pois;
 
-            SetActivePOI(0);
+            if (poiName != null && (GetPOIIndex(poiName) != -1))
+            {                
+                SetActivePOI(GetPOIIndex(poiName));
+            }
+            else
+            {
+                SetActivePOI(GetDefaultPOIIndex());
+            }
+        }
+
+        int GetDefaultPOIIndex()
+        {
+            return m_POI.Count == 0 ? -1 : 0;
+        }
+
+        int GetPOIIndex(string poiName)
+        {
+            int poiIndex = 0;
+            foreach (var poi in m_POI)
+            {
+                if (poi.name == poiName)
+                {
+                    return poiIndex; // Found it.
+                }
+                ++poiIndex;
+            }
+
+            return -1; // Not found.
         }
 
         void ActivateProject(int projectIndex)
@@ -280,9 +303,20 @@ namespace ArchiVR
                 return;
             }
 
+            var lpi = new LoadingProjectInfo();
+
+            lpi.ProjectIndex = (projectIndex) % m_projectNames.Count;
+
+            while (projectIndex < 0)
+            {
+                projectIndex += m_projectNames.Count;
+            }
+
+            lpi.POIName = GetActivePOI() ? GetActivePOI().name : null;
+
             m_leftControllerText.text = (projectIndex == -1 ? "" : m_projectNames[projectIndex]);
 
-            m_loadingProjectIndex = projectIndex;
+            m_loadingProjectInfo = lpi;
 
             StartCoroutine(LoadProject());
         }
@@ -386,10 +420,8 @@ namespace ArchiVR
 
             bool toggleImmersionMode = false;           
 
-            if (m_loadingProjectIndex == -1)
+            if (m_loadingProjectInfo == null) // While not loading a project...
             {
-                // While not loading a project...
-
                 // .. active project is toggled using X/Y button, F1/F2 keys.
                 activatePrevProject = m_controllerState.button3Down || Input.GetKeyDown(KeyCode.F1) || Input.GetKeyDown(KeyCode.LeftControl);
                 activateNextProject = m_controllerState.button4Down || Input.GetKeyDown(KeyCode.F2) || Input.GetKeyDown(KeyCode.LeftShift);
@@ -698,9 +730,9 @@ namespace ArchiVR
         {
             var oldProjectName = GetActiveProjectName();
 
-            if (m_loadingProjectIndex != -1)
+            if (m_loadingProjectInfo != null)
             {
-                var newProjectName = m_projectNames[m_loadingProjectIndex];
+                var newProjectName = m_projectNames[m_loadingProjectInfo.ProjectIndex];
 
                 AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(newProjectName, LoadSceneMode.Additive);
 
@@ -711,7 +743,7 @@ namespace ArchiVR
                 }
             }
 
-            m_activeProjectIndex = m_loadingProjectIndex;
+            m_activeProjectIndex = m_loadingProjectInfo.ProjectIndex;
 
             if (oldProjectName != null)
             {
@@ -725,11 +757,11 @@ namespace ArchiVR
             }
 
             // Gather the POI from the new project.
-            GatherActiveProjectPOI();
+            GatherActiveProjectPOI(m_loadingProjectInfo.POIName);
 
             SetActiveImmersionMode(m_activeImmersionModeIndex);
 
-            m_loadingProjectIndex = -1;
+            m_loadingProjectInfo = null;
         }
     }
 
@@ -1047,11 +1079,9 @@ namespace ArchiVR
 
         public override void Update()
         {
-            if (m_application.m_loadingProjectIndex == -1)
+            if (m_application.m_loadingProjectInfo == null) // While not loading a project...
             {
-                // While not loading a project...
-
-                // Active POI is toggle using A/B button, F3/F4 key.
+                // ... Active POI is toggle using A/B button, F3/F4 key.
                 var activateNextPOI = m_application.m_controllerState.button1Down || Input.GetKeyDown(KeyCode.F3);
                 var activatePrevPOI = m_application.m_controllerState.button2Down || Input.GetKeyDown(KeyCode.F4);
 
