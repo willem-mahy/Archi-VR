@@ -138,8 +138,8 @@ namespace ArchiVR
 
                 m_application.rightControllerButtonMapping.textButtonOculus.text = "Exit";
 
-                m_application.rightControllerButtonMapping.textButtonA.text = "Vorige locatie";
-                m_application.rightControllerButtonMapping.textButtonB.text = "Volgende locatie";
+                m_application.rightControllerButtonMapping.textButtonA.text = "";
+                m_application.rightControllerButtonMapping.textButtonB.text = "";
 
                 m_application.rightControllerButtonMapping.textRightThumbUp.text = "Beweeg vooruit";
                 m_application.rightControllerButtonMapping.textRightThumbDown.text = "Beweeg achteruit";
