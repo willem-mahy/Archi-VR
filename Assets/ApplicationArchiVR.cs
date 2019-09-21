@@ -19,6 +19,8 @@ namespace ArchiVR
 
         #region Game objects
 
+        public Animator m_fadeAnimator = null;
+
         public UnityEngine.GameObject m_ovrCameraRig = null;
 
         UnityEngine.GameObject m_centerEyeAnchor = null;
@@ -699,24 +701,52 @@ namespace ArchiVR
             SetActivePOI(m_activePOIIndex + offset);
         }
 
-        void SetActivePOI(int newPOIIndex)
+
+        public void OnTeleportFadeOutComplete()
         {
-            if (m_POI.Count == 0)
-            {
-                m_activePOIIndex = -1;
-                return;
-            }
-
-            m_activePOIIndex = (newPOIIndex) % m_POI.Count;
-
-            while (m_activePOIIndex < 0)
-            {
-                m_activePOIIndex += m_POI.Count;
-            }
+            m_fadeAnimator.ResetTrigger("FadeOut");
 
             UpdateTrackingSpacePosition();
 
             m_rightControllerText.text = (m_activePOIIndex == -1 ? "" : m_POI[m_activePOIIndex].name);
+            
+            m_fadeAnimator.SetTrigger("FadeIn");
+        }
+
+        public void OnTeleportFadeInComplete()
+        {
+            m_fadeAnimator.ResetTrigger("FadeIn");
+        }
+
+        void SetActivePOI(int newPOIIndex)
+        {
+            // Determine wheter we need a fading transition.
+            bool needFade = m_activePOIIndex != -1;
+
+            // Determine the new POI index.
+            if (m_POI.Count == 0)
+            {
+                m_activePOIIndex = -1;
+            }
+            else
+            {
+                m_activePOIIndex = (newPOIIndex) % m_POI.Count;
+
+                while (m_activePOIIndex < 0)
+                {
+                    m_activePOIIndex += m_POI.Count;
+                }
+            }
+
+            if (needFade)
+            {
+                m_fadeAnimator.ResetTrigger("FadeIn");
+                m_fadeAnimator.SetTrigger("FadeOut");
+            }
+            else
+            {
+                OnTeleportFadeOutComplete();
+            }            
         }
 
         IEnumerator LoadProject()
