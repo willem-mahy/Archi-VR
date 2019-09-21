@@ -1190,8 +1190,14 @@ namespace ArchiVR
             }
             else
             {
+                var rotTrackingSpace = m_application.m_ovrCameraRig.transform.rotation.eulerAngles;
+                var rotEye = m_application.m_centerEyeCanvas.transform.parent.rotation.eulerAngles;
+
                 m_application.m_ovrCameraRig.transform.position = activePOI.transform.position;
-                m_application.m_ovrCameraRig.transform.rotation = activePOI.transform.rotation;
+
+                var rot = activePOI.transform.rotation.eulerAngles;
+                rot.y = rot.y + (rotTrackingSpace.y - rotEye.y);
+                m_application.m_ovrCameraRig.transform.rotation = Quaternion.Euler(rot);
             }
 
             if (Application.isEditor)
