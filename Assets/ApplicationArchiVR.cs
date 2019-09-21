@@ -424,28 +424,11 @@ namespace ArchiVR
             float magnitudeRight = 0.0f;
             float magnitudeUp = 0.0f;
 
-            if (Application.isEditor)
-            {
-                float mag = 1.0f;
+            magnitudeForward = m_controllerInput.m_controllerState.rThumbStick.y;
+            magnitudeRight = m_controllerInput.m_controllerState.rThumbStick.x;
 
-                // ... viewpoint is translated horizontally with arrow keys
-                if (Input.GetKey(KeyCode.DownArrow)) magnitudeForward -= mag;
-                if (Input.GetKey(KeyCode.UpArrow)) magnitudeForward += mag;
-
-                if (Input.GetKey(KeyCode.LeftArrow)) magnitudeRight -= mag;
-                if (Input.GetKey(KeyCode.RightArrow)) magnitudeRight += mag;
-
-                magnitudeUp += Input.GetKey(KeyCode.O) ? m_flySpeedUpDown : 0.0f;
-                magnitudeUp -= Input.GetKey(KeyCode.L) ? m_flySpeedUpDown : 0.0f;
-            }
-            else
-            {
-                magnitudeForward = m_controllerInput.m_controllerState.rThumbStick.y;
-                magnitudeRight = m_controllerInput.m_controllerState.rThumbStick.x;
-
-                magnitudeUp += OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger);
-                magnitudeUp -= OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger);
-            }
+            magnitudeUp += m_controllerInput.m_controllerState.button6Pressed ? 1.0f : 0.0f; // TODO: get linear axis value instead...
+            magnitudeUp -= m_controllerInput.m_controllerState.button8Pressed ? 1.0f : 0.0f; // TODO: get linear axis value instead...
 
             #endregion
 
@@ -497,7 +480,7 @@ namespace ArchiVR
                 offset.Normalize();
             }
 
-            var offsetUp = magnitudeUp * Vector3.up;
+            var offsetUp = magnitudeUp * m_flySpeedUpDown * Vector3.up;
 
             offset += offsetUp;
 
