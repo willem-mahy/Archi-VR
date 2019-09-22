@@ -6,6 +6,8 @@ namespace ArchiVR
     {
         public override void Enter()
         {
+            Logger.Debug("ImmersionModeWalkthrough.Enter()");
+
             InitButtonMappingUI();
 
             // Restore default moving up/down.
@@ -14,37 +16,41 @@ namespace ArchiVR
 
         public override void Exit()
         {
+            Logger.Debug("ImmersionModeWalkthrough.Exit()");
+
             // Restore default moving up/down.
             m_application.m_flySpeedUpDown = ApplicationArchiVR.DefaultFlySpeedUpDown;
         }
 
         public override void Update()
         {
-            if (m_application.m_loadingProjectInfo == null) // While not loading a project...
+            //Logger.Debug("ImmersionModeWalkthrough.Update()");
+
+            if (m_application.ToggleActiveProject())
             {
-                // ... Active POI is toggle using A/B button, F3/F4 key.
-                var activateNextPOI = m_application.m_controllerInput.m_controllerState.button1Down || Input.GetKeyDown(KeyCode.F3);
-                var activatePrevPOI = m_application.m_controllerInput.m_controllerState.button2Down || Input.GetKeyDown(KeyCode.F4);
-
-                #region Activate POI
-
-                if (activatePrevPOI)
-                {
-                    m_application.OffsetActivePOIIndex(+1);
-                }
-
-                if (activateNextPOI)
-                {
-                    m_application.OffsetActivePOIIndex(-1);
-                }
-
-                #endregion
+                return;
             }
+
+            if (m_application.ToggleActivePOI())
+            {
+                return;
+            }
+
+            if (m_application.ToggleImmersionMode2())
+            {
+                return;
+            }
+
+            m_application.Fly();
+
+            m_application.m_rightControllerText.text = m_application.ActivePOIName ?? "";
         }
 
         public override void UpdateModelLocationAndScale()
         {
-            var activeProject = m_application.GetActiveProject();
+            Logger.Debug("ImmersionModeWalkthrough.UpdateModelLocationAndScale()");
+
+            var activeProject = m_application.ActiveProject;
 
             if (activeProject == null)
             {
@@ -58,7 +64,9 @@ namespace ArchiVR
 
         public override void UpdateTrackingSpacePosition()
         {
-            var activePOI = m_application.GetActivePOI();
+            Logger.Debug("ImmersionModeWalkthrough.UpdateTrackingSpacePosition()");
+
+            var activePOI = m_application.ActivePOI;
 
             if (activePOI == null)
             {
@@ -82,8 +90,10 @@ namespace ArchiVR
             }
         }
 
-        void InitButtonMappingUI()
+        public override void InitButtonMappingUI()
         {
+            Logger.Debug("ImmersionModeWalkthrough.InitButtonMappingUI()");
+
             // Left controller
             if (m_application.leftControllerButtonMapping != null)
             {

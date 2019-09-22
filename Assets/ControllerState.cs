@@ -250,9 +250,9 @@ namespace ArchiVR
         public void Update_Editor()
         {
             // Left controller
-            if (Input.GetKey(KeyCode.F1)) button1Pressed = true;
-            if (Input.GetKey(KeyCode.F2)) button2Pressed = true;
-
+            if (Input.GetKey(KeyCode.F1)) button3Pressed = true;
+            if (Input.GetKey(KeyCode.F2)) button4Pressed = true;
+           
             if (Input.GetKey(KeyCode.F)) button5Pressed = true;
             if (Input.GetKey(KeyCode.R)) button7Pressed = true;
 
@@ -263,12 +263,12 @@ namespace ArchiVR
 
             if (Input.GetKey(KeyCode.Q)) lThumbStick.x -= 1;
             if (Input.GetKey(KeyCode.D)) lThumbStick.x += 1;
-            if (Input.GetKey(KeyCode.Z)) lThumbStick.y -= 1;
-            if (Input.GetKey(KeyCode.S)) lThumbStick.y += 1;
+            if (Input.GetKey(KeyCode.S)) lThumbStick.y -= 1;
+            if (Input.GetKey(KeyCode.Z)) lThumbStick.y += 1;
 
             // Right controller
-            if (Input.GetKey(KeyCode.F3)) button3Pressed = true;
-            if (Input.GetKey(KeyCode.F4)) button4Pressed = true;
+            if (Input.GetKey(KeyCode.F3)) button1Pressed = true;
+            if (Input.GetKey(KeyCode.F4)) button2Pressed = true;
 
             if (Input.GetKey(KeyCode.F12)) buttonOculusPressed = true;
 

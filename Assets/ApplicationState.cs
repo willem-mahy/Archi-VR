@@ -1,6 +1,6 @@
 ﻿namespace ArchiVR
 {
-    public class ImmersionMode
+    public class ApplicationState
     {
         public ApplicationArchiVR m_application = null;
 
@@ -17,6 +17,12 @@
 
         public virtual void UpdateTrackingSpacePosition() { }
 
-        public virtual void InitButtonMappingUI() { }
+        public virtual void OnTeleportFadeOutComplete()
+        {
+        }
+
+        public virtual void OnTeleportFadeInComplete()
+        {
+        }
     }
 }

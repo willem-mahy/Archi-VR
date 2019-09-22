@@ -9,6 +9,7 @@ namespace ArchiVR
     {
         #region Variables
 
+        // The application version.
         public string m_version = "190920a";
 
         #region Game objects
@@ -19,30 +20,106 @@ namespace ArchiVR
 
         UnityEngine.GameObject m_centerEyeAnchor = null;
 
-        UnityEngine.GameObject m_leftHandAnchor = null;
+        public UnityEngine.GameObject m_leftHandAnchor = null;
 
-        UnityEngine.GameObject m_rightHandAnchor = null;
+        public UnityEngine.GameObject m_rightHandAnchor = null;
 
         #endregion
 
+        public TeleportInfo TeleportInfo { get; set; } = new TeleportInfo();
+
         #region Project
-
-        //! -1 when not loading a project.
-        public LoadingProjectInfo m_loadingProjectInfo = null;
-
-        // The index of the currently active project.
-        int m_activeProjectIndex = -1;
 
         // The list of names of all projects included in the build.
         List<string> m_projectNames = new List<string>();
+
+        // The index of the currently active project.
+        public int ActiveProjectIndex { get; set; } = -1;
 
         #endregion
 
         #region POI
 
-        int m_activePOIIndex = -1;
+        public int ActivePOIIndex { get; set; } = -1;
 
-        List<UnityEngine.GameObject> m_POI = new List<UnityEngine.GameObject>();
+        public GameObject ActivePOI
+        {
+            get
+            {
+                if (ActivePOIIndex == -1)
+                {
+                    return null;
+                }
+
+                return m_POI[ActivePOIIndex];
+            }
+        }
+
+        public string ActivePOIName
+        {
+            get
+            {
+                if (ActivePOI == null)
+                {
+                    return null;
+                }
+
+                return ActivePOI.name;
+            }
+        }
+
+        List<GameObject> m_POI = new List<GameObject>();
+
+        #endregion
+
+        #region Application State
+
+        // The ammication states enumeration.
+        public enum ApplicationStates : int
+        {
+            None = -1,
+            Default,
+            Teleporting,
+            LoadingProject
+        };        
+
+        // The typed application states.
+        ApplicationStateDefault m_applicationStateDefault = new ApplicationStateDefault();
+        ApplicationStateTeleporting m_applicationStateTeleporting = new ApplicationStateTeleporting();
+        //ApplicationStateLoadingProject m_applicationStateLoadingProject = new ApplicationStateLoadingProject();
+        
+        // The generic list of application states.
+        List<ApplicationState> m_applicationStates = new List<ApplicationState>();
+
+        // The active immersion mode index.
+        private int m_activeApplicationStateIndex = (int)ApplicationStates.None;
+
+        //! Gets the active application state.  Returns null if no state is active.
+        public ApplicationState GetActiveApplicationState()
+        {
+            if (m_activeApplicationStateIndex == -1)
+                return null;
+
+            return m_applicationStates[m_activeApplicationStateIndex];
+        }
+
+        //! Sets the active application state.
+        public ApplicationState SetActiveApplicationState(ApplicationStates applicationState)
+        {
+            if (GetActiveApplicationState() != null)
+            {
+                GetActiveApplicationState().Exit();
+            }
+
+            m_activeApplicationStateIndex = (int)applicationState;
+
+            if (GetActiveApplicationState() != null)
+            {
+                GetActiveApplicationState().Enter();
+            }
+
+            return m_applicationStates[m_activeApplicationStateIndex];
+        }
 
         #endregion
 
@@ -54,7 +131,20 @@ namespace ArchiVR
         List<ImmersionMode> m_immersionModes = new List<ImmersionMode>();
 
         // The active immersion mode index.
-        private int m_activeImmersionModeIndex = -1;
+        public int ActiveImmersionModeIndex { get; set; } = DefaultImmersionModeIndex;
+
+        public ImmersionMode ActiveImmersionMode
+        {
+            get
+            {
+                if (ActiveImmersionModeIndex == -1)
+                {
+                    return null;
+                }
+
+                return m_immersionModes[ActiveImmersionModeIndex];
+            }
+        }
 
         #endregion
 
@@ -66,7 +156,8 @@ namespace ArchiVR
         enum MenuMode
         {
             None = 0,
-            Debug,
+            DebugLog,
+            DebugInput,
             Info
         }
 
@@ -80,7 +171,7 @@ namespace ArchiVR
         public UnityEngine.UI.Text m_centerEyeText = null;
 
         // The HUD menu text
-        string text = "";
+        string m_menuText = "";
 
         #endregion
 
@@ -149,13 +240,12 @@ namespace ArchiVR
             m_rightControllerPanel = GameObject.Find("RightControllerPanel");
             m_rightControllerText = GameObject.Find("RightControllerText").GetComponent<UnityEngine.UI.Text>();
 
-            #endregion           
+            #endregion
 
-            GatherProjects();
+            #region Init immersion modes.
 
             m_immersionModes.Add(new ImmersionModeWalkthrough());
             m_immersionModes.Add(new ImmersionModeMaquette());
-
 
             foreach (var immersionMode in m_immersionModes)
             {
@@ -163,47 +253,63 @@ namespace ArchiVR
                 immersionMode.Init();
             }
 
+            #endregion
+
+            #region Init application states.
+
+            m_applicationStates.Add(m_applicationStateDefault);
+            m_applicationStates.Add(m_applicationStateTeleporting);
+            //m_applicationStates.Add(m_applicationStateLoadingProject);
+
+            foreach (var applicationState in m_applicationStates)
+            {
+                applicationState.m_application = this;
+                applicationState.Init();
+            }
+
+            #endregion
+
+            GatherProjects();
+
             SetActiveImmersionMode(DefaultImmersionModeIndex);
+
+            SetActiveProject(0);
         }
 
         void GatherProjects()
         {
-            m_projectNames = GetProjectNames();
-
-            ActivateProject(0);
+            m_projectNames = GetProjectNames();            
         }
 
-        string GetActiveProjectName()
+        public string ActiveProjectName
         {
-            if (m_activeProjectIndex == -1)
-                return null;
-
-            return m_projectNames[m_activeProjectIndex];
+            get
+            {
+                // We delip-berately do NOT return the temptingly simple ActiveProject.name here.
+                // This returns the name (always "Project) of the gameobjet representing the project in the scene.
+                return ActiveProjectIndex == -1 ? null : m_projectNames[ActiveProjectIndex];
+            }
         }
 
-        public GameObject GetActiveProject()
+        public GameObject ActiveProject
         {
-            if (m_activeProjectIndex == -1)
-                return null;
+            get
+            {
+                if (ActiveProjectIndex == -1)
+                {
+                    return null;
+                }
 
-            var activeProject = GameObject.Find("Project");
-
-            return activeProject;
+                return GameObject.Find("Project");
+            }
         }
 
-        public GameObject GetActivePOI()
-        {
-            if (m_activePOIIndex == -1)
-                return null;
-
-            return m_POI[m_activePOIIndex];
-        }
-
-        void GatherActiveProjectPOI(string poiName)
+        //! Gather all POI for the currently active project.
+        public void GatherActiveProjectPOI()
         {
             m_POI.Clear();
 
-            var activeProject = GetActiveProject();
+            var activeProject = ActiveProject;
 
             if (activeProject == null)
             {
@@ -211,7 +317,6 @@ namespace ArchiVR
             }
 
             // Gather all POI in the current active project.
-            var pois = new List<GameObject>();
 
             foreach (Transform childOfActiveProject in activeProject.transform)
             {
@@ -223,35 +328,20 @@ namespace ArchiVR
 
                     foreach (Transform childOfPOIs in POIs.transform)
                     {
-                        pois.Add(childOfPOIs.gameObject);
+                        m_POI.Add(childOfPOIs.gameObject);
                     }
 
                     break;
                 }
             }
-
-            SetPOI(pois, poiName);
         }
 
-        void SetPOI(
-            List<GameObject> pois,
-            string poiName)
+        public int DefaultPOIIndex
         {
-            m_POI = pois;
-
-            if (poiName != null && (GetPOIIndex(poiName) != -1))
-            {                
-                SetActivePOI(GetPOIIndex(poiName));
-            }
-            else
+            get
             {
-                SetActivePOI(GetDefaultPOIIndex());
+                return m_POI.Count == 0 ? -1 : 0;
             }
-        }
-
-        int GetDefaultPOIIndex()
-        {
-            return m_POI.Count == 0 ? -1 : 0;
         }
 
         int GetPOIIndex(string poiName)
@@ -269,7 +359,7 @@ namespace ArchiVR
             return -1; // Not found.
         }
 
-        void ActivateProject(int projectIndex)
+        void SetActiveProject(int projectIndex)
         {
             if (m_projectNames.Count == 0)
             {
@@ -286,27 +376,25 @@ namespace ArchiVR
                 }
             }
 
-            if (projectIndex == m_activeProjectIndex)
+            if (projectIndex == ActiveProjectIndex)
             {
                 return;
             }
 
-            var lpi = new LoadingProjectInfo();
+            var ti = new TeleportInfo();
 
-            lpi.ProjectIndex = (projectIndex) % m_projectNames.Count;
+            ti.ProjectIndex = (projectIndex) % m_projectNames.Count;
 
             while (projectIndex < 0)
             {
                 projectIndex += m_projectNames.Count;
             }
 
-            lpi.POIName = GetActivePOI() ? GetActivePOI().name : null;
+            ti.POIName = ActivePOIName;
 
-            m_leftControllerText.text = (projectIndex == -1 ? "" : m_projectNames[projectIndex]);
+            TeleportInfo = ti;
 
-            m_loadingProjectInfo = lpi;
-
-            StartCoroutine(LoadProject());
+            SetActiveApplicationState(ApplicationStates.Teleporting);
         }
 
         void ToggleCanvas()
@@ -322,54 +410,42 @@ namespace ArchiVR
 
         void UpdateTrackingSpacePosition()
         {
-            var aim = GetActiveImmersionMode();
-
-            if (aim == null)
+            if (ActiveImmersionMode == null)
                 return;
 
-            aim.UpdateTrackingSpacePosition();
+            ActiveImmersionMode.UpdateTrackingSpacePosition();
         }
 
         void UpdateModelLocationAndScale()
         {
-            var aim = GetActiveImmersionMode();
-
-            if (aim == null)
+            if (ActiveImmersionMode == null)
                 return;
 
-            aim.UpdateModelLocationAndScale();
+            ActiveImmersionMode.UpdateModelLocationAndScale();
         }
 
         void ToggleImmersionMode()
         {
-            SetActiveImmersionMode(1 - m_activeImmersionModeIndex);
+            SetActiveImmersionMode(1 - ActiveImmersionModeIndex);
         }
 
-        ImmersionMode GetActiveImmersionMode()
+        public void SetActiveImmersionMode(int immersionModeIndex)
         {
-            if (m_activeImmersionModeIndex == -1)
-                return null;
-
-            return m_immersionModes[m_activeImmersionModeIndex];
-        }
-
-        void SetActiveImmersionMode(int immersionModeIndex)
-        {
-            if (immersionModeIndex == m_activeImmersionModeIndex)
+            if (immersionModeIndex == ActiveImmersionModeIndex)
             {
                 return; // Nothing to do.
             }
 
-            var aim = GetActiveImmersionMode();
+            var aim = ActiveImmersionMode;
 
             if (aim != null)
             {
                 aim.Exit();
             }
 
-            m_activeImmersionModeIndex = immersionModeIndex;
+            ActiveImmersionModeIndex = immersionModeIndex;
 
-            aim = GetActiveImmersionMode();
+            aim = ActiveImmersionMode;
 
             if (aim != null)
             {
@@ -400,26 +476,30 @@ namespace ArchiVR
                 rightControllerButtonMapping.Update(m_controllerInput.m_controllerState);
             }
 
-            #region Figure out whether there is something to do.
+            #region Toggle HUD menu.
 
-            bool activatePrevProject = false;
-            bool activateNextProject = false;
-
-            bool toggleImmersionMode = false;           
-
-            if (m_loadingProjectInfo == null) // While not loading a project...
-            {
-                // .. active project is toggled using X/Y button, F1/F2 keys.
-                activatePrevProject = m_controllerInput.m_controllerState.button3Down || Input.GetKeyDown(KeyCode.F1) || Input.GetKeyDown(KeyCode.LeftControl);
-                activateNextProject = m_controllerInput.m_controllerState.button4Down || Input.GetKeyDown(KeyCode.F2) || Input.GetKeyDown(KeyCode.LeftShift);
-
-                // ... immersion mode is toggled using I
-                toggleImmersionMode = m_controllerInput.m_controllerState.button7Down || Input.GetKeyDown(KeyCode.I);               
-            }
-
-            // ... menu is toggled using M
+            // HUD menu is toggled using M
             bool toggleMenu = m_controllerInput.m_controllerState.buttonStartDown || Input.GetKeyDown(KeyCode.F11);
 
+            if (toggleMenu)
+            {
+                ToggleMenuMode();
+            }
+
+            #endregion
+
+            if (GetActiveApplicationState() != null)
+            {
+                GetActiveApplicationState().Update();
+            }
+
+            UpdateMenu();
+
+            UpdateControllersLocation();
+        }
+
+        public void Fly()
+        {
             float magnitudeForward = 0.0f;
             float magnitudeRight = 0.0f;
             float magnitudeUp = 0.0f;
@@ -429,36 +509,6 @@ namespace ArchiVR
 
             magnitudeUp += m_controllerInput.m_controllerState.button6Pressed ? 1.0f : 0.0f; // TODO: get linear axis value instead...
             magnitudeUp -= m_controllerInput.m_controllerState.button8Pressed ? 1.0f : 0.0f; // TODO: get linear axis value instead...
-
-            #endregion
-
-            #region Do it           
-
-            if (toggleMenu)
-            {
-                ToggleMenuMode();
-            }
-
-            if (toggleImmersionMode)
-            {
-                ToggleImmersionMode();
-            }
-
-            #region Activate project
-
-            if (activateNextProject)
-            {
-                ActivateProject(m_activeProjectIndex + 1);
-            }
-
-            if (activatePrevProject)
-            {
-                ActivateProject(m_activeProjectIndex - 1);
-            }
-
-            #endregion            
-
-            #region Fly behaviour
 
             float flySpeed = 1.0f;
 
@@ -488,21 +538,71 @@ namespace ArchiVR
             {
                 TranslateTrackingSpace(flySpeed * Time.deltaTime * offset);
             }
+        }
 
-            #endregion
+        public bool ToggleImmersionMode2()
+        { 
+            // Immersion mode is toggled using I key, Left index trigger.
+            bool toggleImmersionMode = m_controllerInput.m_controllerState.button7Down || Input.GetKeyDown(KeyCode.I);
 
-            var aim = GetActiveImmersionMode();
-
-            if (aim != null)
+            if (toggleImmersionMode)
             {
-                aim.Update();
+                ToggleImmersionMode();
+                return true;
             }
 
-            UpdateMenu();
+            return false;
+        }
+    /*! Checks the current input and toggles the active project if necessary.
+     *
+     * \return 'true' if a new project is activated, 'false' otherwise.
+     */
+    public bool ToggleActiveProject()
+        {
+            // Active project is toggled using X/Y button, F1/F2 keys.
+            bool activatePrevProject = m_controllerInput.m_controllerState.button3Down || Input.GetKeyDown(KeyCode.F1);
+            
+            if (activatePrevProject)
+            {
+                SetActiveProject(ActiveProjectIndex - 1);
+                return true;
+            }
 
-            UpdateControllersLocation();
+            bool activateNextProject = m_controllerInput.m_controllerState.button4Down || Input.GetKeyDown(KeyCode.F2);
 
-            #endregion
+            if (activateNextProject)
+            {
+                SetActiveProject(ActiveProjectIndex + 1);
+                return true;
+            }
+
+            return false;
+        }
+
+        /*! Checks the current input and toggles the active POI if necessary.
+         *
+         * \return 'true' if a new POI is activated, 'false' otherwise.
+         */
+        public bool ToggleActivePOI()
+        {
+            // Active project is toggled using X/Y button, F1/F2 keys.
+            bool activatePrev = m_controllerInput.m_controllerState.button1Down || Input.GetKeyDown(KeyCode.F3);
+
+            if (activatePrev)
+            {
+                TeleportToPOIInActiveProject(ActivePOIIndex - 1);
+                return true;
+            }
+
+            bool activateNext = m_controllerInput.m_controllerState.button2Down || Input.GetKeyDown(KeyCode.F4);
+
+            if (activateNext)
+            {
+                TeleportToPOIInActiveProject(ActivePOIIndex + 1);
+                return true;
+            }
+
+            return false;
         }
 
         //! Activates the next menu mode.
@@ -539,20 +639,23 @@ namespace ArchiVR
         }
 
         void TranslateTrackingSpace(Vector3 offset)
-            {
-                m_ovrCameraRig.transform.position = m_ovrCameraRig.transform.position + offset;
-            }
+        {
+            m_ovrCameraRig.transform.position = m_ovrCameraRig.transform.position + offset;
+        }
 
         void UpdateMenu()
         {
             // Reset HUD menu text.
-            text = "";
+            m_menuText = "";
 
             // Update HUD menu text. (if not 'None')
             switch (m_menuMode)
             {
-                case MenuMode.Debug:
-                    UpdateMenuDebug();
+                case MenuMode.DebugInput:
+                    UpdateMenuDebugInput();
+                    break;
+                case MenuMode.DebugLog:
+                    UpdateMenuDebugLog();
                     break;
                 case MenuMode.Info:
                     UpdateMenuInfo();
@@ -560,39 +663,39 @@ namespace ArchiVR
                 case MenuMode.None:
                     break;
                 default:
-                    text += "Unsupported menu mode: " + m_menuMode.ToString();
+                    m_menuText += "Unsupported menu mode: " + m_menuMode.ToString();
                     break;
             }
 
             // Push HUD menu text to UI.
-            m_centerEyeText.text = text;
+            m_centerEyeText.text = m_menuText;
 
             m_centerEyePanel.SetActive(MenuMode.None != m_menuMode);
         }
 
-        void UpdateMenuDebug()
+        void UpdateMenuDebugInput()
         {
             var controllerState = m_controllerInput.m_controllerState;
 
-            text += "\nInput mode: " + (m_controllerInput.m_inputMode == ControllerInput.InputMode.Unity ? "Unity" : "OVR");
-            text += "\n";
+            m_menuText += "\nInput mode: " + (m_controllerInput.m_inputMode == ControllerInput.InputMode.Unity ? "Unity" : "OVR");
+            m_menuText += "\n";
             //text += "\nRemote connection: L=" + (lRemoteConnected ? "OK" : "NA") + " R=" + (rRemoteConnected ? "OK" : "NA");
-            text += "\nTouch controllers:" + (controllerState.lTouchConnected ? "L " : "") + " " + (controllerState.rTouchConnected ? " R" : "") +
+            m_menuText += "\nTouch controllers:" + (controllerState.lTouchConnected ? "L " : "") + " " + (controllerState.rTouchConnected ? " R" : "") +
                     "(Active Controller: " + (controllerState.activeController == OVRInput.Controller.LTouch ? " L" : "") + (controllerState.activeController == OVRInput.Controller.RTouch ? " R" : "") + ")";
-            text += "\n";
-            text += "\nThumbstick: L(" + controllerState.lThumbStick.x + ", " + controllerState.lThumbStick.y + ") R(" + controllerState.rThumbStick.x + ", " + controllerState.rThumbStick.y + ")";
-            text += "\nL thumbstick:";
-            text += "\n Left: " + (controllerState.lThumbstickDirectionLeftDown ? "Down" : (controllerState.lThumbstickDirectionLeftPressed ? "Pressed" : ""));
-            text += "\n Right: " + (controllerState.lThumbstickDirectionRightDown ? "Down" : (controllerState.lThumbstickDirectionRightPressed ? "Pressed" : ""));
-            text += "\n Up: " + (controllerState.lThumbstickDirectionUpDown ? "Down" : (controllerState.lThumbstickDirectionUpPressed ? "Pressed" : ""));
-            text += "\n Down: " + (controllerState.lThumbstickDirectionDownDown ? "Down" : (controllerState.lThumbstickDirectionDownPressed ? "Pressed" : ""));
+            m_menuText += "\n";
+            m_menuText += "\nThumbstick: L(" + controllerState.lThumbStick.x + ", " + controllerState.lThumbStick.y + ") R(" + controllerState.rThumbStick.x + ", " + controllerState.rThumbStick.y + ")";
+            m_menuText += "\nL thumbstick:";
+            m_menuText += "\n Left: " + (controllerState.lThumbstickDirectionLeftDown ? "Down" : (controllerState.lThumbstickDirectionLeftPressed ? "Pressed" : ""));
+            m_menuText += "\n Right: " + (controllerState.lThumbstickDirectionRightDown ? "Down" : (controllerState.lThumbstickDirectionRightPressed ? "Pressed" : ""));
+            m_menuText += "\n Up: " + (controllerState.lThumbstickDirectionUpDown ? "Down" : (controllerState.lThumbstickDirectionUpPressed ? "Pressed" : ""));
+            m_menuText += "\n Down: " + (controllerState.lThumbstickDirectionDownDown ? "Down" : (controllerState.lThumbstickDirectionDownPressed ? "Pressed" : ""));
 
             if (m_controllerInput.m_inputMode == ControllerInput.InputMode.Unity)
             {
-                text += "\nJoysticks:";
+                m_menuText += "\nJoysticks:";
                 foreach (var n in controllerState.joystickNames)
                 {
-                    text += "\n -" + n;
+                    m_menuText += "\n -" + n;
                 }
             }
             else
@@ -605,26 +708,44 @@ namespace ArchiVR
                 //text += "\nSecondary IndexTrigger = " + OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) + (OVRInput.GetDown(OVRInput.RawButton.RIndexTrigger) ? " Down" : ""); ;
 
                 // left
-                text += "\nL IndexTrigger = " + OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger) + (controllerState.rawButtonLIndexTriggerDown ? " Down" : "");
+                m_menuText += "\nL IndexTrigger = " + OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger) + (controllerState.rawButtonLIndexTriggerDown ? " Down" : "");
 
                 // right
-                text += "\nR IndexTrigger = " + OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger) + (controllerState.rawButtonRIndexTriggerDown ? " Down" : "");
+                m_menuText += "\nR IndexTrigger = " + OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger) + (controllerState.rawButtonRIndexTriggerDown ? " Down" : "");
 
                 // returns true if the secondary gamepad button, typically “B”, is currently touched by the user.
                 //text += "\nGetTouchTwo = " + OVRInput.Get(OVRInput.Touch.Two);   
             }
 
-            text += "\n";
+            m_menuText += "\n";
 
-            text += "\nButton 1 = " + (controllerState.button1Down ? "Down" : (controllerState.button1Pressed ? "Pressed" : ""));
-            text += "\nButton 2 = " + (controllerState.button2Down ? "Down" : (controllerState.button2Pressed ? "Pressed" : ""));
-            text += "\nButton 3 = " + (controllerState.button3Down ? "Down" : (controllerState.button3Pressed ? "Pressed" : ""));
-            text += "\nButton 4 = " + (controllerState.button4Down ? "Down" : (controllerState.button4Pressed ? "Pressed" : ""));
-            text += "\nButton 5 = " + (controllerState.button5Down ? "Down" : (controllerState.button5Pressed ? "Pressed" : ""));
-            text += "\nButton 6 = " + (controllerState.button6Down ? "Down" : (controllerState.button6Pressed ? "Pressed" : ""));
-            text += "\nButton 7 = " + (controllerState.button7Down ? "Down" : (controllerState.button7Pressed ? "Pressed" : ""));
-            text += "\nButton 8 = " + (controllerState.button8Down ? "Down" : (controllerState.button8Pressed ? "Pressed" : ""));
-            text += "\nButton Start = " + (controllerState.buttonStartDown ? "Down" : (controllerState.buttonStartPressed ? "Pressed" : ""));
+            m_menuText += "\nButton 1 = " + (controllerState.button1Down ? "Down" : (controllerState.button1Pressed ? "Pressed" : ""));
+            m_menuText += "\nButton 2 = " + (controllerState.button2Down ? "Down" : (controllerState.button2Pressed ? "Pressed" : ""));
+            m_menuText += "\nButton 3 = " + (controllerState.button3Down ? "Down" : (controllerState.button3Pressed ? "Pressed" : ""));
+            m_menuText += "\nButton 4 = " + (controllerState.button4Down ? "Down" : (controllerState.button4Pressed ? "Pressed" : ""));
+            m_menuText += "\nButton 5 = " + (controllerState.button5Down ? "Down" : (controllerState.button5Pressed ? "Pressed" : ""));
+            m_menuText += "\nButton 6 = " + (controllerState.button6Down ? "Down" : (controllerState.button6Pressed ? "Pressed" : ""));
+            m_menuText += "\nButton 7 = " + (controllerState.button7Down ? "Down" : (controllerState.button7Pressed ? "Pressed" : ""));
+            m_menuText += "\nButton 8 = " + (controllerState.button8Down ? "Down" : (controllerState.button8Pressed ? "Pressed" : ""));
+            m_menuText += "\nButton Start = " + (controllerState.buttonStartDown ? "Down" : (controllerState.buttonStartPressed ? "Pressed" : ""));
+        }
+
+        void UpdateMenuDebugLog()
+        {
+            m_menuText = "";
+
+            const int maxNumLines = 15;
+            int numLines = System.Math.Min(Logger.s_log.Count, maxNumLines);
+
+            for (var lineIndex = 0; lineIndex < numLines; ++lineIndex)
+            {
+                if (m_menuText.Length > 0)
+                {
+                    m_menuText += "\n";
+                }
+
+                m_menuText+= Logger.s_log[Logger.s_log.Count - (lineIndex+1)];
+            }
         }
 
         List<string> GetProjectNames()
@@ -648,120 +769,180 @@ namespace ArchiVR
         {
             var projectNames = GetProjectNames();
 
-            text += "\nProjects:";
+            m_menuText += "\nProjects:";
             foreach (var projectName in projectNames)
             {
-                text += "\n - " + projectName;
+                m_menuText += "\n - " + projectName;
             }
 
-            var activeProjectName = GetActiveProjectName();
+            var activeProjectName = ActiveProjectName;
 
             if (activeProjectName != null)
             {
-                text += "\n";
-                text += "\n" + activeProjectName;
+                m_menuText += "\n";
+                m_menuText += "\n" + activeProjectName;
 
-                var activePOI = GetActivePOI();
+                var activePOI = ActivePOI;
 
                 if (activePOI != null)
                 {
-                    text += " > " + activePOI.name;
+                    m_menuText += " > " + activePOI.name;
                 }
             }
 
-            text += "\n";
-            text += "\nversion: " + m_version;
+            m_menuText += "\n";
+            m_menuText += "\nversion: " + m_version;
         }
 
-        public void OffsetActivePOIIndex(int offset)
+        public void TeleportToPOIInActiveProjectAtIndexOffset(int indexOffset)
         {
-            SetActivePOI(m_activePOIIndex + offset);
+            TeleportToPOIInActiveProject(ActivePOIIndex + indexOffset);
         }
 
 
         public void OnTeleportFadeOutComplete()
         {
+            Logger.Debug("ApplicationArchiVR::OnTeleportFadeInComplete()");
+
             m_fadeAnimator.ResetTrigger("FadeOut");
 
-            UpdateTrackingSpacePosition();
-
-            m_rightControllerText.text = (m_activePOIIndex == -1 ? "" : m_POI[m_activePOIIndex].name);
-            
-            m_fadeAnimator.SetTrigger("FadeIn");
+            var applicationState = GetActiveApplicationState();
+            if (applicationState != null)
+            {
+                applicationState.OnTeleportFadeOutComplete();
+            }
         }
 
         public void OnTeleportFadeInComplete()
         {
+            Logger.Debug("ApplicationArchiVR::OnTeleportFadeInComplete()");
+
             m_fadeAnimator.ResetTrigger("FadeIn");
+
+            var applicationState = GetActiveApplicationState();
+            if (applicationState != null)
+            {
+                applicationState.OnTeleportFadeInComplete();
+            }
         }
 
-        void SetActivePOI(int newPOIIndex)
+        void SetActivePOI(string newPOIName)
         {
-            // Determine wheter we need a fading transition.
-            bool needFade = m_activePOIIndex != -1;
+            // Get the POI index by POI name.
+            var newPOIIndex = GetPOIIndex(newPOIName);
 
+            if (newPOIIndex == -1)
+                if (m_POI.Count > 0)
+                    newPOIIndex = 0;
+
+            ActivePOIIndex = newPOIIndex;
+        }
+
+        void TeleportToPOIInActiveProject(int newPOIIndex)
+        {
             // Determine the new POI index.
             if (m_POI.Count == 0)
             {
-                m_activePOIIndex = -1;
+                newPOIIndex = -1;
             }
             else
             {
-                m_activePOIIndex = (newPOIIndex) % m_POI.Count;
+                newPOIIndex = (newPOIIndex) % m_POI.Count;
 
-                while (m_activePOIIndex < 0)
+                while (newPOIIndex < 0)
                 {
-                    m_activePOIIndex += m_POI.Count;
+                    newPOIIndex += m_POI.Count;
                 }
             }
 
-            if (needFade)
-            {
-                m_fadeAnimator.ResetTrigger("FadeIn");
-                m_fadeAnimator.SetTrigger("FadeOut");
-            }
-            else
-            {
-                OnTeleportFadeOutComplete();
-            }            
+            var ti = new TeleportInfo();
+
+            ti.ProjectIndex = ActiveProjectIndex;
+
+            ti.POIName = newPOIIndex == -1 ? null : m_POI[newPOIIndex].name;
+
+            TeleportInfo = ti;
+
+            SetActiveApplicationState(ApplicationStates.Teleporting);
         }
 
-        IEnumerator LoadProject()
+        public string GetProjectName(int projectIndex)
         {
-            var oldProjectName = GetActiveProjectName();
+            return m_projectNames[projectIndex];
+        }
 
-            if (m_loadingProjectInfo != null)
+        public IEnumerator Teleport()
+        {
+            Logger.Debug("ApplicationArchiVR::Teleport()");
+
+            if (TeleportInfo != null)
             {
-                var newProjectName = m_projectNames[m_loadingProjectInfo.ProjectIndex];
-
-                AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(newProjectName, LoadSceneMode.Additive);
-
-                // Wait until asynchronous loading the old project finishes.
-                while (!asyncLoad.isDone)
+                if (ActiveProjectIndex != TeleportInfo.ProjectIndex) // If project changed...
                 {
-                    yield return null;
+                    // Needs to be cached before activating the new project.
+                    var oldProjectName = ActiveProjectName;
+
+                    // Option A: first unload, then load...
+                    // Unload the old project
+                    if (oldProjectName != null)
+                    {
+                        Logger.Debug("Unloading project '" + oldProjectName + "'");
+
+                        AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(oldProjectName);
+
+                        // Wait until asynchronous unloading the old project finishes.
+                        while (!asyncUnload.isDone)
+                        {
+                            yield return null;
+                        }
+                    }                    
+
+                    // Load the new projct
+                    var newProjectName = GetProjectName(TeleportInfo.ProjectIndex);
+
+                    Logger.Debug("Loading project '" + newProjectName + "'");
+
+                    AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(newProjectName, LoadSceneMode.Additive);
+
+                    // Wait until asynchronous loading the new project finishes.
+                    while (!asyncLoad.isDone)
+                    {
+                        yield return null;
+                    }
+
+                    // Update active project index to point to newly activated project.
+                    ActiveProjectIndex = TeleportInfo.ProjectIndex;
+
+                    // Update left controller UI displaying the project name.
+                    m_leftControllerText.text = ActiveProjectName ?? "No project loaded.";
+
+                    // Option B: first load, then unload...
+                    //// Unload the old project
+                    //if (oldProjectName != null)
+                    //{
+                    //    Logger.Debug("Unloading project '" + oldProjectName + "'");
+
+                    //    AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(oldProjectName);
+
+                    //    // Wait until asynchronous unloading the old project finishes.
+                    //    while (!asyncUnload.isDone)
+                    //    {
+                    //        yield return null;
+                    //    }
+                    //}
                 }
+
+                // Gather the POI from the new project.
+                GatherActiveProjectPOI();
+
+                SetActivePOI(TeleportInfo.POIName);
+
+                TeleportInfo = null;
+
+                ActiveImmersionMode.UpdateTrackingSpacePosition();
+
+                m_fadeAnimator.SetTrigger("FadeIn");
             }
-
-            m_activeProjectIndex = m_loadingProjectInfo.ProjectIndex;
-
-            if (oldProjectName != null)
-            {
-                AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(oldProjectName);
-
-                // Wait until asynchronous unloading the old project finishes.
-                while (!asyncUnload.isDone)
-                {
-                    yield return null;
-                }
-            }
-
-            // Gather the POI from the new project.
-            GatherActiveProjectPOI(m_loadingProjectInfo.POIName);
-
-            SetActiveImmersionMode(m_activeImmersionModeIndex);
-
-            m_loadingProjectInfo = null;
         }
     }
 }

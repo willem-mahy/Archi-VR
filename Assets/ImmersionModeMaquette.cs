@@ -16,6 +16,8 @@ namespace ArchiVR
 
         public override void Init()
         {
+            Logger.Debug("ImmersionModeMaquette.Init()");
+
             if (m_maquettePreviewContext == null)
             {
                 m_maquettePreviewContext = GameObject.Find("MaquettePreviewContext");
@@ -24,6 +26,8 @@ namespace ArchiVR
 
         public override void Enter()
         {
+            Logger.Debug("ImmersionModeMaquette.Enter()");
+
             InitButtonMappingUI();
 
             if (m_maquettePreviewContext)
@@ -35,6 +39,8 @@ namespace ArchiVR
 
         public override void Exit()
         {
+            Logger.Debug("ImmersionModeMaquette.Exit()");
+
             if (m_maquettePreviewContext)
                 m_maquettePreviewContext.SetActive(false);
 
@@ -44,25 +50,28 @@ namespace ArchiVR
 
         public override void Update()
         {
+            //Logger.Debug("ImmersionModeMaquette.Update()");
+
+            if (m_application.ToggleActiveProject())
+            {
+                return;
+            }
+
+            if (m_application.ToggleImmersionMode2())
+            {
+                return;
+            }
+
+            m_application.Fly();
+
+            m_application.m_rightControllerText.text = "";
+
             #region Maquette manipulation.
 
-            float magnitudeRotateMaquette = 0.0f;
-            float magnitudeTranslateMaquette = 0.0f;
+            var cs = m_application.m_controllerInput.m_controllerState;
 
-            if (Application.isEditor)
-            {
-                float mag = 1.0f;
-                magnitudeTranslateMaquette += Input.GetKey(KeyCode.O) ? mag : 0.0f;
-                magnitudeTranslateMaquette -= Input.GetKey(KeyCode.L) ? mag : 0.0f;
-
-                magnitudeRotateMaquette += Input.GetKey(KeyCode.K) ? mag : 0.0f;
-                magnitudeRotateMaquette -= Input.GetKey(KeyCode.M) ? mag : 0.0f;
-            }
-            else
-            {
-                magnitudeTranslateMaquette += m_application.m_controllerInput.m_controllerState.lThumbStick.y;
-                magnitudeRotateMaquette = m_application.m_controllerInput.m_controllerState.lThumbStick.x;
-            }
+            float magnitudeRotateMaquette = cs.lThumbStick.x;
+            float magnitudeTranslateMaquette = cs.lThumbStick.y;
 
             // Translate Up/Down
             var maquetteMoveSpeed = 1.0f;
@@ -81,7 +90,9 @@ namespace ArchiVR
 
         public override void UpdateModelLocationAndScale()
         {
-            var activeProject = m_application.GetActiveProject();
+            Logger.Debug("ImmersionModeMaquette.UpdateModelLocationAndScale()");
+
+            var activeProject = m_application.ActiveProject;
 
             if (activeProject == null)
             {
@@ -102,6 +113,8 @@ namespace ArchiVR
 
         public override void UpdateTrackingSpacePosition()
         {
+            Logger.Debug("ImmersionModeMaquette.UpdateTrackingSpacePosition()");
+
             m_application.ResetTrackingSpacePosition(); // Center around model.
 
             if (Application.isEditor)
@@ -110,8 +123,10 @@ namespace ArchiVR
             }
         }
 
-        void InitButtonMappingUI()
+        public override void InitButtonMappingUI()
         {
+            Logger.Debug("ImmersionModeMaquette.InitButtonMappingUI()");
+            
             // Left controller
             if (m_application.leftControllerButtonMapping != null)
             {
