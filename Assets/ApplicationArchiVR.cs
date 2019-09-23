@@ -18,7 +18,7 @@ namespace ArchiVR
 
         public UnityEngine.GameObject m_ovrCameraRig = null;
 
-        UnityEngine.GameObject m_centerEyeAnchor = null;
+        public UnityEngine.GameObject m_centerEyeAnchor = null;
 
         public UnityEngine.GameObject m_leftHandAnchor = null;
 
@@ -67,6 +67,8 @@ namespace ArchiVR
                 return ActivePOI.name;
             }
         }
+
+        public List<GameObject> m_layers = new List<GameObject>();
 
         List<GameObject> m_POI = new List<GameObject>();
 
@@ -336,6 +338,29 @@ namespace ArchiVR
             }
         }
 
+        //! Gather all POI for the currently active project.
+        public void GatherActiveProjectLayers()
+        {
+            m_layers.Clear();
+
+            var activeProject = ActiveProject;
+
+            if (activeProject == null)
+            {
+                return;
+            }
+
+            // Gather all POI in the current active project.
+            var modelTransform = activeProject.transform.Find("Model");
+            var layers = modelTransform.Find("Layers");
+            foreach (Transform layerTransform in layers.transform)
+            {
+                var layer = layerTransform.gameObject;
+
+                m_layers.Add(layer);
+            }
+        }
+
         public int DefaultPOIIndex
         {
             get
@@ -488,14 +513,14 @@ namespace ArchiVR
 
             #endregion
 
+            UpdateControllersLocation();
+
             if (GetActiveApplicationState() != null)
             {
                 GetActiveApplicationState().Update();
             }
 
             UpdateMenu();
-
-            UpdateControllersLocation();
         }
 
         public void Fly()
@@ -934,6 +959,9 @@ namespace ArchiVR
 
                 // Gather the POI from the new project.
                 GatherActiveProjectPOI();
+
+                // Gather the layers from the new project.
+                GatherActiveProjectLayers();
 
                 SetActivePOI(TeleportInfo.POIName);
 

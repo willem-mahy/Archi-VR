@@ -4,8 +4,17 @@ namespace ArchiVR
 {
     public class ImmersionModeMaquette : ImmersionMode
     {
+        // Represents pick hit position.
+        GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+
+        // Represents pick ray.
+        GameObject pickRayGO = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+
+        // The layer currently being picked.
+        GameObject pickedLayer;
+
         #region variables
-        
+
         GameObject m_maquettePreviewContext = null;
 
         float m_maquetteOffset = 0;
@@ -22,6 +31,16 @@ namespace ArchiVR
             {
                 m_maquettePreviewContext = GameObject.Find("MaquettePreviewContext");
             }
+
+            sphere.transform.parent = m_maquettePreviewContext.transform;
+            sphere.transform.localScale = 0.1f * Vector3.one;
+            sphere.SetActive(false);
+
+            pickRayGO.transform.localScale = new Vector3(0.01f, 1, 0.01f);
+            pickRayGO.transform.rotation = Quaternion.Euler(new Vector3(90, 0, 0));
+            pickRayGO.transform.position = new Vector3(0, 0, 1);
+            pickRayGO.transform.SetParent(m_application.m_leftHandAnchor.transform, true);
+            pickRayGO.SetActive(false);
         }
 
         public override void Enter()
@@ -35,6 +54,8 @@ namespace ArchiVR
 
             // Disable moving up/down.
             m_application.m_flySpeedUpDown = 0.0f;
+
+            pickRayGO.SetActive(true);
         }
 
         public override void Exit()
@@ -46,6 +67,9 @@ namespace ArchiVR
 
             // Restore default moving up/down.
             m_application.m_flySpeedUpDown = ApplicationArchiVR.DefaultFlySpeedUpDown;
+
+            sphere.SetActive(false);
+            pickRayGO.SetActive(false);
         }
 
         public override void Update()
@@ -62,9 +86,25 @@ namespace ArchiVR
                 return;
             }
 
-            m_application.Fly();
+            if (m_application.m_controllerInput.m_controllerState.button5Down)
+            {
+                if (pickedLayer != null)
+                {
+                    pickedLayer.SetActive(!pickedLayer.activeSelf);
+                }
+                else
+                {
+                    foreach (var layer in m_application.m_layers)
+                    {
+                        layer.SetActive(true);
+                    }
+                }
+            }
 
-            m_application.m_rightControllerText.text = "";
+            // Show name of picked model layer in right control text.
+            m_application.m_rightControllerText.text = (pickedLayer == null) ? "" : pickedLayer.name;
+
+            m_application.Fly();
 
             #region Maquette manipulation.
 
@@ -86,6 +126,57 @@ namespace ArchiVR
             UpdateModelLocationAndScale();
 
             #endregion
+
+            Ray pickRay = new Ray(
+                m_application.m_leftHandAnchor.transform.position,
+
+                //m_application.m_leftHandAnchor.transform.forward
+                m_application.m_centerEyeAnchor.transform.forward
+                );
+            
+            float minHitDistance = -1;
+
+            pickedLayer = null;
+
+            foreach (var layer in m_application.m_layers)
+            {
+                foreach (Transform geometryTransform in layer.transform)
+                {
+                    var geometryCollider = geometryTransform.GetComponent<Collider>();
+
+                    if (geometryCollider)
+                    {
+                        float hitDistance = -1;
+
+                        if (geometryCollider.bounds.IntersectRay(pickRay, out hitDistance))
+                        {
+                            if (minHitDistance == -1)
+                            {
+                                minHitDistance = hitDistance;
+                                pickedLayer = layer;
+                            }
+                            else if (hitDistance < minHitDistance)
+                            {
+                                minHitDistance = hitDistance;
+                                pickedLayer = layer;
+                            }
+
+                            sphere.transform.position =
+                                m_application.m_leftHandAnchor.transform.position
+                                + hitDistance * m_application.m_leftHandAnchor.transform.forward;                                                          
+                        }
+                    }
+                }
+            }
+
+            sphere.SetActive(minHitDistance >= 0);
+
+            Debug.DrawRay(
+                pickRay.origin,
+                pickRay.direction * System.Math.Max(200, minHitDistance),
+                Color.white,
+                0.0f, // duration
+                true); // depthTest
         }
 
         public override void UpdateModelLocationAndScale()

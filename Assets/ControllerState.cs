@@ -253,7 +253,10 @@ namespace ArchiVR
             if (Input.GetKey(KeyCode.F1)) button3Pressed = true;
             if (Input.GetKey(KeyCode.F2)) button4Pressed = true;
            
+            if (Input.GetKeyDown(KeyCode.F)) button5Down = true;
             if (Input.GetKey(KeyCode.F)) button5Pressed = true;
+
+            if (Input.GetKeyDown(KeyCode.R)) button7Down = true;
             if (Input.GetKey(KeyCode.R)) button7Pressed = true;
 
             if (Input.GetKey(KeyCode.F11)) buttonStartPressed = true;
