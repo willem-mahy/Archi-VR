@@ -38,6 +38,21 @@ namespace ArchiVR
 
         #endregion
 
+        #region Model Layers
+
+        public List<GameObject> m_layers = new List<GameObject>();
+
+        //! Unhides all model layers.
+        public void UnhideAllModelLayers()
+        {
+            foreach (var layer in m_layers)
+            {
+                layer.SetActive(true);
+            }
+        }
+
+        #endregion
+
         #region POI
 
         public int ActivePOIIndex { get; set; } = -1;
@@ -67,9 +82,7 @@ namespace ArchiVR
                 return ActivePOI.name;
             }
         }
-
-        public List<GameObject> m_layers = new List<GameObject>();
-
+        
         List<GameObject> m_POI = new List<GameObject>();
 
         #endregion

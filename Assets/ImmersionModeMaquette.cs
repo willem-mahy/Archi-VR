@@ -94,10 +94,7 @@ namespace ArchiVR
                 }
                 else
                 {
-                    foreach (var layer in m_application.m_layers)
-                    {
-                        layer.SetActive(true);
-                    }
+                    m_application.UnhideAllModelLayers();
                 }
             }
 

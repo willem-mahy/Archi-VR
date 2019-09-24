@@ -12,6 +12,8 @@ namespace ArchiVR
 
             // Restore default moving up/down.
             m_application.m_flySpeedUpDown = 1.0f;
+
+            m_application.UnhideAllModelLayers();
         }
 
         public override void Exit()
