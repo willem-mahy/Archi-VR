@@ -4,6 +4,17 @@ namespace ArchiVR
 {
     public class ImmersionModeMaquette : ImmersionMode
     {
+        #region variables
+
+        // The surroundings in which the maquette is previewed
+        GameObject m_maquettePreviewContext = null;
+
+        // The translational (up) distance.
+        float m_maquetteOffset = 0;
+
+        // The maquette rotational offset.
+        float m_maquetteRotation = 0;
+
         // Represents pick hit position.
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
@@ -13,13 +24,18 @@ namespace ArchiVR
         // The layer currently being picked.
         GameObject pickedLayer;
 
-        #region variables
+        enum MaquetteManipulationMode
+        {
+            None = 0,
+            Translate,
+            Rotate
+        };
 
-        GameObject m_maquettePreviewContext = null;
-
-        float m_maquetteOffset = 0;
-
-        float m_maquetteRotation = 0;
+        private MaquetteManipulationMode maquetteManipulationMode
+        {
+            get;
+            set;
+        } = MaquetteManipulationMode.None;
 
         #endregion
 
@@ -53,6 +69,8 @@ namespace ArchiVR
             m_application.m_flySpeedUpDown = 0.0f;
 
             pickRayGO.SetActive(true);
+
+            maquetteManipulationMode = MaquetteManipulationMode.None;
         }
 
         public override void Exit()
@@ -83,6 +101,7 @@ namespace ArchiVR
                 return;
             }
 
+            // Toggle model layer visibility using picking.
             if (m_application.m_controllerInput.m_controllerState.button5Down)
             {
                 if (pickedLayer != null)
@@ -107,16 +126,40 @@ namespace ArchiVR
             float magnitudeRotateMaquette = cs.lThumbStick.x;
             float magnitudeTranslateMaquette = cs.lThumbStick.y;
 
-            // Translate Up/Down
-            var maquetteMoveSpeed = 1.0f;
+            // Update maquette manipulationMode
+            bool manipulating = (Mathf.Abs(magnitudeRotateMaquette) > 0.1f) || (Mathf.Abs(magnitudeTranslateMaquette) > 0.1f);
+            if (maquetteManipulationMode == MaquetteManipulationMode.None)
+            {
+                if (manipulating)
+                {
+                    maquetteManipulationMode = (Mathf.Abs(magnitudeRotateMaquette) > Mathf.Abs(magnitudeTranslateMaquette))
+                        ? MaquetteManipulationMode.Rotate
+                        : MaquetteManipulationMode.Translate;
+                }
+                else
+                    maquetteManipulationMode = MaquetteManipulationMode.None;
+            }
+            else
+            {
+                if (!manipulating)
+                    maquetteManipulationMode = MaquetteManipulationMode.None;
+            }
 
-            m_maquetteOffset = Mathf.Min(1.0f, m_maquetteOffset + magnitudeTranslateMaquette * maquetteMoveSpeed * Time.deltaTime);
+            if (maquetteManipulationMode == MaquetteManipulationMode.Translate)
+            {
+                // Translate Up/Down
+                var maquetteMoveSpeed = 1.0f;
 
-            // Rotate around 'up' vector.
-            var maquetteRotateSpeed = 60.0f;
+                m_maquetteOffset = Mathf.Min(1.0f, m_maquetteOffset + magnitudeTranslateMaquette * maquetteMoveSpeed * Time.deltaTime);
+            }
 
-            m_maquetteRotation += magnitudeRotateMaquette * maquetteRotateSpeed * Time.deltaTime;
+            if (maquetteManipulationMode == MaquetteManipulationMode.Rotate)
+            {
+                // Rotate around 'up' vector.
+                var maquetteRotateSpeed = 60.0f;
 
+                m_maquetteRotation += magnitudeRotateMaquette * maquetteRotateSpeed * Time.deltaTime;
+            }
             UpdateModelLocationAndScale();
 
             #endregion

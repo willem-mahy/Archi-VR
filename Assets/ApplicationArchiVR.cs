@@ -28,6 +28,8 @@ namespace ArchiVR
 
         public TeleportInfo TeleportInfo { get; set; } = new TeleportInfo();
 
+        public GameObject Sun { get; set; } = null;
+
         #region Project
 
         // The list of names of all projects included in the build.
@@ -230,6 +232,9 @@ namespace ArchiVR
         void Start()
         {
             #region Get handles to game objects
+
+            if (Sun == null)
+                Sun = GameObject.Find("Sun");
 
             if (m_ovrCameraRig == null)
                 m_ovrCameraRig = GameObject.Find("OVRCameraRig");
@@ -498,6 +503,8 @@ namespace ArchiVR
         // Update is called once per frame
         void Update()
         {
+            Sun.transform.Rotate(Vector3.up, 0.01f);
+
             #region Update controller state.
 
             m_controllerInput.Update();
