@@ -257,7 +257,7 @@ namespace ArchiVR
             {
                 m_application.leftControllerButtonMapping.textLeftHandTrigger.text = "";
 
-                m_application.leftControllerButtonMapping.textLeftIndexTrigger.text = "Verander shaal";
+                m_application.leftControllerButtonMapping.textLeftIndexTrigger.text = "Verander schaal";
 
                 m_application.leftControllerButtonMapping.textButtonStart.text = "Toggle menu";
 
