@@ -10,7 +10,7 @@ namespace ArchiVR
         #region Variables
 
         // The application version.
-        public string m_version = "190920a";
+        public string m_version = "190924a";
 
         #region Game objects
 
