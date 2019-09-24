@@ -8,7 +8,7 @@ namespace ArchiVR
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 
         // Represents pick ray.
-        GameObject pickRayGO = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        GameObject pickRayGO = null;
 
         // The layer currently being picked.
         GameObject pickedLayer;
@@ -33,13 +33,10 @@ namespace ArchiVR
             }
 
             sphere.transform.parent = m_maquettePreviewContext.transform;
-            sphere.transform.localScale = 0.1f * Vector3.one;
+            sphere.transform.localScale = 0.025f * Vector3.one;
             sphere.SetActive(false);
 
-            pickRayGO.transform.localScale = new Vector3(0.01f, 1, 0.01f);
-            pickRayGO.transform.rotation = Quaternion.Euler(new Vector3(90, 0, 0));
-            pickRayGO.transform.position = new Vector3(0, 0, 1);
-            pickRayGO.transform.SetParent(m_application.m_leftHandAnchor.transform, true);
+            pickRayGO = GameObject.Find("PickRay");
             pickRayGO.SetActive(false);
         }
 
