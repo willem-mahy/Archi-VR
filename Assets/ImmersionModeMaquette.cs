@@ -129,10 +129,7 @@ namespace ArchiVR
 
             Ray pickRay = new Ray(
                 m_application.m_leftHandAnchor.transform.position,
-
-                m_application.m_leftHandAnchor.transform.forward
-                //m_application.m_centerEyeAnchor.transform.forward
-                );
+                m_application.m_leftHandAnchor.transform.forward);
             
             float minHitDistance = -1;
 
