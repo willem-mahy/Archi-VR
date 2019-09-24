@@ -22,6 +22,13 @@ namespace ArchiVR
         public override void Enter()
         {
             Logger.Debug("ApplicationStateDefault.Enter()");
+
+            var aim = m_application.ActiveImmersionMode;
+
+            if (aim != null)
+            {
+                aim.InitButtonMappingUI();
+            }
         }
 
         public override void Exit()
