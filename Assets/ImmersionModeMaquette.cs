@@ -45,8 +45,11 @@ namespace ArchiVR
 
             if (m_maquettePreviewContext == null)
             {
-                m_maquettePreviewContext = GameObject.Find("MaquettePreviewContext");
+                m_maquettePreviewContext = GameObject.Find("MaquettePreviewContext");                
             }
+
+            if (m_maquettePreviewContext)
+                m_maquettePreviewContext.SetActive(false);
 
             sphere.transform.parent = m_maquettePreviewContext.transform;
             sphere.transform.localScale = 0.025f * Vector3.one;
@@ -251,23 +254,25 @@ namespace ArchiVR
         public override void InitButtonMappingUI()
         {
             Logger.Debug("ImmersionModeMaquette.InitButtonMappingUI()");
+
+            var isEditor = Application.isEditor;
             
             // Left controller
             if (m_application.leftControllerButtonMapping != null)
             {
                 m_application.leftControllerButtonMapping.textLeftHandTrigger.text = "";
 
-                m_application.leftControllerButtonMapping.textLeftIndexTrigger.text = "Verander schaal";
+                m_application.leftControllerButtonMapping.textLeftIndexTrigger.text = "Verander schaal" + (isEditor ? " (?)" : "");
 
-                m_application.leftControllerButtonMapping.textButtonStart.text = "Toggle menu";
+                m_application.leftControllerButtonMapping.textButtonStart.text = "Toggle menu" + (isEditor ? " (F11)" : "");
 
-                m_application.leftControllerButtonMapping.textButtonX.text = "Vorig project";
-                m_application.leftControllerButtonMapping.textButtonY.text = "Volgend project";
+                m_application.leftControllerButtonMapping.textButtonX.text = "Vorig project" + (isEditor ? " (F1)" : "");
+                m_application.leftControllerButtonMapping.textButtonY.text = "Volgend project" + (isEditor ? " (F2)" : "");
 
-                m_application.leftControllerButtonMapping.textLeftThumbUp.text = "Model omhoog";
-                m_application.leftControllerButtonMapping.textLeftThumbDown.text = "Model omlaag";
-                m_application.leftControllerButtonMapping.textLeftThumbLeft.text = "Model links";
-                m_application.leftControllerButtonMapping.textLeftThumbRight.text = "Model rechts";
+                m_application.leftControllerButtonMapping.textLeftThumbUp.text = "Model omhoog" + (isEditor ? " (Z)" : "");
+                m_application.leftControllerButtonMapping.textLeftThumbDown.text = "Model omlaag" + (isEditor ? " (S)" : "");
+                m_application.leftControllerButtonMapping.textLeftThumbLeft.text = "Model links" + (isEditor ? " (Q)" : "");
+                m_application.leftControllerButtonMapping.textLeftThumbRight.text = "Model rechts" + (isEditor ? " (D)" : "");
             }
 
             // Right controller
@@ -281,10 +286,10 @@ namespace ArchiVR
                 m_application.rightControllerButtonMapping.textButtonA.text = "";
                 m_application.rightControllerButtonMapping.textButtonB.text = "";
 
-                m_application.rightControllerButtonMapping.textRightThumbUp.text = "Beweeg vooruit";
-                m_application.rightControllerButtonMapping.textRightThumbDown.text = "Beweeg achteruit";
-                m_application.rightControllerButtonMapping.textRightThumbLeft.text = "Beweeg links";
-                m_application.rightControllerButtonMapping.textRightThumbRight.text = "Beweeg rechts";
+                m_application.rightControllerButtonMapping.textRightThumbUp.text = "Beweeg vooruit" + (isEditor ? "(ArrowUp)" : "");
+                m_application.rightControllerButtonMapping.textRightThumbDown.text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
+                m_application.rightControllerButtonMapping.textRightThumbLeft.text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
+                m_application.rightControllerButtonMapping.textRightThumbRight.text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
             }
         }
     }

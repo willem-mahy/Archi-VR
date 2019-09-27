@@ -96,17 +96,19 @@ namespace ArchiVR
         {
             Logger.Debug("ImmersionModeWalkthrough.InitButtonMappingUI()");
 
+            var isEditor = Application.isEditor;
+
             // Left controller
             if (m_application.leftControllerButtonMapping != null)
             {
                 m_application.leftControllerButtonMapping.textLeftHandTrigger.text = "";
 
-                m_application.leftControllerButtonMapping.textLeftIndexTrigger.text = "Verander schaal";
+                m_application.leftControllerButtonMapping.textLeftIndexTrigger.text = "Verander schaal" + (isEditor ? " (R)" : "");
 
-                m_application.leftControllerButtonMapping.textButtonStart.text = "Toggle menu";
+                m_application.leftControllerButtonMapping.textButtonStart.text = "Toggle menu" + (isEditor ? " (F)" : "");
 
-                m_application.leftControllerButtonMapping.textButtonX.text = "Vorig project";
-                m_application.leftControllerButtonMapping.textButtonY.text = "Volgend project";
+                m_application.leftControllerButtonMapping.textButtonX.text = "Vorig project" + (isEditor ? " (F1)" : "");
+                m_application.leftControllerButtonMapping.textButtonY.text = "Volgend project" + (isEditor ? " (F2)" : "");
 
                 m_application.leftControllerButtonMapping.textLeftThumbUp.text = "";
                 m_application.leftControllerButtonMapping.textLeftThumbDown.text = "";
@@ -117,18 +119,18 @@ namespace ArchiVR
             // Right controller
             if (m_application.rightControllerButtonMapping != null)
             {
-                m_application.rightControllerButtonMapping.textRightIndexTrigger.text = "Beweeg omhoog";
-                m_application.rightControllerButtonMapping.textRightHandTrigger.text = "Beweeg omlaag";
+                m_application.rightControllerButtonMapping.textRightIndexTrigger.text = "Beweeg omhoog" + (isEditor ? " (Return)" : "");
+                m_application.rightControllerButtonMapping.textRightHandTrigger.text = "Beweeg omlaag" + (isEditor ? " (RShift)" : "");
 
-                m_application.rightControllerButtonMapping.textButtonOculus.text = "Exit";
+                m_application.rightControllerButtonMapping.textButtonOculus.text = "Exit" + (isEditor ? " ()" : "");
 
-                m_application.rightControllerButtonMapping.textButtonA.text = "Vorige locatie";
-                m_application.rightControllerButtonMapping.textButtonB.text = "Volgende locatie";
+                m_application.rightControllerButtonMapping.textButtonA.text = "Vorige locatie" + (isEditor ? " (F3)" : "");
+                m_application.rightControllerButtonMapping.textButtonB.text = "Volgende locatie" + (isEditor ? " (F4)" : "");
 
-                m_application.rightControllerButtonMapping.textRightThumbUp.text = "Beweeg vooruit";
-                m_application.rightControllerButtonMapping.textRightThumbDown.text = "Beweeg achteruit";
-                m_application.rightControllerButtonMapping.textRightThumbLeft.text = "Beweeg links";
-                m_application.rightControllerButtonMapping.textRightThumbRight.text = "Beweeg rechts";
+                m_application.rightControllerButtonMapping.textRightThumbUp.text = "Beweeg vooruit" + (isEditor ? " (ArrowUp)" : "");
+                m_application.rightControllerButtonMapping.textRightThumbDown.text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
+                m_application.rightControllerButtonMapping.textRightThumbLeft.text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
+                m_application.rightControllerButtonMapping.textRightThumbRight.text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
             }
         }
     }
