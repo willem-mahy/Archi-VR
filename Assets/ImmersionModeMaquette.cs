@@ -7,22 +7,20 @@ namespace ArchiVR
         #region variables
 
         // The surroundings in which the maquette is previewed
-        GameObject m_maquettePreviewContext = null;
+        private GameObject m_maquettePreviewContext = null;
 
         // The translational (up) distance.
-        float m_maquetteOffset = 0;
+        private float m_maquetteOffset = 0;
 
         // The maquette rotational offset.
-        float m_maquetteRotation = 0;
-
-        // Represents pick hit position.
-        GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        private float m_maquetteRotation = 0;
 
         // Represents pick ray.
-        GameObject pickRayGO = null;
+        private GameObject pickRayGameObject = null;
+        private PickRay pickRay = null;
 
         // The layer currently being picked.
-        GameObject pickedLayer;
+        private GameObject pickedLayer;
 
         enum MaquetteManipulationMode
         {
@@ -51,12 +49,8 @@ namespace ArchiVR
             if (m_maquettePreviewContext)
                 m_maquettePreviewContext.SetActive(false);
 
-            sphere.transform.parent = m_maquettePreviewContext.transform;
-            sphere.transform.localScale = 0.025f * Vector3.one;
-            sphere.SetActive(false);
-
-            pickRayGO = GameObject.Find("PickRay");
-            pickRayGO.SetActive(false);
+            pickRayGameObject = GameObject.Find("PickRay");
+            pickRay = pickRayGameObject.GetComponent<PickRay>();
         }
 
         public override void Enter()
@@ -71,7 +65,7 @@ namespace ArchiVR
             // Disable moving up/down.
             m_application.m_flySpeedUpDown = 0.0f;
 
-            pickRayGO.SetActive(true);
+            pickRayGameObject.SetActive(true);
 
             maquetteManipulationMode = MaquetteManipulationMode.None;
         }
@@ -86,8 +80,7 @@ namespace ArchiVR
             // Restore default moving up/down.
             m_application.m_flySpeedUpDown = ApplicationArchiVR.DefaultFlySpeedUpDown;
 
-            sphere.SetActive(false);
-            pickRayGO.SetActive(false);
+            pickRayGameObject.SetActive(false);
         }
 
         public override void Update()
@@ -167,11 +160,11 @@ namespace ArchiVR
 
             #endregion
 
-            Ray pickRay = new Ray(
-                m_application.m_leftHandAnchor.transform.position,
-                m_application.m_leftHandAnchor.transform.forward);
+            var pickRay = new Ray(
+                pickRayGameObject.transform.position,
+                pickRayGameObject.transform.forward);
             
-            float minHitDistance = -1;
+            float minHitDistance = float.NaN;
 
             pickedLayer = null;
 
@@ -187,7 +180,7 @@ namespace ArchiVR
 
                         if (geometryCollider.bounds.IntersectRay(pickRay, out hitDistance))
                         {
-                            if (minHitDistance == -1)
+                            if (float.IsNaN(minHitDistance))
                             {
                                 minHitDistance = hitDistance;
                                 pickedLayer = layer;
@@ -197,23 +190,21 @@ namespace ArchiVR
                                 minHitDistance = hitDistance;
                                 pickedLayer = layer;
                             }
-
-                            sphere.transform.position =
-                                m_application.m_leftHandAnchor.transform.position
-                                + hitDistance * m_application.m_leftHandAnchor.transform.forward;                                                          
                         }
                     }
                 }
             }
 
-            sphere.SetActive(minHitDistance >= 0);
+            this.pickRay.HitDistance = minHitDistance;
 
+            /*
             Debug.DrawRay(
                 pickRay.origin,
                 pickRay.direction * System.Math.Max(200, minHitDistance),
                 Color.white,
                 0.0f, // duration
                 true); // depthTest
+            */
         }
 
         public override void UpdateModelLocationAndScale()
