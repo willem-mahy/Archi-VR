@@ -168,27 +168,41 @@ namespace ArchiVR
 
             pickedLayer = null;
 
+            var recursive = true;
+
             foreach (var layer in m_application.m_layers)
             {
-                foreach (Transform geometryTransform in layer.transform)
+                if (recursive)
                 {
-                    var geometryCollider = geometryTransform.GetComponent<Collider>();
-
-                    if (geometryCollider)
+                    PickRecursively(
+                        layer,
+                        pickRay,
+                        layer,
+                        ref pickedLayer,
+                        ref minHitDistance);
+                }
+                else
+                {
+                    foreach (Transform geometryTransform in layer.transform)
                     {
-                        float hitDistance = -1;
+                        var geometryCollider = geometryTransform.GetComponent<Collider>();
 
-                        if (geometryCollider.bounds.IntersectRay(pickRay, out hitDistance))
+                        if (geometryCollider)
                         {
-                            if (float.IsNaN(minHitDistance))
+                            float hitDistance = -1;
+
+                            if (geometryCollider.bounds.IntersectRay(pickRay, out hitDistance))
                             {
-                                minHitDistance = hitDistance;
-                                pickedLayer = layer;
-                            }
-                            else if (hitDistance < minHitDistance)
-                            {
-                                minHitDistance = hitDistance;
-                                pickedLayer = layer;
+                                if (float.IsNaN(minHitDistance))
+                                {
+                                    minHitDistance = hitDistance;
+                                    pickedLayer = layer;
+                                }
+                                else if (hitDistance < minHitDistance)
+                                {
+                                    minHitDistance = hitDistance;
+                                    pickedLayer = layer;
+                                }
                             }
                         }
                     }
@@ -205,6 +219,66 @@ namespace ArchiVR
                 0.0f, // duration
                 true); // depthTest
             */
+        }
+
+        private void PickRecursively(
+            GameObject layer,
+            Ray pickRay,
+            GameObject gameObject,
+            ref GameObject pickedLayer,
+            ref float minHitDistance)
+        {
+            // Pick-test on self.
+            var geometryCollider = gameObject.GetComponent<Collider>();
+
+            if (geometryCollider)
+            {
+                float hitDistance = float.NaN;
+
+                // Raycast
+                RaycastHit hitInfo = new RaycastHit();
+
+                if (geometryCollider.Raycast(pickRay, out hitInfo, 9000))
+                {
+                    hitDistance = hitInfo.distance;
+                }
+
+                // Bounds-check.
+                /*
+                if (geometryCollider.bounds.IntersectRay(pickRay, out hitDistance))
+                {
+                }
+                else
+                {
+                    hitDistance = float.Nan;
+                }
+                */
+
+                if (!float.IsNaN(hitDistance))
+                {
+                    if (float.IsNaN(minHitDistance))
+                    {
+                        minHitDistance = hitDistance;
+                        pickedLayer = layer;
+                    }
+                    else if (hitDistance < minHitDistance)
+                    {
+                        minHitDistance = hitDistance;
+                        pickedLayer = layer;
+                    }
+                }
+            }
+
+            // Recurse.
+            foreach (Transform childTransform in gameObject.transform)
+            {
+                PickRecursively(
+                        layer,
+                        pickRay,
+                        childTransform.gameObject,
+                        ref pickedLayer,
+                        ref minHitDistance);
+            }
         }
 
         public override void UpdateModelLocationAndScale()
