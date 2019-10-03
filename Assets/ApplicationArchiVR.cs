@@ -1,10 +1,16 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+[assembly: System.Reflection.AssemblyVersion("1.0.*")]
+
 namespace ArchiVR
 {
+
     public class ApplicationArchiVR : MonoBehaviour
     {
         #region Variables
@@ -228,9 +234,43 @@ namespace ArchiVR
 
         #endregion Variables
 
+        // Generates the time stamp of when application was linked.
+        public static DateTime GetLinkerTimestampUtc(Assembly assembly)
+        {
+            var location = assembly.Location;
+            return GetLinkerTimestampUtc(location);
+        }
+
+        public static DateTime GetLinkerTimestampUtc(string filePath)
+        {
+            const int peHeaderOffset = 60;
+            const int linkerTimestampOffset = 8;
+            var bytes = new byte[2048];
+
+            using (var file = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                file.Read(bytes, 0, bytes.Length);
+            }
+
+            var headerPos = BitConverter.ToInt32(bytes, peHeaderOffset);
+            var secondsSince1970 = BitConverter.ToInt32(bytes, headerPos + linkerTimestampOffset);
+            var dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            return dt.AddSeconds(secondsSince1970);
+        }
+
+
         // Start is called before the first frame update
         void Start()
         {
+            #region Automatically get build version
+            
+            // Does give a seemingly unusable number.
+            //m_version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+            m_version = GetLinkerTimestampUtc(Assembly.GetExecutingAssembly()).ToString();
+            
+            #endregion
+            
             #region Get handles to game objects
 
             if (Sun == null)
@@ -653,7 +693,7 @@ namespace ArchiVR
         //! Activates the next menu mode.
         void ToggleMenuMode()
         {
-            m_menuMode = (MenuMode)(((int)m_menuMode + 1) % 3);
+            m_menuMode = (MenuMode)(((int)m_menuMode + 1) % 4);
         }
 
         //! Updates the location of the controllers.
