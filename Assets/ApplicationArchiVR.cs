@@ -181,7 +181,7 @@ namespace ArchiVR
         }
 
         // The menu mode.
-        private MenuMode m_menuMode = MenuMode.Info;// MenuMode.None;
+        private MenuMode m_menuMode = MenuMode.None;
 
         public UnityEngine.GameObject m_centerEyeCanvas = null;
 
@@ -356,7 +356,7 @@ namespace ArchiVR
 
             #region Toggle HUD menu.
 
-            // HUD menu is toggled using M
+            // HUD menu is toggled using left controller Start button, or F11 button in Editor.
             bool toggleMenu = m_controllerInput.m_controllerState.buttonStartDown || Input.GetKeyDown(KeyCode.F11);
 
             if (toggleMenu)
@@ -580,12 +580,6 @@ namespace ArchiVR
         }
 
         #endregion
-
-        //!
-        void ToggleCanvas()
-        {
-            m_centerEyeCanvas.SetActive(!m_centerEyeCanvas.activeSelf);
-        }
 
         //!
         public void ResetTrackingSpacePosition()

@@ -226,7 +226,7 @@ namespace ArchiVR
                 button7Down = (!prevState.button7Down && !prevState.button7Pressed) && button7Pressed;
                 button8Down = (!prevState.button8Down && !prevState.button8Pressed) && button8Pressed;
 
-                buttonStartDown = (!prevState.buttonStartDown && !prevState.buttonStartPressed) && buttonStartDown;
+                buttonStartDown = (!prevState.buttonStartDown && !prevState.buttonStartPressed) && buttonStartPressed;
 
                 buttonThumbstickPDown = (!prevState.buttonThumbstickPDown && !prevState.lThumbstickPressed) && buttonThumbstickPPressed;
                 buttonThumbstickSDown = (!prevState.buttonThumbstickSDown && !prevState.rThumbstickPressed) && buttonThumbstickPPressed;
