@@ -50,7 +50,8 @@ namespace ArchiVR
             if (m_maquettePreviewContext)
                 m_maquettePreviewContext.SetActive(false);
 
-            pickRayGameObject = GameObject.Find("PickRay");
+            // Get a handle to the pick ray game object
+            pickRayGameObject = GameObject.Find("R PickRay");
             pickRay = pickRayGameObject.GetComponent<PickRay>();
         }
 
