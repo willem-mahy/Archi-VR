@@ -247,6 +247,7 @@ namespace ArchiVR
             rThumbStick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
         }
 
+        //! Updates the controller state using Unity API (keyboard and mouse) while running in editor.
         public void Update_Editor()
         {
             // Left controller
@@ -275,16 +276,18 @@ namespace ArchiVR
 
             if (Input.GetKey(KeyCode.F12)) buttonOculusPressed = true;
 
-            if (Input.GetKey(KeyCode.RightShift)) button6Pressed = true;
-            if (Input.GetKey(KeyCode.Return)) button8Pressed = true;
+            if (Input.GetMouseButtonDown(1)) button6Down = true;
+            if (Input.GetMouseButton(1)) button6Pressed = true;
+            if (Input.GetMouseButtonDown(0)) button8Down = true;
+            if (Input.GetMouseButton(0)) button8Pressed = true;
 
             if (Input.GetKey(KeyCode.LeftArrow)) rThumbStick.x -= 1;
             if (Input.GetKey(KeyCode.RightArrow)) rThumbStick.x += 1;
             if (Input.GetKey(KeyCode.DownArrow)) rThumbStick.y -= 1;
             if (Input.GetKey(KeyCode.UpArrow)) rThumbStick.y += 1;
 
-            if (Input.GetKeyDown(KeyCode.Plus)) rThumbstickDown = true;
-            if (Input.GetKey(KeyCode.Plus)) rThumbstickPressed = true;
+            if (Input.GetKeyDown(KeyCode.Plus)) rThumbstickPressed = true;
+            if (Input.GetMouseButtonDown(2)) rThumbstickPressed = true;
         }
     }
 }
