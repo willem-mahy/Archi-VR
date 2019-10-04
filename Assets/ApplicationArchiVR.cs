@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 using WM;
+using WM.VR;
 
 [assembly: System.Reflection.AssemblyVersion("1.0.*")]
 
@@ -169,7 +169,15 @@ namespace ArchiVR
         public ButtonMappingUI rightControllerButtonMapping = null;
 
         #endregion
-        
+
+        // Right controller pick ray.
+        public GameObject RPickRayGameObject = null;
+        public PickRay RPickRay = null;
+
+        // Right controller pick ray.
+        public GameObject LPickRayGameObject = null;
+        public PickRay LPickRay = null;
+
         #region HUD menu
 
         enum MenuMode
@@ -285,15 +293,31 @@ namespace ArchiVR
             m_centerEyePanel = GameObject.Find("CenterEyePanel");
             m_centerEyeText = GameObject.Find("CenterEyeText").GetComponent<UnityEngine.UI.Text>();
 
+            // Left controller.
+
+            // Pick ray.
+            LPickRayGameObject = GameObject.Find("L PickRay");
+            LPickRay = LPickRayGameObject.GetComponent<PickRay>();
+
             m_leftControllerCanvas = GameObject.Find("LeftControllerCanvas");
             m_leftControllerPanel = GameObject.Find("LeftControllerPanel");
             m_leftControllerText = GameObject.Find("LeftControllerText").GetComponent<UnityEngine.UI.Text>();
+
+            // Right controller.
+
+            // Pick ray.
+            RPickRayGameObject = GameObject.Find("R PickRay");
+            RPickRay = RPickRayGameObject.GetComponent<PickRay>();
 
             m_rightControllerCanvas = GameObject.Find("RightControllerCanvas");
             m_rightControllerPanel = GameObject.Find("RightControllerPanel");
             m_rightControllerText = GameObject.Find("RightControllerText").GetComponent<UnityEngine.UI.Text>();
 
             #endregion
+
+            // Disable all pickrays.
+            LPickRayGameObject.SetActive(false);
+            RPickRayGameObject.SetActive(false);
 
             #region Init immersion modes.
 
@@ -703,6 +727,8 @@ namespace ArchiVR
             // Translate trasking space.
             if (offset != Vector3.zero)
             {
+                OVRManager.boundary.SetVisible(true);
+
                 TranslateTrackingSpace(m_flySpeedHorizontal * Time.deltaTime * offset);
             }
         }
@@ -736,10 +762,8 @@ namespace ArchiVR
                     Vector3.up,
                     rotateOffset);
 
-                
+                OVRManager.boundary.SetVisible(true);
             }
-
-            OVRManager.boundary.SetVisible(doRotate);
         }
 
         

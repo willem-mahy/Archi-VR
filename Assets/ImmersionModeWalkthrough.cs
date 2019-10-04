@@ -34,6 +34,9 @@ namespace ArchiVR
 
             // Restore default moving up/down.
             m_application.m_flySpeedUpDown = ApplicationArchiVR.DefaultFlySpeedUpDown;
+
+            // We might have made the boundary visible, so make sure it is hidden again.
+            OVRManager.boundary.SetVisible(false);
         }
 
         public override void Update()
@@ -54,6 +57,9 @@ namespace ArchiVR
             {
                 return;
             }
+
+            // By default, do not show the boundary.  We will set it visible in Fly() and UpdateTrackingSpace() below, if needed.
+            OVRManager.boundary.SetVisible(false);
 
             m_application.Fly();
 
@@ -119,7 +125,7 @@ namespace ArchiVR
 
                 m_application.leftControllerButtonMapping.textLeftIndexTrigger.text = "Verander schaal" + (isEditor ? " (R)" : "");
 
-                m_application.leftControllerButtonMapping.textButtonStart.text = "Toggle menu" + (isEditor ? " (F)" : "");
+                m_application.leftControllerButtonMapping.textButtonStart.text = "Toggle menu" + (isEditor ? " (F11)" : "");
 
                 m_application.leftControllerButtonMapping.textButtonX.text = "Vorig project" + (isEditor ? " (F1)" : "");
                 m_application.leftControllerButtonMapping.textButtonY.text = "Volgend project" + (isEditor ? " (F2)" : "");

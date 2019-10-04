@@ -16,10 +16,6 @@ namespace ArchiVR
         // The maquette rotational offset.
         private float m_maquetteRotation = 0;
 
-        // Represents pick ray.
-        private GameObject pickRayGameObject = null;
-        private PickRay pickRay = null;
-
         // The layer currently being picked.
         private GameObject pickedLayer;
 
@@ -49,10 +45,6 @@ namespace ArchiVR
 
             if (m_maquettePreviewContext)
                 m_maquettePreviewContext.SetActive(false);
-
-            // Get a handle to the pick ray game object
-            pickRayGameObject = GameObject.Find("R PickRay");
-            pickRay = pickRayGameObject.GetComponent<PickRay>();
         }
 
         public override void Enter()
@@ -67,7 +59,8 @@ namespace ArchiVR
             // Disable moving up/down.
             m_application.m_flySpeedUpDown = 0.0f;
 
-            pickRayGameObject.SetActive(true);
+            // Enable only R pickray.
+            m_application.RPickRayGameObject.SetActive(true);
 
             maquetteManipulationMode = MaquetteManipulationMode.None;
         }
@@ -82,7 +75,7 @@ namespace ArchiVR
             // Restore default moving up/down.
             m_application.m_flySpeedUpDown = ApplicationArchiVR.DefaultFlySpeedUpDown;
 
-            pickRayGameObject.SetActive(false);
+            m_application.RPickRayGameObject.SetActive(false);
         }
 
         public override void Update()
@@ -148,7 +141,7 @@ namespace ArchiVR
                 // Translate Up/Down
                 var maquetteMoveSpeed = 1.0f;
 
-                m_maquetteOffset = Mathf.Min(1.0f, m_maquetteOffset + magnitudeTranslateMaquette * maquetteMoveSpeed * Time.deltaTime);
+                m_maquetteOffset = Mathf.Clamp(m_maquetteOffset + magnitudeTranslateMaquette * maquetteMoveSpeed * Time.deltaTime, -1.0f, 0.6f);
             }
 
             if (maquetteManipulationMode == MaquetteManipulationMode.Rotate)
@@ -163,8 +156,8 @@ namespace ArchiVR
             #endregion
 
             var pickRay = new Ray(
-                pickRayGameObject.transform.position,
-                pickRayGameObject.transform.forward);
+                m_application.RPickRayGameObject.transform.position,
+                m_application.RPickRayGameObject.transform.forward);
             
             float minHitDistance = float.NaN;
 
@@ -211,7 +204,7 @@ namespace ArchiVR
                 }
             }
 
-            this.pickRay.HitDistance = minHitDistance;
+            m_application.RPickRay.HitDistance = minHitDistance;
 
             /*
             Debug.DrawRay(
@@ -285,7 +278,7 @@ namespace ArchiVR
 
         public override void UpdateModelLocationAndScale()
         {
-            Logger.Debug("ImmersionModeMaquette.UpdateModelLocationAndScale()");
+            //Logger.Debug("ImmersionModeMaquette.UpdateModelLocationAndScale()");
 
             var activeProject = m_application.ActiveProject;
 
