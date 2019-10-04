@@ -4,6 +4,33 @@ namespace ArchiVR
 {
     public class ButtonMappingUI : MonoBehaviour
     {
+        #region Variables
+
+        /*! The size of the 'Dead zone' for thumb sticks.
+         *
+         * As long as the absolute value of a a thumb stick axis
+         * is smaller than this value, the axis button is considered 'not pressed'. 
+         */
+        private readonly float thumbDeadZone = 0.2f;
+
+        #region Colors
+
+        //! The color for down buttons' labels.
+        public Color DownColor { get; set; } = Color.yellow;
+
+        //! The color for up buttons' labels.
+        public Color UpColor { get; set; } = Color.red;
+
+        //! The color for pressed buttons' labels.
+        public Color PressedColor { get; set; } = Color.green;
+
+        //! The color for non-pressed buttons' labels.
+        public Color DefaultColor { get; set; } = Color.black;
+
+        #endregion
+
+        #region Handles to Button UI Labels
+
         // Left Controller
         public UnityEngine.UI.Text textButtonStart = null;
         public UnityEngine.UI.Text textButtonX = null;
@@ -26,27 +53,31 @@ namespace ArchiVR
         public UnityEngine.UI.Text textRightThumbLeft = null;
         public UnityEngine.UI.Text textRightThumbRight = null;
 
-        // Start is called before the first frame update
+        #endregion
+
+        #endregion
+
+        //! Start is called before the first frame update
         void Start()
         {
         
         }
 
-        // Update is called once per frame
+        //! Update is called once per frame
         void Update()
         {
         
         }
 
-        private float thumbDeadZone = 0.05f;
-
+        //! Updates the button mapping labels to the pressed state of their corresponding button.
         public void Update(ControllerState controllerState)
         {
-            // Left controller
+            #region Left controller
+
             UpdateState(textButtonA, controllerState.button1Pressed);
             UpdateState(textButtonB, controllerState.button2Pressed);
 
-            UpdateState(textButtonOculus, controllerState.buttonOculusPressed);
+            UpdateState(textButtonStart, controllerState.buttonStartPressed);
 
             UpdateState(textLeftHandTrigger, controllerState.button5Pressed);
             UpdateState(textLeftIndexTrigger, controllerState.button7Pressed);
@@ -57,11 +88,14 @@ namespace ArchiVR
             UpdateState(textLeftThumbLeft, controllerState.lThumbStick.x < -thumbDeadZone);
             UpdateState(textLeftThumbRight, controllerState.lThumbStick.x > thumbDeadZone);
 
-            // Right controller
+            #endregion
+
+            #region Right controller
+
             UpdateState(textButtonX, controllerState.button3Pressed);
             UpdateState(textButtonY, controllerState.button4Pressed);
 
-            UpdateState(textButtonStart, controllerState.buttonStartPressed);
+            UpdateState(textButtonOculus, controllerState.buttonOculusPressed);
 
             UpdateState(textRightHandTrigger, controllerState.button6Pressed);
             UpdateState(textRightIndexTrigger, controllerState.button8Pressed);
@@ -71,16 +105,19 @@ namespace ArchiVR
 
             UpdateState(textRightThumbLeft, controllerState.rThumbStick.x < -thumbDeadZone);
             UpdateState(textRightThumbRight, controllerState.rThumbStick.x > thumbDeadZone);
+
+            #endregion
         }
 
+        //! Updates the given button mapping label to the given pressed state.
         private void UpdateState(
             UnityEngine.UI.Text buttonText,
-            bool pressed)
+            bool pressed) // TODO: refactor to a four-state ButtonState (default/down/pressed/up), and use all four colors...
         {
             if (buttonText == null)
                 return;
 
-            buttonText.color = (pressed ? Color.green : Color.black);
+            buttonText.color = (pressed ? PressedColor : DefaultColor);
         }
     }
 }

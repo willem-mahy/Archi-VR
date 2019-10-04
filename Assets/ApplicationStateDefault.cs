@@ -6,12 +6,6 @@ namespace ArchiVR
     {
         #region variables
         
-        GameObject m_maquettePreviewContext = null;
-
-        float m_maquetteOffset = 0;
-
-        float m_maquetteRotation = 0;
-
         #endregion
 
         public override void Init()

@@ -170,7 +170,7 @@ namespace ArchiVR
 
             var recursive = true;
 
-            foreach (var layer in m_application.m_layers)
+            foreach (var layer in m_application.GetModelLayers())
             {
                 if (recursive)
                 {

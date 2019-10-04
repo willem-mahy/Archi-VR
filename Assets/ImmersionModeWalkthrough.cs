@@ -4,6 +4,18 @@ namespace ArchiVR
 {
     public class ImmersionModeWalkthrough : ImmersionMode
     {
+        #region variables
+
+        // TODO: remove below: I think we can just manimpulate  trackingspace to align model with play space...
+
+        //#region Model location (ued to align with play space)
+
+        //float m_modelRotation = 0;
+
+        //Vector3 m_modelTranslation = new Vector3();
+
+        #endregion
+
         public override void Enter()
         {
             Logger.Debug("ImmersionModeWalkthrough.Enter()");
@@ -46,6 +58,8 @@ namespace ArchiVR
             m_application.Fly();
 
             m_application.m_rightControllerText.text = m_application.ActivePOIName ?? "";
+
+            m_application.UpdateTrackingSpace();
         }
 
         public override void UpdateModelLocationAndScale()
@@ -110,17 +124,17 @@ namespace ArchiVR
                 m_application.leftControllerButtonMapping.textButtonX.text = "Vorig project" + (isEditor ? " (F1)" : "");
                 m_application.leftControllerButtonMapping.textButtonY.text = "Volgend project" + (isEditor ? " (F2)" : "");
 
-                m_application.leftControllerButtonMapping.textLeftThumbUp.text = "";
-                m_application.leftControllerButtonMapping.textLeftThumbDown.text = "";
-                m_application.leftControllerButtonMapping.textLeftThumbLeft.text = "";
-                m_application.leftControllerButtonMapping.textLeftThumbRight.text = "";
+                m_application.leftControllerButtonMapping.textLeftThumbUp.text = "Beweeg omhoog" + (isEditor ? " (Z)" : "");
+                m_application.leftControllerButtonMapping.textLeftThumbDown.text = "Beweeg omlaag" + (isEditor ? " (S)" : "");
+                m_application.leftControllerButtonMapping.textLeftThumbLeft.text = "< Tracking " + (isEditor ? " (Q)" : "");
+                m_application.leftControllerButtonMapping.textLeftThumbRight.text = "Tracking >" + (isEditor ? " (D)" : "");
             }
 
             // Right controller
             if (m_application.rightControllerButtonMapping != null)
             {
-                m_application.rightControllerButtonMapping.textRightIndexTrigger.text = "Beweeg omhoog" + (isEditor ? " (Return)" : "");
-                m_application.rightControllerButtonMapping.textRightHandTrigger.text = "Beweeg omlaag" + (isEditor ? " (RShift)" : "");
+                m_application.rightControllerButtonMapping.textRightIndexTrigger.text = "";
+                m_application.rightControllerButtonMapping.textRightHandTrigger.text = "";
 
                 m_application.rightControllerButtonMapping.textButtonOculus.text = "Exit" + (isEditor ? " ()" : "");
 
