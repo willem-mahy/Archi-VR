@@ -1100,7 +1100,7 @@ namespace ArchiVR
                     ActiveProjectIndex = TeleportInfo.ProjectIndex;
 
                     // Update left controller UI displaying the project name.
-                    m_leftControllerText.text = ActiveProjectName ?? "No project loaded.";
+                    m_leftControllerText.text = (ActiveProjectName != null) ? GetProjectNameShort(ActiveProjectName) : "No project loaded.";
 
                     // Option B: first load, then unload...
                     //// Unload the old project
@@ -1131,6 +1131,21 @@ namespace ArchiVR
                 ActiveImmersionMode.UpdateTrackingSpacePosition();
 
                 m_fadeAnimator.SetTrigger("FadeIn");
+            }
+
+            //! Get the short-format (excluding prefix 'Project') project name for the given project name.
+            string GetProjectNameShort(string projectName)
+            {
+                string prefix = "project";
+
+                if (projectName.ToLower().StartsWith(prefix))
+                {
+                    return projectName.Substring(prefix.Length);
+                }
+                else
+                {
+                    return projectName;
+                }
             }
         }
     }
