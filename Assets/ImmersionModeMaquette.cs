@@ -100,7 +100,7 @@ namespace ArchiVR
             }
 
             // Toggle model layer visibility using picking.
-            if (m_application.m_controllerInput.m_controllerState.button5Down)
+            if (m_application.m_controllerInput.m_controllerState.button8Down)
             {
                 if (pickedLayer != null)
                 {
