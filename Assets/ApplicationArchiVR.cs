@@ -356,12 +356,24 @@ namespace ArchiVR
         //! Update is called once per frame
         void Update()
         {
+            if (m_controllerInput.m_controllerState.button5Down)
+            {
+                var qualityLevel = QualitySettings.GetQualityLevel();
+                ++qualityLevel;
+                qualityLevel%= QualitySettings.names.Length;
+                QualitySettings.SetQualityLevel(qualityLevel);
+            }
+
+            #region Animate sun
+
             var sunSpeed = 0.0f; // 0.01f
 
             if (sunSpeed != 0.0f)
             {
                 Sun.transform.Rotate(Vector3.up, Time.deltaTime * sunSpeed);
             }
+
+            #endregion
 
             #region Update controller state.
 
@@ -995,6 +1007,12 @@ namespace ArchiVR
         void UpdateMenuInfo()
         {
             var projectNames = GetProjectNames();
+
+            var qualityLevel = QualitySettings.GetQualityLevel();
+
+            m_menuText += "\nQuality: " + QualitySettings.names[qualityLevel];
+
+            m_menuText += "\n";
 
             m_menuText += "\nProjects:";
             foreach (var projectName in projectNames)

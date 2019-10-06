@@ -121,7 +121,7 @@ namespace ArchiVR
             // Left controller
             if (m_application.leftControllerButtonMapping != null)
             {
-                m_application.leftControllerButtonMapping.textLeftHandTrigger.text = "";
+                m_application.leftControllerButtonMapping.textLeftHandTrigger.text = "GFX Quality";
 
                 m_application.leftControllerButtonMapping.textLeftIndexTrigger.text = "Verander schaal" + (isEditor ? " (R)" : "");
 
