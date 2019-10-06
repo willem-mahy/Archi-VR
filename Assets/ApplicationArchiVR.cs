@@ -356,7 +356,12 @@ namespace ArchiVR
         //! Update is called once per frame
         void Update()
         {
-            Sun.transform.Rotate(Vector3.up, 0.01f);
+            var sunSpeed = 0.0f; // 0.01f
+
+            if (sunSpeed != 0.0f)
+            {
+                Sun.transform.Rotate(Vector3.up, Time.deltaTime * sunSpeed);
+            }
 
             #region Update controller state.
 
