@@ -2573,7 +2573,8 @@ GameObject:
   - component: {fileID: 660413564}
   - component: {fileID: 660413563}
   - component: {fileID: 660413565}
-  m_Layer: 0
+  - component: {fileID: 660413566}
+  m_Layer: 5
   m_Name: FPSText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2651,6 +2652,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c27ea3d26d08cb42acfafd6b1e2a3dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &660413566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 660413561}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f0670c3792510840b22601591c9dae6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  comparison: 8
+  apply: 0
 --- !u!1 &663891054
 GameObject:
   m_ObjectHideFlags: 0
@@ -4147,7 +4162,9 @@ GameObject:
   - component: {fileID: 1034758483}
   - component: {fileID: 1034758485}
   - component: {fileID: 1034758484}
-  m_Layer: 0
+  - component: {fileID: 1034758486}
+  - component: {fileID: 1034758487}
+  m_Layer: 5
   m_Name: CenterEyePanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4210,6 +4227,34 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1034758482}
   m_CullTransparentMesh: 0
+--- !u!114 &1034758486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034758482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f0670c3792510840b22601591c9dae6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  comparison: 8
+  apply: 0
+--- !u!114 &1034758487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034758482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f0670c3792510840b22601591c9dae6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  comparison: 8
+  apply: 0
 --- !u!4 &1125677552 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 482130, guid: 126d619cf4daa52469682f85c1378b4a,
@@ -4737,7 +4782,8 @@ GameObject:
   - component: {fileID: 1295765058}
   - component: {fileID: 1295765060}
   - component: {fileID: 1295765059}
-  m_Layer: 0
+  - component: {fileID: 1295765061}
+  m_Layer: 5
   m_Name: FPSPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4800,6 +4846,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1295765057}
   m_CullTransparentMesh: 0
+--- !u!114 &1295765061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1295765057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f0670c3792510840b22601591c9dae6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  comparison: 8
+  apply: 0
 --- !u!1 &1306855880
 GameObject:
   m_ObjectHideFlags: 0
@@ -5727,7 +5787,8 @@ GameObject:
   - component: {fileID: 1579398437}
   - component: {fileID: 1579398439}
   - component: {fileID: 1579398438}
-  m_Layer: 0
+  - component: {fileID: 1579398440}
+  m_Layer: 5
   m_Name: CenterEyeText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5793,6 +5854,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1579398436}
   m_CullTransparentMesh: 0
+--- !u!114 &1579398440
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1579398436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f0670c3792510840b22601591c9dae6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  comparison: 8
+  apply: 0
 --- !u!1001 &1621952055
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6181,7 +6256,7 @@ GameObject:
   - component: {fileID: 1828154115}
   - component: {fileID: 1828154114}
   - component: {fileID: 1828154113}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: CenterEyeCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
