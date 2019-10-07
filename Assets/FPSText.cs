@@ -18,7 +18,11 @@ public class FPSText : MonoBehaviour
         {
             return;
         }
-        
-        text.text = "FPS: " + (int)(1f / Time.unscaledDeltaTime);
+
+        var qualityLevel = QualitySettings.GetQualityLevel();
+        var qualityLevelName = QualitySettings.names[qualityLevel];
+        var fps = (int)(1f / Time.unscaledDeltaTime);
+
+        text.text = qualityLevelName + " FPS: " + fps;
     }
 }

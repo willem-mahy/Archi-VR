@@ -10,8 +10,27 @@ using WM.VR;
 
 [assembly: System.Reflection.AssemblyVersion("1.0.*")]
 
+namespace WM
+{
+    class UtilIterate
+    {
+        // Clamps value to range [minValue, maxValue[ by making it cycle, if necessary.
+        public static int MakeCycle(int value, int minValue, int maxValue)
+        {
+            if (value < minValue)
+                return maxValue - 1;
+
+            if (value >= maxValue)
+                return minValue;
+
+            return value; // in range [minValue, maxValue[
+        }
+    }
+}
 namespace ArchiVR
 {
+    
+
     public class ApplicationArchiVR : MonoBehaviour
     {
         #region Variables
@@ -19,9 +38,15 @@ namespace ArchiVR
         // The application version.
         public string m_version = "190924a";
 
+        // Whether to show the GFX quality level and FPS as HUD UI.
+        private bool m_enableDebugGFX = false;
+
         #region Game objects
 
         public Animator m_fadeAnimator = null;
+
+        public UnityEngine.GameObject m_gfxDebugPanelHUD = null;
+        public UnityEngine.UI.Text m_gfxDebugHUDText = null;
 
         public UnityEngine.GameObject m_ovrCameraRig = null;
 
@@ -293,6 +318,8 @@ namespace ArchiVR
             m_centerEyePanel = GameObject.Find("CenterEyePanel");
             m_centerEyeText = GameObject.Find("CenterEyeText").GetComponent<UnityEngine.UI.Text>();
 
+            m_gfxDebugPanelHUD = GameObject.Find("FPSPanel");
+            m_gfxDebugHUDText = GameObject.Find("FPSText").GetComponent<UnityEngine.UI.Text>();
             // Left controller.
 
             // Pick ray.
@@ -356,12 +383,25 @@ namespace ArchiVR
         //! Update is called once per frame
         void Update()
         {
-            if (m_controllerInput.m_controllerState.button5Down)
+            if (m_controllerInput.m_controllerState.lThumbstickDown)
+                m_enableDebugGFX = !m_enableDebugGFX;
+
+            m_gfxDebugPanelHUD.SetActive(m_enableDebugGFX);
+
+            if (m_enableDebugGFX)
             {
                 var qualityLevel = QualitySettings.GetQualityLevel();
-                ++qualityLevel;
-                qualityLevel%= QualitySettings.names.Length;
-                QualitySettings.SetQualityLevel(qualityLevel);
+
+                if (m_controllerInput.m_controllerState.button5Down)
+                {
+                    qualityLevel = UtilIterate.MakeCycle(--qualityLevel, 0, QualitySettings.names.Length);
+                    QualitySettings.SetQualityLevel(qualityLevel);
+                }
+                if (m_controllerInput.m_controllerState.button6Down)
+                {
+                    qualityLevel = UtilIterate.MakeCycle(++qualityLevel, 0, QualitySettings.names.Length);
+                    QualitySettings.SetQualityLevel(qualityLevel);
+                }
             }
 
             #region Animate sun
