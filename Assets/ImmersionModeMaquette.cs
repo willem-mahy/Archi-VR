@@ -42,7 +42,7 @@ namespace ArchiVR
             {
                 m_maquettePreviewContext = GameObject.Find("MaquettePreviewContext");                
             }
-
+                        
             if (m_maquettePreviewContext)
                 m_maquettePreviewContext.SetActive(false);
         }
@@ -287,16 +287,25 @@ namespace ArchiVR
                 return;
             }
 
-            var position = Vector3.zero;
-            position.y = 1 + m_maquetteOffset;
+            var scale = 0.04f;
+            activeProject.transform.position = Vector3.zero;
+            activeProject.transform.rotation = Quaternion.identity;
+            activeProject.transform.localScale = scale * Vector3.one;
 
-            var rotation = Quaternion.AngleAxis(m_maquetteRotation, Vector3.up);
+            // Locate around anchor.
+            var modelAnchor = GameObject.Find("ModelAnchor");
 
-            var scale = 0.04f * Vector3.one;
+            if (modelAnchor != null)
+            {
+                activeProject.transform.localPosition = -scale * modelAnchor.transform.localPosition;
+            }
 
-            activeProject.transform.position = position;
-            activeProject.transform.rotation = rotation;
-            activeProject.transform.localScale = scale;
+            // Add height offset.
+            var pos = activeProject.transform.position;
+            pos.y = 1 + m_maquetteOffset;
+            activeProject.transform.position = pos;
+
+            activeProject.transform.RotateAround(Vector3.zero, Vector3.up, m_maquetteRotation);
         }
 
         public override void UpdateTrackingSpacePosition()
