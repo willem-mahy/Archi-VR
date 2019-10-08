@@ -41,6 +41,10 @@ namespace ArchiVR
         // Whether to show the GFX quality level and FPS as HUD UI.
         private bool m_enableDebugGFX = false;
 
+        private TrackerClient TrackerClient = new TrackerClient(new WM.ILogger());
+
+        private TrackerClient MockRemoteTrackerClient = new TrackerClient(new WM.ILogger());
+
         #region Game objects
 
         public Animator m_fadeAnimator = null;
@@ -267,9 +271,18 @@ namespace ArchiVR
 
         #region GameObject overrides
 
+        GameObject Avatar = null;
+
+        IAvatarController avatarController =
+            new AvatarControllerUDP();
+            //new AvatarControllerMock();
+
         //! Start is called before the first frame update
         void Start()
         {
+            TrackerClient.Start();
+            MockRemoteTrackerClient.Start();
+
             #region Automatically get build version
 
             if (true)
@@ -294,10 +307,13 @@ namespace ArchiVR
                     m_version = LinkerTimestamp.GetLinkerTimestampUtc(Assembly.GetExecutingAssembly()).ToString();
                 }
             }
-            
+
             #endregion
-            
+
             #region Get handles to game objects
+
+            if (Avatar == null)
+                Avatar = GameObject.Find("Avatar");
 
             if (Sun == null)
                 Sun = GameObject.Find("Sun");
@@ -383,6 +399,15 @@ namespace ArchiVR
         //! Update is called once per frame
         void Update()
         {
+            // Make avatar move.
+            avatarController.Update(Avatar);
+
+            if (Application.isEditor)
+            {
+                // Mock remote player from camera position
+                MockRemoteTrackerClient.SendPosition(m_centerEyeAnchor);
+            }
+
             if (m_controllerInput.m_controllerState.lThumbstickDown)
                 m_enableDebugGFX = !m_enableDebugGFX;
 
@@ -1074,6 +1099,10 @@ namespace ArchiVR
                     m_menuText += " > " + activePOI.name;
                 }
             }
+
+            m_menuText += "\n";
+            string myIP = WM.Util.Net.GetLocalIPAddress();
+            m_menuText += "\nDevice IP: " + myIP;
 
             m_menuText += "\n";
             m_menuText += "\nversion: " + m_version;
