@@ -30,7 +30,8 @@ namespace WM
         private static int localPort;
 
         // prefs
-        private string IP = "127.0.0.1";  // define in init
+        private string IP = "127.0.0.1";  // LocalHost
+        
         public int port = 8050;  // define in init
 
         // "connection" things
@@ -57,6 +58,17 @@ namespace WM
         // start from unity3d
         public void Start()
         {
+            if (!Application.isEditor)
+            {
+                // Running on quest -> Send position to Aorus
+                IP = "192.168.0.13";  // Aorus
+            }
+            else
+            {
+                // Running on Aorus -> Send position to Quest
+                //IP = "192.168.0.X"; // Quest
+            }
+
             init();
         }
 
@@ -66,8 +78,8 @@ namespace WM
             Rect rectObj = new Rect(40, 380, 200, 400);
             GUIStyle style = new GUIStyle();
             style.alignment = TextAnchor.UpperLeft;
-            GUI.Box(rectObj, "# UDPSend-Data\n127.0.0.1 " + port + " #\n"
-                        + "shell> nc -lu 127.0.0.1  " + port + " \n"
+            GUI.Box(rectObj, "# UDPSend-Data\n" + IP + " " + port + " #\n"
+                        + "shell> nc -lu " + IP + "  " + port + " \n"
                     , style);
 
             // ------------------------
@@ -97,7 +109,6 @@ namespace WM
             // status
             print("Sending to " + IP + " : " + port);
             print("Testing: nc -lu " + IP + " : " + port);
-
         }
 
         // inputFromConsole
@@ -135,14 +146,14 @@ namespace WM
         {
             try
             {
-                //if (message != "")
-                //{
+                if (message != "")
+                {
+                    // Daten mit der UTF8-Kodierung in das Binärformat kodieren.
+                    byte[] data = Encoding.UTF8.GetBytes(message);
 
-                // Daten mit der UTF8-Kodierung in das Binärformat kodieren.
-                byte[] data = Encoding.UTF8.GetBytes(message);
-
-                // Den message zum Remote-Client senden.
-                client.Send(data, data.Length, remoteEndPoint);
+                    // Den message zum Remote-Client senden.
+                    client.Send(data, data.Length, remoteEndPoint);
+                }
             }
             catch (Exception err)
             {

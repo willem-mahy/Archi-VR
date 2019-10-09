@@ -41,10 +41,6 @@ namespace ArchiVR
         // Whether to show the GFX quality level and FPS as HUD UI.
         private bool m_enableDebugGFX = false;
 
-        private TrackerClient TrackerClient = new TrackerClient(new WM.ILogger());
-
-        private TrackerClient MockRemoteTrackerClient = new TrackerClient(new WM.ILogger());
-
         #region Game objects
 
         public Animator m_fadeAnimator = null;
@@ -267,21 +263,25 @@ namespace ArchiVR
 
         #endregion
 
+        GameObject Avatar = null;
+        
+        IAvatarController avatarController =
+            new AvatarControllerUDP();
+            //new AvatarControllerMock();
+        
+        // Broadcasts own avatar frame.
+        private TrackerClient TrackerClient = new TrackerClient(new WM.ILogger());
+
         #endregion Variables
 
         #region GameObject overrides
 
-        GameObject Avatar = null;
-
-        IAvatarController avatarController =
-            new AvatarControllerUDP();
-            //new AvatarControllerMock();
 
         //! Start is called before the first frame update
         void Start()
         {
+            // Broadcast own avatar frame.
             TrackerClient.Start();
-            MockRemoteTrackerClient.Start();
 
             #region Automatically get build version
 
@@ -399,13 +399,16 @@ namespace ArchiVR
         //! Update is called once per frame
         void Update()
         {
+            m_centerEyeAnchor.GetComponent<Camera>().enabled = false;
+            m_centerEyeAnchor.GetComponent<Camera>().enabled = true;
+            
             // Make avatar move.
             avatarController.Update(Avatar);
 
             if (Application.isEditor)
             {
                 // Mock remote player from camera position
-                MockRemoteTrackerClient.SendPosition(m_centerEyeAnchor);
+                TrackerClient.SendPosition(m_centerEyeAnchor);
             }
 
             if (m_controllerInput.m_controllerState.lThumbstickDown)
