@@ -33,7 +33,7 @@ namespace WM
         UdpClient udpClient;
 
         // public
-        public int port = 8050;  // define in init
+        //public int port = 8890;  // define in init
 
         // infos
         public string lastReceivedUDPPacket = "";
@@ -44,41 +44,7 @@ namespace WM
             this.udpClient = udpClient;
         }
 
-        // start from shell
-        //private static void Main()
-        //{
-        //    UDPReceive receiveObj = new UDPReceive();
-        //    receiveObj.init();
-
-        //    string text = "";
-        //    do
-        //    {
-        //        text = Console.ReadLine();
-        //    }
-        //    while (!text.Equals("exit"));
-        //}
-        
-        // start from unity3d
-        public void Start()
-        {
-            init();
-        }
-
-        // OnGUI
-        void OnGUI()
-        {
-            Rect rectObj = new Rect(40, 10, 200, 400);
-            GUIStyle style = new GUIStyle();
-            style.alignment = TextAnchor.UpperLeft;
-            GUI.Box(rectObj, "# UDPReceive\n127.0.0.1 " + port + " #\n"
-                        + "shell> nc -u 127.0.0.1 : " + port + " \n"
-                        + "\nLast Packet: \n" + lastReceivedUDPPacket
-                        + "\n\nAll Messages: \n" + allReceivedUDPPackets
-                    , style);
-        }
-
-        // init
-        private void init()
+        public void Init()
         {
             // Endpunkt definieren, von dem die Nachrichten gesendet werden.
             print("UDPReceive.init()");

@@ -79,8 +79,8 @@ namespace WM
         {
             if (true)
             {
-                udpSend.Start();
-                udpReceive.Start();
+                udpSend.Init();
+                udpReceive.Init();
             }
             else
             {

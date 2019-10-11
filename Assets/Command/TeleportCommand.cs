@@ -17,6 +17,16 @@ namespace Assets.Command
 
         public void Execute(ApplicationArchiVR application)
         {
+            //if (application.RunAsServer)
+            //{
+            //    return;
+            //}
+            
+            //if ((application.ActiveProjectIndex == ProjectIndex) && (application.ActivePOIName == POIName))
+            //{
+            //    return;
+            //}
+
             application.TeleportCommand = this;
 
             application.SetActiveApplicationState(ApplicationStates.Teleporting);

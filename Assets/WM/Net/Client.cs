@@ -1,5 +1,6 @@
 ﻿using ArchiVR;
 using Assets.Command;
+using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -20,26 +21,47 @@ namespace WM
 
             public string serverIP = "";//192.168.0.13";
 
+            #region TCP
+
             public int port = 8888;
 
+            // The TCP client
             private TcpClient tcpClient;
-
-            private Thread thread;
 
             #endregion
 
-            // Start is called before the first frame update
-            void Start()
-            {
-            }
+            #region UDP
 
+            public static readonly int UdpPort = 8890; // Must be different than server UDP port probably...
+
+            public UdpClient udpClient;// = new UdpClient(UdpPort);
+
+            private UDPSend udpSend;
+
+            private UDPReceive udpReceive;
+
+            private string udpReceiveBuffer;
+
+            #endregion
+
+            // The thread.
+            private Thread thread;
+
+            #endregion
+                        
             public void Init()
             {
+                /*
                 // TODO: Why is this needed?
                 ASCIIEncoding ASCII = new ASCIIEncoding();
+                               
+                // Create TCP client socket
+                tcpClient = new TcpClient(GetLocalIpAddress);
 
-                // Create client socket
-                tcpClient = new TcpClient();
+                // Start UDP sockets
+                udpSend.Init();
+                udpReceive.Init();
+                */
 
                 thread = new Thread(new ThreadStart(ThreadFunction));
                 thread.IsBackground = true;
@@ -57,6 +79,7 @@ namespace WM
             private void ThreadFunction()
             {
                 Connect();
+
                 Debug.Log("Client: tcpClient connected.");
 
                 var serverStream = tcpClient.GetStream();
@@ -67,6 +90,14 @@ namespace WM
                 var bytesToServer = Encoding.ASCII.GetBytes(messageToServer);
                 serverStream.Write(bytesToServer, 0, bytesToServer.Length);
                 serverStream.Flush();
+
+                // Initialize UDP sockets to/from server.
+                udpClient = new UdpClient(UdpPort);
+
+                udpSend = new UDPSend(udpClient);
+                udpSend.remoteIP = serverIP;
+                udpSend.remotePort = Server.UdpPort;
+                udpReceive = new UDPReceive(udpClient);
 
                 while (true)
                 {
@@ -136,6 +167,80 @@ namespace WM
                 }
 
                 return tcpClient.Connected;
+            }
+
+
+
+            public void SendPositionToUDP(GameObject avatar)
+            {
+                try
+                {
+                    var position = avatar.transform.position; // + avatar.transform.forward;
+
+                    var to = new TrackedObject();
+                    to.Name = "Avatar";
+                    to.Position = position;
+
+                    var ser = new XmlSerializer(typeof(TrackedObject));
+
+                    var writer = new StringWriter();
+                    ser.Serialize(writer, to);
+                    writer.Close();
+
+                    var data = writer.ToString();
+
+                    udpSend.sendString(data);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Exception:" + e.Message);
+                }
+            }
+
+            public void UpdatePositionFromUDP(GameObject avatar)
+            {
+                try
+                {
+                    udpReceiveBuffer += udpReceive.getLatestUDPPacket();
+
+                    string frameEndTag = "</TrackedObject>";
+                    int frameEndTagLength = frameEndTag.Length;
+                    int lastFrameEnd = udpReceiveBuffer.LastIndexOf(frameEndTag);
+
+                    if (lastFrameEnd < 0)
+                    {
+                        return;
+                    }
+
+                    string temp = udpReceiveBuffer.Substring(0, lastFrameEnd + frameEndTagLength);
+
+                    int lastFrameBegin = temp.LastIndexOf("<TrackedObject ");
+
+                    if (lastFrameBegin < 0)
+                    {
+                        return;
+                    }
+
+                    // Now get the frame string.
+                    string lastFrame = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
+
+                    // Clear old frames from receivebuffer.
+                    udpReceiveBuffer = udpReceiveBuffer.Substring(lastFrameEnd + frameEndTagLength);
+
+                    var ser = new XmlSerializer(typeof(TrackedObject));
+
+                    //var reader = new StreamReader(avatarFilePath);
+                    var reader = new StringReader(lastFrame);
+
+                    var trackedObject = (TrackedObject)(ser.Deserialize(reader));
+                    reader.Close();
+
+                    avatar.transform.position = trackedObject.Position;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Exception:" + e.Message);
+                }
             }
         }
     }

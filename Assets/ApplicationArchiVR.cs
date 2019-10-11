@@ -296,12 +296,14 @@ namespace ArchiVR
         {
             if (RunAsServer)
             {
+                // Init server
                 Server.Init();
+
+                // Let client connect to own server. (TODO: connect directly, ie without network middle layer.)
+                Client.serverIP = NetUtil.GetLocalIPAddress();
             }
-            else
-            {
-                Client.Init();
-            }
+
+            Client.Init();
 
             /*
             // Updates avatar for remote player.
@@ -439,16 +441,20 @@ namespace ArchiVR
         //! Update is called once per frame
         void Update()
         {
+            // TODO: WHY THAF is this necessary to make camera work in Editor?
             m_centerEyeAnchor.GetComponent<Camera>().enabled = false;
             m_centerEyeAnchor.GetComponent<Camera>().enabled = true;
 
-            lock (commandQueueLock)
+            if (this.TeleportCommand != null)
             {
-                foreach (var command in CommandQueue)
+                lock (commandQueueLock)
                 {
-                    command.Execute(this);
+                    foreach (var command in CommandQueue)
+                    {
+                        command.Execute(this);
+                    }
+                    CommandQueue.Clear();
                 }
-                CommandQueue.Clear();
             }
 
             // Make avatar move.
@@ -464,6 +470,9 @@ namespace ArchiVR
                 {
                     trackerClient.SendPosition(m_centerEyeAnchor);
                 }
+
+                Client.SendPositionToUDP(m_centerEyeAnchor);
+                Client.UpdatePositionFromUDP(Avatar);
             }
 
             if (m_controllerInput.m_controllerState.lThumbstickDown)
@@ -1229,7 +1238,7 @@ namespace ArchiVR
 
         private void Teleport(TeleportCommand teleportCommand)
         {
-            TeleportCommand = teleportCommand;
+            //TeleportCommand = teleportCommand;
 
             if (RunAsServer)
             {

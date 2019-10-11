@@ -26,9 +26,8 @@ namespace WM
         private static int localPort;
 
         // prefs
-        private string IP = "127.0.0.1";  // LocalHost
-        
-        public int port = 8050;  // define in init
+        public string remoteIP = "127.0.0.1"; // 'loop back by default...
+        public int remotePort = 8889;
 
         // "connection" things
         IPEndPoint remoteEndPoint;
@@ -42,71 +41,14 @@ namespace WM
             this.udpClient = udpClient;
         }
 
-        // call it from shell (as program)
-        //private static void Main()
-        //{
-        //    UDPSend sendObj = new UDPSend();
-        //    sendObj.init();
-
-        //    // testing via console
-        //    // sendObj.inputFromConsole();
-
-        //    // as server sending endless
-        //    sendObj.sendEndless(" endless infos \n");
-
-        //}
-
         // start from unity3d
-        public void Start()
+        public void Init()
         {
-            if (!Application.isEditor)
-            {
-                // Running on quest -> Send position to Aorus
-                IP = "192.168.0.13";  // Aorus
-            }
-            else
-            {
-                // Running on Aorus -> Send position to Quest
-                //IP = "192.168.0.X"; // Quest
-            }
+            Debug.LogError("UDPSend.init()");
 
-            init();
-        }
+            remoteEndPoint = new IPEndPoint(IPAddress.Parse(remoteIP), remotePort);
 
-        // OnGUI
-        void OnGUI()
-        {
-            Rect rectObj = new Rect(40, 380, 200, 400);
-            GUIStyle style = new GUIStyle();
-            style.alignment = TextAnchor.UpperLeft;
-            GUI.Box(rectObj, "# UDPSend-Data\n" + IP + " " + port + " #\n"
-                        + "shell> nc -lu " + IP + "  " + port + " \n"
-                    , style);
-
-            // ------------------------
-            // send it
-            // ------------------------
-            strMessage = GUI.TextField(new Rect(40, 420, 140, 20), strMessage);
-            if (GUI.Button(new Rect(190, 420, 40, 20), "send"))
-            {
-                sendString(strMessage + "\n");
-            }
-        }
-
-        // init
-        public void init()
-        {
-            // Endpunkt definieren, von dem die Nachrichten gesendet werden.
-            print("UDPSend.init()");
-
-            // ----------------------------
-            // Senden
-            // ----------------------------
-            remoteEndPoint = new IPEndPoint(IPAddress.Parse(IP), port);
-
-            // status
-            print("Sending to " + IP + " : " + port);
-            print("Testing: nc -lu " + IP + " : " + port);
+            Debug.LogError("Initialized for sending to remote end point (" + remoteIP + ":" + remotePort + ")");
         }
 
         // inputFromConsole
@@ -140,6 +82,11 @@ namespace WM
         //! Sends the given message to the remote client.
         public void sendString(string message)
         {
+            if (remoteEndPoint == null)
+            {
+                return; // Not connected yet...
+            }
+
             try
             {
                 if (message != "")
