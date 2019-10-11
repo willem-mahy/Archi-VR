@@ -7,46 +7,35 @@ using System;
 
 namespace WM
 {
-    namespace Utils
-    {
-        class XML
-        {
-            public static float ConvertToFloat(string valueString)
-            {
-                return (float)XmlConvert.ToDouble(valueString);
-            }
-        }
-    }
-
     [Serializable]
     [XmlRoot("TrackedObject")]
     public class TrackedObject
     {
         //! Read a double from XML.
-        static public void FromXML
-        (out double v
-        , ref XPathNavigator nav
-        , string vectorElementPath)
-        {
-            string xs = (nav.SelectSingleNode(vectorElementPath).Value);
+        //static public void FromXML
+        //(out double v
+        //, ref XPathNavigator nav
+        //, string vectorElementPath)
+        //{
+        //    string xs = (nav.SelectSingleNode(vectorElementPath).Value);
 
-            v = WM.Utils.XML.ConvertToFloat(xs);
-        }
+        //    v = WM.Utils.XML.ConvertToFloat(xs);
+        //}
 
         //! Read a Vector3 from XML.
-        static public void FromXML
-        (ref Vector3 v
-        , ref XPathNavigator nav
-        , string vectorElementPath)
-        {
-            string xs = (nav.SelectSingleNode(vectorElementPath + "/X").Value);
-            string ys = (nav.SelectSingleNode(vectorElementPath + "/Y").Value);
-            string zs = (nav.SelectSingleNode(vectorElementPath + "/Z").Value);
+        //static public void FromXML
+        //(ref Vector3 v
+        //, ref XPathNavigator nav
+        //, string vectorElementPath)
+        //{
+        //    string xs = (nav.SelectSingleNode(vectorElementPath + "/X").Value);
+        //    string ys = (nav.SelectSingleNode(vectorElementPath + "/Y").Value);
+        //    string zs = (nav.SelectSingleNode(vectorElementPath + "/Z").Value);
 
-            v.x = WM.Utils.XML.ConvertToFloat(xs);
-            v.y = WM.Utils.XML.ConvertToFloat(ys);
-            v.z = WM.Utils.XML.ConvertToFloat(zs);
-        }
+        //    v.x = WM.Utils.XML.ConvertToFloat(xs);
+        //    v.y = WM.Utils.XML.ConvertToFloat(ys);
+        //    v.z = WM.Utils.XML.ConvertToFloat(zs);
+        //}
 
         [XmlElement("Name")]
         public string Name { get; set; } = "";

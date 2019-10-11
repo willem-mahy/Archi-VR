@@ -62,7 +62,7 @@ namespace WM
                 var serverStream = tcpClient.GetStream();
 
                 // Send message to server
-                var myIP = WM.Util.Net.GetLocalIPAddress();
+                var myIP = NetUtil.GetLocalIPAddress();
                 var messageToServer = "Hello from client '" + myIP + "'$";
                 var bytesToServer = Encoding.ASCII.GetBytes(messageToServer);
                 serverStream.Write(bytesToServer, 0, bytesToServer.Length);

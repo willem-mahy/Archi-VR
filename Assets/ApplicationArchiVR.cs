@@ -1157,7 +1157,7 @@ namespace ArchiVR
             }
 
             m_menuText += "\n";
-            string myIP = WM.Util.Net.GetLocalIPAddress();
+            string myIP = NetUtil.GetLocalIPAddress();
             m_menuText += "\nDevice IP: " + myIP;
 
             m_menuText += "\n";

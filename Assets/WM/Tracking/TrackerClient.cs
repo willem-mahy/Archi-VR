@@ -9,32 +9,11 @@ using UnityEngine;
 
 namespace WM
 {
-    namespace Util
-    {
-        class Net
-        {
-            public static string GetLocalIPAddress()
-            {
-                var host = Dns.GetHostEntry(Dns.GetHostName());
-
-                foreach (var ip in host.AddressList)
-                {
-                    if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    {
-                        return ip.ToString();
-                    }
-                }
-
-                throw new WebException("Local IP address not found!");
-            }
-        }
-    }
-
     public class ILogger
     {
         public void Add(string text)
         {
-            UnityEngine.Debug.Log(text);
+            Debug.Log(text);
         }
     }
 
@@ -106,7 +85,7 @@ namespace WM
             else
             {
                 // First log own IP
-                string myIP = WM.Util.Net.GetLocalIPAddress();
+                string myIP = WM.Net.NetUtil.GetLocalIPAddress();
                 Log("Device IP: " + myIP);
 
                 if (remoteClientIP.Length == 0)
