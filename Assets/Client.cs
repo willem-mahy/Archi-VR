@@ -80,7 +80,7 @@ public class Client : MonoBehaviour
             var teleportCommand = (TeleportCommand)(ser.Deserialize(reader));
             reader.Close();
 
-            teleportCommand.Execute(application);
+            application.QueueCommand(teleportCommand);
         }
     }
 

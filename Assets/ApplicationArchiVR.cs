@@ -36,6 +36,8 @@ namespace ArchiVR
     {
         #region Variables
 
+        public List<TeleportCommand> CommandQueue = new List<TeleportCommand>();
+
         // The application version.
         public string m_version = "190924a";
 
@@ -419,11 +421,29 @@ namespace ArchiVR
             SetActiveProject(0);
         }
 
+        private object commandQueueLock = new object();
+
+        public void QueueCommand(TeleportCommand teleportCommand)
+        {
+            lock (commandQueueLock)
+            {
+                CommandQueue.Add(teleportCommand);
+            }
+        }
         //! Update is called once per frame
         void Update()
         {
             m_centerEyeAnchor.GetComponent<Camera>().enabled = false;
             m_centerEyeAnchor.GetComponent<Camera>().enabled = true;
+
+            lock (commandQueueLock)
+            {
+                foreach (var command in CommandQueue)
+                {
+                    command.Execute(this);
+                }
+                CommandQueue.Clear();
+            }
 
             // Make avatar move.
             if (avatarController != null)
