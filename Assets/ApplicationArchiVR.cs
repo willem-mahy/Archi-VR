@@ -282,12 +282,16 @@ namespace ArchiVR
         //! Start is called before the first frame update
         void Start()
         {
-            avatarController = new AvatarControllerUDP(RemoteClientIP);
-            //new AvatarControllerMock();
-
-            // Broadcast own avatar frame.
+            /*
+            // Updates avatar for remote player.
+            avatarController =
+                new AvatarControllerUDP(RemoteClientIP);
+                //new AvatarControllerMock();
+            
+            // Broadcasts own avatar frame.
             trackerClient = new TrackerClient(RemoteClientIP, new WM.ILogger());
             trackerClient.Start();
+            */
 
             #region Automatically get build version
 
@@ -407,14 +411,20 @@ namespace ArchiVR
         {
             m_centerEyeAnchor.GetComponent<Camera>().enabled = false;
             m_centerEyeAnchor.GetComponent<Camera>().enabled = true;
-            
+
             // Make avatar move.
-            avatarController.Update(Avatar);
+            if (avatarController != null)
+            {
+                avatarController.Update(Avatar);
+            }
 
             if (Application.isEditor)
             {
                 // Mock remote player from camera position
-                trackerClient.SendPosition(m_centerEyeAnchor);
+                if (trackerClient != null)
+                {
+                    trackerClient.SendPosition(m_centerEyeAnchor);
+                }
             }
 
             if (m_controllerInput.m_controllerState.lThumbstickDown)

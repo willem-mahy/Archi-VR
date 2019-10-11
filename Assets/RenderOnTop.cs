@@ -23,7 +23,7 @@ public class RenderOnTop : MonoBehaviour
 
     private void Apply()
     {
-        Debug.Log("RenderOnTop.Apply()");
+        //Debug.Log("RenderOnTop.Apply()");
 
         apply = false;
         
