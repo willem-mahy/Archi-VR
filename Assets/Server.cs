@@ -18,7 +18,7 @@ public class Server : MonoBehaviour
 
     public int port = 8888;
 
-    private Thread thread;
+    private Thread receiveFromClientsThread;
 
     private Thread acceptClientThread;
 
@@ -65,11 +65,13 @@ public class Server : MonoBehaviour
 
         acceptClientThread = new Thread(new ThreadStart(AcceptClientFunction));
         acceptClientThread.IsBackground = true;
+        acceptClientThread.Name = "acceptClientThread";
         acceptClientThread.Start();
 
-        thread = new Thread(new ThreadStart(ReceiveFromClientsFunction));
-        thread.IsBackground = true;
-        thread.Start();
+        receiveFromClientsThread = new Thread(new ThreadStart(ReceiveFromClientsFunction));
+        receiveFromClientsThread.IsBackground = true;
+        receiveFromClientsThread.Name = "receiveFromClientsThread";
+        receiveFromClientsThread.Start();
 
         Debug.Log("Server started");
     }
@@ -80,23 +82,30 @@ public class Server : MonoBehaviour
         {
             try
             {
-                // Create the client socket.
-                var newTcpClient = default(TcpClient);
-
-                // Accept the client socket.
-                newTcpClient = tcpListener.AcceptTcpClient();
-
-                Debug.Log("Server: Client connected: " + newTcpClient.Client.RemoteEndPoint.ToString());
-
-                var teleportCommand = new TeleportCommand();
-                teleportCommand.ProjectIndex = application.ActiveProjectIndex;
-                teleportCommand.POIName = application.ActivePOIName;
-
-                SendCommand(teleportCommand, newTcpClient);
-
-                lock (clientsLock)
+                if (tcpListener.Pending())
                 {
-                    clientSockets.Add(newTcpClient);
+                    // Create the client socket.
+                    var newTcpClient = default(TcpClient);
+
+                    // Accept the client socket.
+                    newTcpClient = tcpListener.AcceptTcpClient();
+
+                    Debug.Log("Server: Client connected: " + newTcpClient.Client.RemoteEndPoint.ToString());
+
+                    var teleportCommand = new TeleportCommand();
+                    teleportCommand.ProjectIndex = application.ActiveProjectIndex;
+                    teleportCommand.POIName = application.ActivePOIName;
+
+                    SendCommand(teleportCommand, newTcpClient);
+
+                    lock (clientsLock)
+                    {
+                        clientsLockOwner = "AcceptClientFunction";
+
+                        clientSockets.Add(newTcpClient);
+
+                        clientsLockOwner = "None (AcceptClientFunction)";
+                    }
                 }
             }
             catch (Exception ex)
@@ -106,14 +115,18 @@ public class Server : MonoBehaviour
         }
     }
 
+    private string clientsLockOwner = "";
+
     private void ReceiveFromClientsFunction()
     {
-        while ((true))
+        while (true)
         {
             try
             {
                 lock (clientsLock)
                 {
+                    clientsLockOwner = "ReceiveFromClientsFunction";
+
                     foreach (var tcpClient in clientSockets)
                     {
                         //if (tcpClient == null)
@@ -125,10 +138,14 @@ public class Server : MonoBehaviour
                         {
                             var networkStream = tcpClient.GetStream();
 
-                            // Receive from client.
-                            byte[] bytesFromClient = new byte[tcpClient.ReceiveBufferSize];
-                            networkStream.Read(bytesFromClient, 0, (int)tcpClient.ReceiveBufferSize);
-                            dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFromClient);
+                            var numBytesAvailable = tcpClient.Available;
+                            if (numBytesAvailable > 0)
+                            {
+                                // Receive from client.
+                                byte[] bytesFromClient = new byte[numBytesAvailable];
+                                networkStream.Read(bytesFromClient, 0, numBytesAvailable);
+                                dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFromClient);
+                            }
                         }
 
                         var messageEnd = dataFromClient.IndexOf("$");
@@ -139,15 +156,12 @@ public class Server : MonoBehaviour
 
                             Debug.Log(" >> Message from client - " + messageFromClient);
                             messageEnd = dataFromClient.IndexOf("$");
-
-                            // Respond to client.
-                            /*
-                            string dataToClient = "I received your message: '" + messageFromClient + "'";
-                            SendToClient(dataToClient, tcpClient);
-                            */
                         }
                     }
+
+                    clientsLockOwner = "None (last:ReceiveFromClientsFunction)";
                 }
+                Thread.Sleep(10);
             }
             catch (Exception ex)
             {
@@ -188,6 +202,7 @@ public class Server : MonoBehaviour
 
             lock (clientsLock)
             {
+                clientsLockOwner = "BroadcastCommand";
 
                 foreach (var tcpClient in clientSockets)
                 {
@@ -196,6 +211,8 @@ public class Server : MonoBehaviour
                         SendToClient(data, tcpClient);
                     }
                 }
+
+                clientsLockOwner = "None (BroadcastCommand)";
             }
         }
         catch (Exception e)
@@ -248,12 +265,17 @@ public class Server : MonoBehaviour
 
         lock (clientsLock)
         {
+            clientsLockOwner = "CloseSockets";
+
             // Close the client sockets.
             foreach (var clientSocket in clientSockets)
             {
                 clientSocket.Close();
             }
+            
             clientSockets.Clear();
+
+            clientsLockOwner = "None (CloseSockets)";
         }
 
         // Stop the server socket.

@@ -88,7 +88,17 @@ namespace ArchiVR
 
         #region POI
 
-        public int ActivePOIIndex { get; set; } = -1;
+        private int activePOIIndex = -1;
+
+        public int ActivePOIIndex 
+        {
+            get { return activePOIIndex; }
+            set
+            {
+                activePOIIndex = value;
+                ActivePOIName = ActivePOI != null ? ActivePOI.name : null;
+            }
+        }
 
         public GameObject ActivePOI
         {
@@ -105,15 +115,7 @@ namespace ArchiVR
 
         public string ActivePOIName
         {
-            get
-            {
-                if (ActivePOI == null)
-                {
-                    return null;
-                }
-
-                return ActivePOI.name;
-            }
+            get; private set;
         }
         
         List<GameObject> m_POI = new List<GameObject>();
@@ -627,7 +629,7 @@ namespace ArchiVR
             tc.ProjectIndex = projectIndex;
             tc.POIName = ActivePOIName;
 
-            tc.Execute(this);
+            Teleport(tc);
         }
         #endregion
 
