@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 using WM;
+using WM.Net;
 using WM.VR;
 
 [assembly: System.Reflection.AssemblyVersion("1.0.*")]
@@ -46,7 +47,10 @@ namespace ArchiVR
 
         public bool RunAsServer = false;
 
+        // The multiplayer server.
         public Server Server;
+
+        // The multiplayer client.
         public Client Client;
 
         #region Game objects
