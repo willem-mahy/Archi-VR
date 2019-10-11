@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Command;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -43,6 +44,9 @@ namespace ArchiVR
 
         public bool RunAsServer = false;
 
+        public Server Server;
+        public Client Client;
+
         #region Game objects
 
         public Animator m_fadeAnimator = null;
@@ -60,7 +64,7 @@ namespace ArchiVR
 
         #endregion
 
-        public TeleportInfo TeleportInfo { get; set; } = new TeleportInfo();
+        public TeleportCommand TeleportCommand { get; set; }
 
         public GameObject Sun { get; set; } = null;
 
@@ -282,6 +286,15 @@ namespace ArchiVR
         //! Start is called before the first frame update
         void Start()
         {
+            if (RunAsServer)
+            {
+                Server.Init();
+            }
+            else
+            {
+                Client.Init();
+            }
+
             /*
             // Updates avatar for remote player.
             avatarController =
@@ -583,20 +596,18 @@ namespace ArchiVR
                 return;
             }
 
-            var ti = new TeleportInfo();
-
-            ti.ProjectIndex = (projectIndex) % m_projectNames.Count;
+            projectIndex = (projectIndex) % m_projectNames.Count;
 
             while (projectIndex < 0)
             {
                 projectIndex += m_projectNames.Count;
             }
 
-            ti.POIName = ActivePOIName;
+            var tc = new TeleportCommand();
+            tc.ProjectIndex = projectIndex;
+            tc.POIName = ActivePOIName;
 
-            TeleportInfo = ti;
-
-            SetActiveApplicationState(ApplicationStates.Teleporting);
+            tc.Execute(this);
         }
         #endregion
 
@@ -1181,24 +1192,34 @@ namespace ArchiVR
                 }
             }
 
-            var ti = new TeleportInfo();
+            var tc = new TeleportCommand();
 
-            ti.ProjectIndex = ActiveProjectIndex;
+            tc.ProjectIndex = ActiveProjectIndex;
 
-            ti.POIName = newPOIIndex == -1 ? null : m_POI[newPOIIndex].name;
+            tc.POIName = newPOIIndex == -1 ? null : m_POI[newPOIIndex].name;
 
-            TeleportInfo = ti;
+            Teleport(tc);
+        }
 
-            SetActiveApplicationState(ApplicationStates.Teleporting);
+        private void Teleport(TeleportCommand teleportCommand)
+        {
+            TeleportCommand = teleportCommand;
+
+            if (RunAsServer)
+            {
+                Server.BroadcastCommand(teleportCommand);
+            }
+
+            teleportCommand.Execute(this);
         }
 
         public IEnumerator Teleport()
         {
             Logger.Debug("ApplicationArchiVR::Teleport()");
 
-            if (TeleportInfo != null)
+            if (TeleportCommand != null)
             {
-                if (ActiveProjectIndex != TeleportInfo.ProjectIndex) // If project changed...
+                if (ActiveProjectIndex != TeleportCommand.ProjectIndex) // If project changed...
                 {
                     // Needs to be cached before activating the new project.
                     var oldProjectName = ActiveProjectName;
@@ -1219,7 +1240,7 @@ namespace ArchiVR
                     }                    
 
                     // Load the new projct
-                    var newProjectName = GetProjectName(TeleportInfo.ProjectIndex);
+                    var newProjectName = GetProjectName(TeleportCommand.ProjectIndex);
 
                     Logger.Debug("Loading project '" + newProjectName + "'");
 
@@ -1232,7 +1253,7 @@ namespace ArchiVR
                     }
 
                     // Update active project index to point to newly activated project.
-                    ActiveProjectIndex = TeleportInfo.ProjectIndex;
+                    ActiveProjectIndex = TeleportCommand.ProjectIndex;
 
                     // Update left controller UI displaying the project name.
                     m_leftControllerText.text = (ActiveProjectName != null) ? GetProjectNameShort(ActiveProjectName) : "No project loaded.";
@@ -1259,9 +1280,9 @@ namespace ArchiVR
                 // Gather the layers from the new project.
                 GatherActiveProjectLayers();
 
-                SetActivePOI(TeleportInfo.POIName);
+                SetActivePOI(TeleportCommand.POIName);
 
-                TeleportInfo = null;
+                TeleportCommand = null;
 
                 ActiveImmersionMode.UpdateTrackingSpacePosition();
 

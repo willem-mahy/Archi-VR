@@ -1,4 +1,5 @@
-﻿using Assets.Command;
+﻿using ArchiVR;
+using Assets.Command;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,11 +14,13 @@ public class Server : MonoBehaviour
 {
     #region Variables
 
+    public ApplicationArchiVR application;
+
     public int port = 8888;
 
     private Thread thread;
 
-    private int requestCount = 0;
+    private Thread acceptClientThread;
 
     // The server socket.
     TcpListener tcpListener;
@@ -25,10 +28,15 @@ public class Server : MonoBehaviour
     // The client socket.
     List<TcpClient> clientSockets = new List<TcpClient>();
 
+    private object clientsLock = new object();
     #endregion
 
     // Start is called before the first frame update
     void Start()
+    {   
+    }
+
+    public void Init()
     {
         // TODO: Why is this needed?
         System.Text.ASCIIEncoding ASCII = new System.Text.ASCIIEncoding();
@@ -55,57 +63,89 @@ public class Server : MonoBehaviour
         // Start the server socket.
         tcpListener.Start();
 
-        thread = new Thread(new ThreadStart(ThreadFunction));
+        acceptClientThread = new Thread(new ThreadStart(AcceptClientFunction));
+        acceptClientThread.IsBackground = true;
+        acceptClientThread.Start();
+
+        thread = new Thread(new ThreadStart(ReceiveFromClientsFunction));
         thread.IsBackground = true;
         thread.Start();
 
         Debug.Log("Server started");
     }
 
-    private void ThreadFunction()
+    private void AcceptClientFunction()
     {
-        requestCount = 0;
-
         while ((true))
         {
             try
             {
-                var newTcpClient = AcceptNewClient();
+                // Create the client socket.
+                var newTcpClient = default(TcpClient);
+
+                // Accept the client socket.
+                newTcpClient = tcpListener.AcceptTcpClient();
+
+                Debug.Log("Server: Client connected: " + newTcpClient.Client.RemoteEndPoint.ToString());
 
                 var teleportCommand = new TeleportCommand();
-                teleportCommand.ProjectName = "Foo";
-                teleportCommand.POIName = "Bar";
+                teleportCommand.ProjectIndex = application.ActiveProjectIndex;
+                teleportCommand.POIName = application.ActivePOIName;
 
                 SendCommand(teleportCommand, newTcpClient);
 
-                requestCount = requestCount + 1;
-
-                foreach (var tcpClient in clientSockets)
+                lock (clientsLock)
                 {
-                    var dataFromClient = "";
+                    clientSockets.Add(newTcpClient);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(ex.ToString());
+            }
+        }
+    }
+
+    private void ReceiveFromClientsFunction()
+    {
+        while ((true))
+        {
+            try
+            {
+                lock (clientsLock)
+                {
+                    foreach (var tcpClient in clientSockets)
                     {
-                        var networkStream = tcpClient.GetStream();
+                        //if (tcpClient == null)
+                        //{
+                        //    continue;
+                        //}
 
-                        // Receive from client.
-                        byte[] bytesFromClient = new byte[tcpClient.ReceiveBufferSize];
-                        networkStream.Read(bytesFromClient, 0, (int)tcpClient.ReceiveBufferSize);
-                        dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFromClient);
-                    }
+                        var dataFromClient = "";
+                        {
+                            var networkStream = tcpClient.GetStream();
 
-                    var messageEnd = dataFromClient.IndexOf("$");
-                    while (messageEnd != -1)
-                    {
-                        var messageFromClient = dataFromClient.Substring(0, messageEnd);
-                        dataFromClient = dataFromClient.Substring(messageEnd+1);
+                            // Receive from client.
+                            byte[] bytesFromClient = new byte[tcpClient.ReceiveBufferSize];
+                            networkStream.Read(bytesFromClient, 0, (int)tcpClient.ReceiveBufferSize);
+                            dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFromClient);
+                        }
 
-                        Debug.Log(" >> Message from client - " + messageFromClient);
-                        messageEnd = dataFromClient.IndexOf("$");
+                        var messageEnd = dataFromClient.IndexOf("$");
+                        while (messageEnd != -1)
+                        {
+                            var messageFromClient = dataFromClient.Substring(0, messageEnd);
+                            dataFromClient = dataFromClient.Substring(messageEnd + 1);
 
-                        // Respond to client.
-                        /*
-                        string dataToClient = "I received your message: '" + messageFromClient + "'";
-                        SendToClient(dataToClient, tcpClient);
-                        */
+                            Debug.Log(" >> Message from client - " + messageFromClient);
+                            messageEnd = dataFromClient.IndexOf("$");
+
+                            // Respond to client.
+                            /*
+                            string dataToClient = "I received your message: '" + messageFromClient + "'";
+                            SendToClient(dataToClient, tcpClient);
+                            */
+                        }
                     }
                 }
             }
@@ -133,21 +173,37 @@ public class Server : MonoBehaviour
         Debug.Log("Server stopped");
     }
 
-    private TcpClient AcceptNewClient()
+    public void BroadcastCommand(
+        TeleportCommand teleportCommand)
     {
-        // Create the client socket.
-        var newTcpClient = default(TcpClient);
+        try
+        {
+            var ser = new XmlSerializer(typeof(TeleportCommand));
 
-        // Accept the client socket.
-        newTcpClient = tcpListener.AcceptTcpClient();
+            var writer = new StringWriter();
+            ser.Serialize(writer, teleportCommand);
+            writer.Close();
 
-        Debug.Log("Server: Client connected: " + newTcpClient.Client.RemoteEndPoint.ToString());
+            var data = writer.ToString();
 
-        clientSockets.Add(newTcpClient);
+            lock (clientsLock)
+            {
 
-        return newTcpClient;
+                foreach (var tcpClient in clientSockets)
+                {
+                    //if (tcpClient != null)
+                    {
+                        SendToClient(data, tcpClient);
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Exception:" + e.Message);
+        }
+
     }
-
     public void SendCommand(
         TeleportCommand teleportCommand,
         TcpClient tcpClient)
@@ -190,12 +246,15 @@ public class Server : MonoBehaviour
     {
         Debug.Log("Server::CloseSockets");
 
-        // Close the client sockets.
-        foreach (var clientSocket in clientSockets)
+        lock (clientsLock)
         {
-            clientSocket.Close();
+            // Close the client sockets.
+            foreach (var clientSocket in clientSockets)
+            {
+                clientSocket.Close();
+            }
+            clientSockets.Clear();
         }
-        clientSockets.Clear();
 
         // Stop the server socket.
         tcpListener.Stop();

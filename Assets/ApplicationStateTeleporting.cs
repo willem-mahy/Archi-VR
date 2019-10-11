@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Command;
+using UnityEngine;
 
 namespace ArchiVR
 {
@@ -82,8 +83,8 @@ namespace ArchiVR
             Logger.Debug("ApplicationStateTeleporting.OnTeleportFadeOutComplete()");
 
             if (
-                (m_application.ActiveProjectIndex != m_application.TeleportInfo.ProjectIndex) || // project changed
-                (m_application.ActivePOIName != m_application.TeleportInfo.POIName)) // poi changed
+                (m_application.ActiveProjectIndex != m_application.TeleportCommand.ProjectIndex) || // project changed
+                (m_application.ActivePOIName != m_application.TeleportCommand.POIName)) // poi changed
             {
                 m_application.StartCoroutine(m_application.Teleport());
             }

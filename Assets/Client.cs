@@ -1,4 +1,5 @@
-﻿using Assets.Command;
+﻿using ArchiVR;
+using Assets.Command;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
@@ -10,6 +11,8 @@ using WM;
 public class Client : MonoBehaviour
 {
     #region Variables
+
+    public ApplicationArchiVR application;
 
     public string serverIP = "";//192.168.0.13";
 
@@ -24,6 +27,10 @@ public class Client : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+    }
+
+    public void Init()
+    {
         // TODO: Why is this needed?
         ASCIIEncoding ASCII = new ASCIIEncoding();
 
@@ -34,7 +41,7 @@ public class Client : MonoBehaviour
         thread.IsBackground = true;
         thread.Start();
 
-        Debug.Log("Server started");
+        Debug.Log("Client started");
     }
 
     // Update is called once per frame
@@ -70,14 +77,14 @@ public class Client : MonoBehaviour
             //var reader = new StreamReader(avatarFilePath);
             var reader = new StringReader(dataFromServer);
 
-            var trackedObject = (TeleportCommand)(ser.Deserialize(reader));
+            var teleportCommand = (TeleportCommand)(ser.Deserialize(reader));
             reader.Close();
 
-            Thread.Sleep(1000);
+            teleportCommand.Execute(application);
         }
     }
 
-    public int connectTimeout = 500;
+    public int connectTimeout = 100;
 
     private void Connect()
     {
