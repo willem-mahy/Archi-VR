@@ -30,7 +30,7 @@ namespace WM
         Thread receiveThread;
 
         // udpclient object
-        UdpClient client;
+        UdpClient udpClient;
 
         // public
         public int port = 8050;  // define in init
@@ -39,20 +39,24 @@ namespace WM
         public string lastReceivedUDPPacket = "";
         public string allReceivedUDPPackets = ""; // clean up this from time to time!
 
+        public UDPReceive(UdpClient udpClient)
+        {
+            this.udpClient = udpClient;
+        }
 
         // start from shell
-        private static void Main()
-        {
-            UDPReceive receiveObj = new UDPReceive();
-            receiveObj.init();
+        //private static void Main()
+        //{
+        //    UDPReceive receiveObj = new UDPReceive();
+        //    receiveObj.init();
 
-            string text = "";
-            do
-            {
-                text = Console.ReadLine();
-            }
-            while (!text.Equals("exit"));
-        }
+        //    string text = "";
+        //    do
+        //    {
+        //        text = Console.ReadLine();
+        //    }
+        //    while (!text.Equals("exit"));
+        //}
         
         // start from unity3d
         public void Start()
@@ -87,9 +91,6 @@ namespace WM
         // receive thread
         private void ReceiveData()
         {
-            //client = new UdpClient(port);
-            client = MyUDP.s_client;
-
             while (true)
             {
 
@@ -97,7 +98,7 @@ namespace WM
                 {
                     // Bytes empfangen.
                     IPEndPoint anyIP = new IPEndPoint(IPAddress.Any, 0);
-                    byte[] data = client.Receive(ref anyIP);
+                    byte[] data = udpClient.Receive(ref anyIP);
 
                     // Bytes mit der UTF8-Kodierung in das Textformat kodieren.
                     string text = Encoding.UTF8.GetString(data);

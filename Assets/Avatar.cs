@@ -9,16 +9,20 @@ public class IAvatarController
 
 public class AvatarControllerUDP : IAvatarController
 {
-    TrackerClient trackerClient = null;
+    TrackerClient trackerClient;
+
+    public AvatarControllerUDP(
+        string remoteClientIP)
+    {
+        trackerClient = new TrackerClient(
+            remoteClientIP,
+            new WM.ILogger());
+
+        trackerClient.Start();
+    }
 
     public override void Update(GameObject avatarGameObject)
     {
-        if (trackerClient == null)
-        {
-            trackerClient = new TrackerClient(new WM.ILogger());
-            trackerClient.Start();
-        }
-
         trackerClient.UpdatePosition(avatarGameObject);
     }
 }

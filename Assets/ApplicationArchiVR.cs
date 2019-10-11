@@ -41,6 +41,8 @@ namespace ArchiVR
         // Whether to show the GFX quality level and FPS as HUD UI.
         private bool m_enableDebugGFX = false;
 
+        public bool RunAsServer = false;
+
         #region Game objects
 
         public Animator m_fadeAnimator = null;
@@ -225,6 +227,8 @@ namespace ArchiVR
         // The HUD menu text
         string m_menuText = "";
 
+        public string RemoteClientIP = "127.0.0.1";
+
         #endregion
 
         #region L controller menu
@@ -263,14 +267,12 @@ namespace ArchiVR
 
         #endregion
 
-        GameObject Avatar = null;
-        
-        IAvatarController avatarController =
-            new AvatarControllerUDP();
-            //new AvatarControllerMock();
-        
+        private GameObject Avatar;
+
+        private IAvatarController avatarController;
+
         // Broadcasts own avatar frame.
-        private TrackerClient TrackerClient = new TrackerClient(new WM.ILogger());
+        private TrackerClient trackerClient;
 
         #endregion Variables
 
@@ -280,8 +282,12 @@ namespace ArchiVR
         //! Start is called before the first frame update
         void Start()
         {
+            avatarController = new AvatarControllerUDP(RemoteClientIP);
+            //new AvatarControllerMock();
+
             // Broadcast own avatar frame.
-            TrackerClient.Start();
+            trackerClient = new TrackerClient(RemoteClientIP, new WM.ILogger());
+            trackerClient.Start();
 
             #region Automatically get build version
 
@@ -408,7 +414,7 @@ namespace ArchiVR
             if (Application.isEditor)
             {
                 // Mock remote player from camera position
-                TrackerClient.SendPosition(m_centerEyeAnchor);
+                trackerClient.SendPosition(m_centerEyeAnchor);
             }
 
             if (m_controllerInput.m_controllerState.lThumbstickDown)

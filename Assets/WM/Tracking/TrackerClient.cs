@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Xml.Serialization;
 using UnityEngine;
@@ -44,15 +45,15 @@ namespace WM
 
         private string m_receiveBuffer;
 
-        private UDPSend udpSend = new UDPSend();
-        private UDPReceive udpReceive = new UDPReceive();
+        public static UdpClient udpClient = new UdpClient(8050);
 
-        public string serverIP = "127.0.0.1";
+        private UDPSend udpSend;
+        private UDPReceive udpReceive;
+
+        public string remoteClientIP = "127.0.0.1";
 
         public int serverPort = 8888;
         public int clientPort = 8887;
-
-        //public bool active = false;
 
         public float[] position = new float[3];
 
@@ -71,23 +72,28 @@ namespace WM
             }
         }
 
-        private ILogger m_logger = null;
+        private ILogger logger = null;
 
         public TrackerClient(
+            string remoteClientIP,
             WM.ILogger logger)
         {
-            this.m_logger = logger;
+            this.remoteClientIP = remoteClientIP;
+            this.logger = logger;
+
+            udpSend = new UDPSend(udpClient);
+            udpReceive = new UDPReceive(udpClient);
         }
 
         public void Log(string text)
-        {
-            if (m_logger == null)
             {
-                return;
-            }
+                if (logger == null)
+                {
+                    return;
+                }
 
-            m_logger.Add(text);
-        }
+                logger.Add(text);
+            }
 
         // Use this for initialization
         public void Start()
@@ -103,16 +109,16 @@ namespace WM
                 string myIP = WM.Util.Net.GetLocalIPAddress();
                 Log("Device IP: " + myIP);
 
-                if (serverIP.Length == 0)
+                if (remoteClientIP.Length == 0)
                 {
-                    serverIP = myIP;
+                    remoteClientIP = myIP;
                 }
 
-                Log("Connecting to WMTracker UDP Server @ " + serverIP + ":" + serverPort + "...");
+                Log("Connecting to WMTracker UDP Server @ " + remoteClientIP + ":" + serverPort + "...");
 
                 m_client = new WMTrackerConnection_UdpClient(
-                    m_logger,
-                    serverIP,
+                    logger,
+                    remoteClientIP,
                     serverPort,
                     clientPort);
 
@@ -124,95 +130,6 @@ namespace WM
                 m_thread.Start();
             }
         }
-
-        //public void UpdatePositionFromTrackerXML_XPath()
-        //{
-        //    try
-        //    {
-        //        m_lastFrame = "";
-
-        //        if (m_client != null)
-        //        {
-        //            m_receiveBuffer += m_client.GetReceivedText();
-        //        }
-
-        //        int lastFrameEnd = m_receiveBuffer.LastIndexOf("</Frame>");
-
-        //        if (lastFrameEnd < 0)
-        //        {
-        //            return;
-        //        }
-
-        //        string temp = m_receiveBuffer.Substring(0, lastFrameEnd + 8);
-
-        //        int lastFrameBegin = temp.LastIndexOf("<Frame>");
-
-        //        if (lastFrameBegin < 0)
-        //        {
-        //            return;
-        //        }
-
-        //        // Now get the frame string.
-        //        m_lastFrame = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
-
-        //        if (m_receiveBuffer.Length == 0)
-        //        {
-        //            return;
-        //        }
-
-        //        // Writing to console is detrimental to performance! only use for debugging!
-        //        //Console.WriteLine("m_receiveBuffer: " + m_receiveBuffer);
-        //        //Console.WriteLine("frame: " + frame);
-
-        //        var xmlReaderSettings = new XmlReaderSettings();
-        //        xmlReaderSettings.ConformanceLevel = ConformanceLevel.Fragment;
-
-        //        var doc = new XPathDocument(XmlReader.Create(new StringReader(m_lastFrame), xmlReaderSettings));
-
-        //        var nav = doc.CreateNavigator();
-
-        //        // Read the number of Marked Objects in the frame.
-        //        string nums = nav.SelectSingleNode("/Frame/Objects/Num").Value;
-        //        int num = XmlConvert.ToInt32(nums);
-
-        //        for (int markedObjectIndex = 0; markedObjectIndex < num; ++markedObjectIndex)
-        //        {
-        //            string objectElementPath = "/Frame/Objects/Object" + markedObjectIndex;
-
-        //            string name = (nav.SelectSingleNode(objectElementPath + "/Name").Value);
-
-        //            if (!m_markedObjects.ContainsKey(name))
-        //            {
-        //                m_markedObjects[name] = new TrackedObject();
-        //                m_markedObjects[name].Name = name;
-        //            }
-
-        //            TrackedObject m = m_markedObjects[name];
-
-        //            m.FromXML(ref nav, objectElementPath);
-        //        }
-
-        //        // Clear receive buffer
-        //        // TODO: only discard up to and including processed message
-        //        m_receiveBuffer = "";
-
-        //        //if (text != null)
-        //        //{
-        //        //    text.text += "\nPos: " + position.ToString();
-        //        //}
-
-        //        //if (m_target)
-        //        //{
-        //        //    var basePosition = new Vector3(-6, 4, -12);
-        //        //    var positionYZSwapped = new Vector3(position.x, position.z, position.y);
-        //        //    m_target.transform.position = basePosition + 0.01f * positionYZSwapped;
-        //        //}
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Log("Exception:" + e.Message);
-        //    }
-        //}
 
         private static readonly string avatarFilePath = @"avatar.xml";
 
@@ -307,7 +224,7 @@ namespace WM
         {
             try
             {
-                var position = avatar.transform.position + avatar.transform.forward;
+                var position = avatar.transform.position; // + avatar.transform.forward;
 
                 var to = new TrackedObject();
                 to.Name = "Avatar";

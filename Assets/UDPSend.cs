@@ -20,10 +20,6 @@ using UnityEngine;
 
 namespace WM
 {
-    public class MyUDP
-    {
-        public static UdpClient s_client = new UdpClient(8050);
-    }
 
     public class UDPSend : MonoBehaviour
     {
@@ -36,25 +32,30 @@ namespace WM
 
         // "connection" things
         IPEndPoint remoteEndPoint;
-        UdpClient client;
+        UdpClient udpClient;
 
         // gui
         string strMessage = "";
 
+        public UDPSend(UdpClient udpClient)
+        {
+            this.udpClient = udpClient;
+        }
 
         // call it from shell (as program)
-        private static void Main()
-        {
-            UDPSend sendObj = new UDPSend();
-            sendObj.init();
+        //private static void Main()
+        //{
+        //    UDPSend sendObj = new UDPSend();
+        //    sendObj.init();
 
-            // testing via console
-            // sendObj.inputFromConsole();
+        //    // testing via console
+        //    // sendObj.inputFromConsole();
 
-            // as server sending endless
-            sendObj.sendEndless(" endless infos \n");
+        //    // as server sending endless
+        //    sendObj.sendEndless(" endless infos \n");
 
-        }
+        //}
+
         // start from unity3d
         public void Start()
         {
@@ -103,9 +104,6 @@ namespace WM
             // ----------------------------
             remoteEndPoint = new IPEndPoint(IPAddress.Parse(IP), port);
 
-            //client = new UdpClient();
-            client = MyUDP.s_client;
-
             // status
             print("Sending to " + IP + " : " + port);
             print("Testing: nc -lu " + IP + " : " + port);
@@ -124,13 +122,11 @@ namespace WM
                     // Den Text zum Remote-Client senden.
                     if (text != "")
                     {
-
-                        // Daten mit der UTF8-Kodierung in das Binärformat kodieren.
+                        // Encode data to UTF8-encoding.
                         byte[] data = Encoding.UTF8.GetBytes(text);
 
-                        // Den Text zum Remote-Client senden.
-                        
-                        //client.Send(data, data.Length, remoteEndPoint);
+                        // Send data to remote client.
+                        udpClient.Send(data, data.Length, remoteEndPoint);
                     }
                 } while (text != "");
             }
@@ -141,35 +137,24 @@ namespace WM
 
         }
 
-        // sendData
+        //! Sends the given message to the remote client.
         public void sendString(string message)
         {
             try
             {
                 if (message != "")
                 {
-                    // Daten mit der UTF8-Kodierung in das Binärformat kodieren.
+                    // Encode data to UTF8-encoding.
                     byte[] data = Encoding.UTF8.GetBytes(message);
 
-                    // Den message zum Remote-Client senden.
-                    client.Send(data, data.Length, remoteEndPoint);
+                    // Send data to remote client.
+                    udpClient.Send(data, data.Length, remoteEndPoint);
                 }
             }
             catch (Exception err)
             {
                 print(err.ToString());
             }
-        }
-
-
-        // endless test
-        public void sendEndless(string testStr)
-        {
-            do
-            {
-                sendString(testStr);
-            }
-            while (true);
         }
     }
 }
