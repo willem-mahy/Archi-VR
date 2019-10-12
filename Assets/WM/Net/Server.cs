@@ -434,7 +434,7 @@ namespace WM
                 }
             }
 
-            public string GetTrackedObjectFromFromUdp(int clientIndex)// TODO: make list or map [ip, avatar]
+            public string GetTrackedObjectFromFromUdp(int clientIndex)
             {
                 if (udpConnections.Count < clientIndex - 1)
                     return null;
