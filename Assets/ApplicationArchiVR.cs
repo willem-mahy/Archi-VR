@@ -445,7 +445,7 @@ namespace ArchiVR
             m_centerEyeAnchor.GetComponent<Camera>().enabled = false;
             m_centerEyeAnchor.GetComponent<Camera>().enabled = true;
 
-            if (this.TeleportCommand == null)
+            if (this.TeleportCommand == null) // TODO? : Move the processing of commands to ApplicationStateDefault:Update()?
             {
                 lock (commandQueueLock)
                 {
