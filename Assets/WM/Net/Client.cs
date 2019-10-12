@@ -181,7 +181,7 @@ namespace WM
                 return tcpClient.Connected;
             }
 
-
+            int frameIndex = 0;
 
             public void SendPositionToUDP(GameObject avatar)
             {
@@ -207,6 +207,8 @@ namespace WM
                     var data = writer.ToString();
 
                     udpSend.sendString(data);
+
+                    //Debug.Log("Client: Sent frame " + frameIndex++);
                 }
                 catch (Exception e)
                 {
@@ -216,10 +218,10 @@ namespace WM
 
             public void UpdatePositionFromUDP(GameObject avatar)
             {
-                if (udpReceive == null)
-                {
-                    return; // Not connected yet...
-                }
+                //if (udpReceive == null)
+                //{
+                //    return; // Not connected yet...
+                //}
 
                 try
                 {

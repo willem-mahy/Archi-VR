@@ -189,13 +189,15 @@ namespace WM
                                 // Try to receive the x-th client frame.
                                 var trackedObjectXML = GetTrackedObjectFromFromUdp(clientIndex);
 
+                                Debug.Log("Server: Received frame from client " + clientIndex);
+
                                 // Broadcast the x-th client frame to all but the originating client. (so avatars can be updated.)
                                 if (trackedObjectXML != null)
                                 {
                                     for (int broadcastClientIndex = 0; broadcastClientIndex < clientSockets.Count; ++broadcastClientIndex)
                                     {
                                         if (clientIndex == broadcastClientIndex)
-                                            return; // don't send own client updates back to self...
+                                            continue; // don't send own client updates back to self...
 
                                         SendDataToUdp(trackedObjectXML, broadcastClientIndex);
                                     }
