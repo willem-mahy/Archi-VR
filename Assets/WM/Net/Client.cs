@@ -193,6 +193,7 @@ namespace WM
                 try
                 {
                     var position = avatar.transform.position; // + avatar.transform.forward;
+                    position.y -= 1.8f;
 
                     var to = new TrackedObject();
                     to.Name = "Avatar";
