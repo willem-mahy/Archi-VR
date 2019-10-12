@@ -185,10 +185,10 @@ namespace WM
 
             public void SendPositionToUDP(GameObject avatar)
             {
-                if (udpSend == null)
-                {
-                    return; // Not connected yet...
-                }
+                //if (udpSend == null)
+                //{
+                //    return; // Not connected yet...
+                //}
 
                 try
                 {
