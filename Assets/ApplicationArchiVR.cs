@@ -120,7 +120,7 @@ namespace ArchiVR
         public string ActivePOIName
         {
             get; private set;
-        }
+        } = "";
         
         List<GameObject> m_POI = new List<GameObject>();
 

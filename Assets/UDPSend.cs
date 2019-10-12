@@ -27,7 +27,7 @@ namespace WM
 
         // prefs
         public string remoteIP = "127.0.0.1"; // 'loop back by default...
-        public int remotePort = 8889;
+        public int remotePort = 8890;
 
         // "connection" things
         IPEndPoint remoteEndPoint;

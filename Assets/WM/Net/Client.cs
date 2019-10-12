@@ -25,7 +25,7 @@ namespace WM
 
             #region TCP
 
-            public int TcpPort = 8888;
+            public int TcpPort = 8889; // Must be different than server TCP port probably...
 
             // The TCP client
             private TcpClient tcpClient;
@@ -34,7 +34,7 @@ namespace WM
 
             #region UDP
 
-            public static readonly int UdpPort = 8890; // Must be different than server UDP port probably...
+            public static readonly int UdpPort = 8891; // Must be different than server UDP port probably...
 
             private UdpClient udpClient;
 
@@ -182,6 +182,11 @@ namespace WM
 
             public void SendPositionToUDP(GameObject avatar)
             {
+                if (udpSend == null)
+                {
+                    return; // Not connected yet...
+                }
+
                 try
                 {
                     var position = avatar.transform.position; // + avatar.transform.forward;
@@ -208,6 +213,11 @@ namespace WM
 
             public void UpdatePositionFromUDP(GameObject avatar)
             {
+                if (udpReceive == null)
+                {
+                    return; // Not connected yet...
+                }
+
                 try
                 {
                     udpReceiveBuffer += udpReceive.getLatestUDPPacket();

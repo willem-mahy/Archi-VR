@@ -54,7 +54,7 @@ namespace WM
             #region UDP
 
             // Port for the UDP client.
-            public static readonly int UdpPort = 8889; // Must be different than server TCP port probably...
+            public static readonly int UdpPort = 8890; // Must be different than server TCP port probably...
 
             public UdpClient udpClient;// =  new UdpClient(UdpPort); //TODO: seems to not work?
 
@@ -132,11 +132,14 @@ namespace WM
 
                             Debug.Log("Server: Client connected: " + newTcpClient.Client.RemoteEndPoint.ToString());
 
-                            var teleportCommand = new TeleportCommand();
-                            teleportCommand.ProjectIndex = application.ActiveProjectIndex;
-                            teleportCommand.POIName = application.ActivePOIName;
+                            if (application.ActiveProjectIndex != -1)
+                            {
+                                var teleportCommand = new TeleportCommand();
+                                teleportCommand.ProjectIndex = application.ActiveProjectIndex;
+                                teleportCommand.POIName = application.ActivePOIName;
 
-                            //SendCommand(teleportCommand, newTcpClient);
+                                SendCommand(teleportCommand, newTcpClient);
+                            }
 
                             var newUdpConnection = new UdpConnection();                            
                             newUdpConnection.udpSend = new UDPSend(udpClient);
@@ -173,28 +176,20 @@ namespace WM
                         {
                             clientsLockOwner = "ReceiveUdpFunction";
 
-                            foreach (var udpConnection in udpConnections)
+                            for (int clientIndex = 0; clientIndex < clientSockets.Count; ++clientIndex)
                             {
-                                if (udpConnection == null)
-                                {
-                                    continue;
-                                }
+                                // Try to receive the x-th client frame.
+                                var trackedObjectXML = GetTrackedObjectFromFromUdp(clientIndex);
 
-                                for (int clientIndex = 0; clientIndex < clientSockets.Count; ++clientIndex)
+                                // Broadcast the x-th client frame to all but the originating client. (so avatars can be updated.)
+                                if (trackedObjectXML != null)
                                 {
-                                    // Try to receive the x-th client frame.
-                                    var trackedObjectXML = GetTrackedObjectFromFromUdp(clientIndex);
-
-                                    // Broadcast the x-th client frame to all but the originating client. (so avatars can be updated.)
-                                    if (trackedObjectXML != null)
+                                    for (int broadcastClientIndex = 0; broadcastClientIndex < clientSockets.Count; ++broadcastClientIndex)
                                     {
-                                        for (int broadcastClientIndex = 0; broadcastClientIndex < clientSockets.Count; ++broadcastClientIndex)
-                                        {
-                                            if (clientIndex == broadcastClientIndex)
-                                                return; // don't send own client updates back to self...
+                                        if (clientIndex == broadcastClientIndex)
+                                            return; // don't send own client updates back to self...
 
-                                            SendDataToUdp(trackedObjectXML, broadcastClientIndex);
-                                        }
+                                        SendDataToUdp(trackedObjectXML, broadcastClientIndex);
                                     }
                                 }
                             }
@@ -288,6 +283,7 @@ namespace WM
                     writer.Close();
 
                     var data = writer.ToString();
+                    Debug.Log(data);
 
                     lock (clientsLock)
                     {

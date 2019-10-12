@@ -25,10 +25,10 @@ namespace Assets.Command
             //    return;
             //}
             
-            //if ((application.ActiveProjectIndex == ProjectIndex) && (application.ActivePOIName == POIName))
-            //{
-            //    return;
-            //}
+            if ((application.ActiveProjectIndex == ProjectIndex) && (application.ActivePOIName == POIName))
+            {
+                return;
+            }
 
             application.TeleportCommand = this;
 

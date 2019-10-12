@@ -27,17 +27,16 @@ namespace WM
     {
 
         // receiving Thread
-        Thread receiveThread;
+        private Thread receiveThread;
 
         // udpclient object
-        UdpClient udpClient;
+        private UdpClient udpClient;
 
-        // public
-        //public int port = 8890;  // define in init
-
-        // infos
+        //
         public string lastReceivedUDPPacket = "";
-        public string allReceivedUDPPackets = ""; // clean up this from time to time!
+        
+        // clean up this from time to time!
+        public string allReceivedUDPPackets = "";
 
         public UDPReceive(UdpClient udpClient)
         {
