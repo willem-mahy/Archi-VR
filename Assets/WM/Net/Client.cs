@@ -261,6 +261,8 @@ namespace WM
                     reader.Close();
 
                     avatar.transform.position = trackedObject.Position;
+
+                    Debug.Log("trackedObject.Position: " + trackedObject.Position);
                 }
                 catch (Exception e)
                 {
