@@ -44,11 +44,11 @@ namespace WM
         // start from unity3d
         public void Init()
         {
-            Debug.LogError("UDPSend.init()");
+            Debug.Log("UDPSend.init()");
 
             remoteEndPoint = new IPEndPoint(IPAddress.Parse(remoteIP), remotePort);
 
-            Debug.LogError("Initialized for sending to remote end point (" + remoteIP + ":" + remotePort + ")");
+            Debug.Log("Initialized for sending to remote end point (" + remoteIP + ":" + remotePort + ")");
         }
 
         // inputFromConsole
