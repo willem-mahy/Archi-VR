@@ -99,7 +99,10 @@ namespace WM
                 udpSend = new UDPSend(udpClient);
                 udpSend.remoteIP = ServerIP;
                 udpSend.remotePort = Server.UdpPort;
+                udpSend.Init();
+
                 udpReceive = new UDPReceive(udpClient);
+                udpReceive.Init();
 
                 while (true)
                 {
@@ -162,11 +165,11 @@ namespace WM
 
             private bool ConnectToServer(string serverIP)
             {
-                Debug.Log("Client: Trying to connect tcpClient to '" + serverIP + ":" + TcpPort + "' (timeout: " + ConnectTimeout + "ms)");
+                Debug.Log("Client: Trying to connect tcpClient to '" + serverIP + ":" + Server.TcpPort + "' (timeout: " + ConnectTimeout + "ms)");
 
                 var tcpClient = new TcpClient();
 
-                var connectionAttempt = tcpClient.ConnectAsync(serverIP, TcpPort);
+                var connectionAttempt = tcpClient.ConnectAsync(serverIP, Server.TcpPort);
 
                 connectionAttempt.Wait(ConnectTimeout);
 
