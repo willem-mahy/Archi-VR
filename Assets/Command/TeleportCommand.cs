@@ -1,6 +1,7 @@
 ﻿using ArchiVR;
 using System;
 using System.Xml.Serialization;
+using UnityEngine;
 using static ArchiVR.ApplicationArchiVR;
 
 namespace Assets.Command
@@ -17,6 +18,8 @@ namespace Assets.Command
 
         public void Execute(ApplicationArchiVR application)
         {
+            Debug.Log("TeleportCommand.Execute()");
+
             //if (application.RunAsServer)
             //{
             //    return;
