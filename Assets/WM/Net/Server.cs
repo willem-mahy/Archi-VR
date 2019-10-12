@@ -129,7 +129,7 @@ namespace WM
                             teleportCommand.ProjectIndex = application.ActiveProjectIndex;
                             teleportCommand.POIName = application.ActivePOIName;
 
-                            SendCommand(teleportCommand, newTcpClient);
+                            //SendCommand(teleportCommand, newTcpClient);
 
                             var newUdpConnection = new UdpConnection();                            
                             newUdpConnection.udpSend = new UDPSend(udpClient);
