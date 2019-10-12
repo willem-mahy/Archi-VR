@@ -631,13 +631,6 @@ namespace ArchiVR
                 return;
             }
 
-            projectIndex = (projectIndex) % m_projectNames.Count;
-
-            while (projectIndex < 0)
-            {
-                projectIndex += m_projectNames.Count;
-            }
-
             var tc = new TeleportCommand();
             tc.ProjectIndex = projectIndex;
             tc.POIName = ActivePOIName;
