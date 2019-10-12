@@ -247,7 +247,7 @@ namespace WM
                                     var messageFromClient = dataFromClient.Substring(0, messageEnd);
                                     dataFromClient = dataFromClient.Substring(messageEnd + 1);
 
-                                    Debug.Log(" >> Message from client - " + messageFromClient);
+                                    Debug.Log("Server:ReceiveTcpFunction(): Data from client: '" + messageFromClient + "'");
                                     messageEnd = dataFromClient.IndexOf("$");
                                 }
                             }
@@ -277,6 +277,8 @@ namespace WM
             public void BroadcastCommand(
                 TeleportCommand teleportCommand)
             {
+                Debug.Log("Server:BoadcastCommand()");
+
                 try
                 {
                     var ser = new XmlSerializer(typeof(TeleportCommand));
@@ -295,7 +297,7 @@ namespace WM
                         {
                             //if (tcpClient != null)
                             {
-                                SendToClient(data, tcpClient);
+                                SendData(data, tcpClient);
                             }
                         }
 
@@ -306,12 +308,14 @@ namespace WM
                 {
                     Debug.LogError("Exception:" + e.Message);
                 }
-
             }
+
             public void SendCommand(
                 TeleportCommand teleportCommand,
                 TcpClient tcpClient)
             {
+                Debug.Log("Server:SendCommand()");
+
                 try
                 {
                     var ser = new XmlSerializer(typeof(TeleportCommand));
@@ -322,7 +326,7 @@ namespace WM
 
                     var data = writer.ToString();
 
-                    SendToClient(data, tcpClient);
+                    SendData(data, tcpClient);
                 }
                 catch (Exception e)
                 {
@@ -330,10 +334,12 @@ namespace WM
                 }
             }
 
-            public void SendToClient(
+            public void SendData(
                 String data,
                 TcpClient tcpClient)
             {
+                Debug.Log("Server:SendData()");
+
                 var networkStream = tcpClient.GetStream();
 
                 var bytes = Encoding.ASCII.GetBytes(data);
