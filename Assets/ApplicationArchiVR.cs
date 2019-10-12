@@ -618,12 +618,7 @@ namespace ArchiVR
             }
             else
             {
-                projectIndex = (projectIndex) % m_projectNames.Count;
-
-                while (projectIndex < 0)
-                {
-                    projectIndex += m_projectNames.Count;
-                }
+                projectIndex = UtilIterate.MakeCycle(projectIndex, 0, m_projectNames.Count);
             }
 
             if (projectIndex == ActiveProjectIndex)
