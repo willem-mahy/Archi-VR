@@ -69,9 +69,6 @@ namespace WM
                     // Bytes mit der UTF8-Kodierung in das Textformat kodieren.
                     string text = Encoding.UTF8.GetString(data);
 
-                    // Print the received text.
-                    //print(">> " + text);
-
                     // latest UDPpacket
                     lastReceivedUDPPacket = text;
 
