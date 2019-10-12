@@ -146,9 +146,14 @@ namespace WM
 
                             var newUdpConnection = new UdpConnection();                            
                             newUdpConnection.udpSend = new UDPSend(udpClient);
-                            newUdpConnection.udpSend.remoteIP = newTcpClient.Client.RemoteEndPoint.ToString();
+
+                            var remoteIpEndPoint = newTcpClient.Client.RemoteEndPoint as IPEndPoint;
+                            var remoteIP = remoteIpEndPoint.Address.ToString();
+                            newUdpConnection.udpSend.remoteIP = remoteIP;
                             newUdpConnection.udpSend.remotePort = Client.UdpPort;
+                            newUdpConnection.udpSend.Init();
                             newUdpConnection.udpReceive = new UDPReceive(udpClient);
+                            newUdpConnection.udpReceive.Init();
 
                             lock (clientsLock)
                             {
