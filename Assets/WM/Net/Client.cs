@@ -19,11 +19,13 @@ namespace WM
 
             public ApplicationArchiVR application;
 
-            public string serverIP = "";//192.168.0.13";
+            public string ServerIP = "";//192.168.0.13";
+
+            public int ConnectTimeout = 100;
 
             #region TCP
 
-            public int port = 8888;
+            public int TcpPort = 8888;
 
             // The TCP client
             private TcpClient tcpClient;
@@ -34,7 +36,7 @@ namespace WM
 
             public static readonly int UdpPort = 8890; // Must be different than server UDP port probably...
 
-            public UdpClient udpClient;// = new UdpClient(UdpPort);
+            private UdpClient udpClient;
 
             private UDPSend udpSend;
 
@@ -95,40 +97,47 @@ namespace WM
                 udpClient = new UdpClient(UdpPort);
 
                 udpSend = new UDPSend(udpClient);
-                udpSend.remoteIP = serverIP;
+                udpSend.remoteIP = ServerIP;
                 udpSend.remotePort = Server.UdpPort;
                 udpReceive = new UDPReceive(udpClient);
 
                 while (true)
                 {
-                    // Receive message from server.
-                    var bytesFromServer = new byte[tcpClient.ReceiveBufferSize];
-                    serverStream.Read(bytesFromServer, 0, (int)tcpClient.ReceiveBufferSize);
-                    string dataFromServer = Encoding.ASCII.GetString(bytesFromServer);
-                    Debug.Log("Client: Data from server: " + dataFromServer);
+                    string dataFromServer = "";
 
-                    var ser = new XmlSerializer(typeof(TeleportCommand));
+                    while (serverStream.DataAvailable)
+                    {
+                        // Receive data from server.
+                        var bytesFromServer = new byte[tcpClient.ReceiveBufferSize];
+                        var numBytesRead = serverStream.Read(bytesFromServer, 0, (int)tcpClient.ReceiveBufferSize);
 
-                    //var reader = new StreamReader(avatarFilePath);
-                    var reader = new StringReader(dataFromServer);
+                        dataFromServer+= Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);          
+                    }
 
-                    var teleportCommand = (TeleportCommand)(ser.Deserialize(reader));
-                    reader.Close();
+                    if (dataFromServer.Length > 0)
+                    {
+                        Debug.Log("Client: Data from server: " + dataFromServer);
 
-                    application.QueueCommand(teleportCommand);
+                        var ser = new XmlSerializer(typeof(TeleportCommand));
+
+                        var reader = new StringReader(dataFromServer);
+
+                        var teleportCommand = (TeleportCommand)(ser.Deserialize(reader));
+                        reader.Close();
+
+                        application.QueueCommand(teleportCommand);
+                    }
                 }
             }
-
-            public int connectTimeout = 100;
 
             private void Connect()
             {
                 while (true)
                 {
-                    if (this.serverIP != "")
+                    if (this.ServerIP != "")
                     {
                         // connect to a predefined server.
-                        if (ConnectToServer(this.serverIP))
+                        if (ConnectToServer(this.ServerIP))
                         {
                             return;
                         }
@@ -143,7 +152,7 @@ namespace WM
                             if (ConnectToServer(serverIP))
                             {
                                 // Remember server IP.
-                                this.serverIP = serverIP;
+                                this.ServerIP = serverIP;
                                 return;
                             }
                         }
@@ -153,13 +162,13 @@ namespace WM
 
             private bool ConnectToServer(string serverIP)
             {
-                Debug.Log("Client: Trying to connect tcpClient to '" + serverIP + ":" + port + "' (timeout: " + connectTimeout + "ms)");
+                Debug.Log("Client: Trying to connect tcpClient to '" + serverIP + ":" + TcpPort + "' (timeout: " + ConnectTimeout + "ms)");
 
                 var tcpClient = new TcpClient();
 
-                var connectionAttempt = tcpClient.ConnectAsync(serverIP, port);
+                var connectionAttempt = tcpClient.ConnectAsync(serverIP, TcpPort);
 
-                connectionAttempt.Wait(connectTimeout);
+                connectionAttempt.Wait(ConnectTimeout);
 
                 if (tcpClient.Connected)
                 {

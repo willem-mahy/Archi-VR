@@ -300,7 +300,7 @@ namespace ArchiVR
                 Server.Init();
 
                 // Let client connect to own server. (TODO: connect directly, ie without network middle layer.)
-                Client.serverIP = NetUtil.GetLocalIPAddress();
+                Client.ServerIP = NetUtil.GetLocalIPAddress();
             }
 
             Client.Init();
@@ -1245,7 +1245,7 @@ namespace ArchiVR
                 Server.BroadcastCommand(teleportCommand);
             }
 
-            teleportCommand.Execute(this);
+            //teleportCommand.Execute(this);
         }
 
         public IEnumerator Teleport()

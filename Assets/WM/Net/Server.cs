@@ -34,24 +34,31 @@ namespace WM
             // The server socket.
             TcpListener tcpListener;
 
-            // The client socket.
-            List<TcpClient> clientSockets = new List<TcpClient>();
+            // Used for debugging client list lock related deadlocks.
+            private string clientsLockOwner = "";
 
+            // Lock for the clients list.
             private object clientsLock = new object();
 
+            // The client TCP sockets.
+            List<TcpClient> clientSockets = new List<TcpClient>();
+
+            // The thread that accepts TCP data from connected clients.
             private Thread receiveTcpThread;
 
+            // The thread that accepts client connections.
             private Thread acceptClientThread;
 
             #endregion
 
             #region UDP
 
-            public static readonly int UdpPort = 8889; // Must be different than server UDP port probably...
+            // Port for the UDP client.
+            public static readonly int UdpPort = 8889; // Must be different than server TCP port probably...
 
-            public UdpClient udpClient;// =  new UdpClient(UdpPort);
+            public UdpClient udpClient;// =  new UdpClient(UdpPort); //TODO: seems to not work?
 
-            List<UdpConnection> udpConnections;// = new List<UdpConnection>();
+            List<UdpConnection> udpConnections;// = new List<UdpConnection>(); //TODO: seems to not work?
 
             private Thread receiveUdpThread;
 
@@ -123,7 +130,7 @@ namespace WM
                             // Accept the client socket.
                             newTcpClient = tcpListener.AcceptTcpClient();
 
-                            Debug.Log("Client connected: " + newTcpClient.Client.RemoteEndPoint.ToString());
+                            Debug.Log("Server: Client connected: " + newTcpClient.Client.RemoteEndPoint.ToString());
 
                             var teleportCommand = new TeleportCommand();
                             teleportCommand.ProjectIndex = application.ActiveProjectIndex;
@@ -155,8 +162,6 @@ namespace WM
                     }
                 }
             }
-
-            private string clientsLockOwner = "";
 
             private void ReceiveUdpFunction()
             {
