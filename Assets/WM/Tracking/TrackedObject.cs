@@ -43,6 +43,7 @@ namespace WM
         [XmlElement("Position")]
         public Vector3 Position { get; set; } = new Vector3();
 
+        /*
         [XmlElement("RotationAxis")]
         public Vector3 RotationAxis { get; set; } = new Vector3();
 
@@ -71,34 +72,35 @@ namespace WM
             "Y: " + Position.y + "\n" +
             "Z: " + Position.z + "\n" +
             "\n" +
-            /*
-            "Rotation Euler Angles:\n" +
-            "X: " + m_rotationEuler.x + "\n" +
-            "Y: " + m_rotationEuler.y + "\n" +
-            "Z: " + m_rotationEuler.z + "\n" +
-            "\n" +
-            "Rotation Local Axes:\n" +
-            "X axis:\n" +
-            "X: " + m_axisX.x + "\n" +
-            "Y: " + m_axisX.y + "\n" +
-            "Z: " + m_axisX.z + "\n" +
-            "\n" +
-            "Y axis:\n" +
-            "X: " + m_axisY.x + "\n" +
-            "Y: " + m_axisY.y + "\n" +
-            "Z: " + m_axisY.z + "\n" +
-            "\n" +
-            "Z axis:\n" +
-            "X: " + m_axisZ.x + "\n" +
-            "Y: " + m_axisZ.y + "\n" +
-            "Z: " + m_axisZ.z +
-            "\n" +
-            */
+            
+            //"Rotation Euler Angles:\n" +
+            //"X: " + m_rotationEuler.x + "\n" +
+            //"Y: " + m_rotationEuler.y + "\n" +
+            //"Z: " + m_rotationEuler.z + "\n" +
+            //"\n" +
+            //"Rotation Local Axes:\n" +
+            //"X axis:\n" +
+            //"X: " + m_axisX.x + "\n" +
+            //"Y: " + m_axisX.y + "\n" +
+            //"Z: " + m_axisX.z + "\n" +
+            //"\n" +
+            //"Y axis:\n" +
+            //"X: " + m_axisY.x + "\n" +
+            //"Y: " + m_axisY.y + "\n" +
+            //"Z: " + m_axisY.z + "\n" +
+            //"\n" +
+            //"Z axis:\n" +
+            //"X: " + m_axisZ.x + "\n" +
+            //"Y: " + m_axisZ.y + "\n" +
+            //"Z: " + m_axisZ.z +
+            //"\n" +
+            
             "Rotation AxisAngle:\n" +
             "X: " + RotationAxis.x + "\n" +
             "Y: " + RotationAxis.y + "\n" +
             "Z: " + RotationAxis.z + "\n" +
             "Angle:" + RotationAngle;
         }
+    */
     }
 } // WM
