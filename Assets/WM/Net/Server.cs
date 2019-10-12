@@ -29,7 +29,7 @@ namespace WM
 
             #region TCP
 
-            public int tcpPort = 8888;
+            public static readonly int TcpPort = 8888;
 
             // The server socket.
             TcpListener tcpListener;
@@ -89,25 +89,28 @@ namespace WM
 
                 // Get first IP address.
                 var serverIpAddress = hostEntry.AddressList[1];
-                Debug.Log("Server IP address: " + serverIpAddress.ToString());
-
+                
                 // Create the server socket.
-                Debug.Log("Server TCP port: " + tcpPort.ToString());
-                tcpListener = new TcpListener(serverIpAddress, tcpPort);
-
+                tcpListener = new TcpListener(serverIpAddress, TcpPort);
+                
                 // Start the server socket.
                 tcpListener.Start();
 
+                Debug.Log("Server running TCP listener @ " + serverIpAddress.ToString() + ":" + TcpPort.ToString());
+
+                // Start a thread to listen for incoming connections from clients on the server TCP socket.
                 acceptClientThread = new Thread(new ThreadStart(AcceptClientFunction));
                 acceptClientThread.IsBackground = true;
                 acceptClientThread.Name = "acceptClientThread";
                 acceptClientThread.Start();
 
+                // Start a thread to listen for incoming data from connected clients on the server TCP socket.
                 receiveTcpThread = new Thread(new ThreadStart(ReceiveTcpFunction));
                 receiveTcpThread.IsBackground = true;
                 receiveTcpThread.Name = "receiveTcpThread";
                 receiveTcpThread.Start();
 
+                // Start a thread to listen for incoming data from connected clients on the server UDP socket.
                 receiveUdpThread = new Thread(new ThreadStart(ReceiveUdpFunction));
                 receiveUdpThread.IsBackground = true;
                 receiveUdpThread.Name = "receiveUdpThread";
