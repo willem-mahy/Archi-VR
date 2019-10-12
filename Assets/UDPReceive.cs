@@ -82,12 +82,17 @@ namespace WM
             }
         }
 
-        // getLatestUDPPacket
-        // cleans up the rest
-        public string getLatestUDPPacket()
+        //public string getLatestUDPPacket()
+        //{
+        //    allReceivedUDPPackets = "";
+        //    return lastReceivedUDPPacket;
+        //}
+
+        public string getAllReceivedData()
         {
+            string r = allReceivedUDPPackets;
             allReceivedUDPPackets = "";
-            return lastReceivedUDPPacket;
+            return r;
         }
     }
 }

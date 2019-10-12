@@ -189,7 +189,7 @@ namespace WM
                                 // Try to receive the x-th client frame.
                                 var trackedObjectXML = GetTrackedObjectFromFromUdp(clientIndex);
 
-                                Debug.Log("Server: Received frame from client " + clientIndex);
+                                //Debug.Log("Server: Received frame from client " + clientIndex);
 
                                 // Broadcast the x-th client frame to all but the originating client. (so avatars can be updated.)
                                 if (trackedObjectXML != null)
@@ -446,7 +446,7 @@ namespace WM
 
                 try
                 {
-                    udpConnection.udpReceiveBuffer += udpConnection.udpReceive.getLatestUDPPacket();
+                    udpConnection.udpReceiveBuffer += udpConnection.udpReceive.getAllReceivedData();
 
                     string frameEndTag = "</TrackedObject>";
                     int frameEndTagLength = frameEndTag.Length;

@@ -225,7 +225,7 @@ namespace WM
 
                 try
                 {
-                    udpReceiveBuffer += udpReceive.getLatestUDPPacket();
+                    udpReceiveBuffer += udpReceive.getAllReceivedData();
 
                     string frameEndTag = "</TrackedObject>";
                     int frameEndTagLength = frameEndTag.Length;
