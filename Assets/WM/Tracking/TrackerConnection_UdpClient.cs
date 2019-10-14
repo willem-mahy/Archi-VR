@@ -75,7 +75,7 @@ namespace WM
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("WMTrackerConnection_UdpClient.Run(): Failed to create UdpCLient!");
+                        Console.WriteLine("WMTrackerConnection_UdpClient.Run(): Failed to create UdpCLient!" + e.Message);
                     }
                 }
 
