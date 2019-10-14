@@ -127,7 +127,9 @@ namespace WM
                     return;
                 }
 
-                var remoteIP = udpReceive.allReceivedUDPPackets.Keys.GetEnumerator().Current;
+                var keysEnumerator = udpReceive.allReceivedUDPPackets.Keys.GetEnumerator();
+                keysEnumerator.MoveNext();
+                var remoteIP = keysEnumerator.Current;
 
                 string frameEndTag = "</TrackedObject>";
                 int frameEndTagLength = frameEndTag.Length;

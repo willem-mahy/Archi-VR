@@ -62,11 +62,11 @@ namespace WM
 
                 try
                 {
-                    // Bytes empfangen.
+                    // Recive bytes from any client.
                     var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
                     byte[] data = udpClient.Receive(ref remoteEndPoint);
 
-                    // Bytes mit der UTF8-Kodierung in das Textformat kodieren.
+                    // Encode received bytes to UTF8- encoding.
                     string text = Encoding.UTF8.GetString(data);
 
                     // latest UDPpacket
