@@ -191,11 +191,13 @@ namespace WM
                 try
                 {
                     var position = avatar.transform.position; // + avatar.transform.forward;
+                    var rotation = avatar.transform.rotation;
                     position.y -= 1.8f;
 
                     var to = new TrackedObject();
                     to.Name = "Avatar";
                     to.Position = position;
+                    to.Rotation = rotation;
 
                     var ser = new XmlSerializer(typeof(TrackedObject));
 
@@ -224,41 +226,47 @@ namespace WM
 
                 try
                 {
-                    //udpReceiveBuffer += udpReceive.getAllReceivedData();
-                    if (udpReceive.allReceivedUDPPackets.Keys.Count == 0)
+                    string lastFrame;
+
+                    lock (udpReceive.allReceivedUDPPackets)
                     {
-                        return;
+                        //udpReceiveBuffer += udpReceive.getAllReceivedData();
+                        if (udpReceive.allReceivedUDPPackets.Keys.Count == 0)
+                        {
+                            return;
+                        }
+
+                        // For now use the first (because only) remote client's data.
+                        var keysEnumerator = udpReceive.allReceivedUDPPackets.Keys.GetEnumerator();
+                        keysEnumerator.MoveNext();
+                        var remoteIP = keysEnumerator.Current;
+
+
+                        string frameEndTag = "</TrackedObject>";
+                        int frameEndTagLength = frameEndTag.Length;
+
+                        int lastFrameEnd = udpReceive.allReceivedUDPPackets[remoteIP].LastIndexOf(frameEndTag);
+
+                        if (lastFrameEnd < 0)
+                        {
+                            return;
+                        }
+
+                        string temp = udpReceive.allReceivedUDPPackets[remoteIP].Substring(0, lastFrameEnd + frameEndTagLength);
+
+                        int lastFrameBegin = temp.LastIndexOf("<TrackedObject ");
+
+                        if (lastFrameBegin < 0)
+                        {
+                            return;
+                        }
+
+                        // Now get the frame string.
+                        lastFrame = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
+
+                        // Clear old frames from receivebuffer.
+                        udpReceive.allReceivedUDPPackets[remoteIP] = udpReceive.allReceivedUDPPackets[remoteIP].Substring(lastFrameEnd + frameEndTagLength);
                     }
-
-                    // For now use the first (because only) remote client's data.
-                    var keysEnumerator = udpReceive.allReceivedUDPPackets.Keys.GetEnumerator();
-                    keysEnumerator.MoveNext();
-                    var remoteIP = keysEnumerator.Current;
-
-
-                    string frameEndTag = "</TrackedObject>";
-                    int frameEndTagLength = frameEndTag.Length;
-                    int lastFrameEnd = udpReceive.allReceivedUDPPackets[remoteIP].LastIndexOf(frameEndTag);
-
-                    if (lastFrameEnd < 0)
-                    {
-                        return;
-                    }
-
-                    string temp = udpReceive.allReceivedUDPPackets[remoteIP].Substring(0, lastFrameEnd + frameEndTagLength);
-
-                    int lastFrameBegin = temp.LastIndexOf("<TrackedObject ");
-
-                    if (lastFrameBegin < 0)
-                    {
-                        return;
-                    }
-
-                    // Now get the frame string.
-                    string lastFrame = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
-
-                    // Clear old frames from receivebuffer.
-                    udpReceive.allReceivedUDPPackets[remoteIP] = udpReceive.allReceivedUDPPackets[remoteIP].Substring(lastFrameEnd + frameEndTagLength);
 
                     var ser = new XmlSerializer(typeof(TrackedObject));
 
@@ -269,6 +277,7 @@ namespace WM
                     reader.Close();
 
                     avatar.transform.position = trackedObject.Position;
+                    avatar.transform.rotation = trackedObject.Rotation;
 
                     Debug.Log("trackedObject.Position: " + trackedObject.Position);
                 }

@@ -19,7 +19,6 @@ namespace WM
             public string remoteIP;
             public UDPSend udpSend;
             public UDPReceive udpReceive;
-            public string udpReceiveBuffer = "";
         }
 
         public class Server : MonoBehaviour
@@ -456,18 +455,16 @@ namespace WM
                         return null;
                     }
 
-                    var udpReceiveBuffer = udpConnection.udpReceive.allReceivedUDPPackets[remoteIP];
-
                     string frameEndTag = "</TrackedObject>";
                     int frameEndTagLength = frameEndTag.Length;
-                    int lastFrameEnd = udpReceiveBuffer.LastIndexOf(frameEndTag);
+                    int lastFrameEnd = udpConnection.udpReceive.allReceivedUDPPackets[remoteIP].LastIndexOf(frameEndTag);
 
                     if (lastFrameEnd < 0)
                     {
                         return null;
                     }
 
-                    string temp = udpReceiveBuffer.Substring(0, lastFrameEnd + frameEndTagLength);
+                    string temp = udpConnection.udpReceive.allReceivedUDPPackets[remoteIP].Substring(0, lastFrameEnd + frameEndTagLength);
 
                     int lastFrameBegin = temp.LastIndexOf("<TrackedObject ");
 
@@ -480,7 +477,7 @@ namespace WM
                     string trackedObjectXML = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
 
                     // Clear old frames from receivebuffer.
-                    udpConnection.udpReceiveBuffer = udpReceiveBuffer.Substring(lastFrameEnd + frameEndTagLength);
+                    udpConnection.udpReceive.allReceivedUDPPackets[remoteIP] = udpConnection.udpReceive.allReceivedUDPPackets[remoteIP].Substring(lastFrameEnd + frameEndTagLength);
 
                     var ser = new XmlSerializer(typeof(TrackedObject));
 

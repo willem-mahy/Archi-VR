@@ -43,6 +43,9 @@ namespace WM
         [XmlElement("Position")]
         public Vector3 Position { get; set; } = new Vector3();
 
+        [XmlElement("Rotation")]
+        public Quaternion Rotation { get; set; } = new Quaternion();
+
         /*
         [XmlElement("RotationAxis")]
         public Vector3 RotationAxis { get; set; } = new Vector3();

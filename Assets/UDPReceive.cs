@@ -75,15 +75,17 @@ namespace WM
                     // ....
                     var senderIP = remoteEndPoint.Address.ToString();
 
-                    if (allReceivedUDPPackets.ContainsKey(senderIP))
+                    lock (allReceivedUDPPackets)
                     {
-                        allReceivedUDPPackets[senderIP] = allReceivedUDPPackets[senderIP] + text;
+                        if (allReceivedUDPPackets.ContainsKey(senderIP))
+                        {
+                            allReceivedUDPPackets[senderIP] = allReceivedUDPPackets[senderIP] + text;
+                        }
+                        else
+                        {
+                            allReceivedUDPPackets[senderIP] = text;
+                        }
                     }
-                    else
-                    {
-                        allReceivedUDPPackets[senderIP] = text;
-                    }
-
                 }
                 catch (Exception err)
                 {

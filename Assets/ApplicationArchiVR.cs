@@ -438,6 +438,10 @@ namespace ArchiVR
                 CommandQueue.Add(teleportCommand);
             }
         }
+        
+        Vector3 m_centerEyeAnchorPrev = new Vector3();
+        int frame = 0;
+
         //! Update is called once per frame
         void Update()
         {
@@ -471,8 +475,14 @@ namespace ArchiVR
                     trackerClient.SendPosition(m_centerEyeAnchor);
                 }
 
-                Client.SendPositionToUDP(m_centerEyeAnchor);
-                Client.UpdatePositionFromUDP(Avatar);
+                
+                if (((m_centerEyeAnchor.transform.position - m_centerEyeAnchorPrev).magnitude > 0.01f) || (frame++ % 10 == 0))
+                {
+                    Client.SendPositionToUDP(m_centerEyeAnchor);
+                    m_centerEyeAnchorPrev = m_centerEyeAnchor.transform.position;
+                }
+
+                Client.UpdatePositionFromUDP(Avatar);                
             }
 
             if (m_controllerInput.m_controllerState.lThumbstickDown)
