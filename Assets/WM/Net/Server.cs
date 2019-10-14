@@ -16,6 +16,7 @@ namespace WM
     {
         class UdpConnection
         {
+            public string remoteIP;
             public UDPSend udpSend;
             public UDPReceive udpReceive;
             public string udpReceiveBuffer = "";
@@ -154,6 +155,8 @@ namespace WM
                             newUdpConnection.udpSend.Init();
                             newUdpConnection.udpReceive = new UDPReceive(udpClient);
                             newUdpConnection.udpReceive.Init();
+
+                            newUdpConnection.remoteIP = remoteIP;
 
                             lock (clientsLock)
                             {
@@ -446,18 +449,25 @@ namespace WM
 
                 try
                 {
-                    udpConnection.udpReceiveBuffer += udpConnection.udpReceive.getAllReceivedData();
+                    var remoteIP = udpConnections[clientIndex].remoteIP;
+
+                    if (!udpConnection.udpReceive.allReceivedUDPPackets.ContainsKey(remoteIP))
+                    {
+                        return null;
+                    }
+
+                    var udpReceiveBuffer = udpConnection.udpReceive.allReceivedUDPPackets[remoteIP];
 
                     string frameEndTag = "</TrackedObject>";
                     int frameEndTagLength = frameEndTag.Length;
-                    int lastFrameEnd = udpConnection.udpReceiveBuffer.LastIndexOf(frameEndTag);
+                    int lastFrameEnd = udpReceiveBuffer.LastIndexOf(frameEndTag);
 
                     if (lastFrameEnd < 0)
                     {
                         return null;
                     }
 
-                    string temp = udpConnection.udpReceiveBuffer.Substring(0, lastFrameEnd + frameEndTagLength);
+                    string temp = udpReceiveBuffer.Substring(0, lastFrameEnd + frameEndTagLength);
 
                     int lastFrameBegin = temp.LastIndexOf("<TrackedObject ");
 
@@ -470,7 +480,7 @@ namespace WM
                     string trackedObjectXML = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
 
                     // Clear old frames from receivebuffer.
-                    udpConnection.udpReceiveBuffer = udpConnection.udpReceiveBuffer.Substring(lastFrameEnd + frameEndTagLength);
+                    udpConnection.udpReceiveBuffer = udpReceiveBuffer.Substring(lastFrameEnd + frameEndTagLength);
 
                     var ser = new XmlSerializer(typeof(TrackedObject));
 

@@ -15,6 +15,7 @@
  
 */
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -36,7 +37,7 @@ namespace WM
         public string lastReceivedUDPPacket = "";
         
         // clean up this from time to time!
-        public string allReceivedUDPPackets = "";
+        public Dictionary<string, string> allReceivedUDPPackets = new Dictionary<string, string>();
 
         public UDPReceive(UdpClient udpClient)
         {
@@ -62,8 +63,8 @@ namespace WM
                 try
                 {
                     // Bytes empfangen.
-                    IPEndPoint anyIP = new IPEndPoint(IPAddress.Any, 0);
-                    byte[] data = udpClient.Receive(ref anyIP);
+                    var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                    byte[] data = udpClient.Receive(ref remoteEndPoint);
 
                     // Bytes mit der UTF8-Kodierung in das Textformat kodieren.
                     string text = Encoding.UTF8.GetString(data);
@@ -72,7 +73,16 @@ namespace WM
                     lastReceivedUDPPacket = text;
 
                     // ....
-                    allReceivedUDPPackets = allReceivedUDPPackets + text;
+                    var senderIP = remoteEndPoint.Address.ToString();
+
+                    if (allReceivedUDPPackets.ContainsKey(senderIP))
+                    {
+                        allReceivedUDPPackets[senderIP] = allReceivedUDPPackets[senderIP] + text;
+                    }
+                    else
+                    {
+                        allReceivedUDPPackets[senderIP] = text;
+                    }
 
                 }
                 catch (Exception err)
@@ -80,19 +90,6 @@ namespace WM
                     print(err.ToString());
                 }
             }
-        }
-
-        //public string getLatestUDPPacket()
-        //{
-        //    allReceivedUDPPackets = "";
-        //    return lastReceivedUDPPacket;
-        //}
-
-        public string getAllReceivedData()
-        {
-            string r = allReceivedUDPPackets;
-            allReceivedUDPPackets = "";
-            return r;
-        }
+        }                
     }
 }

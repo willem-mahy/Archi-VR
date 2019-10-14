@@ -42,8 +42,6 @@ namespace WM
 
             private UDPReceive udpReceive;
 
-            private string udpReceiveBuffer;
-
             #endregion
 
             // The thread.
@@ -226,18 +224,25 @@ namespace WM
 
                 try
                 {
-                    udpReceiveBuffer += udpReceive.getAllReceivedData();
+                    //udpReceiveBuffer += udpReceive.getAllReceivedData();
+                    if (udpReceive.allReceivedUDPPackets.Keys.Count == 0)
+                    {
+                        return;
+                    }
+
+                    // For now use the first (because only) remote client's data.
+                    var remoteIP = udpReceive.allReceivedUDPPackets.Keys.GetEnumerator().Current;
 
                     string frameEndTag = "</TrackedObject>";
                     int frameEndTagLength = frameEndTag.Length;
-                    int lastFrameEnd = udpReceiveBuffer.LastIndexOf(frameEndTag);
+                    int lastFrameEnd = udpReceive.allReceivedUDPPackets[remoteIP].LastIndexOf(frameEndTag);
 
                     if (lastFrameEnd < 0)
                     {
                         return;
                     }
 
-                    string temp = udpReceiveBuffer.Substring(0, lastFrameEnd + frameEndTagLength);
+                    string temp = udpReceive.allReceivedUDPPackets[remoteIP].Substring(0, lastFrameEnd + frameEndTagLength);
 
                     int lastFrameBegin = temp.LastIndexOf("<TrackedObject ");
 
@@ -250,7 +255,7 @@ namespace WM
                     string lastFrame = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
 
                     // Clear old frames from receivebuffer.
-                    udpReceiveBuffer = udpReceiveBuffer.Substring(lastFrameEnd + frameEndTagLength);
+                    udpReceive.allReceivedUDPPackets[remoteIP] = udpReceive.allReceivedUDPPackets[remoteIP].Substring(lastFrameEnd + frameEndTagLength);
 
                     var ser = new XmlSerializer(typeof(TrackedObject));
 
