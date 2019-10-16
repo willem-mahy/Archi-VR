@@ -1,20 +1,4 @@
-﻿
-/*
- 
-    -----------------------
-    UDP-Receive (send to)
-    -----------------------
-    // [url]http://msdn.microsoft.com/de-de/library/bb979228.aspx#ID0E3BAC[/url]
-   
-   
-    // > receive
-    // 127.0.0.1 : 8051
-   
-    // send
-    // nc -u 127.0.0.1 8051
- 
-*/
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -24,9 +8,10 @@ using UnityEngine;
 
 namespace WM
 {
-    public class UDPReceive : MonoBehaviour
+    /*
+     */
+    public class UDPReceive
     {
-
         // receiving Thread
         private Thread receiveThread;
 
@@ -47,11 +32,13 @@ namespace WM
         public void Init()
         {
             // Endpunkt definieren, von dem die Nachrichten gesendet werden.
-            print("UDPReceive.init()");
+            Debug.Log("UDPReceive.Init()");
 
             receiveThread = new Thread(new ThreadStart(ReceiveData));
             receiveThread.IsBackground = true;
             receiveThread.Start();
+
+            Debug.Log("UDPReceive running");
         }
 
         // receive thread
@@ -87,9 +74,9 @@ namespace WM
                         }
                     }
                 }
-                catch (Exception err)
+                catch (Exception e)
                 {
-                    print(err.ToString());
+                    Debug.Log("UDPReceive.ReceiveData(): Exception: " + e.ToString());
                 }
             }
         }                

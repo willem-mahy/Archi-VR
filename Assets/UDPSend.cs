@@ -1,18 +1,4 @@
-﻿/*
-
------------------------
-UDP-Send
------------------------
-// [url]http://msdn.microsoft.com/de-de/library/bb979228.aspx#ID0E3BAC[/url]
-
-// > gesendetes unter
-// 127.0.0.1 : 8050 empfangen
-
-// nc -lu 127.0.0.1 8050
-
-    // todo: shutdown thread at the end
-*/
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -20,8 +6,9 @@ using UnityEngine;
 
 namespace WM
 {
-
-    public class UDPSend : MonoBehaviour
+    /*
+     */
+    public class UDPSend
     {
         private static int localPort;
 
@@ -41,42 +28,13 @@ namespace WM
             this.udpClient = udpClient;
         }
 
-        // start from unity3d
         public void Init()
         {
-            Debug.Log("UDPSend.init()");
+            Debug.Log("UDPSend.Init()");
 
             remoteEndPoint = new IPEndPoint(IPAddress.Parse(remoteIP), remotePort);
 
-            Debug.Log("Initialized for sending to remote end point (" + remoteIP + ":" + remotePort + ")");
-        }
-
-        // inputFromConsole
-        private void inputFromConsole()
-        {
-            try
-            {
-                string text;
-                do
-                {
-                    text = Console.ReadLine();
-
-                    // Den Text zum Remote-Client senden.
-                    if (text != "")
-                    {
-                        // Encode data to UTF8-encoding.
-                        byte[] data = Encoding.UTF8.GetBytes(text);
-
-                        // Send data to remote client.
-                        udpClient.Send(data, data.Length, remoteEndPoint);
-                    }
-                } while (text != "");
-            }
-            catch (Exception err)
-            {
-                print(err.ToString());
-            }
-
+            Debug.Log("UDPSend running @ " + remoteIP + ":" + remotePort + ")");
         }
 
         //! Sends the given message to the remote client.
@@ -98,9 +56,9 @@ namespace WM
                     udpClient.Send(data, data.Length, remoteEndPoint);
                 }
             }
-            catch (Exception err)
+            catch (Exception e)
             {
-                print(err.ToString());
+                Debug.Log("UDPSend.sendString(): Exception: " + e.ToString());
             }
         }
     }

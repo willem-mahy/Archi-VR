@@ -183,10 +183,11 @@ namespace WM
 
             public void SendPositionToUDP(GameObject avatar)
             {
-                //if (udpSend == null)
-                //{
-                //    return; // Not connected yet...
-                //}
+                // Temporarily disabled the below check: udpSend is not null but still the if-clause evaluates to true?!? :-s
+                if (udpSend == null)
+                {
+                    return; // Not connected yet...
+                }
 
                 try
                 {
@@ -279,7 +280,8 @@ namespace WM
                     avatar.transform.position = trackedObject.Position;
                     avatar.transform.rotation = trackedObject.Rotation;
 
-                    Debug.Log("trackedObject.Position: " + trackedObject.Position);
+                    //Debug.Log("Client.UpdatePositionFromUDP(): trackedObject.Position: " + trackedObject.Position);
+                    //Debug.Log("Client.UpdatePositionFromUDP(): trackedObject.Rotation: " + trackedObject.Rotation);
                 }
                 catch (Exception e)
                 {

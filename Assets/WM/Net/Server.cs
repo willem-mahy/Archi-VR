@@ -326,10 +326,13 @@ namespace WM
 
                         foreach (var clientConnection in clientConnections)
                         {
-                            //if (tcpClient != null)
+                            if (clientConnection.tcpClient == null)
                             {
-                                SendData(data, clientConnection.tcpClient);
+                                Debug.LogWarning("Server.BroadcastCommand(): clientConnection.tcpClient == null");
+                                continue;
                             }
+                            
+                            SendData(data, clientConnection.tcpClient);
                         }
 
                         clientsLockOwner = "None (BroadcastCommand)";
@@ -472,6 +475,7 @@ namespace WM
                         return;
                     }
 
+                    // Temporarily disabled the below check: udpSend is not null but still the if-clause evaluates to true?!? :-s
                     if (clientConnection.udpSend == null)
                     {
                         return;
