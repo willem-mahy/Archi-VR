@@ -37,10 +37,10 @@ namespace ArchiVR
     {
         #region Variables
 
-        public List<TeleportCommand> CommandQueue = new List<TeleportCommand>();
+        public List<ICommand> CommandQueue = new List<ICommand>();
 
         // The application version.
-        public string m_version = "190924a";
+        public string m_version = "";
 
         // Whether to show the GFX quality level and FPS as HUD UI.
         private bool m_enableDebugGFX = false;
@@ -431,11 +431,11 @@ namespace ArchiVR
 
         private object commandQueueLock = new object();
 
-        public void QueueCommand(TeleportCommand teleportCommand)
+        public void QueueCommand(ICommand command)
         {
             lock (commandQueueLock)
             {
-                CommandQueue.Add(teleportCommand);
+                CommandQueue.Add(command);
             }
         }
         
@@ -780,7 +780,14 @@ namespace ArchiVR
         //!
         void ToggleImmersionMode()
         {
-            SetActiveImmersionMode(1 - ActiveImmersionModeIndex);
+            if (RunAsServer)
+            {
+                var c = new SetImmersionModeCommand();
+                c.ImmersionModeIndex = 1 - ActiveImmersionModeIndex;
+
+                Server.BroadcastCommand(c);
+            }
+            //SetActiveImmersionMode(1 - ActiveImmersionModeIndex);
         }
 
         //! TODO: Investigate whether to rename/factor out...
@@ -794,7 +801,7 @@ namespace ArchiVR
                 ToggleImmersionMode();
                 return true;
             }
-
+            
             return false;
         }
 

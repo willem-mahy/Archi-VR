@@ -15,6 +15,8 @@ namespace WM
     {
         public class Client : MonoBehaviour
         {
+            readonly bool XML = false;
+
             #region Variables
 
             public ApplicationArchiVR application;
@@ -48,7 +50,7 @@ namespace WM
             private Thread thread;
 
             #endregion
-                        
+
             public void Init()
             {
                 /*
@@ -112,21 +114,70 @@ namespace WM
                         var bytesFromServer = new byte[tcpClient.ReceiveBufferSize];
                         var numBytesRead = serverStream.Read(bytesFromServer, 0, (int)tcpClient.ReceiveBufferSize);
 
-                        dataFromServer+= Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);          
+                        dataFromServer += Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);
                     }
 
                     if (dataFromServer.Length > 0)
                     {
                         Debug.Log("Client: Data from server: " + dataFromServer);
 
-                        var ser = new XmlSerializer(typeof(TeleportCommand));
+                        while (true)
+                        {
+                            string beginTag = "<Message ";
+                            string endTag = "</Message>";
+                            int EndTagLength = endTag.Length;
 
-                        var reader = new StringReader(dataFromServer);
+                            int firstMessageBegin = dataFromServer.IndexOf(beginTag);
 
-                        var teleportCommand = (TeleportCommand)(ser.Deserialize(reader));
-                        reader.Close();
+                            if (firstMessageBegin < 0)
+                            {
+                                break;
+                            }
 
-                        application.QueueCommand(teleportCommand);
+                            // Remove all data in front of first message.
+                            dataFromServer = dataFromServer.Substring(firstMessageBegin);
+
+                            int firstMessageEnd = dataFromServer.IndexOf(endTag);
+
+                            if (firstMessageEnd < 0)
+                            {
+                                break;
+                            }
+
+                            //XML-deserialize the message.
+                            int messageLength = firstMessageEnd + EndTagLength;
+                            string messageXML = dataFromServer.Substring(0, messageLength);
+
+                            int c = dataFromServer.Length;
+                            var remainder = dataFromServer.Substring(firstMessageEnd + EndTagLength);
+                            dataFromServer = remainder;
+
+                            var ser = new XmlSerializer(typeof(Message));
+
+                            var reader = new StringReader(messageXML);
+
+                            var message = (Message)(ser.Deserialize(reader));
+
+                            reader.Close();
+
+                            // Binary-deserialize the object from the message.
+                            var obj = message.Deserialize();
+
+                            if (obj is TeleportCommand)
+                            {
+                                var teleportCommand = (TeleportCommand)obj;
+                                application.QueueCommand(teleportCommand);
+                            }
+                            else if (obj is SetImmersionModeCommand)
+                            {
+                                var command = (SetImmersionModeCommand)obj;
+                                application.QueueCommand(command);
+                            }
+                            //else if (obj is DisconnectCommand)
+                            //{
+                            //    this.Disconnect()
+                            //}
+                        }
                     }
                 }
             }
@@ -204,7 +255,7 @@ namespace WM
 
                     var writer = new StringWriter();
                     ser.Serialize(writer, to);
-                    writer.Close();
+                    writer.Close();                    
 
                     var data = writer.ToString();
 

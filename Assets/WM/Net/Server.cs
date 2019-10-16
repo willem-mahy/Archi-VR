@@ -28,6 +28,8 @@ namespace WM
 
         public class Server : MonoBehaviour
         {
+            readonly bool XML = false;
+
             #region Variables
 
             public ApplicationArchiVR application;
@@ -305,19 +307,40 @@ namespace WM
             }
 
             public void BroadcastCommand(
-                TeleportCommand teleportCommand)
+                ICommand command)
             {
                 Debug.Log("Server:BoadcastCommand()");
 
                 try
                 {
-                    var ser = new XmlSerializer(typeof(TeleportCommand));
+                    string data;
 
-                    var writer = new StringWriter();
-                    ser.Serialize(writer, teleportCommand);
-                    writer.Close();
+                    //if (XML)
+                    //{
+                    //    var ser = new XmlSerializer(typeof(TeleportCommand));
 
-                    var data = writer.ToString();
+                    //    var writer = new StringWriter();
+                    //    ser.Serialize(writer, command);
+                    //    writer.Close();
+
+                    //    data = writer.ToString();
+                    //}
+                    //else
+                    //{
+                        var message = new Message();
+                        message.Serialize(command);
+
+                        var ser = new XmlSerializer(typeof(Message));
+
+                        var writer = new StringWriter();
+                        ser.Serialize(writer, message);
+                        writer.Close();
+
+                        data = writer.ToString();
+
+                        data = data + "DEBUG123456789";
+                    //}
+
                     Debug.Log(data);
 
                     lock (clientConnections)
@@ -561,7 +584,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Exception:" + e.Message);
+                    Debug.LogError("Server.GetTrackedObjectFromFromUdp(): Exception: " + e.Message);
                     return null;
                 }
             }

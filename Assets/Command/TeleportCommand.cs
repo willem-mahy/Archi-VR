@@ -8,7 +8,7 @@ namespace Assets.Command
 {
     [Serializable]
     [XmlRoot("TeleportCommand")]
-    public class TeleportCommand
+    public class TeleportCommand : ICommand
     {
         [XmlElement("ProjectIndex")]
         public int ProjectIndex { get; set; } = -1;
