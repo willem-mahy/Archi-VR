@@ -213,16 +213,16 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Exception:" + e.Message);
+                    Debug.LogError("Clien.SendPositionToUDP(): Exception:" + e.Message);
                 }
             }
 
             public void UpdatePositionFromUDP(GameObject avatar)
             {
-                //if (udpReceive == null)
-                //{
-                //    return; // Not connected yet...
-                //}
+                if (udpReceive == null)
+                {
+                    return; // Not connected yet...
+                }
 
                 try
                 {
@@ -283,7 +283,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Exception:" + e.Message);
+                    Debug.LogError("Client.UpdatePositionFromUDP(): Exception:" + e.Message);
                 }
             }
         }

@@ -14,11 +14,16 @@ namespace WM
 {
     namespace Net
     {
-        class UdpConnection
+        class ClientConnection
         {
+            //! The IP of the client.
             public string remoteIP;
+
+            // The TCP client.
+            public TcpClient tcpClient;
+
+            // The UDP sender.
             public UDPSend udpSend;
-            public UDPReceive udpReceive;
         }
 
         public class Server : MonoBehaviour
@@ -29,19 +34,16 @@ namespace WM
 
             #region TCP
 
-            public static readonly int TcpPort = 8888;
+            public static readonly int TcpPort = 8887;
 
-            // The server socket.
+            //! The TCP listener.
             TcpListener tcpListener;
 
             // Used for debugging client list lock related deadlocks.
             private string clientsLockOwner = "";
 
-            // Lock for the clients list.
-            private object clientsLock = new object();
-
-            // The client TCP sockets.
-            List<TcpClient> clientSockets = new List<TcpClient>();
+            // The client connections.
+            List<ClientConnection> clientConnections = new List<ClientConnection>();
 
             // The thread that accepts TCP data from connected clients.
             private Thread receiveTcpThread;
@@ -56,9 +58,11 @@ namespace WM
             // Port for the UDP client.
             public static readonly int UdpPort = 8890; // Must be different than server TCP port probably...
 
+            // The UDP cLient.
             public UdpClient udpClient;// =  new UdpClient(UdpPort); //TODO: seems to not work?
 
-            List<UdpConnection> udpConnections;// = new List<UdpConnection>(); //TODO: seems to not work?
+            //! The UDP Receiver.
+            public UDPReceive udpReceive;
 
             private Thread receiveUdpThread;
 
@@ -68,55 +72,71 @@ namespace WM
 
             public void Init()
             {
-                udpClient = new UdpClient(UdpPort);
+                Debug.Log("Server.Init() Start");
 
-                udpConnections = new List<UdpConnection>();
+                try
+                {
+                    Debug.Log("Server.Init() Create UDP client at port " + UdpPort);
+                    udpClient = new UdpClient(UdpPort);
 
-                // TODO: Why is this needed?
-                System.Text.ASCIIEncoding ASCII = new System.Text.ASCIIEncoding();
+                    udpReceive = new UDPReceive(udpClient);
+                    udpReceive.Init();
 
-                // Get host name for local machine.
-                var hostName = Dns.GetHostName();
+                    clientConnections = new List<ClientConnection>();
 
-                // Get host entry.
-                var hostEntry = Dns.GetHostEntry(hostName);
+                    // Get host name for local machine.
+                    var hostName = Dns.GetHostName();
 
-                // Print all IP adresses:
-                //foreach (var ipAddress in hostEntry.AddressList)
-                //{
-                //    Debug.Log("- IP address" + ipAddress);
-                //}
+                    // Get host entry.
+                    var hostEntry = Dns.GetHostEntry(hostName);
 
-                // Get first IP address.
-                var serverIpAddress = hostEntry.AddressList[1];
-                
-                // Create the server socket.
-                tcpListener = new TcpListener(serverIpAddress, TcpPort);
-                
-                // Start the server socket.
-                tcpListener.Start();
+                    // Print all IP adresses:
+                    {
+                        Debug.Log("Server IP addresses:");
 
-                Debug.Log("Server running TCP listener @ " + serverIpAddress.ToString() + ":" + TcpPort.ToString());
+                        foreach (var ipAddress in hostEntry.AddressList)
+                        {
+                            Debug.Log("    - " + ipAddress);
+                        }
+                    }
 
-                // Start a thread to listen for incoming connections from clients on the server TCP socket.
-                acceptClientThread = new Thread(new ThreadStart(AcceptClientFunction));
-                acceptClientThread.IsBackground = true;
-                acceptClientThread.Name = "acceptClientThread";
-                acceptClientThread.Start();
+                    // Get first IPv4 address.
+                    var serverIpAddress = hostEntry.AddressList[1];
 
-                // Start a thread to listen for incoming data from connected clients on the server TCP socket.
-                receiveTcpThread = new Thread(new ThreadStart(ReceiveTcpFunction));
-                receiveTcpThread.IsBackground = true;
-                receiveTcpThread.Name = "receiveTcpThread";
-                receiveTcpThread.Start();
+                    // Create the TCP listener.
+                    Debug.Log("Server.Init() Create TCP listener @ " + serverIpAddress.ToString() + ":" + TcpPort.ToString());
+                    tcpListener = new TcpListener(serverIpAddress, TcpPort);
 
-                // Start a thread to listen for incoming data from connected clients on the server UDP socket.
-                receiveUdpThread = new Thread(new ThreadStart(ReceiveUdpFunction));
-                receiveUdpThread.IsBackground = true;
-                receiveUdpThread.Name = "receiveUdpThread";
-                receiveUdpThread.Start();
+                    // Start the server socket.
+                    Debug.Log("Server.Init() Start TCP listener");
+                    tcpListener.Start();
 
-                Debug.Log("Server started");
+                    Debug.Log("Server.Init() TCP listener started");
+
+                    // Start a thread to listen for incoming connections from clients on the server TCP socket.
+                    acceptClientThread = new Thread(new ThreadStart(AcceptClientFunction));
+                    acceptClientThread.IsBackground = true;
+                    acceptClientThread.Name = "acceptClientThread";
+                    acceptClientThread.Start();
+
+                    // Start a thread to listen for incoming data from connected clients on the server TCP socket.
+                    receiveTcpThread = new Thread(new ThreadStart(ReceiveTcpFunction));
+                    receiveTcpThread.IsBackground = true;
+                    receiveTcpThread.Name = "receiveTcpThread";
+                    receiveTcpThread.Start();
+
+                    // Start a thread to listen for incoming data from connected clients on the server UDP socket.
+                    receiveUdpThread = new Thread(new ThreadStart(ReceiveUdpFunction));
+                    receiveUdpThread.IsBackground = true;
+                    receiveUdpThread.Name = "receiveUdpThread";
+                    receiveUdpThread.Start();
+
+                    Debug.Log("Server started");
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError("Server.Init(): Exception: " + ex.ToString());
+                }
             }
 
             private void AcceptClientFunction()
@@ -127,51 +147,49 @@ namespace WM
                     {
                         if (tcpListener.Pending())
                         {
-                            // Create the client socket.
-                            var newTcpClient = default(TcpClient);
+                            var newClientConnection = new ClientConnection();
 
-                            // Accept the client socket.
-                            newTcpClient = tcpListener.AcceptTcpClient();
+                            // Create the client TCP socket.
+                            newClientConnection.tcpClient = default(TcpClient);
 
-                            Debug.Log("Server: Client connected: " + newTcpClient.Client.RemoteEndPoint.ToString());
+                            // Accept the client TCP socket.
+                            newClientConnection.tcpClient = tcpListener.AcceptTcpClient();
 
+                            var clientEndPoint = newClientConnection.tcpClient.Client.RemoteEndPoint as IPEndPoint;
+                            var clientIP = clientEndPoint.Address.ToString();
+                            newClientConnection.remoteIP = clientIP;
+
+                            Debug.Log("Server: Client connected: " + clientIP);
+
+                            newClientConnection.udpSend = new UDPSend(udpClient);
+
+                            newClientConnection.udpSend.remoteIP = clientIP;
+                            newClientConnection.udpSend.remotePort = Client.UdpPort;
+                            newClientConnection.udpSend.Init();                            
+
+                            lock (clientConnections)
+                            {
+                                clientsLockOwner = "AcceptClientFunction";
+
+                                clientConnections.Add(newClientConnection);
+
+                                clientsLockOwner = "None (AcceptClientFunction)";
+                            }
+
+                            // Now the client is connected, make him spawn at the current Project and POI.
                             if (application.ActiveProjectIndex != -1)
                             {
                                 var teleportCommand = new TeleportCommand();
                                 teleportCommand.ProjectIndex = application.ActiveProjectIndex;
                                 teleportCommand.POIName = application.ActivePOIName;
 
-                                SendCommand(teleportCommand, newTcpClient);
-                            }
-
-                            var newUdpConnection = new UdpConnection();                            
-                            newUdpConnection.udpSend = new UDPSend(udpClient);
-
-                            var remoteIpEndPoint = newTcpClient.Client.RemoteEndPoint as IPEndPoint;
-                            var remoteIP = remoteIpEndPoint.Address.ToString();
-                            newUdpConnection.udpSend.remoteIP = remoteIP;
-                            newUdpConnection.udpSend.remotePort = Client.UdpPort;
-                            newUdpConnection.udpSend.Init();
-                            newUdpConnection.udpReceive = new UDPReceive(udpClient);
-                            newUdpConnection.udpReceive.Init();
-
-                            newUdpConnection.remoteIP = remoteIP;
-
-                            lock (clientsLock)
-                            {
-                                clientsLockOwner = "AcceptClientFunction";
-
-                                clientSockets.Add(newTcpClient);
-
-                                udpConnections.Add(newUdpConnection);
-
-                                clientsLockOwner = "None (AcceptClientFunction)";
+                                SendCommand(teleportCommand, newClientConnection.tcpClient);
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogError(ex.ToString());
+                        Debug.LogError("Server.AcceptClientFunction(): Exception: " + ex.ToString());
                     }
                 }
             }
@@ -182,11 +200,11 @@ namespace WM
                 {
                     try
                     {
-                        lock (clientsLock)
+                        lock (clientConnections)
                         {
                             clientsLockOwner = "ReceiveUdpFunction";
 
-                            for (int clientIndex = 0; clientIndex < clientSockets.Count; ++clientIndex)
+                            for (int clientIndex = 0; clientIndex < clientConnections.Count; ++clientIndex)
                             {
                                 // Try to receive the x-th client frame.
                                 var trackedObjectXML = GetTrackedObjectFromFromUdp(clientIndex);
@@ -196,7 +214,7 @@ namespace WM
                                 // Broadcast the x-th client frame to all but the originating client. (so avatars can be updated.)
                                 if (trackedObjectXML != null)
                                 {
-                                    for (int broadcastClientIndex = 0; broadcastClientIndex < clientSockets.Count; ++broadcastClientIndex)
+                                    for (int broadcastClientIndex = 0; broadcastClientIndex < clientConnections.Count; ++broadcastClientIndex)
                                     {
                                         if (clientIndex == broadcastClientIndex)
                                             continue; // don't send own client updates back to self...
@@ -212,7 +230,7 @@ namespace WM
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogError(ex.ToString());
+                        Debug.LogError("Server.ReceiveUdpFunction(): Exception: " + ex.ToString());
                     }
                 }
             }
@@ -223,22 +241,27 @@ namespace WM
                 {
                     try
                     {
-                        lock (clientsLock)
+                        lock (clientConnections)
                         {
                             clientsLockOwner = "ReceiveTcpFunction";
 
-                            foreach (var tcpClient in clientSockets)
+                            foreach (var clientConnection in clientConnections)
                             {
-                                //if (tcpClient == null)
-                                //{
-                                //    continue;
-                                //}
+                                if (clientConnection == null)
+                                {
+                                    continue;
+                                }
+
+                                if (clientConnection.tcpClient == null)
+                                {
+                                    continue;
+                                }
 
                                 var dataFromClient = "";
                                 {
-                                    var networkStream = tcpClient.GetStream();
+                                    var networkStream = clientConnection.tcpClient.GetStream();
 
-                                    var numBytesAvailable = tcpClient.Available;
+                                    var numBytesAvailable = clientConnection.tcpClient.Available;
                                     if (numBytesAvailable > 0)
                                     {
                                         // Receive from client.
@@ -265,7 +288,7 @@ namespace WM
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogError(ex.ToString());
+                        Debug.LogError("Server.ReceiveTcpFunction(): Exception: " + ex.ToString());
                     }
                 }
             }
@@ -297,15 +320,15 @@ namespace WM
                     var data = writer.ToString();
                     Debug.Log(data);
 
-                    lock (clientsLock)
+                    lock (clientConnections)
                     {
                         clientsLockOwner = "BroadcastCommand";
 
-                        foreach (var tcpClient in clientSockets)
+                        foreach (var clientConnection in clientConnections)
                         {
                             //if (tcpClient != null)
                             {
-                                SendData(data, tcpClient);
+                                SendData(data, clientConnection.tcpClient);
                             }
                         }
 
@@ -314,7 +337,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Exception:" + e.Message);
+                    Debug.LogError("Server.BroadcastCommand(): Exception: " + e.Message);
                 }
             }
 
@@ -338,7 +361,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Exception:" + e.Message);
+                    Debug.LogError("Server.SendCommand(): Exception:" + e.Message);
                 }
             }
 
@@ -348,39 +371,56 @@ namespace WM
             {
                 Debug.Log("Server:SendData()");
 
-                var networkStream = tcpClient.GetStream();
+                try
+                {
+                    var networkStream = tcpClient.GetStream();
 
-                var bytes = Encoding.ASCII.GetBytes(data);
-                networkStream.Write(bytes, 0, bytes.Length);
-                networkStream.Flush();
+                    var bytes = Encoding.ASCII.GetBytes(data);
+                    networkStream.Write(bytes, 0, bytes.Length);
+                    networkStream.Flush();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Server.SendData(): Exception:" + e.Message);
+                }
             }
 
             private void DisconnectClients()
             {
                 Debug.Log("Server::DisconnectClients");
+
+                BroadcastMessage("ServerShuttingDown");
             }
 
             private void CloseSockets()
             {
                 Debug.Log("Server::CloseSockets");
 
-                lock (clientsLock)
+                try
                 {
-                    clientsLockOwner = "CloseSockets";
-
-                    // Close the client sockets.
-                    foreach (var clientSocket in clientSockets)
+                    lock (clientConnections)
                     {
-                        clientSocket.Close();
+                        clientsLockOwner = "CloseSockets";
+
+                        // Close the client sockets.
+                        foreach (var clientConnection in clientConnections)
+                        {
+                            clientConnection.tcpClient.Close();
+                            //clientConnection.udpSend.Close();
+                        }
+
+                        clientConnections.Clear();
+
+                        clientsLockOwner = "None (CloseSockets)";
                     }
 
-                    clientSockets.Clear();
-
-                    clientsLockOwner = "None (CloseSockets)";
+                    // Stop the TCP listener.
+                    tcpListener.Stop();
                 }
-
-                // Stop the server socket.
-                tcpListener.Stop();
+                catch (Exception e)
+                {
+                    Debug.LogError("Server.SendData(): Exception:" + e.Message);
+                }
             }
 
 
@@ -418,66 +458,92 @@ namespace WM
 
             public void SendDataToUdp(string data, int clientIndex)
             {
-                if (udpConnections.Count < clientIndex - 1)
-                    return;
-
-                var udpConnection = udpConnections[clientIndex];
-
-                if (udpConnection == null)
-                    return;
-
-                try
+                lock (clientConnections)
                 {
-                    udpConnection.udpSend.sendString(data);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("Exception:" + e.Message);
+                    if (clientConnections.Count < clientIndex - 1)
+                    {
+                        return;
+                    }
+
+                    var clientConnection = clientConnections[clientIndex];
+
+                    if (clientConnection == null)
+                    {
+                        return;
+                    }
+
+                    if (clientConnection.udpSend == null)
+                    {
+                        return;
+                    }
+
+                    try
+                    {
+                        clientConnection.udpSend.sendString(data);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError("Exception:" + e.Message);
+                    }
                 }
             }
 
             public string GetTrackedObjectFromFromUdp(int clientIndex)
             {
-                if (udpConnections.Count < clientIndex - 1)
-                    return null;
-
-                var udpConnection = udpConnections[clientIndex];
-
-                if (udpConnection == null)
-                    return null;
-
                 try
                 {
-                    var remoteIP = udpConnections[clientIndex].remoteIP;
+                    var clientIP = "";
 
-                    if (!udpConnection.udpReceive.allReceivedUDPPackets.ContainsKey(remoteIP))
+                    lock (clientConnections)
                     {
-                        return null;
+                        if (clientConnections.Count < clientIndex - 1)
+                        {
+                            return null;
+                        }
+
+                        var clientConnection = clientConnections[clientIndex];
+
+                        if (clientConnection == null)
+                        {
+                            return null;
+                        }
+
+                        clientIP = clientConnections[clientIndex].remoteIP;
                     }
 
-                    string frameEndTag = "</TrackedObject>";
-                    int frameEndTagLength = frameEndTag.Length;
-                    int lastFrameEnd = udpConnection.udpReceive.allReceivedUDPPackets[remoteIP].LastIndexOf(frameEndTag);
+                    string trackedObjectXML = "";
 
-                    if (lastFrameEnd < 0)
+                    lock (udpReceive.allReceivedUDPPackets)
                     {
-                        return null;
+                        if (!udpReceive.allReceivedUDPPackets.ContainsKey(clientIP))
+                        {
+                            return null;
+                        }
+
+                        string frameEndTag = "</TrackedObject>";
+                        int frameEndTagLength = frameEndTag.Length;
+                        int lastFrameEnd = udpReceive.allReceivedUDPPackets[clientIP].LastIndexOf(frameEndTag);
+
+                        if (lastFrameEnd < 0)
+                        {
+                            return null;
+                        }
+
+                        string temp = udpReceive.allReceivedUDPPackets[clientIP].Substring(0, lastFrameEnd + frameEndTagLength);
+
+                        int lastFrameBegin = temp.LastIndexOf("<TrackedObject ");
+
+                        if (lastFrameBegin < 0)
+                        {
+                            return null;
+                        }
+
+                        // Now get the frame string.
+                        trackedObjectXML = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
+
+                        // Clear old frames from receivebuffer.
+                        udpReceive.allReceivedUDPPackets[clientIP] = udpReceive.allReceivedUDPPackets[clientIP].Substring(lastFrameEnd + frameEndTagLength);
                     }
-
-                    string temp = udpConnection.udpReceive.allReceivedUDPPackets[remoteIP].Substring(0, lastFrameEnd + frameEndTagLength);
-
-                    int lastFrameBegin = temp.LastIndexOf("<TrackedObject ");
-
-                    if (lastFrameBegin < 0)
-                    {
-                        return null;
-                    }
-
-                    // Now get the frame string.
-                    string trackedObjectXML = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
-
-                    // Clear old frames from receivebuffer.
-                    udpConnection.udpReceive.allReceivedUDPPackets[remoteIP] = udpConnection.udpReceive.allReceivedUDPPackets[remoteIP].Substring(lastFrameEnd + frameEndTagLength);
 
                     var ser = new XmlSerializer(typeof(TrackedObject));
 
