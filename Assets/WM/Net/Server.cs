@@ -178,14 +178,22 @@ namespace WM
                                 clientsLockOwner = "None (AcceptClientFunction)";
                             }
 
-                            // Now the client is connected, make him spawn at the current Project and POI.
                             if (application.ActiveProjectIndex != -1)
                             {
+                                // Now the client is connected, make him...
+                                
+                                // A) ...spawn at the current Project and POI.
                                 var teleportCommand = new TeleportCommand();
                                 teleportCommand.ProjectIndex = application.ActiveProjectIndex;
                                 teleportCommand.POIName = application.ActivePOIName;
 
                                 SendCommand(teleportCommand, newClientConnection.tcpClient);
+
+                                // B) ...be in the same immersion mode.
+                                var setImmersionModeCommand = new SetImmersionModeCommand();
+                                setImmersionModeCommand.ImmersionModeIndex = application.ActiveImmersionModeIndex;
+
+                                SendCommand(setImmersionModeCommand, newClientConnection.tcpClient);
                             }
                         }
                     }
@@ -313,35 +321,7 @@ namespace WM
 
                 try
                 {
-                    string data;
-
-                    //if (XML)
-                    //{
-                    //    var ser = new XmlSerializer(typeof(TeleportCommand));
-
-                    //    var writer = new StringWriter();
-                    //    ser.Serialize(writer, command);
-                    //    writer.Close();
-
-                    //    data = writer.ToString();
-                    //}
-                    //else
-                    //{
-                        var message = new Message();
-                        message.Serialize(command);
-
-                        var ser = new XmlSerializer(typeof(Message));
-
-                        var writer = new StringWriter();
-                        ser.Serialize(writer, message);
-                        writer.Close();
-
-                        data = writer.ToString();
-
-                        data = data + "DEBUG123456789";
-                    //}
-
-                    Debug.Log(data);
+                    string data = GetCommandAsData(command);
 
                     lock (clientConnections)
                     {
@@ -367,21 +347,31 @@ namespace WM
                 }
             }
 
+            private string GetCommandAsData(ICommand command)
+            {
+                var message = new Message();
+                message.Serialize(command);
+
+                var ser = new XmlSerializer(typeof(Message));
+
+                var writer = new StringWriter();
+                ser.Serialize(writer, message);
+                writer.Close();
+
+                var data = writer.ToString();
+
+                return data;
+            }
+
             public void SendCommand(
-                TeleportCommand teleportCommand,
+                ICommand command,
                 TcpClient tcpClient)
             {
                 Debug.Log("Server:SendCommand()");
 
                 try
                 {
-                    var ser = new XmlSerializer(typeof(TeleportCommand));
-
-                    var writer = new StringWriter();
-                    ser.Serialize(writer, teleportCommand);
-                    writer.Close();
-
-                    var data = writer.ToString();
+                    var data = GetCommandAsData(command);
 
                     SendData(data, tcpClient);
                 }
