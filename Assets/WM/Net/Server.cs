@@ -179,15 +179,30 @@ namespace WM
                             if (application.ActiveProjectIndex != -1)
                             {
                                 // Now the client is connected, make him...
-                                
-                                // A) ...spawn at the current Project and POI.
+
+                                // A) .. know its peer clients
+                                int avatarIndex = 0;
+                                foreach (var clientConnection in clientConnections)
+                                {
+                                    // Notify clients that another client connected.
+                                    var cc1 = new ConnectClientCommand();
+                                    cc1.ClientIP = clientConnection.remoteIP;
+                                    cc1.AvatarIndex = avatarIndex;
+
+                                    BroadcastCommand(cc1);
+
+                                    avatarIndex = (avatarIndex++) % 4;
+                                }
+
+
+                                // B) ...spawn at the current Project and POI.
                                 var teleportCommand = new TeleportCommand();
                                 teleportCommand.ProjectIndex = application.ActiveProjectIndex;
                                 teleportCommand.POIName = application.ActivePOIName;
 
                                 SendCommand(teleportCommand, newClientConnection.tcpClient);
 
-                                // B) ...be in the same immersion mode.
+                                // C) ...be in the same immersion mode.
                                 var setImmersionModeCommand = new SetImmersionModeCommand();
                                 setImmersionModeCommand.ImmersionModeIndex = application.ActiveImmersionModeIndex;
 
