@@ -99,7 +99,7 @@ namespace ArchiVR
         }
 
 
-        public Dictionary<string, GameObject> avatars;
+        public Dictionary<string, GameObject> avatars = new Dictionary<string, GameObject>();
 
         public Animator m_fadeAnimator = null;
 

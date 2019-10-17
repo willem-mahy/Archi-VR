@@ -2,7 +2,6 @@
 using System;
 using System.Xml.Serialization;
 using UnityEngine;
-using static ArchiVR.ApplicationArchiVR;
 
 namespace Assets.Command
 {
