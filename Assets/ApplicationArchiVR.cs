@@ -62,6 +62,25 @@ namespace ArchiVR
 
         #region Game objects
 
+        // Reference to the avatar Prefabs. Drag Prefabs into this field in the Inspector.
+        public List<GameObject> avatarPrefabs = new List<GameObject>();
+
+        // This script will simply instantiate the Prefab when the game starts.
+        void ShowAllAvatarPrefabs()
+        {
+            float x = -3;
+
+            foreach (var ap in avatarPrefabs)
+            {
+                Instantiate(
+                    ap,
+                    new Vector3(x, 0, 0),
+                    Quaternion.identity);
+
+                x += 2;
+            }
+        }
+
         public Animator m_fadeAnimator = null;
 
         public UnityEngine.GameObject m_gfxDebugPanelHUD = null;
@@ -288,11 +307,6 @@ namespace ArchiVR
 
         private GameObject Avatar;
 
-        private IAvatarController avatarController;
-
-        // Broadcasts own avatar frame.
-        private TrackerClient trackerClient;
-
         #endregion Variables
 
         #region GameObject overrides
@@ -301,6 +315,8 @@ namespace ArchiVR
         //! Start is called before the first frame update
         void Start()
         {
+            ShowAllAvatarPrefabs();
+
             switch (NetworkMode)
             {
                 case NetworkMode.Server:
@@ -325,16 +341,6 @@ namespace ArchiVR
                     }
                     break;
             }
-            /*
-            // Updates avatar for remote player.
-            avatarController =
-                new AvatarControllerUDP(RemoteClientIP);
-                //new AvatarControllerMock();
-            
-            // Broadcasts own avatar frame.
-            trackerClient = new TrackerClient(RemoteClientIP, new WM.ILogger());
-            trackerClient.Start();
-            */
 
             #region Automatically get build version
 
@@ -460,6 +466,7 @@ namespace ArchiVR
         }
         
         Vector3 m_centerEyeAnchorPrev = new Vector3();
+
         int frame = 0;
 
         //! Update is called once per frame
@@ -481,21 +488,8 @@ namespace ArchiVR
                 }
             }
 
-            // Make avatar move.
-            if (avatarController != null)
-            {
-                avatarController.Update(Avatar);
-            }
-
             if (Application.isEditor)
             {
-                // Mock remote player from camera position
-                if (trackerClient != null)
-                {
-                    trackerClient.SendPosition(m_centerEyeAnchor);
-                }
-
-                
                 if (((m_centerEyeAnchor.transform.position - m_centerEyeAnchorPrev).magnitude > 0.01f) || (frame++ % 10 == 0))
                 {
                     Client.SendPositionToUDP(m_centerEyeAnchor);
@@ -798,27 +792,35 @@ namespace ArchiVR
         #region Immersion mode management
 
         //!
-        void ToggleImmersionMode()
+        void ToggleImmersionModeIfNetworkModeAllows()
         {
-            if (NetworkMode==NetworkMode.Server)
-            {
-                var c = new SetImmersionModeCommand();
-                c.ImmersionModeIndex = 1 - ActiveImmersionModeIndex;
+            var c = new SetImmersionModeCommand();
+            c.ImmersionModeIndex = 1 - ActiveImmersionModeIndex;
 
-                Server.BroadcastCommand(c);
+            switch (NetworkMode)
+            {
+                case NetworkMode.Standalone:
+                    {
+                        Server.BroadcastCommand(c);
+                    }
+                    break;
+                case NetworkMode.Server:
+                    {
+                        QueueCommand(c);
+                    }
+                    break;
             }
-            //SetActiveImmersionMode(1 - ActiveImmersionModeIndex);
         }
 
         //! TODO: Investigate whether to rename/factor out...
-        public bool ToggleImmersionMode2()
+        public bool ToggleImmersionModeIfInputAndNetworkModeAllows()
         {
             // Immersion mode is toggled using I key, Left index trigger.
             bool toggleImmersionMode = m_controllerInput.m_controllerState.button7Down || Input.GetKeyDown(KeyCode.I);
 
             if (toggleImmersionMode)
             {
-                ToggleImmersionMode();
+                ToggleImmersionModeIfNetworkModeAllows();
                 return true;
             }
             
@@ -1263,14 +1265,18 @@ namespace ArchiVR
 
         private void Teleport(TeleportCommand teleportCommand)
         {
-            //TeleportCommand = teleportCommand;
-
-            if (NetworkMode == NetworkMode.Server)
+            switch (NetworkMode)
             {
-                Server.BroadcastCommand(teleportCommand);
-            }
-
-            //teleportCommand.Execute(this);
+                case NetworkMode.Server:
+                    Server.BroadcastCommand(teleportCommand);
+                    break;
+                case NetworkMode.Client:
+                    // NOOP: server has control...
+                    break;
+                case NetworkMode.Standalone:
+                    QueueCommand(teleportCommand);
+                    break;
+            }            
         }
 
         public IEnumerator Teleport()

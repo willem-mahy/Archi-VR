@@ -53,7 +53,7 @@ namespace ArchiVR
                 return;
             }
 
-            if (m_application.ToggleImmersionMode2())
+            if (m_application.ToggleImmersionModeIfInputAndNetworkModeAllows())
             {
                 return;
             }
