@@ -287,6 +287,10 @@ namespace WM
                         //keysEnumerator.MoveNext();
                         //var remoteIP = keysEnumerator.Current;
 
+                        if (!udpReceive.allReceivedUDPPackets.ContainsKey(remoteIP))
+                        {
+                            return;
+                        }
 
                         string frameEndTag = "</TrackedObject>";
                         int frameEndTagLength = frameEndTag.Length;
