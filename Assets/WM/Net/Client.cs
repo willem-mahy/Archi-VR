@@ -165,6 +165,11 @@ namespace WM
                                 var command = (SetImmersionModeCommand)obj;
                                 application.QueueCommand(command);
                             }
+                            else if (obj is ConnectClientCommand)
+                            {
+                                var command = (ConnectClientCommand)obj;
+                                application.QueueCommand(command);
+                            }
                             //else if (obj is DisconnectCommand)
                             //{
                             //    this.Disconnect()

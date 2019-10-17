@@ -83,9 +83,11 @@ namespace ArchiVR
 
         public int AvatarIndex = 0;
 
-        public void ConnectClient(string ip)
+        public void ConnectClient(
+            string ip,
+            int avatarIndex)
         {
-            var go = InstanciateAvatarPrefabs(AvatarIndex);
+            this.avatars[ip] = InstanciateAvatarPrefabs(avatarIndex);
         }
 
         GameObject InstanciateAvatarPrefabs(int avatarIndex)

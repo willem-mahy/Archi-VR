@@ -159,7 +159,6 @@ namespace WM
                             var clientIP = clientEndPoint.Address.ToString();
                             newClientConnection.remoteIP = clientIP;
 
-                            application.ConnectClient(clientIP);
                             Debug.Log("Server: Client connected: " + clientIP);
 
                             newClientConnection.udpSend = new UDPSend(udpClient);
@@ -194,6 +193,15 @@ namespace WM
 
                                 SendCommand(setImmersionModeCommand, newClientConnection.tcpClient);
                             }
+
+                            // Notify clients that another client connected.
+                            var cc = new ConnectClientCommand();
+                            cc.ClientIP = clientIP;
+                            cc.AvatarIndex = newClientAvatarIndex;
+                            BroadcastCommand(cc);
+
+                            // Update and cycle avatar index for nex client.
+                            newClientAvatarIndex = (newClientAvatarIndex++) % 4;
                         }
                     }
                     catch (Exception ex)
@@ -202,6 +210,8 @@ namespace WM
                     }
                 }
             }
+
+            int newClientAvatarIndex = 0; // counter.
 
             private void ReceiveUdpFunction()
             {
