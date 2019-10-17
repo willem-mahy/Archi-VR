@@ -31,21 +31,28 @@ namespace WM
 }
 namespace ArchiVR
 {
-    
+    public enum NetworkMode
+    {
+        Standalone = 0,
+        Server,
+        Client
+    };
 
     public class ApplicationArchiVR : MonoBehaviour
     {
         #region Variables
 
+        //! The network mode. (Default: Standalone)
+        public NetworkMode NetworkMode = NetworkMode.Standalone;
+        
+        //! The command queue.
         public List<ICommand> CommandQueue = new List<ICommand>();
 
         // The application version.
-        public string m_version = "";
+        public string Version = "";
 
         // Whether to show the GFX quality level and FPS as HUD UI.
-        private bool m_enableDebugGFX = false;
-
-        public bool RunAsServer = false;
+        private bool enableDebugGFX = false;
 
         // The multiplayer server.
         public Server Server;
@@ -294,17 +301,30 @@ namespace ArchiVR
         //! Start is called before the first frame update
         void Start()
         {
-            if (RunAsServer)
+            switch (NetworkMode)
             {
-                // Init server
-                Server.Init();
+                case NetworkMode.Server:
+                    {
+                        // Init network server
+                        Server.Init();
 
-                // Let client connect to own server. (TODO: connect directly, ie without network middle layer.)
-                Client.ServerIP = NetUtil.GetLocalIPAddress();
+                        // Init network client
+                        Client.ServerIP = NetUtil.GetLocalIPAddress(); // Let client connect to own server. (TODO: connect directly, ie without network middle layer.)
+                        Client.Init();
+                    }
+                    break;
+                case NetworkMode.Client:
+                    {
+                        // Init network client only
+                        Client.Init();
+                    }
+                    break;
+                case NetworkMode.Standalone:
+                    {
+                        // Init no network
+                    }
+                    break;
             }
-
-            Client.Init();
-
             /*
             // Updates avatar for remote player.
             avatarController =
@@ -331,13 +351,13 @@ namespace ArchiVR
                 Console.WriteLine("Minor   : {0}", assemblyVersion.Minor);
                 Console.WriteLine("Build   : {0} = {1}", assemblyVersion.Build, buildDate.ToShortDateString());
                 Console.WriteLine("Revision: {0} = {1}", assemblyVersion.Revision, buildDate.ToLongTimeString());
-                m_version = buildDate.ToShortDateString() + " " + buildDate.ToLongTimeString();
+                Version = buildDate.ToShortDateString() + " " + buildDate.ToLongTimeString();
             }
             else
             {
                 if (Application.isEditor) // Goes terribly wrong when running on Quest headset...
                 {
-                    m_version = LinkerTimestamp.GetLinkerTimestampUtc(Assembly.GetExecutingAssembly()).ToString();
+                    Version = LinkerTimestamp.GetLinkerTimestampUtc(Assembly.GetExecutingAssembly()).ToString();
                 }
             }
 
@@ -486,11 +506,11 @@ namespace ArchiVR
             }
 
             if (m_controllerInput.m_controllerState.lThumbstickDown)
-                m_enableDebugGFX = !m_enableDebugGFX;
+                enableDebugGFX = !enableDebugGFX;
 
-            m_gfxDebugPanelHUD.SetActive(m_enableDebugGFX);
+            m_gfxDebugPanelHUD.SetActive(enableDebugGFX);
 
-            if (m_enableDebugGFX)
+            if (enableDebugGFX)
             {
                 var qualityLevel = QualitySettings.GetQualityLevel();
 
@@ -780,7 +800,7 @@ namespace ArchiVR
         //!
         void ToggleImmersionMode()
         {
-            if (RunAsServer)
+            if (NetworkMode==NetworkMode.Server)
             {
                 var c = new SetImmersionModeCommand();
                 c.ImmersionModeIndex = 1 - ActiveImmersionModeIndex;
@@ -1175,7 +1195,7 @@ namespace ArchiVR
             m_menuText += "\nDevice IP: " + myIP;
 
             m_menuText += "\n";
-            m_menuText += "\nversion: " + m_version;
+            m_menuText += "\nversion: " + Version;
         }
 
         #endregion
@@ -1245,7 +1265,7 @@ namespace ArchiVR
         {
             //TeleportCommand = teleportCommand;
 
-            if (RunAsServer)
+            if (NetworkMode == NetworkMode.Server)
             {
                 Server.BroadcastCommand(teleportCommand);
             }

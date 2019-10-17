@@ -15,8 +15,6 @@ namespace WM
     {
         public class Client : MonoBehaviour
         {
-            readonly bool XML = false;
-
             #region Variables
 
             public ApplicationArchiVR application;
@@ -70,12 +68,6 @@ namespace WM
                 thread.Start();
 
                 Debug.Log("Client started");
-            }
-
-            // Update is called once per frame
-            void Update()
-            {
-
             }
 
             private void ThreadFunction()
@@ -230,8 +222,6 @@ namespace WM
                 return tcpClient.Connected;
             }
 
-            int frameIndex = 0;
-
             public void SendPositionToUDP(GameObject avatar)
             {
                 // Temporarily disabled the below check: udpSend is not null but still the if-clause evaluates to true?!? :-s
@@ -244,8 +234,7 @@ namespace WM
                 {
                     var position = avatar.transform.position; // + avatar.transform.forward;
                     var rotation = avatar.transform.rotation;
-                    position.y -= 1.8f;
-
+                    
                     var to = new TrackedObject();
                     to.Name = "Avatar";
                     to.Position = position;
@@ -328,7 +317,8 @@ namespace WM
                     var trackedObject = (TrackedObject)(ser.Deserialize(reader));
                     reader.Close();
 
-                    avatar.transform.position = trackedObject.Position;
+                    avatar.transform.position = trackedObject.Position - 1.8f * Vector3.up;
+
                     avatar.transform.rotation = trackedObject.Rotation;
 
                     //Debug.Log("Client.UpdatePositionFromUDP(): trackedObject.Position: " + trackedObject.Position);

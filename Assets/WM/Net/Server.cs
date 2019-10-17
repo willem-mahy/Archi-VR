@@ -28,8 +28,6 @@ namespace WM
 
         public class Server : MonoBehaviour
         {
-            readonly bool XML = false;
-
             #region Variables
 
             public ApplicationArchiVR application;
@@ -438,39 +436,6 @@ namespace WM
                     Debug.LogError("Server.SendData(): Exception:" + e.Message);
                 }
             }
-
-
-
-
-            //public void SendPositionToUdp(
-            //    TrackedObject to,
-            //    int clientIndex)
-            //{
-            //    if (udpConnections.Count < clientIndex - 1)
-            //        return;
-
-            //    var udpConnection = udpConnections[clientIndex];
-
-            //    if (udpConnection == null)
-            //        return;
-
-            //    try
-            //    {
-            //        var ser = new XmlSerializer(typeof(TrackedObject));
-
-            //        var writer = new StringWriter();
-            //        ser.Serialize(writer, to);
-            //        writer.Close();
-
-            //        var data = writer.ToString();
-
-            //        udpConnection.udpSend.sendString(data);
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        Debug.LogError("Exception:" + e.Message);
-            //    }
-            //}
 
             public void SendDataToUdp(string data, int clientIndex)
             {
