@@ -159,6 +159,7 @@ namespace WM
                             var clientIP = clientEndPoint.Address.ToString();
                             newClientConnection.remoteIP = clientIP;
 
+                            application.ConnectClient(clientIP);
                             Debug.Log("Server: Client connected: " + clientIP);
 
                             newClientConnection.udpSend = new UDPSend(udpClient);

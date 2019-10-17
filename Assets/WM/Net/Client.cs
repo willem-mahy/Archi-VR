@@ -258,7 +258,7 @@ namespace WM
                 }
             }
 
-            public void UpdatePositionFromUDP(GameObject avatar)
+            public void UpdatePositionFromUDP(GameObject avatar, string remoteIP)
             {
                 if (udpReceive == null)
                 {
@@ -277,10 +277,10 @@ namespace WM
                             return;
                         }
 
-                        // For now use the first (because only) remote client's data.
-                        var keysEnumerator = udpReceive.allReceivedUDPPackets.Keys.GetEnumerator();
-                        keysEnumerator.MoveNext();
-                        var remoteIP = keysEnumerator.Current;
+                        //// For now use the first (because only) remote client's data.
+                        //var keysEnumerator = udpReceive.allReceivedUDPPackets.Keys.GetEnumerator();
+                        //keysEnumerator.MoveNext();
+                        //var remoteIP = keysEnumerator.Current;
 
 
                         string frameEndTag = "</TrackedObject>";

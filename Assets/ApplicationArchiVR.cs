@@ -66,7 +66,7 @@ namespace ArchiVR
         public List<GameObject> avatarPrefabs = new List<GameObject>();
 
         // This script will simply instantiate the Prefab when the game starts.
-        void ShowAllAvatarPrefabs()
+        void InstanciateAllAvatarPrefabs()
         {
             float x = -3;
 
@@ -80,6 +80,24 @@ namespace ArchiVR
                 x += 2;
             }
         }
+
+        public int AvatarIndex = 0;
+
+        public void ConnectClient(string ip)
+        {
+            var go = InstanciateAvatarPrefabs(AvatarIndex);
+        }
+
+        GameObject InstanciateAvatarPrefabs(int avatarIndex)
+        {
+            return Instantiate(
+                    avatarPrefabs[avatarIndex],
+                    new Vector3(0, 0, 0),
+                    Quaternion.identity);
+        }
+
+
+        public Dictionary<string, GameObject> avatars;
 
         public Animator m_fadeAnimator = null;
 
@@ -315,7 +333,7 @@ namespace ArchiVR
         //! Start is called before the first frame update
         void Start()
         {
-            ShowAllAvatarPrefabs();
+            InstanciateAllAvatarPrefabs();
 
             switch (NetworkMode)
             {
@@ -488,7 +506,7 @@ namespace ArchiVR
                 }
             }
 
-            if (Application.isEditor)
+            if (NetworkMode != NetworkMode.Standalone)
             {
                 if (((m_centerEyeAnchor.transform.position - m_centerEyeAnchorPrev).magnitude > 0.01f) || (frame++ % 10 == 0))
                 {
@@ -496,7 +514,8 @@ namespace ArchiVR
                     m_centerEyeAnchorPrev = m_centerEyeAnchor.transform.position;
                 }
 
-                Client.UpdatePositionFromUDP(Avatar);                
+                foreach (var ip in this.avatars.Keys)
+                    Client.UpdatePositionFromUDP(avatars[ip], ip);
             }
 
             if (m_controllerInput.m_controllerState.lThumbstickDown)
