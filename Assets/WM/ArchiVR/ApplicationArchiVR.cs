@@ -224,12 +224,16 @@ namespace WM
 
             #endregion
 
+            #region Controller UI
+
             #region Button mapping UI
 
             public ButtonMappingUI leftControllerButtonMapping = null;
             public ButtonMappingUI rightControllerButtonMapping = null;
 
             #endregion
+
+            #region Pick Ray
 
             // Right controller pick ray.
             public GameObject RPickRayGameObject = null;
@@ -239,6 +243,10 @@ namespace WM
             public GameObject LPickRayGameObject = null;
             public PickRay LPickRay = null;
 
+            #endregion
+
+            #endregion
+
             #region HUD menu
 
             enum MenuMode
@@ -246,20 +254,23 @@ namespace WM
                 None = 0,
                 DebugLog,
                 DebugInput,
+                Graphics, 
+                Network,                
                 Info
             }
 
             // The menu mode.
-            private MenuMode m_menuMode = MenuMode.None;
+            private MenuMode menuMode = MenuMode.None;
 
-            public UnityEngine.GameObject m_centerEyeCanvas = null;
+            public GameObject m_centerEyeCanvas = null;
 
-            UnityEngine.GameObject debugLogMenuPanel = null;
-            UnityEngine.GameObject debugInputMenuPanel = null;
-            UnityEngine.GameObject graphicsMenuPanel = null;
-            UnityEngine.GameObject networkMenuPanel = null;
+            List<GameObject> menus = new List<GameObject>();
 
-            public UnityEngine.UI.Text m_centerEyeText = null;
+            GameObject debugLogMenuPanel = null;
+            GameObject debugInputMenuPanel = null;
+            GameObject graphicsMenuPanel = null;
+            GameObject networkMenuPanel = null;
+            GameObject infoMenuPanel = null;
 
             // The HUD menu text
             string m_menuText = "";
@@ -380,12 +391,19 @@ namespace WM
                     m_rightHandAnchor = GameObject.Find("RightHandAnchor");
 
                 m_centerEyeCanvas = GameObject.Find("CenterEyeCanvas");
+                
                 debugInputMenuPanel = GameObject.Find("DebugInputMenuPanel");
+                menus.Add(debugInputMenuPanel);
                 debugLogMenuPanel = GameObject.Find("DebugLogMenuPanel");
+                menus.Add(debugLogMenuPanel);
                 graphicsMenuPanel = GameObject.Find("GraphicsMenuPanel");
+                menus.Add(graphicsMenuPanel);
                 networkMenuPanel = GameObject.Find("NetworkMenuPanel");
+                menus.Add(networkMenuPanel);
+                infoMenuPanel = GameObject.Find("InfoMenuPanel");
+                menus.Add(infoMenuPanel);
 
-                m_centerEyeText = GameObject.Find("CenterEyeText").GetComponent<UnityEngine.UI.Text>();
+                SetActiveMenu(null);
 
                 m_gfxDebugPanelHUD = GameObject.Find("FPSPanel");
                 m_gfxDebugHUDText = GameObject.Find("FPSText").GetComponent<UnityEngine.UI.Text>();
@@ -458,6 +476,19 @@ namespace WM
                     CommandQueue.Add(command);
                 }
             }
+
+            public GameObject ActiveMenu { get; private set; }
+
+            private void SetActiveMenu(GameObject activeMenu)
+            {
+                ActiveMenu = activeMenu;
+
+                foreach (var menu in menus)
+                {
+                    menu.SetActive(menu == activeMenu);
+                }
+            }
+
 
             Vector3 m_centerEyeAnchorPrev = new Vector3();
 
@@ -1039,15 +1070,35 @@ namespace WM
             //! Activates the next menu mode.
             void ToggleMenuMode()
             {
-                m_menuMode = (MenuMode)(((int)m_menuMode + 1) % 4);
+                menuMode = (MenuMode)UtilIterate.MakeCycle((int)menuMode + 1, 0, menus.Count);
+
+                switch (menuMode)
+                {
+                    case MenuMode.DebugInput:
+                        SetActiveMenu(debugInputMenuPanel);
+                        break;
+                    case MenuMode.DebugLog:
+                        SetActiveMenu(debugLogMenuPanel);
+                        break;
+                    case MenuMode.Graphics:
+                        SetActiveMenu(graphicsMenuPanel);
+                        break;
+                    case MenuMode.Network:
+                        SetActiveMenu(networkMenuPanel);
+                        break;
+                    case MenuMode.None:
+                        SetActiveMenu(null);
+                        break;
+                    default:
+                        m_menuText += "Unsupported menu mode: " + menuMode.ToString();
+                        break;
+                }
             }
 
             //! Updates the visibility and content of the HUD menu.
             void UpdateMenu()
             {
-                m_centerEyeCanvas.SetActive(MenuMode.None != m_menuMode);
-
-                if (MenuMode.None == m_menuMode)
+                if (MenuMode.None == menuMode)
                 {
                     return; // If menu is not shown, we need not update it.
                 }
@@ -1056,7 +1107,7 @@ namespace WM
                 m_menuText = "";
 
                 // Update HUD menu text. (if not 'None')
-                switch (m_menuMode)
+                switch (menuMode)
                 {
                     case MenuMode.DebugInput:
                         UpdateMenuDebugInput();
@@ -1064,18 +1115,22 @@ namespace WM
                     case MenuMode.DebugLog:
                         UpdateMenuDebugLog();
                         break;
+                    case MenuMode.Graphics:
+                        break;
+                    case MenuMode.Network:
+                        break;
                     case MenuMode.Info:
                         UpdateMenuInfo();
                         break;
                     case MenuMode.None:
                         break;
                     default:
-                        m_menuText += "Unsupported menu mode: " + m_menuMode.ToString();
+                        m_menuText += "Unsupported menu mode: " + menuMode.ToString();
                         break;
                 }
 
                 // Push HUD menu text to UI.
-                m_centerEyeText.text = m_menuText;
+                //m_centerEyeText.text = m_menuText;
             }
 
             //!
