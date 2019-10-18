@@ -37,7 +37,7 @@ namespace WM
 
             #region TCP
 
-            public static readonly int TcpPort = 8887;
+            public static readonly int TcpPort = 8888;
 
             //! The TCP listener.
             TcpListener tcpListener;
@@ -46,7 +46,21 @@ namespace WM
             private string clientsLockOwner = "";
 
             // The client connections.
-            List<ClientConnection> clientConnections = new List<ClientConnection>();
+            private List<ClientConnection> clientConnections = new List<ClientConnection>();
+
+            //! Get a string with information about connected clients.
+            public string GetClientInfo()
+            {
+                string info = "";
+                lock (this.clientConnections)
+                {
+                    foreach (var clientConnection in clientConnections)
+                    {
+                        info += "- " + clientConnection.remoteIP + "\n";
+                    }
+                }
+                return info;
+            }
 
             // The thread that accepts TCP data from connected clients.
             private Thread receiveTcpThread;
