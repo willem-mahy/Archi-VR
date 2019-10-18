@@ -22,6 +22,8 @@ namespace WM
             //! The IP of the client.
             public string remoteIP;
 
+            public int AvatarIndex = 0;
+
             #region TCP stuff
 
             // The client-specific TCP client.
@@ -44,7 +46,10 @@ namespace WM
 
             #region TCP
 
-            public static readonly int TcpPort = 8888;
+            public static readonly int TcpPort =
+                8886;
+            //8887;
+            //8888;
 
             //! The TCP listener.
             TcpListener tcpListener;
@@ -205,17 +210,17 @@ namespace WM
                                 // Now the client is connected, make him...
 
                                 // A) .. know its peer clients
-                                int avatarIndex = 0;
-                                foreach (var clientConnection in clientConnections)
+                                lock (clientConnections)
                                 {
-                                    // Notify clients that another client connected.
-                                    var cc1 = new ConnectClientCommand();
-                                    cc1.ClientIP = clientConnection.remoteIP;
-                                    cc1.AvatarIndex = avatarIndex;
+                                    foreach (var clientConnection in clientConnections)
+                                    {
+                                        // Notify clients that another client connected.
+                                        var cc1 = new ConnectClientCommand();
+                                        cc1.ClientIP = clientConnection.remoteIP;
+                                        cc1.AvatarIndex = clientConnection.AvatarIndex;
 
-                                    BroadcastCommand(cc1);
-
-                                    avatarIndex = (avatarIndex++) % 4;
+                                        BroadcastCommand(cc1);
+                                    }
                                 }
 
 
@@ -392,6 +397,8 @@ namespace WM
                                 }
                                 else if (obj is SetClientAvatarCommand)
                                 {
+                                    var scac = (SetClientAvatarCommand)obj;
+                                    clientConnection.AvatarIndex = scac.AvatarIndex;
                                     BroadcastData(messageXML);
                                 }
                             }
