@@ -822,12 +822,12 @@ namespace ArchiVR
             {
                 case NetworkMode.Standalone:
                     {
-                        Server.BroadcastCommand(c);
+                        QueueCommand(c);
                     }
                     break;
                 case NetworkMode.Server:
                     {
-                        QueueCommand(c);
+                        Server.BroadcastCommand(c);
                     }
                     break;
             }
