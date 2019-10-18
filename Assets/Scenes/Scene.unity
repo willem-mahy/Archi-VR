@@ -2172,6 +2172,24 @@ Transform:
   m_Father: {fileID: 796705114}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &567071034 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6427173051727153466, guid: 6467771b2bf57d441a8fdfabe5ec64bc,
+    type: 3}
+  m_PrefabInstance: {fileID: 1721038312}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &567071036 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6427173051727153464, guid: 6467771b2bf57d441a8fdfabe5ec64bc,
+    type: 3}
+  m_PrefabInstance: {fileID: 1721038312}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 567071034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75096b4ff78229649855f01789c63568, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &588539889
 GameObject:
   m_ObjectHideFlags: 0
@@ -7625,10 +7643,10 @@ MonoBehaviour:
   m_rightHandAnchor: {fileID: 257516482}
   leftControllerButtonMapping: {fileID: 212702950}
   rightControllerButtonMapping: {fileID: 796705113}
-  RPickRayGameObject: {fileID: 0}
-  RPickRay: {fileID: 0}
-  LPickRayGameObject: {fileID: 0}
-  LPickRay: {fileID: 0}
+  RPickRayGameObject: {fileID: 567071034}
+  RPickRay: {fileID: 567071036}
+  LPickRayGameObject: {fileID: 1997699746}
+  LPickRay: {fileID: 1997699748}
   m_centerEyeCanvas: {fileID: 1828154111}
   m_centerEyeText: {fileID: 1579398438}
   RemoteClientIP: 192.168.0.12
@@ -8371,6 +8389,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_application: {fileID: 1858803769}
+--- !u!1 &1997699746 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6427173051727153466, guid: 6467771b2bf57d441a8fdfabe5ec64bc,
+    type: 3}
+  m_PrefabInstance: {fileID: 6427173052248393951}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1997699748 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6427173051727153464, guid: 6467771b2bf57d441a8fdfabe5ec64bc,
+    type: 3}
+  m_PrefabInstance: {fileID: 6427173052248393951}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1997699746}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75096b4ff78229649855f01789c63568, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2000310853
 GameObject:
   m_ObjectHideFlags: 0
