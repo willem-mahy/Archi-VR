@@ -1,6 +1,4 @@
-﻿using ArchiVR;
-using Assets.Command;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -8,21 +6,26 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Xml.Serialization;
+
 using UnityEngine;
+
+using WM.ArchiVR;
+using WM.ArchiVR.Command;
 
 namespace WM
 {
     namespace Net
     {
+        // Holds all data related to a client connected to the server.
         class ClientConnection
         {
             //! The IP of the client.
             public string remoteIP;
 
-            // The TCP client.
+            // The client-specific TCP client.
             public TcpClient tcpClient;
 
-            // The UDP sender.
+            // The client-specific UDP sender.
             public UDPSend udpSend;
         }
 

@@ -1,342 +1,340 @@
-﻿using ArchiVR;
-using Assets.Command;
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Xml.Serialization;
+
 using UnityEngine;
-using WM;
 
-namespace WM
+using WM.ArchiVR;
+using WM.ArchiVR.Command;
+
+namespace WM.Net
 {
-    namespace Net
+    public class Client : MonoBehaviour
     {
-        public class Client : MonoBehaviour
+        #region Variables
+
+        public ApplicationArchiVR application;
+
+        public string ServerIP = "";//192.168.0.13";
+
+        public int ConnectTimeout = 100;
+
+        #region TCP
+
+        public int TcpPort = 8889; // Must be different than server TCP port probably...
+
+        // The TCP client
+        private TcpClient tcpClient;
+
+        #endregion
+
+        #region UDP
+
+        public static readonly int UdpPort = 8891; // Must be different than server UDP port probably...
+
+        private UdpClient udpClient;
+
+        private UDPSend udpSend;
+
+        private UDPReceive udpReceive;
+
+        #endregion
+
+        // The thread.
+        private Thread thread;
+
+        #endregion
+
+        public void Init()
         {
-            #region Variables
-
-            public ApplicationArchiVR application;
-
-            public string ServerIP = "";//192.168.0.13";
-
-            public int ConnectTimeout = 100;
-
-            #region TCP
-
-            public int TcpPort = 8889; // Must be different than server TCP port probably...
-
-            // The TCP client
-            private TcpClient tcpClient;
-
-            #endregion
-
-            #region UDP
-
-            public static readonly int UdpPort = 8891; // Must be different than server UDP port probably...
-
-            private UdpClient udpClient;
-
-            private UDPSend udpSend;
-
-            private UDPReceive udpReceive;
-
-            #endregion
-
-            // The thread.
-            private Thread thread;
-
-            #endregion
-
-            public void Init()
-            {
-                /*
-                // TODO: Why is this needed?
-                ASCIIEncoding ASCII = new ASCIIEncoding();
+            /*
+            // TODO: Why is this needed?
+            ASCIIEncoding ASCII = new ASCIIEncoding();
                                
-                // Create TCP client socket
-                tcpClient = new TcpClient(GetLocalIpAddress);
+            // Create TCP client socket
+            tcpClient = new TcpClient(GetLocalIpAddress);
 
-                // Start UDP sockets
-                udpSend.Init();
-                udpReceive.Init();
-                */
+            // Start UDP sockets
+            udpSend.Init();
+            udpReceive.Init();
+            */
 
-                thread = new Thread(new ThreadStart(ThreadFunction));
-                thread.IsBackground = true;
-                thread.Start();
+            thread = new Thread(new ThreadStart(ThreadFunction));
+            thread.IsBackground = true;
+            thread.Start();
 
-                Debug.Log("Client started");
-            }
+            Debug.Log("Client started");
+        }
 
-            private void ThreadFunction()
+        private void ThreadFunction()
+        {
+            Connect();
+
+            Debug.Log("Client: tcpClient connected.");
+
+            var serverStream = tcpClient.GetStream();
+
+            // Send message to server
+            var myIP = NetUtil.GetLocalIPAddress();
+            var messageToServer = "Hello from client '" + myIP + "'$";
+            var bytesToServer = Encoding.ASCII.GetBytes(messageToServer);
+            serverStream.Write(bytesToServer, 0, bytesToServer.Length);
+            serverStream.Flush();
+
+            // Initialize UDP sockets to/from server.
+            udpClient = new UdpClient(UdpPort);
+
+            udpSend = new UDPSend(udpClient);
+            udpSend.remoteIP = ServerIP;
+            udpSend.remotePort = Server.UdpPort;
+            udpSend.Init();
+
+            udpReceive = new UDPReceive(udpClient);
+            udpReceive.Init();
+
+            while (true)
             {
-                Connect();
+                string dataFromServer = "";
 
-                Debug.Log("Client: tcpClient connected.");
-
-                var serverStream = tcpClient.GetStream();
-
-                // Send message to server
-                var myIP = NetUtil.GetLocalIPAddress();
-                var messageToServer = "Hello from client '" + myIP + "'$";
-                var bytesToServer = Encoding.ASCII.GetBytes(messageToServer);
-                serverStream.Write(bytesToServer, 0, bytesToServer.Length);
-                serverStream.Flush();
-
-                // Initialize UDP sockets to/from server.
-                udpClient = new UdpClient(UdpPort);
-
-                udpSend = new UDPSend(udpClient);
-                udpSend.remoteIP = ServerIP;
-                udpSend.remotePort = Server.UdpPort;
-                udpSend.Init();
-
-                udpReceive = new UDPReceive(udpClient);
-                udpReceive.Init();
-
-                while (true)
+                while (serverStream.DataAvailable)
                 {
-                    string dataFromServer = "";
+                    // Receive data from server.
+                    var bytesFromServer = new byte[tcpClient.ReceiveBufferSize];
+                    var numBytesRead = serverStream.Read(bytesFromServer, 0, (int)tcpClient.ReceiveBufferSize);
 
-                    while (serverStream.DataAvailable)
+                    dataFromServer += Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);
+                }
+
+                if (dataFromServer.Length > 0)
+                {
+                    Debug.Log("Client: Data from server: " + dataFromServer);
+
+                    while (true)
                     {
-                        // Receive data from server.
-                        var bytesFromServer = new byte[tcpClient.ReceiveBufferSize];
-                        var numBytesRead = serverStream.Read(bytesFromServer, 0, (int)tcpClient.ReceiveBufferSize);
+                        string beginTag = "<Message ";
+                        string endTag = "</Message>";
+                        int EndTagLength = endTag.Length;
 
-                        dataFromServer += Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);
-                    }
+                        int firstMessageBegin = dataFromServer.IndexOf(beginTag);
 
-                    if (dataFromServer.Length > 0)
-                    {
-                        Debug.Log("Client: Data from server: " + dataFromServer);
-
-                        while (true)
+                        if (firstMessageBegin < 0)
                         {
-                            string beginTag = "<Message ";
-                            string endTag = "</Message>";
-                            int EndTagLength = endTag.Length;
-
-                            int firstMessageBegin = dataFromServer.IndexOf(beginTag);
-
-                            if (firstMessageBegin < 0)
-                            {
-                                break;
-                            }
-
-                            // Remove all data in front of first message.
-                            dataFromServer = dataFromServer.Substring(firstMessageBegin);
-
-                            int firstMessageEnd = dataFromServer.IndexOf(endTag);
-
-                            if (firstMessageEnd < 0)
-                            {
-                                break;
-                            }
-
-                            //XML-deserialize the message.
-                            int messageLength = firstMessageEnd + EndTagLength;
-                            string messageXML = dataFromServer.Substring(0, messageLength);
-
-                            int c = dataFromServer.Length;
-                            var remainder = dataFromServer.Substring(firstMessageEnd + EndTagLength);
-                            dataFromServer = remainder;
-
-                            var ser = new XmlSerializer(typeof(Message));
-
-                            var reader = new StringReader(messageXML);
-
-                            var message = (Message)(ser.Deserialize(reader));
-
-                            reader.Close();
-
-                            // Binary-deserialize the object from the message.
-                            var obj = message.Deserialize();
-
-                            if (obj is TeleportCommand)
-                            {
-                                var teleportCommand = (TeleportCommand)obj;
-                                application.QueueCommand(teleportCommand);
-                            }
-                            else if (obj is SetImmersionModeCommand)
-                            {
-                                var command = (SetImmersionModeCommand)obj;
-                                application.QueueCommand(command);
-                            }
-                            else if (obj is ConnectClientCommand)
-                            {
-                                var command = (ConnectClientCommand)obj;
-                                application.QueueCommand(command);
-                            }
-                            //else if (obj is DisconnectCommand)
-                            //{
-                            //    this.Disconnect()
-                            //}
+                            break;
                         }
+
+                        // Remove all data in front of first message.
+                        dataFromServer = dataFromServer.Substring(firstMessageBegin);
+
+                        int firstMessageEnd = dataFromServer.IndexOf(endTag);
+
+                        if (firstMessageEnd < 0)
+                        {
+                            break;
+                        }
+
+                        //XML-deserialize the message.
+                        int messageLength = firstMessageEnd + EndTagLength;
+                        string messageXML = dataFromServer.Substring(0, messageLength);
+
+                        int c = dataFromServer.Length;
+                        var remainder = dataFromServer.Substring(firstMessageEnd + EndTagLength);
+                        dataFromServer = remainder;
+
+                        var ser = new XmlSerializer(typeof(Message));
+
+                        var reader = new StringReader(messageXML);
+
+                        var message = (Message)(ser.Deserialize(reader));
+
+                        reader.Close();
+
+                        // Binary-deserialize the object from the message.
+                        var obj = message.Deserialize();
+
+                        if (obj is TeleportCommand)
+                        {
+                            var teleportCommand = (TeleportCommand)obj;
+                            application.QueueCommand(teleportCommand);
+                        }
+                        else if (obj is SetImmersionModeCommand)
+                        {
+                            var command = (SetImmersionModeCommand)obj;
+                            application.QueueCommand(command);
+                        }
+                        else if (obj is ConnectClientCommand)
+                        {
+                            var command = (ConnectClientCommand)obj;
+                            application.QueueCommand(command);
+                        }
+                        //else if (obj is DisconnectCommand)
+                        //{
+                        //    this.Disconnect()
+                        //}
                     }
                 }
             }
+        }
 
-            private void Connect()
+        private void Connect()
+        {
+            while (true)
             {
-                while (true)
+                if (this.ServerIP != "")
                 {
-                    if (this.ServerIP != "")
+                    // connect to a predefined server.
+                    if (ConnectToServer(this.ServerIP))
                     {
-                        // connect to a predefined server.
-                        if (ConnectToServer(this.ServerIP))
+                        return;
+                    }
+                }
+                else
+                {
+                    // Search the local subnet for a server.
+                    for (int i = 0; i < 256; ++i)
+                    {
+                        string serverIP = "192.168.0." + i;
+
+                        if (ConnectToServer(serverIP))
                         {
+                            // Remember server IP.
+                            this.ServerIP = serverIP;
                             return;
                         }
                     }
-                    else
-                    {
-                        // Search the local subnet for a server.
-                        for (int i = 0; i < 256; ++i)
-                        {
-                            string serverIP = "192.168.0." + i;
-
-                            if (ConnectToServer(serverIP))
-                            {
-                                // Remember server IP.
-                                this.ServerIP = serverIP;
-                                return;
-                            }
-                        }
-                    }
                 }
             }
+        }
 
-            private bool ConnectToServer(string serverIP)
+        private bool ConnectToServer(string serverIP)
+        {
+            Debug.Log("Client: Trying to connect tcpClient to '" + serverIP + ":" + Server.TcpPort + "' (timeout: " + ConnectTimeout + "ms)");
+
+            var tcpClient = new TcpClient();
+
+            var connectionAttempt = tcpClient.ConnectAsync(serverIP, Server.TcpPort);
+
+            connectionAttempt.Wait(ConnectTimeout);
+
+            if (tcpClient.Connected)
             {
-                Debug.Log("Client: Trying to connect tcpClient to '" + serverIP + ":" + Server.TcpPort + "' (timeout: " + ConnectTimeout + "ms)");
-
-                var tcpClient = new TcpClient();
-
-                var connectionAttempt = tcpClient.ConnectAsync(serverIP, Server.TcpPort);
-
-                connectionAttempt.Wait(ConnectTimeout);
-
-                if (tcpClient.Connected)
-                {
-                    this.tcpClient = tcpClient;
-                }
-
-                return tcpClient.Connected;
+                this.tcpClient = tcpClient;
             }
 
-            public void SendPositionToUDP(GameObject avatar)
-            {
-                // Temporarily disabled the below check: udpSend is not null but still the if-clause evaluates to true?!? :-s
-                if (udpSend == null)
-                {
-                    return; // Not connected yet...
-                }
+            return tcpClient.Connected;
+        }
 
-                try
-                {
-                    var position = avatar.transform.position; // + avatar.transform.forward;
-                    var rotation = avatar.transform.rotation;
+        public void SendPositionToUDP(GameObject avatar)
+        {
+            // Temporarily disabled the below check: udpSend is not null but still the if-clause evaluates to true?!? :-s
+            if (udpSend == null)
+            {
+                return; // Not connected yet...
+            }
+
+            try
+            {
+                var position = avatar.transform.position; // + avatar.transform.forward;
+                var rotation = avatar.transform.rotation;
                     
-                    var to = new TrackedObject();
-                    to.Name = "Avatar";
-                    to.Position = position;
-                    to.Rotation = rotation;
+                var to = new TrackedObject();
+                to.Name = "Avatar";
+                to.Position = position;
+                to.Rotation = rotation;
 
-                    var ser = new XmlSerializer(typeof(TrackedObject));
+                var ser = new XmlSerializer(typeof(TrackedObject));
 
-                    var writer = new StringWriter();
-                    ser.Serialize(writer, to);
-                    writer.Close();                    
+                var writer = new StringWriter();
+                ser.Serialize(writer, to);
+                writer.Close();                    
 
-                    var data = writer.ToString();
+                var data = writer.ToString();
 
-                    udpSend.sendString(data);
+                udpSend.sendString(data);
 
-                    //Debug.Log("Client: Sent frame " + frameIndex++);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("Clien.SendPositionToUDP(): Exception:" + e.Message);
-                }
+                //Debug.Log("Client: Sent frame " + frameIndex++);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Clien.SendPositionToUDP(): Exception:" + e.Message);
+            }
+        }
+
+        public void UpdatePositionFromUDP(GameObject avatar, string remoteIP)
+        {
+            if (udpReceive == null)
+            {
+                return; // Not connected yet...
             }
 
-            public void UpdatePositionFromUDP(GameObject avatar, string remoteIP)
+            try
             {
-                if (udpReceive == null)
-                {
-                    return; // Not connected yet...
-                }
+                string lastFrame;
 
-                try
+                lock (udpReceive.allReceivedUDPPackets)
                 {
-                    string lastFrame;
-
-                    lock (udpReceive.allReceivedUDPPackets)
+                    //udpReceiveBuffer += udpReceive.getAllReceivedData();
+                    if (udpReceive.allReceivedUDPPackets.Keys.Count == 0)
                     {
-                        //udpReceiveBuffer += udpReceive.getAllReceivedData();
-                        if (udpReceive.allReceivedUDPPackets.Keys.Count == 0)
-                        {
-                            return;
-                        }
-
-                        //// For now use the first (because only) remote client's data.
-                        //var keysEnumerator = udpReceive.allReceivedUDPPackets.Keys.GetEnumerator();
-                        //keysEnumerator.MoveNext();
-                        //var remoteIP = keysEnumerator.Current;
-
-                        if (!udpReceive.allReceivedUDPPackets.ContainsKey(remoteIP))
-                        {
-                            return;
-                        }
-
-                        string frameEndTag = "</TrackedObject>";
-                        int frameEndTagLength = frameEndTag.Length;
-
-                        int lastFrameEnd = udpReceive.allReceivedUDPPackets[remoteIP].LastIndexOf(frameEndTag);
-
-                        if (lastFrameEnd < 0)
-                        {
-                            return;
-                        }
-
-                        string temp = udpReceive.allReceivedUDPPackets[remoteIP].Substring(0, lastFrameEnd + frameEndTagLength);
-
-                        int lastFrameBegin = temp.LastIndexOf("<TrackedObject ");
-
-                        if (lastFrameBegin < 0)
-                        {
-                            return;
-                        }
-
-                        // Now get the frame string.
-                        lastFrame = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
-
-                        // Clear old frames from receivebuffer.
-                        udpReceive.allReceivedUDPPackets[remoteIP] = udpReceive.allReceivedUDPPackets[remoteIP].Substring(lastFrameEnd + frameEndTagLength);
+                        return;
                     }
 
-                    var ser = new XmlSerializer(typeof(TrackedObject));
+                    //// For now use the first (because only) remote client's data.
+                    //var keysEnumerator = udpReceive.allReceivedUDPPackets.Keys.GetEnumerator();
+                    //keysEnumerator.MoveNext();
+                    //var remoteIP = keysEnumerator.Current;
 
-                    //var reader = new StreamReader(avatarFilePath);
-                    var reader = new StringReader(lastFrame);
+                    if (!udpReceive.allReceivedUDPPackets.ContainsKey(remoteIP))
+                    {
+                        return;
+                    }
 
-                    var trackedObject = (TrackedObject)(ser.Deserialize(reader));
-                    reader.Close();
+                    string frameEndTag = "</TrackedObject>";
+                    int frameEndTagLength = frameEndTag.Length;
 
-                    avatar.transform.position = trackedObject.Position - 1.8f * Vector3.up;
+                    int lastFrameEnd = udpReceive.allReceivedUDPPackets[remoteIP].LastIndexOf(frameEndTag);
 
-                    avatar.transform.rotation = trackedObject.Rotation;
+                    if (lastFrameEnd < 0)
+                    {
+                        return;
+                    }
 
-                    //Debug.Log("Client.UpdatePositionFromUDP(): trackedObject.Position: " + trackedObject.Position);
-                    //Debug.Log("Client.UpdatePositionFromUDP(): trackedObject.Rotation: " + trackedObject.Rotation);
+                    string temp = udpReceive.allReceivedUDPPackets[remoteIP].Substring(0, lastFrameEnd + frameEndTagLength);
+
+                    int lastFrameBegin = temp.LastIndexOf("<TrackedObject ");
+
+                    if (lastFrameBegin < 0)
+                    {
+                        return;
+                    }
+
+                    // Now get the frame string.
+                    lastFrame = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
+
+                    // Clear old frames from receivebuffer.
+                    udpReceive.allReceivedUDPPackets[remoteIP] = udpReceive.allReceivedUDPPackets[remoteIP].Substring(lastFrameEnd + frameEndTagLength);
                 }
-                catch (Exception e)
-                {
-                    Debug.LogError("Client.UpdatePositionFromUDP(): Exception:" + e.Message);
-                }
+
+                var ser = new XmlSerializer(typeof(TrackedObject));
+
+                //var reader = new StreamReader(avatarFilePath);
+                var reader = new StringReader(lastFrame);
+
+                var trackedObject = (TrackedObject)(ser.Deserialize(reader));
+                reader.Close();
+
+                avatar.transform.position = trackedObject.Position - 1.8f * Vector3.up;
+
+                avatar.transform.rotation = trackedObject.Rotation;
+
+                //Debug.Log("Client.UpdatePositionFromUDP(): trackedObject.Position: " + trackedObject.Position);
+                //Debug.Log("Client.UpdatePositionFromUDP(): trackedObject.Rotation: " + trackedObject.Rotation);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Client.UpdatePositionFromUDP(): Exception:" + e.Message);
             }
         }
     }
