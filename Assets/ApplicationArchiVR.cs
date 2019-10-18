@@ -335,7 +335,7 @@ namespace ArchiVR
         //! Start is called before the first frame update
         void Start()
         {
-            InstanciateAllAvatarPrefabs();
+            //InstanciateAllAvatarPrefabs();
 
             switch (NetworkMode)
             {
