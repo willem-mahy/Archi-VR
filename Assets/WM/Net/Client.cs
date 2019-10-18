@@ -75,6 +75,13 @@ namespace WM.Net
 
             Debug.Log("Client: tcpClient connected.");
 
+            // Broadcast your chosen avatar.
+            var ac = new SetClientAvatarCommand();
+            ac.ClientIP = WM.Net.NetUtil.GetLocalIPAddress();
+            ac.AvatarIndex = application.AvatarIndex;
+
+            SendCommand(ac);
+
             var serverStream = tcpClient.GetStream();
 
             // Send message to server
@@ -169,6 +176,11 @@ namespace WM.Net
                             var command = (ConnectClientCommand)obj;
                             application.QueueCommand(command);
                         }
+                        else if (obj is SetClientAvatarCommand)
+                        {
+                            var command = (SetClientAvatarCommand)obj;
+                            application.QueueCommand(command);
+                        }
                         //else if (obj is DisconnectCommand)
                         //{
                         //    this.Disconnect()
@@ -182,7 +194,7 @@ namespace WM.Net
         {
             while (true)
             {
-                if (this.ServerIP != "")
+                if (ServerIP != "")
                 {
                     // connect to a predefined server.
                     if (ConnectToServer(this.ServerIP))
@@ -200,7 +212,7 @@ namespace WM.Net
                         if (ConnectToServer(serverIP))
                         {
                             // Remember server IP.
-                            this.ServerIP = serverIP;
+                            ServerIP = serverIP;
                             return;
                         }
                     }
@@ -335,6 +347,56 @@ namespace WM.Net
             catch (Exception e)
             {
                 Debug.LogError("Client.UpdatePositionFromUDP(): Exception:" + e.Message);
+            }
+        }
+
+        private string GetCommandAsData(ICommand command)
+        {
+            var message = new Message();
+            message.Serialize(command);
+
+            var ser = new XmlSerializer(typeof(Message));
+
+            var writer = new StringWriter();
+            ser.Serialize(writer, message);
+            writer.Close();
+
+            var data = writer.ToString();
+
+            return data;
+        }
+
+        public void SendCommand(ICommand command)
+        {
+            Debug.Log("Client:SendCommand()");
+
+            try
+            {
+                var data = GetCommandAsData(command);
+
+                SendData(data);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Server.SendCommand(): Exception:" + e.Message);
+            }
+        }
+
+        public void SendData(String data)
+        {
+            Debug.Log("Server:SendData()");
+
+            try
+            {
+                var networkStream = tcpClient.GetStream();
+
+                var bytes = Encoding.ASCII.GetBytes(data);
+                networkStream.Write(bytes, 0, bytes.Length);
+                networkStream.Flush();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Server.SendData(): Exception:" + e.Message);
             }
         }
     }

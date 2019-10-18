@@ -66,6 +66,19 @@ namespace WM
             {
                 this.avatars[ip] = InstanciateAvatarPrefabs(avatarIndex);
             }
+            public void SetClientAvatar(
+                string ip,
+                int avatarIndex)
+            {
+                var oldAvatar = avatars[ip];
+
+                avatars[ip] = InstanciateAvatarPrefabs(avatarIndex);
+
+                if (oldAvatar != null)
+                {
+                    Destroy(oldAvatar);
+                }
+            }
 
             GameObject InstanciateAvatarPrefabs(int avatarIndex)
             {

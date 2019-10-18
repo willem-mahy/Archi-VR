@@ -22,8 +22,15 @@ namespace WM
             //! The IP of the client.
             public string remoteIP;
 
+            #region TCP stuff
+
             // The client-specific TCP client.
             public TcpClient tcpClient;
+
+            //
+            public string tcpReceivedData = "";
+
+            #endregion
 
             // The client-specific UDP sender.
             public UDPSend udpSend;
@@ -308,7 +315,6 @@ namespace WM
                                     continue;
                                 }
 
-                                var dataFromClient = "";
                                 {
                                     var networkStream = clientConnection.tcpClient.GetStream();
 
@@ -318,18 +324,75 @@ namespace WM
                                         // Receive from client.
                                         byte[] bytesFromClient = new byte[numBytesAvailable];
                                         networkStream.Read(bytesFromClient, 0, numBytesAvailable);
-                                        dataFromClient = System.Text.Encoding.ASCII.GetString(bytesFromClient);
+                                        clientConnection.tcpReceivedData+= System.Text.Encoding.ASCII.GetString(bytesFromClient);
                                     }
                                 }
 
-                                var messageEnd = dataFromClient.IndexOf("$");
-                                while (messageEnd != -1)
-                                {
-                                    var messageFromClient = dataFromClient.Substring(0, messageEnd);
-                                    dataFromClient = dataFromClient.Substring(messageEnd + 1);
+                                //var messageEnd = dataFromClient.IndexOf("$");
+                                //while (messageEnd != -1)
+                                //{
+                                //    var messageFromClient = dataFromClient.Substring(0, messageEnd);
+                                //    dataFromClient = dataFromClient.Substring(messageEnd + 1);
 
-                                    Debug.Log("Server:ReceiveTcpFunction(): Data from client: '" + messageFromClient + "'");
-                                    messageEnd = dataFromClient.IndexOf("$");
+                                //    Debug.Log("Server:ReceiveTcpFunction(): Data from client: '" + messageFromClient + "'");
+                                //    messageEnd = dataFromClient.IndexOf("$");
+                                //}
+
+                                string beginTag = "<Message ";
+                                string endTag = "</Message>";
+                                int EndTagLength = endTag.Length;
+
+                                int firstMessageBegin = clientConnection.tcpReceivedData.IndexOf(beginTag);
+
+                                if (firstMessageBegin < 0)
+                                {
+                                    break;
+                                }
+
+                                // Remove all data in front of first message.
+                                clientConnection.tcpReceivedData = clientConnection.tcpReceivedData.Substring(firstMessageBegin);
+
+                                int firstMessageEnd = clientConnection.tcpReceivedData.IndexOf(endTag);
+
+                                if (firstMessageEnd < 0)
+                                {
+                                    break;
+                                }
+
+                                //XML-deserialize the message.
+                                int messageLength = firstMessageEnd + EndTagLength;
+                                string messageXML = clientConnection.tcpReceivedData.Substring(0, messageLength);
+
+                                int c = clientConnection.tcpReceivedData.Length;
+                                var remainder = clientConnection.tcpReceivedData.Substring(firstMessageEnd + EndTagLength);
+                                clientConnection.tcpReceivedData = remainder;
+
+                                var ser = new XmlSerializer(typeof(Message));
+
+                                var reader = new StringReader(messageXML);
+
+                                var message = (Message)(ser.Deserialize(reader));
+
+                                reader.Close();
+
+                                // Binary-deserialize the object from the message.
+                                var obj = message.Deserialize();
+
+                                if (obj is TeleportCommand)
+                                {
+                                    BroadcastData(messageXML);
+                                }
+                                else if (obj is SetImmersionModeCommand)
+                                {
+                                    BroadcastData(messageXML);
+                                }
+                                else if (obj is ConnectClientCommand)
+                                {
+                                    BroadcastData(messageXML);
+                                }
+                                else if (obj is SetClientAvatarCommand)
+                                {
+                                    BroadcastData(messageXML);
                                 }
                             }
 
@@ -364,9 +427,24 @@ namespace WM
                 {
                     string data = GetCommandAsData(command);
 
+                    BroadcastData(data);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Server.BroadcastCommand(): Exception: " + e.Message);
+                }
+            }
+
+            public void BroadcastData(
+                string data)
+            {
+                Debug.Log("Server:BoadcastData()");
+
+                try
+                {
                     lock (clientConnections)
                     {
-                        clientsLockOwner = "BroadcastCommand";
+                        clientsLockOwner = "BoadcastData";
 
                         foreach (var clientConnection in clientConnections)
                         {
@@ -375,16 +453,16 @@ namespace WM
                                 Debug.LogWarning("Server.BroadcastCommand(): clientConnection.tcpClient == null");
                                 continue;
                             }
-                            
+
                             SendData(data, clientConnection.tcpClient);
                         }
 
-                        clientsLockOwner = "None (BroadcastCommand)";
+                        clientsLockOwner = "None (BoadcastData)";
                     }
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Server.BroadcastCommand(): Exception: " + e.Message);
+                    Debug.LogError("Server.BoadcastData(): Exception: " + e.Message);
                 }
             }
 
