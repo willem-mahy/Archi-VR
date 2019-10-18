@@ -70,7 +70,12 @@ namespace WM
                 string ip,
                 int avatarIndex)
             {
-                var oldAvatar = avatars[ip];
+                var oldAvatar = (avatars.ContainsKey(ip) ? avatars[ip] : null);
+
+                if (oldAvatar == null)
+                {
+                    Debug.LogWarning("SetClientAvatar(): No existing avatar found for client '" + ip + "'");
+                }
 
                 avatars[ip] = InstanciateAvatarPrefabs(avatarIndex);
 
