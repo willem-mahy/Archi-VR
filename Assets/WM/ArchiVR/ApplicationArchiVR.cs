@@ -353,7 +353,7 @@ namespace WM
                             Server.Init();
 
                             // Init network client
-                            Client.ServerIP = NetUtil.GetLocalIPAddress(); // Let client connect to own server. (TODO: connect directly, ie without network middle layer.)
+                            Client.InitialServerIP = NetUtil.GetLocalIPAddress(); // Let client connect to own server. (TODO: connect directly, ie without network middle layer.)
                             Client.Init();
                         }
                         break;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -18,7 +19,7 @@ namespace WM.Net
 
         public ApplicationArchiVR application;
 
-        public string ServerIP = "";//192.168.0.13";
+        public string InitialServerIP = "";//192.168.0.13";
 
         public int ConnectTimeout = 100;
 
@@ -199,10 +200,10 @@ namespace WM.Net
         {
             while (true)
             {
-                if (ServerIP != "")
+                if (InitialServerIP != "")
                 {
                     // connect to a predefined server.
-                    if (ConnectToServer(this.ServerIP))
+                    if (TryConnectToServer(this.ServerIP))
                     {
                         return;
                     }
@@ -214,10 +215,8 @@ namespace WM.Net
                     {
                         string serverIP = "192.168.0." + i;
 
-                        if (ConnectToServer(serverIP))
+                        if (TryConnectToServer(serverIP))
                         {
-                            // Remember server IP.
-                            ServerIP = serverIP;
                             return;
                         }
                     }
@@ -225,9 +224,9 @@ namespace WM.Net
             }
         }
 
-        private bool ConnectToServer(string serverIP)
+        private bool TryConnectToServer(string serverIP)
         {
-            Debug.Log("Client: Trying to connect tcpClient to '" + serverIP + ":" + Server.TcpPort + "' (timeout: " + ConnectTimeout + "ms)");
+            Debug.Log("Client.ConnectToServer(): Trying to connect TCP client to '" + serverIP + ":" + Server.TcpPort + "' (timeout: " + ConnectTimeout + "ms)");
 
             var tcpClient = new TcpClient();
 
@@ -241,6 +240,29 @@ namespace WM.Net
             }
 
             return tcpClient.Connected;
+        }
+
+        //! Returns whether this client is connected to a server.
+        public bool Connected
+        {
+            get
+            {
+                return tcpClient.Connected;
+            }
+        }
+
+        //! Returns the IP address of the server to which this client is connected, or 'Not available' if not connected.
+        public string ServerIP
+        {
+            get
+            {
+                if (!tcpClient.Connected)
+                {
+                    return "Not available";
+                }
+
+                return ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address.ToString();
+            }
         }
 
         public void SendPositionToUDP(GameObject avatar)
