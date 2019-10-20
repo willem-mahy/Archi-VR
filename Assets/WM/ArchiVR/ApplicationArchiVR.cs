@@ -535,12 +535,12 @@ namespace WM
                 {
                     if (((m_centerEyeAnchor.transform.position - m_centerEyeAnchorPrev).magnitude > 0.01f) || (frame++ % 10 == 0))
                     {
-                        Client.SendPositionToUDP(m_centerEyeAnchor);
+                        Client.SendPositionToUDP(m_centerEyeAnchor, m_leftHandAnchor, m_rightHandAnchor);
                         m_centerEyeAnchorPrev = m_centerEyeAnchor.transform.position;
                     }
 
-                    foreach (var ip in this.avatars.Keys)
-                        Client.UpdatePositionFromUDP(avatars[ip], ip);
+                    // Update positions of remote client avatars, with the avatar states received from the server via UDP.
+                    Client.UpdateAvatarPositionsFromUDP();
                 }
 
                 if (m_controllerInput.m_controllerState.lThumbstickDown)

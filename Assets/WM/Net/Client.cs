@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -273,7 +274,10 @@ namespace WM.Net
             }
         }
 
-        public void SendPositionToUDP(GameObject avatar)
+        public void SendPositionToUDP(
+            GameObject avatarHead,
+            GameObject avatarLHand,
+            GameObject avatarRHand)
         {
             // Temporarily disabled the below check: udpSend is not null but still the if-clause evaluates to true?!? :-s
             if (udpSend == null)
@@ -283,18 +287,22 @@ namespace WM.Net
 
             try
             {
-                var position = avatar.transform.position; // + avatar.transform.forward;
-                var rotation = avatar.transform.rotation;
-                    
-                var to = new TrackedObject();
-                to.Name = "Avatar";
-                to.Position = position;
-                to.Rotation = rotation;
+                var avatarState = new AvatarState();
+                avatarState.ClientIP = WM.Net.NetUtil.GetLocalIPAddress();
+                
+                avatarState.HeadPosition = avatarHead.transform.position;
+                avatarState.HeadRotation = avatarHead.transform.rotation;
 
-                var ser = new XmlSerializer(typeof(TrackedObject));
+                avatarState.LHandPosition = avatarLHand.transform.position;
+                avatarState.LHandRotation = avatarLHand.transform.rotation;
+
+                avatarState.RHandPosition = avatarRHand.transform.position;
+                avatarState.RHandRotation = avatarRHand.transform.rotation;
+
+                var ser = new XmlSerializer(typeof(AvatarState));
 
                 var writer = new StringWriter();
-                ser.Serialize(writer, to);
+                ser.Serialize(writer, avatarState);
                 writer.Close();                    
 
                 var data = writer.ToString();
@@ -309,7 +317,7 @@ namespace WM.Net
             }
         }
 
-        public void UpdatePositionFromUDP(GameObject avatar, string remoteIP)
+        public void UpdateAvatarPositionsFromUDP()
         {
             if (udpReceive == null)
             {
@@ -318,66 +326,88 @@ namespace WM.Net
 
             try
             {
-                string lastFrame;
+                var receivedAvatarStates = new Dictionary<string, AvatarState>();
 
                 lock (udpReceive.allReceivedUDPPackets)
                 {
-                    //udpReceiveBuffer += udpReceive.getAllReceivedData();
-                    if (udpReceive.allReceivedUDPPackets.Keys.Count == 0)
+                    foreach (var senderIP in udpReceive.allReceivedUDPPackets.Keys)
                     {
-                        return;
+                        while (true)
+                        {
+                            string frameEndTag = "</AvatarState>";
+                            int frameEndTagLength = frameEndTag.Length;
+
+                            int frameBegin = udpReceive.allReceivedUDPPackets[senderIP].IndexOf("<AvatarState ");
+
+                            if (frameBegin < 0)
+                            {
+                                // We have no full avatar states to read left in the recivebuffer.
+                                return;
+                            }
+
+                            // Get position of first frame begn tag in receive buffer.
+                            if (frameBegin > 0)
+                            {
+                                // Clear old data (older than first frame) from receivebuffer.
+                                udpReceive.allReceivedUDPPackets[senderIP] = udpReceive.allReceivedUDPPackets[senderIP].Substring(frameBegin);
+                                frameBegin = 0;
+                            }
+
+                            // Get position of first frame end tag in receive buffer.
+                            int frameEnd = udpReceive.allReceivedUDPPackets[senderIP].IndexOf(frameEndTag);
+
+                            if (frameEnd < 0)
+                            {
+                                // We have no full avatar states to read left in the recivebuffer.
+                                return;
+                            }
+
+                            // Now get the frame string.
+                            string frameXML = udpReceive.allReceivedUDPPackets[senderIP].Substring(0, frameEnd + frameEndTagLength);
+
+                            // Clear frame from receivebuffer.
+                            udpReceive.allReceivedUDPPackets[senderIP] = udpReceive.allReceivedUDPPackets[senderIP].Substring(frameEnd + frameEndTagLength);
+
+                            {
+                                var ser = new XmlSerializer(typeof(AvatarState));
+
+                                var reader = new StringReader(frameXML);
+
+                                var avatarState = (AvatarState)(ser.Deserialize(reader));
+
+                                reader.Close();
+
+                                receivedAvatarStates[avatarState.ClientIP] = avatarState;
+                            }
+                        }
                     }
-
-                    //// For now use the first (because only) remote client's data.
-                    //var keysEnumerator = udpReceive.allReceivedUDPPackets.Keys.GetEnumerator();
-                    //keysEnumerator.MoveNext();
-                    //var remoteIP = keysEnumerator.Current;
-
-                    if (!udpReceive.allReceivedUDPPackets.ContainsKey(remoteIP))
-                    {
-                        return;
-                    }
-
-                    string frameEndTag = "</TrackedObject>";
-                    int frameEndTagLength = frameEndTag.Length;
-
-                    int lastFrameEnd = udpReceive.allReceivedUDPPackets[remoteIP].LastIndexOf(frameEndTag);
-
-                    if (lastFrameEnd < 0)
-                    {
-                        return;
-                    }
-
-                    string temp = udpReceive.allReceivedUDPPackets[remoteIP].Substring(0, lastFrameEnd + frameEndTagLength);
-
-                    int lastFrameBegin = temp.LastIndexOf("<TrackedObject ");
-
-                    if (lastFrameBegin < 0)
-                    {
-                        return;
-                    }
-
-                    // Now get the frame string.
-                    lastFrame = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
-
-                    // Clear old frames from receivebuffer.
-                    udpReceive.allReceivedUDPPackets[remoteIP] = udpReceive.allReceivedUDPPackets[remoteIP].Substring(lastFrameEnd + frameEndTagLength);
                 }
 
-                var ser = new XmlSerializer(typeof(TrackedObject));
+                // Apply the most recent states.
+                foreach (var clientIP in receivedAvatarStates.Keys)
+                {
+                    if (application.avatars.ContainsKey(clientIP))
+                    {
+                        var avatar = application.avatars[clientIP].GetComponent<Avatar>();
+                        var avatarState = receivedAvatarStates[clientIP];
 
-                //var reader = new StreamReader(avatarFilePath);
-                var reader = new StringReader(lastFrame);
+                        avatar.Head.transform.position = avatarState.HeadPosition;
+                        avatar.Head.transform.rotation = avatarState.HeadRotation;
 
-                var trackedObject = (TrackedObject)(ser.Deserialize(reader));
-                reader.Close();
+                        avatar.Body.transform.position = avatarState.HeadPosition - 0.8f * Vector3.up;
+                        avatar.Body.transform.rotation = Quaternion.AngleAxis((float)(Math.Atan2(avatar.Head.transform.forward.x, avatar.Head.transform.forward.z)), Vector3.up);
+                        
+                        avatar.LHand.transform.position = avatarState.LHandPosition;
+                        avatar.LHand.transform.rotation = avatarState.LHandRotation;
 
-                avatar.transform.position = trackedObject.Position - 1.8f * Vector3.up;
-
-                avatar.transform.rotation = trackedObject.Rotation;
-
-                //Debug.Log("Client.UpdatePositionFromUDP(): trackedObject.Position: " + trackedObject.Position);
-                //Debug.Log("Client.UpdatePositionFromUDP(): trackedObject.Rotation: " + trackedObject.Rotation);
+                        avatar.LHand.transform.position = avatarState.RHandPosition;
+                        avatar.LHand.transform.rotation = avatarState.RHandRotation;
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Client.UpdatePositionFromUDP(): Received avatar state for non-existing avatar! (" + clientIP + ")");
+                    }
+                }
             }
             catch (Exception e)
             {

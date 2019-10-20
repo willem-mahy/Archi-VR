@@ -268,7 +268,7 @@ namespace WM
                             for (int clientIndex = 0; clientIndex < clientConnections.Count; ++clientIndex)
                             {
                                 // Try to receive the x-th client frame.
-                                var trackedObjectXML = GetTrackedObjectFromFromUdp(clientIndex);
+                                var trackedObjectXML = GetAvatarStateFromUdp(clientIndex);
 
                                 //Debug.Log("Server: Received frame from client " + clientIndex);
 
@@ -653,7 +653,7 @@ namespace WM
                 }
             }
 
-            public string GetTrackedObjectFromFromUdp(int clientIndex)
+            public string GetAvatarStateFromUdp(int clientIndex)
             {
                 try
                 {
@@ -685,7 +685,7 @@ namespace WM
                             return null;
                         }
 
-                        string frameEndTag = "</TrackedObject>";
+                        string frameEndTag = "</AvatarState>";
                         int frameEndTagLength = frameEndTag.Length;
                         int lastFrameEnd = udpReceive.allReceivedUDPPackets[clientIP].LastIndexOf(frameEndTag);
 
@@ -696,7 +696,7 @@ namespace WM
 
                         string temp = udpReceive.allReceivedUDPPackets[clientIP].Substring(0, lastFrameEnd + frameEndTagLength);
 
-                        int lastFrameBegin = temp.LastIndexOf("<TrackedObject ");
+                        int lastFrameBegin = temp.LastIndexOf("<AvatarState ");
 
                         if (lastFrameBegin < 0)
                         {
@@ -710,19 +710,19 @@ namespace WM
                         udpReceive.allReceivedUDPPackets[clientIP] = udpReceive.allReceivedUDPPackets[clientIP].Substring(lastFrameEnd + frameEndTagLength);
                     }
 
-                    var ser = new XmlSerializer(typeof(TrackedObject));
+                    var ser = new XmlSerializer(typeof(AvatarState));
 
                     //var reader = new StreamReader(avatarFilePath);
                     var reader = new StringReader(trackedObjectXML);
 
-                    var trackedObject = (TrackedObject)(ser.Deserialize(reader));
+                    var trackedObject = (AvatarState)(ser.Deserialize(reader));
                     reader.Close();
 
                     return trackedObjectXML;
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Server.GetTrackedObjectFromFromUdp(): Exception: " + e.Message);
+                    Debug.LogError("Server.GetAvatarStateFromUdp(): Exception: " + e.Message);
                     return null;
                 }
             }
