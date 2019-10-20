@@ -68,7 +68,7 @@ namespace WM
                 {
                     foreach (var clientConnection in clientConnections)
                     {
-                        info += "- " + clientConnection.remoteIP + "\n";
+                        info += "- " + clientConnection.remoteIP + " AvatarType:" + clientConnection.AvatarIndex + "\n";
                     }
                 }
                 return info;
@@ -168,6 +168,7 @@ namespace WM
                 }
             }
 
+            //! Thread function executed by the 'Accept Client' thread.
             private void AcceptClientFunction()
             {
                 while ((true))
@@ -209,20 +210,21 @@ namespace WM
                             {
                                 // Now the client is connected, make him...
 
-                                // A) .. know its peer clients
+                                // A) .. know its peer clients.  (For each existing client, send a 'ClientConnect' command to the new client.
                                 lock (clientConnections)
                                 {
                                     foreach (var clientConnection in clientConnections)
                                     {
-                                        // Notify clients that another client connected.
-                                        var cc1 = new ConnectClientCommand();
-                                        cc1.ClientIP = clientConnection.remoteIP;
-                                        cc1.AvatarIndex = clientConnection.AvatarIndex;
+                                        if (clientConnection != newClientConnection)
+                                        {
+                                            var cc1 = new ConnectClientCommand();
+                                            cc1.ClientIP = clientConnection.remoteIP;
+                                            cc1.AvatarIndex = clientConnection.AvatarIndex;
 
-                                        BroadcastCommand(cc1);
+                                            SendCommand(cc1, newClientConnection.tcpClient);
+                                        }
                                     }
                                 }
-
 
                                 // B) ...spawn at the current Project and POI.
                                 var teleportCommand = new TeleportCommand();
@@ -246,9 +248,6 @@ namespace WM
                             cc.AvatarIndex = newClientAvatarIndex;
                             BroadcastCommand(cc);
                             */
-
-                            // Update and cycle avatar index for nex client.
-                            newClientAvatarIndex = (newClientAvatarIndex++) % 4;
                         }
                     }
                     catch (Exception ex)
@@ -258,8 +257,7 @@ namespace WM
                 }
             }
 
-            int newClientAvatarIndex = 0; // counter.
-
+            //! Thread function executed by the 'Receive UDP' thread.
             private void ReceiveUdpFunction()
             {
                 while (true)
@@ -301,6 +299,7 @@ namespace WM
                 }
             }
 
+            //! Thread function executed by the 'Receive TCP' thread.
             private void ReceiveTcpFunction()
             {
                 while (true)
@@ -406,6 +405,8 @@ namespace WM
                 }
                 else if (obj is ConnectClientCommand)
                 {
+                    var ccc = (SetClientAvatarCommand)obj;
+                    clientConnection.AvatarIndex = ccc.AvatarIndex;
                     PropagateData(messageXML, clientConnection);
                 }
                 else if (obj is SetClientAvatarCommand)
@@ -524,6 +525,12 @@ namespace WM
 
                 try
                 {
+                    if (tcpClient == null)
+                    {
+                        Debug.LogWarning("Server.SendCommand(): tcpClient == null");
+                        return;
+                    }
+
                     var data = GetCommandAsData(command);
 
                     SendData(data, tcpClient);

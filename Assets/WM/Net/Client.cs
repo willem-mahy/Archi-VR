@@ -69,6 +69,7 @@ namespace WM.Net
             Debug.Log("Client started");
         }
 
+        //! Thread function executed by the thread.
         private void ThreadFunction()
         {
             Connect();
@@ -76,7 +77,7 @@ namespace WM.Net
             Debug.Log("Client: tcpClient connected.");
 
             // Broadcast your chosen avatar.
-            var ac = new SetClientAvatarCommand();
+            var ac = new ConnectClientCommand();
             ac.ClientIP = WM.Net.NetUtil.GetLocalIPAddress();
             ac.AvatarIndex = application.AvatarIndex;
 
