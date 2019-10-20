@@ -330,30 +330,45 @@ namespace WM.Net
 
                 lock (udpReceive.allReceivedUDPPackets)
                 {
-                    foreach (var senderIP in udpReceive.allReceivedUDPPackets.Keys)
+                    if (udpReceive.allReceivedUDPPackets.Keys.Count > 1)
                     {
+                        Debug.LogWarning("Client.UpdateAvatarStatesFromUDP(): More than one receive buffer!?!");
+                        udpReceive.allReceivedUDPPackets.Clear();
+                        return;
+                    }
+
+                    if (udpReceive.allReceivedUDPPackets.Keys.Count == 1)
+                    {
+                        // Get the first and only sender IP.
+                        var senderIPEnumerator = udpReceive.allReceivedUDPPackets.Keys.GetEnumerator();
+                        senderIPEnumerator.MoveNext();
+                        var senderIP = senderIPEnumerator.Current;
+
+                        // Get the corresponding receive buffer.
+                        var receiveBuffer = udpReceive.allReceivedUDPPackets[senderIP];
+
                         while (true)
                         {
                             string frameEndTag = "</AvatarState>";
                             int frameEndTagLength = frameEndTag.Length;
 
-                            int frameBegin = udpReceive.allReceivedUDPPackets[senderIP].IndexOf("<AvatarState ");
+                            int frameBegin = receiveBuffer.IndexOf("<AvatarState ");
 
                             if (frameBegin < 0)
                             {
                                 break; // We have no full avatar states to read left in the receivebuffer -> break parsing received avatar states.
                             }
 
-                            // Get position of first frame begn tag in receive buffer.
+                            // Get position of first frame begin tag in receive buffer.
                             if (frameBegin > 0)
                             {
                                 // Clear old data (older than first frame) from receivebuffer.
-                                udpReceive.allReceivedUDPPackets[senderIP] = udpReceive.allReceivedUDPPackets[senderIP].Substring(frameBegin);
+                                receiveBuffer = receiveBuffer.Substring(frameBegin);
                                 frameBegin = 0;
                             }
 
                             // Get position of first frame end tag in receive buffer.
-                            int frameEnd = udpReceive.allReceivedUDPPackets[senderIP].IndexOf(frameEndTag);
+                            int frameEnd = receiveBuffer.IndexOf(frameEndTag);
 
                             if (frameEnd < 0)
                             {
@@ -361,10 +376,10 @@ namespace WM.Net
                             }
 
                             // Now get the frame string.
-                            string frameXML = udpReceive.allReceivedUDPPackets[senderIP].Substring(0, frameEnd + frameEndTagLength);
+                            string frameXML = receiveBuffer.Substring(0, frameEnd + frameEndTagLength);
 
                             // Clear frame from receivebuffer.
-                            udpReceive.allReceivedUDPPackets[senderIP] = udpReceive.allReceivedUDPPackets[senderIP].Substring(frameEnd + frameEndTagLength);
+                            receiveBuffer = receiveBuffer.Substring(frameEnd + frameEndTagLength);
 
                             {
                                 var ser = new XmlSerializer(typeof(AvatarState));
@@ -378,6 +393,10 @@ namespace WM.Net
                                 receivedAvatarStates[avatarState.ClientIP] = avatarState;
                             }
                         }
+
+                        // We have parsed all available full avatar states from the framebufer and removed them from it.
+                        // Update the framebuffer to the unprocessed remainder.
+                        udpReceive.allReceivedUDPPackets[senderIP] = receiveBuffer;
                     }
                 }
 

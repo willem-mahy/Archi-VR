@@ -47,9 +47,9 @@ namespace WM
             #region TCP
 
             public static readonly int TcpPort =
-                8886;
-            //8887;
-            //8888;
+                //8886;
+                //8887;
+                8888;
 
             //! The TCP listener.
             TcpListener tcpListener;
