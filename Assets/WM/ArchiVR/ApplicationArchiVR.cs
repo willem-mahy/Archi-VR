@@ -524,6 +524,8 @@ namespace WM
                 // TODO: WHY THAF is this necessary to make camera work in Editor?
                 m_centerEyeAnchor.GetComponent<Camera>().enabled = false;
                 m_centerEyeAnchor.GetComponent<Camera>().enabled = true;
+                
+                UpdateControllersLocation();
 
                 if (this.TeleportCommand == null) // TODO? : Move the processing of commands to ApplicationStateDefault:Update()?
                 {
@@ -541,12 +543,15 @@ namespace WM
                 {
                     if (((m_centerEyeAnchor.transform.position - m_centerEyeAnchorPrev).magnitude > 0.01f) || (frame++ % 10 == 0))
                     {
-                        Client.SendPositionToUDP(m_centerEyeAnchor, m_leftHandAnchor, m_rightHandAnchor);
+                        Client.SendAvatarStateToUdp(
+                            m_centerEyeAnchor,
+                            m_leftHandAnchor,
+                            m_rightHandAnchor);
                         m_centerEyeAnchorPrev = m_centerEyeAnchor.transform.position;
                     }
 
                     // Update positions of remote client avatars, with the avatar states received from the server via UDP.
-                    Client.UpdateAvatarStatesFromUDP();
+                    Client.UpdateAvatarStatesFromUdp();
                 }
 
                 if (m_controllerInput.m_controllerState.lThumbstickDown)
@@ -612,8 +617,6 @@ namespace WM
                 }
 
                 #endregion
-
-                UpdateControllersLocation();
 
                 if (GetActiveApplicationState() != null)
                 {

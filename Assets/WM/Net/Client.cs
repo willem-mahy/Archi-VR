@@ -274,7 +274,7 @@ namespace WM.Net
             }
         }
 
-        public void SendPositionToUDP(
+        public void SendAvatarStateToUdp(
             GameObject avatarHead,
             GameObject avatarLHand,
             GameObject avatarRHand)
@@ -317,7 +317,7 @@ namespace WM.Net
             }
         }
 
-        public void UpdateAvatarStatesFromUDP()
+        public void UpdateAvatarStatesFromUdp()
         {
             if (udpReceive == null)
             {
@@ -413,14 +413,14 @@ namespace WM.Net
                             avatar.Head.transform.position = avatarState.HeadPosition;
                             avatar.Head.transform.rotation = avatarState.HeadRotation;
 
-                            avatar.Body.transform.position = avatarState.HeadPosition - 0.8f * Vector3.up;
+                            avatar.Body.transform.position = avatarState.HeadPosition - 0.9f * Vector3.up;
                             avatar.Body.transform.rotation = Quaternion.AngleAxis((float)(Math.Atan2(avatar.Head.transform.forward.x, avatar.Head.transform.forward.z)), Vector3.up);
 
                             avatar.LHand.transform.position = avatarState.LHandPosition;
                             avatar.LHand.transform.rotation = avatarState.LHandRotation;
 
-                            avatar.LHand.transform.position = avatarState.RHandPosition;
-                            avatar.LHand.transform.rotation = avatarState.RHandRotation;
+                            avatar.RHand.transform.position = avatarState.RHandPosition;
+                            avatar.RHand.transform.rotation = avatarState.RHandRotation;
                         }
                         else
                         {
