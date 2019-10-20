@@ -317,7 +317,7 @@ namespace WM.Net
             }
         }
 
-        public void UpdateAvatarPositionsFromUDP()
+        public void UpdateAvatarStatesFromUDP()
         {
             if (udpReceive == null)
             {

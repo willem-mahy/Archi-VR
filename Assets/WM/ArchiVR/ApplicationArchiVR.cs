@@ -540,7 +540,7 @@ namespace WM
                     }
 
                     // Update positions of remote client avatars, with the avatar states received from the server via UDP.
-                    Client.UpdateAvatarPositionsFromUDP();
+                    Client.UpdateAvatarStatesFromUDP();
                 }
 
                 if (m_controllerInput.m_controllerState.lThumbstickDown)
