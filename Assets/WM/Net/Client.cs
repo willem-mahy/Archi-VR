@@ -381,35 +381,38 @@ namespace WM.Net
                     }
                 }
 
-                // Apply the most recent states.
-                foreach (var clientIP in receivedAvatarStates.Keys)
+                lock (application.avatars)
                 {
-                    if (application.avatars.ContainsKey(clientIP))
+                    // Apply the most recent states.
+                    foreach (var clientIP in receivedAvatarStates.Keys)
                     {
-                        var avatar = application.avatars[clientIP].GetComponent<Avatar>();
-                        var avatarState = receivedAvatarStates[clientIP];
+                        if (application.avatars.ContainsKey(clientIP))
+                        {
+                            var avatar = application.avatars[clientIP].GetComponent<Avatar>();
+                            var avatarState = receivedAvatarStates[clientIP];
 
-                        avatar.Head.transform.position = avatarState.HeadPosition;
-                        avatar.Head.transform.rotation = avatarState.HeadRotation;
+                            avatar.Head.transform.position = avatarState.HeadPosition;
+                            avatar.Head.transform.rotation = avatarState.HeadRotation;
 
-                        avatar.Body.transform.position = avatarState.HeadPosition - 0.8f * Vector3.up;
-                        avatar.Body.transform.rotation = Quaternion.AngleAxis((float)(Math.Atan2(avatar.Head.transform.forward.x, avatar.Head.transform.forward.z)), Vector3.up);
-                        
-                        avatar.LHand.transform.position = avatarState.LHandPosition;
-                        avatar.LHand.transform.rotation = avatarState.LHandRotation;
+                            avatar.Body.transform.position = avatarState.HeadPosition - 0.8f * Vector3.up;
+                            avatar.Body.transform.rotation = Quaternion.AngleAxis((float)(Math.Atan2(avatar.Head.transform.forward.x, avatar.Head.transform.forward.z)), Vector3.up);
 
-                        avatar.LHand.transform.position = avatarState.RHandPosition;
-                        avatar.LHand.transform.rotation = avatarState.RHandRotation;
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Client.UpdatePositionFromUDP(): Received avatar state for non-existing avatar! (" + clientIP + ")");
+                            avatar.LHand.transform.position = avatarState.LHandPosition;
+                            avatar.LHand.transform.rotation = avatarState.LHandRotation;
+
+                            avatar.LHand.transform.position = avatarState.RHandPosition;
+                            avatar.LHand.transform.rotation = avatarState.RHandRotation;
+                        }
+                        else
+                        {
+                            Debug.LogWarning("Client.UpdateAvatarStatesFromUDP(): Received avatar state for non-existing avatar! (" + clientIP + ")");
+                        }
                     }
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError("Client.UpdatePositionFromUDP(): Exception:" + e.Message);
+                Debug.LogError("Client.UpdateAvatarStatesFromUDP(): Exception:" + e.Message);
             }
         }
 

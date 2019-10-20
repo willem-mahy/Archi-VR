@@ -64,24 +64,30 @@ namespace WM
                 string ip,
                 int avatarIndex)
             {
-                this.avatars[ip] = InstanciateAvatarPrefabs(avatarIndex);
+                lock (avatars)
+                {
+                    avatars[ip] = InstanciateAvatarPrefabs(avatarIndex);
+                }
             }
             public void SetClientAvatar(
                 string ip,
                 int avatarIndex)
             {
-                var oldAvatar = (avatars.ContainsKey(ip) ? avatars[ip] : null);
-
-                if (oldAvatar == null)
+                lock (avatars)
                 {
-                    Debug.LogWarning("SetClientAvatar(): No existing avatar found for client '" + ip + "'");
-                }
+                    var oldAvatar = (avatars.ContainsKey(ip) ? avatars[ip] : null);
 
-                avatars[ip] = InstanciateAvatarPrefabs(avatarIndex);
+                    if (oldAvatar == null)
+                    {
+                        Debug.LogWarning("SetClientAvatar(): No existing avatar found for client '" + ip + "'");
+                    }
 
-                if (oldAvatar != null)
-                {
-                    Destroy(oldAvatar);
+                    avatars[ip] = InstanciateAvatarPrefabs(avatarIndex);
+
+                    if (oldAvatar != null)
+                    {
+                        Destroy(oldAvatar);
+                    }
                 }
             }
 
