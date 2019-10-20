@@ -405,7 +405,7 @@ namespace WM
                 }
                 else if (obj is ConnectClientCommand)
                 {
-                    var ccc = (SetClientAvatarCommand)obj;
+                    var ccc = (ConnectClientCommand)obj;
                     clientConnection.AvatarIndex = ccc.AvatarIndex;
                     PropagateData(messageXML, clientConnection);
                 }

@@ -77,31 +77,35 @@ namespace WM.Net
             Debug.Log("Client: tcpClient connected.");
 
             // Broadcast your chosen avatar.
-            var ac = new ConnectClientCommand();
-            ac.ClientIP = WM.Net.NetUtil.GetLocalIPAddress();
-            ac.AvatarIndex = application.AvatarIndex;
+            {
+                var ccc = new ConnectClientCommand();
+                ccc.ClientIP = WM.Net.NetUtil.GetLocalIPAddress();
+                ccc.AvatarIndex = application.AvatarIndex;
+                SendCommand(ccc);
+            }
 
-            SendCommand(ac);
-
+            // Get server stream from TCP client.
             var serverStream = tcpClient.GetStream();
 
-            // Send message to server
-            var myIP = NetUtil.GetLocalIPAddress();
-            var messageToServer = "Hello from client '" + myIP + "'$";
-            var bytesToServer = Encoding.ASCII.GetBytes(messageToServer);
-            serverStream.Write(bytesToServer, 0, bytesToServer.Length);
-            serverStream.Flush();
+            //// Send message to server
+            //var myIP = NetUtil.GetLocalIPAddress();
+            //var messageToServer = "Hello from client '" + myIP + "'$";
+            //var bytesToServer = Encoding.ASCII.GetBytes(messageToServer);
+            //serverStream.Write(bytesToServer, 0, bytesToServer.Length);
+            //serverStream.Flush();
 
             // Initialize UDP sockets to/from server.
-            udpClient = new UdpClient(UdpPort);
+            {
+                udpClient = new UdpClient(UdpPort);
 
-            udpSend = new UDPSend(udpClient);
-            udpSend.remoteIP = ServerIP;
-            udpSend.remotePort = Server.UdpPort;
-            udpSend.Init();
+                udpSend = new UDPSend(udpClient);
+                udpSend.remoteIP = ServerIP;
+                udpSend.remotePort = Server.UdpPort;
+                udpSend.Init();
 
-            udpReceive = new UDPReceive(udpClient);
-            udpReceive.Init();
+                udpReceive = new UDPReceive(udpClient);
+                udpReceive.Init();
+            }
 
             while (true)
             {
@@ -385,7 +389,7 @@ namespace WM.Net
 
         public void SendData(String data)
         {
-            Debug.Log("Server:SendData()");
+            Debug.Log("Client:SendData()");
 
             try
             {
@@ -397,7 +401,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                Debug.LogError("Server.SendData(): Exception:" + e.Message);
+                Debug.LogError("Client.SendData(): Exception:" + e.Message);
             }
         }
     }
