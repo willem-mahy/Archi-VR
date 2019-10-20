@@ -203,7 +203,7 @@ namespace WM.Net
                 if (InitialServerIP != "")
                 {
                     // connect to a predefined server.
-                    if (TryConnectToServer(this.ServerIP))
+                    if (TryConnectToServer(InitialServerIP))
                     {
                         return;
                     }
@@ -247,7 +247,7 @@ namespace WM.Net
         {
             get
             {
-                return tcpClient.Connected;
+                return (tcpClient != null) && tcpClient.Connected;
             }
         }
 
@@ -256,7 +256,7 @@ namespace WM.Net
         {
             get
             {
-                if (!tcpClient.Connected)
+                if (!Connected)
                 {
                     return "Not available";
                 }
