@@ -341,8 +341,7 @@ namespace WM.Net
 
                             if (frameBegin < 0)
                             {
-                                // We have no full avatar states to read left in the recivebuffer.
-                                return;
+                                break; // We have no full avatar states to read left in the receivebuffer -> break parsing received avatar states.
                             }
 
                             // Get position of first frame begn tag in receive buffer.
@@ -358,8 +357,7 @@ namespace WM.Net
 
                             if (frameEnd < 0)
                             {
-                                // We have no full avatar states to read left in the recivebuffer.
-                                return;
+                                break; // We have no full avatar states to read left in the receivebuffer -> break parsing received avatar states.
                             }
 
                             // Now get the frame string.
