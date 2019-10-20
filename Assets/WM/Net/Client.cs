@@ -77,12 +77,20 @@ namespace WM.Net
 
             Debug.Log("Client: tcpClient connected.");
 
+            //// Broadcast the fact that you've connected.
+            //{
+            //    var ccc = new ConnectClientCommand();
+            //    ccc.ClientIP = WM.Net.NetUtil.GetLocalIPAddress();
+            //    ccc.AvatarIndex = application.AvatarIndex;
+            //    SendCommand(ccc);
+            //}
+
             // Broadcast your chosen avatar.
             {
-                var ccc = new ConnectClientCommand();
-                ccc.ClientIP = WM.Net.NetUtil.GetLocalIPAddress();
-                ccc.AvatarIndex = application.AvatarIndex;
-                SendCommand(ccc);
+                var scac = new SetClientAvatarCommand();
+                scac.ClientIP = WM.Net.NetUtil.GetLocalIPAddress();
+                scac.AvatarIndex = application.AvatarIndex;
+                SendCommand(scac);
             }
 
             // Get server stream from TCP client.
@@ -405,7 +413,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                Debug.LogError("Server.SendCommand(): Exception:" + e.Message);
+                Debug.LogError("Client.SendCommand(): Exception:" + e.Message);
             }
         }
 

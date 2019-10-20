@@ -206,27 +206,27 @@ namespace WM
                                 clientsLockOwner = "None (AcceptClientFunction)";
                             }
 
-                            if (application.ActiveProjectIndex != -1)
+                            // Now the client is connected, make him...
+
+                            // A) .. know its peer clients.  (For each existing client, send a 'ClientConnect' command to the new client.
+                            lock (clientConnections)
                             {
-                                // Now the client is connected, make him...
-
-                                // A) .. know its peer clients.  (For each existing client, send a 'ClientConnect' command to the new client.
-                                lock (clientConnections)
+                                foreach (var clientConnection in clientConnections)
                                 {
-                                    foreach (var clientConnection in clientConnections)
+                                    if (clientConnection != newClientConnection)
                                     {
-                                        if (clientConnection != newClientConnection)
-                                        {
-                                            var cc1 = new ConnectClientCommand();
-                                            cc1.ClientIP = clientConnection.remoteIP;
-                                            cc1.AvatarIndex = clientConnection.AvatarIndex;
+                                        var cc1 = new ConnectClientCommand();
+                                        cc1.ClientIP = clientConnection.remoteIP;
+                                        cc1.AvatarIndex = clientConnection.AvatarIndex;
 
-                                            SendCommand(cc1, newClientConnection.tcpClient);
-                                        }
+                                        SendCommand(cc1, newClientConnection.tcpClient);
                                     }
                                 }
+                            }
 
-                                // B) ...spawn at the current Project and POI.
+                            // B) ...spawn at the current Project and POI.
+                            if (clientConnections.Count > 1) // Hack to distinguish the local client running on server host. -> will be taken cae of in ServerClient implementation.
+                            {
                                 var teleportCommand = new TeleportCommand();
                                 teleportCommand.ProjectIndex = application.ActiveProjectIndex;
                                 teleportCommand.POIName = application.ActivePOIName;
@@ -240,14 +240,11 @@ namespace WM
                                 SendCommand(setImmersionModeCommand, newClientConnection.tcpClient);
                             }
 
-                            // Note: Removed this: clients send the connection command themselves, because they (nd not server) know which avatar etc they are using...
-                            /*
                             // Notify clients that another client connected.
                             var cc = new ConnectClientCommand();
-                            cc.ClientIP = clientIP;
-                            cc.AvatarIndex = newClientAvatarIndex;
-                            BroadcastCommand(cc);
-                            */
+                            cc.ClientIP = newClientConnection.remoteIP;
+                            cc.AvatarIndex = newClientConnection.AvatarIndex;
+                            PropagateCommand(cc, newClientConnection);
                         }
                     }
                     catch (Exception ex)
@@ -445,7 +442,25 @@ namespace WM
                 }
             }
 
-            public void BroadcastData(
+            private void PropagateCommand(
+                ICommand command,
+                ClientConnection sourceClientConnection)
+            {
+                Debug.Log("Server:PropagateCommand()");
+
+                try
+                {
+                    string data = GetCommandAsData(command);
+
+                    PropagateData(data, sourceClientConnection);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Server.PropagateCommand(): Exception: " + e.Message);
+                }
+            }
+
+            private void BroadcastData(
                 string data)
             {
                 Debug.Log("Server:BroadcastData()");
