@@ -17,6 +17,10 @@ namespace WM.ArchiVR.Command
         [XmlElement("AvatarIndex")]
         public int AvatarIndex { get; set; }
 
+        public ConnectClientCommand()
+        { 
+        }
+
         public void Execute(ApplicationArchiVR application)
         {
             Debug.Log("ConnectClientCommand.Execute()");

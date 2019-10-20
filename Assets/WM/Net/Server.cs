@@ -238,11 +238,14 @@ namespace WM
                                 SendCommand(setImmersionModeCommand, newClientConnection.tcpClient);
                             }
 
+                            // Note: Removed this: clients send the connection command themselves, because they (nd not server) know which avatar etc they are using...
+                            /*
                             // Notify clients that another client connected.
                             var cc = new ConnectClientCommand();
                             cc.ClientIP = clientIP;
                             cc.AvatarIndex = newClientAvatarIndex;
                             BroadcastCommand(cc);
+                            */
 
                             // Update and cycle avatar index for nex client.
                             newClientAvatarIndex = (newClientAvatarIndex++) % 4;
@@ -333,16 +336,6 @@ namespace WM
                                     }
                                 }
 
-                                //var messageEnd = dataFromClient.IndexOf("$");
-                                //while (messageEnd != -1)
-                                //{
-                                //    var messageFromClient = dataFromClient.Substring(0, messageEnd);
-                                //    dataFromClient = dataFromClient.Substring(messageEnd + 1);
-
-                                //    Debug.Log("Server:ReceiveTcpFunction(): Data from client: '" + messageFromClient + "'");
-                                //    messageEnd = dataFromClient.IndexOf("$");
-                                //}
-
                                 string beginTag = "<Message ";
                                 string endTag = "</Message>";
                                 int EndTagLength = endTag.Length;
@@ -364,43 +357,16 @@ namespace WM
                                     break;
                                 }
 
-                                //XML-deserialize the message.
+                                // XML-deserialize the message.
                                 int messageLength = firstMessageEnd + EndTagLength;
                                 string messageXML = clientConnection.tcpReceivedData.Substring(0, messageLength);
 
-                                int c = clientConnection.tcpReceivedData.Length;
+                                // Remove the first message (and all data in front of it) from the client connection receive buffer.
                                 var remainder = clientConnection.tcpReceivedData.Substring(firstMessageEnd + EndTagLength);
                                 clientConnection.tcpReceivedData = remainder;
 
-                                var ser = new XmlSerializer(typeof(Message));
-
-                                var reader = new StringReader(messageXML);
-
-                                var message = (Message)(ser.Deserialize(reader));
-
-                                reader.Close();
-
-                                // Binary-deserialize the object from the message.
-                                var obj = message.Deserialize();
-
-                                if (obj is TeleportCommand)
-                                {
-                                    BroadcastData(messageXML);
-                                }
-                                else if (obj is SetImmersionModeCommand)
-                                {
-                                    BroadcastData(messageXML);
-                                }
-                                else if (obj is ConnectClientCommand)
-                                {
-                                    BroadcastData(messageXML);
-                                }
-                                else if (obj is SetClientAvatarCommand)
-                                {
-                                    var scac = (SetClientAvatarCommand)obj;
-                                    clientConnection.AvatarIndex = scac.AvatarIndex;
-                                    BroadcastData(messageXML);
-                                }
+                                // Process the message
+                                ProcessMessage(messageXML, clientConnection);
                             }
 
                             clientsLockOwner = "None (last:ReceiveFromClientsFunction)";
@@ -411,6 +377,42 @@ namespace WM
                     {
                         Debug.LogError("Server.ReceiveTcpFunction(): Exception: " + ex.ToString());
                     }
+                }
+            }
+
+            private void ProcessMessage(
+                string messageXML,
+                ClientConnection clientConnection)
+            {
+                // XML-deserialize the Message.
+                var ser = new XmlSerializer(typeof(Message));
+
+                var reader = new StringReader(messageXML);
+
+                var message = (Message)(ser.Deserialize(reader));
+
+                reader.Close();
+
+                // Binary-deserialize the object from the message.
+                var obj = message.Deserialize();
+
+                if (obj is TeleportCommand)
+                {
+                    BroadcastData(messageXML);
+                }
+                else if (obj is SetImmersionModeCommand)
+                {
+                    BroadcastData(messageXML);
+                }
+                else if (obj is ConnectClientCommand)
+                {
+                    PropagateData(messageXML, clientConnection);
+                }
+                else if (obj is SetClientAvatarCommand)
+                {
+                     var scac = (SetClientAvatarCommand)obj;
+                    clientConnection.AvatarIndex = scac.AvatarIndex;
+                    PropagateData(messageXML, clientConnection);
                 }
             }
                         
@@ -445,22 +447,16 @@ namespace WM
             public void BroadcastData(
                 string data)
             {
-                Debug.Log("Server:BoadcastData()");
+                Debug.Log("Server:BroadcastData()");
 
                 try
                 {
                     lock (clientConnections)
                     {
-                        clientsLockOwner = "BoadcastData";
+                        clientsLockOwner = "BroadcastData";
 
                         foreach (var clientConnection in clientConnections)
                         {
-                            if (clientConnection.tcpClient == null)
-                            {
-                                Debug.LogWarning("Server.BroadcastCommand(): clientConnection.tcpClient == null");
-                                continue;
-                            }
-
                             SendData(data, clientConnection.tcpClient);
                         }
 
@@ -469,7 +465,38 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Server.BoadcastData(): Exception: " + e.Message);
+                    Debug.LogError("Server.BroadcastData(): Exception: " + e.Message);
+                }
+            }
+            
+            private void PropagateData(
+                string data,
+                ClientConnection sourceClientConnection)
+            {
+                Debug.Log("Server:PropagateData()");
+
+                try
+                {
+                    lock (clientConnections)
+                    {
+                        clientsLockOwner = "PropagateData";
+
+                        foreach (var clientConnection in clientConnections)
+                        {
+                            if (clientConnection == sourceClientConnection)
+                            {
+                                continue; // Do not send to the source client connection.
+                            }
+
+                            SendData(data, clientConnection.tcpClient);
+                        }
+
+                        clientsLockOwner = "None (PropagateData)";
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Server.PropagateData(): Exception: " + e.Message);
                 }
             }
 
@@ -515,6 +542,12 @@ namespace WM
 
                 try
                 {
+                    if (tcpClient == null)
+                    {
+                        Debug.LogWarning("Server.SendData(): tcpClient == null");
+                        return;
+                    }
+
                     var networkStream = tcpClient.GetStream();
 
                     var bytes = Encoding.ASCII.GetBytes(data);
