@@ -276,11 +276,11 @@ namespace WM
             enum MenuMode
             {
                 None = 0,
+                Network, 
+                Graphics,
+                Info,
                 DebugLog,
-                DebugInput,
-                Graphics, 
-                Network,                
-                Info
+                DebugInput
             }
 
             // The menu mode.
