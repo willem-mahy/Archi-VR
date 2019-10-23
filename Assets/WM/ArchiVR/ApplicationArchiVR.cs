@@ -104,6 +104,8 @@ namespace WM
 
             public Animator m_fadeAnimator = null;
 
+            public HUDMenu HudMenu = null;
+
             public UnityEngine.GameObject m_gfxDebugPanelHUD = null;
             public UnityEngine.UI.Text m_gfxDebugHUDText = null;
 
@@ -349,6 +351,10 @@ namespace WM
             //! Start is called before the first frame update
             void Start()
             {
+                if (Application.isEditor)
+                {
+                    HudMenu.AnchorEnabled = true;
+                }
                 //InstanciateAllAvatarPrefabs();
 
                 switch (NetworkMode)
@@ -1097,6 +1103,11 @@ namespace WM
             //! Activates the next menu mode.
             void ToggleMenuMode()
             {
+                if (menuMode == MenuMode.None)
+                {
+                    HudMenu.UpdateAnchoring(); // Re-anchor the HUD menu to be in front of cam.
+                }
+
                 menuMode = (MenuMode)UtilIterate.MakeCycle((int)menuMode + 1, 0, menus.Count);
 
                 switch (menuMode)
