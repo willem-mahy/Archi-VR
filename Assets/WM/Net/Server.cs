@@ -97,11 +97,15 @@ namespace WM
 
             #endregion
 
+            private bool shutDown = false;
+
             #endregion
 
             public void Init()
             {
                 Debug.Log("Server.Init() Start");
+
+                shutDown = false;
 
                 try
                 {
@@ -168,10 +172,38 @@ namespace WM
                 }
             }
 
+
+            public void Shutdown()
+            {
+                shutDown = true;
+
+                acceptClientThread.Join();
+
+                acceptClientThread = null;
+
+                receiveTcpThread.Join();
+
+                receiveTcpThread = null;
+
+                receiveUdpThread.Join();
+
+                receiveUdpThread = null;
+
+                udpClient.Close();
+
+                //TODO SendCommand(new ShutdownServerCommand());
+
+                tcpListener.Stop();
+
+                tcpListener = null;
+
+                clientConnections.Clear();
+            }
+
             //! Thread function executed by the 'Accept Client' thread.
             private void AcceptClientFunction()
             {
-                while ((true))
+                while (!shutDown)
                 {
                     try
                     {
@@ -257,7 +289,7 @@ namespace WM
             //! Thread function executed by the 'Receive UDP' thread.
             private void ReceiveUdpFunction()
             {
-                while (true)
+                while (!shutDown)
                 {
                     try
                     {
@@ -299,7 +331,7 @@ namespace WM
             //! Thread function executed by the 'Receive TCP' thread.
             private void ReceiveTcpFunction()
             {
-                while (true)
+                while (!shutDown)
                 {
                     try
                     {

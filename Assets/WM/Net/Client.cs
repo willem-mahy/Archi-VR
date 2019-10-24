@@ -48,21 +48,13 @@ namespace WM.Net
         // The thread.
         private Thread thread;
 
+        private bool shutDown = false;
+
         #endregion
 
         public void Init()
         {
-            /*
-            // TODO: Why is this needed?
-            ASCIIEncoding ASCII = new ASCIIEncoding();
-                               
-            // Create TCP client socket
-            tcpClient = new TcpClient(GetLocalIpAddress);
-
-            // Start UDP sockets
-            udpSend.Init();
-            udpReceive.Init();
-            */
+            shutDown = false;
 
             thread = new Thread(new ThreadStart(ThreadFunction));
             thread.IsBackground = true;
@@ -71,10 +63,28 @@ namespace WM.Net
             Debug.Log("Client started");
         }
 
+        public void Shutdown()
+        {
+            shutDown = true;
+
+            thread.Join();
+            
+            thread = null;
+
+            udpClient.Close();
+
+            //TODO SendCommand(new DisconnectClientCommand());
+
+            tcpClient.Close();
+        }
+
         //! Thread function executed by the thread.
         private void ThreadFunction()
         {
-            Connect();
+            while (!shutDown)
+            {
+                Connect();
+            }
 
             Debug.Log("Client: tcpClient connected.");
 
@@ -96,14 +106,7 @@ namespace WM.Net
 
             // Get server stream from TCP client.
             var serverStream = tcpClient.GetStream();
-
-            //// Send message to server
-            //var myIP = NetUtil.GetLocalIPAddress();
-            //var messageToServer = "Hello from client '" + myIP + "'$";
-            //var bytesToServer = Encoding.ASCII.GetBytes(messageToServer);
-            //serverStream.Write(bytesToServer, 0, bytesToServer.Length);
-            //serverStream.Flush();
-
+                        
             // Initialize UDP sockets to/from server.
             {
                 udpClient = new UdpClient(UdpPort);
@@ -117,7 +120,7 @@ namespace WM.Net
                 udpReceive.Init();
             }
 
-            while (true)
+            while (!shutDown)
             {
                 string dataFromServer = "";
 
