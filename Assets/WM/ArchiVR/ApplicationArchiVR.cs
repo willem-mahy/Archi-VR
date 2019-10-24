@@ -1140,7 +1140,6 @@ namespace WM
                         UpdateMenuDebugInput();
                         break;
                     case MenuMode.DebugLog:
-                        UpdateMenuDebugLog();
                         break;
                     case MenuMode.Graphics:
                         break;
@@ -1219,34 +1218,9 @@ namespace WM
             }
 
             //!
-            void UpdateMenuDebugLog()
-            {
-                m_menuText = "";
-
-                const int maxNumLines = 15;
-                int numLines = System.Math.Min(Logger.s_log.Count, maxNumLines);
-
-                for (var lineIndex = 0; lineIndex < numLines; ++lineIndex)
-                {
-                    if (m_menuText.Length > 0)
-                    {
-                        m_menuText += "\n";
-                    }
-
-                    m_menuText += Logger.s_log[Logger.s_log.Count - (lineIndex + 1)];
-                }
-            }
-
-            //!
             void UpdateMenuInfo()
             {
                 var projectNames = GetProjectNames();
-
-                var qualityLevel = QualitySettings.GetQualityLevel();
-
-                m_menuText += "\nQuality: " + QualitySettings.names[qualityLevel];
-
-                m_menuText += "\n";
 
                 m_menuText += "\nProjects:";
                 foreach (var projectName in projectNames)

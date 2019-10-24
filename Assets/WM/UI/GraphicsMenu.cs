@@ -84,9 +84,14 @@ public class GraphicsMenu : MonoBehaviour
 
     #region FPS
 
-    public void ShowFPSToggleOnValueChanged(Toggle toggle)
+    //public void ShowFPSToggleOnValueChanged(Toggle toggle)
+    //{
+    //    ApplicationArchiVR.FpsPanelHUD.SetActive(toggle.isOn);
+    //}
+
+    public void ShowFPSToggleOnValueChanged(bool value)
     {
-        ApplicationArchiVR.FpsPanelHUD.SetActive(toggle.isOn);
+        ApplicationArchiVR.FpsPanelHUD.SetActive(value);
     }
 
     #endregion
