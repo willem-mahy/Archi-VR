@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Xml.Serialization;
 using UnityEngine;
-
-using WM.ArchiVR;
 using WM.Net;
 
 namespace WM.ArchiVR.Command
@@ -22,6 +20,7 @@ namespace WM.ArchiVR.Command
         public void Execute(ApplicationArchiVR application)
         {
             Debug.Log("InitNetworkCommand.Execute()");
+            WM.Logger.Debug("InitNetworkCommand.Execute(): NetworkMode = " + NetworkMode);
 
             if (application.NetworkMode == NetworkMode)
             {
