@@ -114,24 +114,24 @@ namespace WM.ArchiVR.UI
 
         void AvatarDropdownValueChanged(Dropdown change)
         {
-            //TODO: application.SetAvatar(AvatarDropdown.value);
+            ApplicationArchiVR.SetAvatar(AvatarDropdown.value);
         }
 
-        public void StandaloneToggleOnValueChanged(Toggle toggle)
+        public void StandaloneToggleOnValueChanged(bool value)
         {
-            if (toggle.isOn)
+            if (value)
                 OnNetworkModeSelection(NetworkMode.Standalone);
         }
 
-        public void ClientToggleOnValueChanged(Toggle toggle)
+        public void ClientToggleOnValueChanged(bool value)
         {
-            if (toggle.isOn)
+            if (value)
                 OnNetworkModeSelection(NetworkMode.Client);
         }
 
-        public void ServerToggleOnValueChanged(Toggle toggle)
+        public void ServerToggleOnValueChanged(bool value)
         {
-            if (toggle.isOn)
+            if (value)
                 OnNetworkModeSelection(NetworkMode.Server);
         }
     }
