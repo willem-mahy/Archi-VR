@@ -51,10 +51,6 @@ namespace WM.ArchiVR.UI
 
             #endregion
 
-            AvatarDropdown.onValueChanged.AddListener(delegate {
-                AvatarDropdownValueChanged(AvatarDropdown);
-            });
-
             switch (ApplicationArchiVR.NetworkMode)
             {
                 case NetworkMode.Standalone:
@@ -68,7 +64,7 @@ namespace WM.ArchiVR.UI
                     break;
             }
 
-            OnNetworkModeSelection(ApplicationArchiVR.NetworkMode); // If startup mode is Standalone, the UI is not updated accordingly, so force that explicitely here...
+            UpdateUIToNetworkModeSelection(ApplicationArchiVR.NetworkMode); // If startup mode is Standalone, the UI is not updated accordingly, so force that explicitely here...
         }
 
         // Update is called once per frame
@@ -81,6 +77,11 @@ namespace WM.ArchiVR.UI
         {
             ApplicationArchiVR.QueueCommand(new InitNetworkCommand(networkMode));
 
+            UpdateUIToNetworkModeSelection(networkMode);
+        }
+        
+        void UpdateUIToNetworkModeSelection(NetworkMode networkMode)
+        {
             switch (networkMode)
             {
                 case NetworkMode.Standalone:
@@ -114,9 +115,9 @@ namespace WM.ArchiVR.UI
 
         #region Avatar
 
-        void AvatarDropdownValueChanged(Dropdown change)
+        public void AvatarDropdownValueChanged(int value)
         {
-            ApplicationArchiVR.SetAvatar(AvatarDropdown.value);
+            ApplicationArchiVR.SetAvatar(value);
         }
 
         public void PrevAvatarButtonOnClick()
