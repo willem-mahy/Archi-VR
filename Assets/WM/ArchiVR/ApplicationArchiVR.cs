@@ -3,11 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
-using WM.UI;
-using WM.Net;
-using WM.VR;
 using WM.ArchiVR.Command;
+using WM.Net;
+using WM.UI;
+using WM.VR;
 
 [assembly: System.Reflection.AssemblyVersion("1.0.*")]
 
@@ -58,6 +57,7 @@ namespace WM
                 }
             }
 
+            //! The avatar for the local player.
             public int AvatarIndex = 0;
 
             public void ConnectClient(
@@ -1157,6 +1157,21 @@ namespace WM
 
                 // Push HUD menu text to UI.
                 //m_centerEyeText.text = m_menuText;
+            }
+
+            //! Sets the avatar for the local player.
+            public void SetAvatar(int avatarIndex)
+            {
+                WM.Logger.Debug("SetAvatar(" + avatarIndex.ToString() + ")");
+
+                if (NetworkMode == NetworkMode.Standalone)
+                {
+                    WM.Logger.Warning("Network mode should not be 'Standalone'!");
+                    return;
+                }
+
+                AvatarIndex = avatarIndex;
+                Client.SendCommand(new SetClientAvatarCommand(WM.Net.NetUtil.GetLocalIPAddress(), avatarIndex));
             }
 
             //!
