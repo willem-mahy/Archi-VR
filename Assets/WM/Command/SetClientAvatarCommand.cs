@@ -3,8 +3,6 @@ using System.Xml.Serialization;
 
 using UnityEngine;
 
-using WM.ArchiVR;
-
 namespace WM.ArchiVR.Command
 {
     [Serializable]
@@ -16,6 +14,18 @@ namespace WM.ArchiVR.Command
 
         [XmlElement("AvatarIndex")]
         public int AvatarIndex { get; set; }
+
+        public SetClientAvatarCommand()
+        {
+        }
+        
+        public SetClientAvatarCommand(
+            string clientIP,
+            int avatarIndex)
+        {
+            ClientIP = clientIP;
+            AvatarIndex = avatarIndex;
+        }
 
         public void Execute(ApplicationArchiVR application)
         {
