@@ -28,7 +28,7 @@ namespace WM.ArchiVR.UI
         public Text ClientsValueText;
 
         public Dropdown AvatarDropdown;
-
+        
         // Start is called before the first frame update
         void Start()
         {
@@ -112,10 +112,28 @@ namespace WM.ArchiVR.UI
             }
         }
 
+        #region Avatar
+
         void AvatarDropdownValueChanged(Dropdown change)
         {
             ApplicationArchiVR.SetAvatar(AvatarDropdown.value);
         }
+
+        public void PrevAvatarButtonOnClick()
+        {
+            var avatarIndex = UtilIterate.MakeCycle(--ApplicationArchiVR.AvatarIndex, 0, ApplicationArchiVR.avatarPrefabs.Count);
+            ApplicationArchiVR.SetAvatar(avatarIndex);
+            AvatarDropdown.value = avatarIndex;
+        }
+
+        public void NextAvatarButtonOnClick()
+        {
+            var avatarIndex = UtilIterate.MakeCycle(++ApplicationArchiVR.AvatarIndex, 0, ApplicationArchiVR.avatarPrefabs.Count);
+            ApplicationArchiVR.SetAvatar(avatarIndex);
+            AvatarDropdown.value = avatarIndex;
+        }
+
+        #endregion
 
         public void StandaloneToggleOnValueChanged(bool value)
         {
