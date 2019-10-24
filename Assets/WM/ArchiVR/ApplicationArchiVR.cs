@@ -18,8 +18,11 @@ namespace WM
         {
             #region Variables
 
-            //! The network mode. (Default: Standalone)
-            public NetworkMode NetworkMode = NetworkMode.Standalone;
+            //! The startup network mode. (Default: Standalone)
+            public NetworkMode StartupNetworkMode = NetworkMode.Standalone;
+
+            //! The current network mode.
+            public NetworkMode NetworkMode = NetworkMode.Standalone; // TODO: make private...
 
             //! The command queue.
             public List<ICommand> CommandQueue = new List<ICommand>();
@@ -120,17 +123,17 @@ namespace WM
 
             public HUDMenu HudMenu = null;
 
-            public UnityEngine.GameObject FpsPanelHUD = null;
+            public GameObject FpsPanelHUD = null;
 
             public UnityEngine.UI.Text FpsTextHUD = null;
 
-            public UnityEngine.GameObject m_ovrCameraRig = null;
+            public GameObject m_ovrCameraRig = null;
 
-            public UnityEngine.GameObject m_centerEyeAnchor = null;
+            public GameObject m_centerEyeAnchor = null;
 
-            public UnityEngine.GameObject m_leftHandAnchor = null;
+            public GameObject m_leftHandAnchor = null;
 
-            public UnityEngine.GameObject m_rightHandAnchor = null;
+            public GameObject m_rightHandAnchor = null;
 
             #endregion
 
@@ -370,8 +373,11 @@ namespace WM
                 {
                     HudMenu.AnchorEnabled = true;
                 }
+
                 //InstanciateAllAvatarPrefabs();
-                QueueCommand(new InitNetworkCommand(NetworkMode));
+
+                //QueueCommand(new InitNetworkCommand(NetworkMode));
+                new InitNetworkCommand(NetworkMode).Execute(this);
 
                 #region Automatically get build version
 
@@ -427,8 +433,15 @@ namespace WM
                 SetActiveMenu(null);
 
                 // FPS panel attached as HUD menu.
-                FpsPanelHUD = GameObject.Find("FPSPanel");
-                FpsTextHUD = GameObject.Find("FPSText").GetComponent<UnityEngine.UI.Text>();
+                if (FpsPanelHUD == null)
+                {
+                    FpsPanelHUD = GameObject.Find("FPSPanel");
+                }
+
+                if (FpsTextHUD == null)
+                {
+                    FpsTextHUD = GameObject.Find("FPSText").GetComponent<UnityEngine.UI.Text>();
+                }
 
 
                 // Left controller.
