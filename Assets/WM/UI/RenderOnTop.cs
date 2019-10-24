@@ -29,6 +29,12 @@ public class RenderOnTop : MonoBehaviour
         
         var graphic = GetComponent<Graphic>();
 
+        if (graphic == null)
+        {
+            WM.Logger.Warning("RenderOnTop: '" + gameObject.name + "' contains no graphic component!");
+            return;
+        }
+
         // Get a handle to the existing material from the graphic.
         var existingGlobalMat = graphic.materialForRendering;
 
