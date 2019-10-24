@@ -54,14 +54,9 @@ public class GraphicsMenu : MonoBehaviour
 
     #region Quality
 
-    public void QualityDropdownOnValueChanged(Dropdown change)
+    public void QualityDropdownOnValueChanged(int value)
     {
-        QualitySettings.SetQualityLevel(QualityDropdown.value);
-    }
-
-    public void QualityDropdownOnSelect(BaseEventData bed)
-    {
-        QualitySettings.SetQualityLevel(QualityDropdown.value);
+        QualitySettings.SetQualityLevel(value);
     }
 
     public void PrevQualityOnClick()
@@ -83,11 +78,6 @@ public class GraphicsMenu : MonoBehaviour
     #endregion
 
     #region FPS
-
-    //public void ShowFPSToggleOnValueChanged(Toggle toggle)
-    //{
-    //    ApplicationArchiVR.FpsPanelHUD.SetActive(toggle.isOn);
-    //}
 
     public void ShowFPSToggleOnValueChanged(bool value)
     {
