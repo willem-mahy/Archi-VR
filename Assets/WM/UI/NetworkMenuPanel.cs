@@ -4,13 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using WM.ArchiVR;
+using WM.ArchiVR.Command;
 using WM.Net;
 
 namespace WM.ArchiVR.UI
 {
     public class NetworkMenuPanel : MonoBehaviour
     {
-        public ApplicationArchiVR application;
+        public ApplicationArchiVR ApplicationArchiVR;
 
         public Text IPValueText;
 
@@ -31,56 +32,82 @@ namespace WM.ArchiVR.UI
         // Start is called before the first frame update
         void Start()
         {
+            #region Get references to UI components.
+
+            ApplicationArchiVR = GameObject.Find("Application").GetComponent<ApplicationArchiVR>();
+            //QualityDropdown = GameObject.Find("GraphicsMenu_QualityDropdown").GetComponent<Dropdown>();
+            //ShowFpsToggle = GameObject.Find("GraphicsMenu_ShowFpsToggle").GetComponent<Toggle>();
+
+            #endregion
+
+            #region initialize Avartor dropdown options
+
             AvatarDropdown.options.Clear();
 
-            foreach (var avatar in application.avatarPrefabs)
+            foreach (var avatar in ApplicationArchiVR.avatarPrefabs)
             {
                 AvatarDropdown.options.Add(new Dropdown.OptionData(avatar.name));
             }
+
+            #endregion
 
             AvatarDropdown.onValueChanged.AddListener(delegate {
                 AvatarDropdownValueChanged(AvatarDropdown);
             });
 
+            switch (ApplicationArchiVR.NetworkMode)
+            {
+                case NetworkMode.Standalone:
+                    StandaloneToggle.isOn = true;
+                    break;
+                case NetworkMode.Server:
+                    ServerToggle.isOn = true;
+                    break;
+                case NetworkMode.Client:
+                    ClientToggle.isOn = true;
+                    break;
+            }
+
+            OnNetworkModeSelection(ApplicationArchiVR.NetworkMode); // If startup mode is Standalone, the UI is not updated accordingly, so force that explicitely here...
         }
 
         // Update is called once per frame
         void Update()
         {
             IPValueText.text = NetUtil.GetLocalIPAddress();
+        }
 
-            switch (application.NetworkMode)
+        void OnNetworkModeSelection(NetworkMode networkMode)
+        {
+            ApplicationArchiVR.QueueCommand(new InitNetworkCommand(networkMode));
+
+            switch (networkMode)
             {
                 case NetworkMode.Standalone:
                     StandaloneToggle.isOn = true;
-                    ServerToggle.isOn = false;
-                    ClientToggle.isOn = false;
-                    NetworkPanel.SetActive(false);                    
+                    
+                    NetworkPanel.SetActive(false);
                     break;
                 case NetworkMode.Server:
-                    StandaloneToggle.isOn = false;
                     ServerToggle.isOn = true;
-                    ClientToggle.isOn = false;
-
+                    
                     NetworkPanel.SetActive(true);
                     ServerPanel.SetActive(true);
                     ClientPanel.SetActive(false);
 
-                    AvatarDropdown.value = application.AvatarIndex;
+                    AvatarDropdown.value = ApplicationArchiVR.AvatarIndex;
 
-                    ClientsValueText.text = application.Server.GetClientInfo();
+                    ClientsValueText.text = ApplicationArchiVR.Server.GetClientInfo();
                     break;
                 case NetworkMode.Client:
-                    StandaloneToggle.isOn = false;
-                    ServerToggle.isOn = false;
                     ClientToggle.isOn = true;
 
                     NetworkPanel.SetActive(true);
                     ServerPanel.SetActive(false);
                     ClientPanel.SetActive(true);
 
-                    ServerIPValueText.text = application.Client.ServerIP;
-                    AvatarDropdown.value = application.AvatarIndex;
+                    ServerIPValueText.text = ApplicationArchiVR.Client.ServerIP;
+                    AvatarDropdown.value = ApplicationArchiVR.AvatarIndex;
                     break;
             }
         }
@@ -88,6 +115,24 @@ namespace WM.ArchiVR.UI
         void AvatarDropdownValueChanged(Dropdown change)
         {
             //TODO: application.SetAvatar(AvatarDropdown.value);
+        }
+
+        public void StandaloneToggleOnValueChanged(Toggle toggle)
+        {
+            if (toggle.isOn)
+                OnNetworkModeSelection(NetworkMode.Standalone);
+        }
+
+        public void ClientToggleOnValueChanged(Toggle toggle)
+        {
+            if (toggle.isOn)
+                OnNetworkModeSelection(NetworkMode.Client);
+        }
+
+        public void ServerToggleOnValueChanged(Toggle toggle)
+        {
+            if (toggle.isOn)
+                OnNetworkModeSelection(NetworkMode.Server);
         }
     }
 }

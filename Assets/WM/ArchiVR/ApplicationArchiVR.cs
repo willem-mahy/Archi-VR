@@ -69,6 +69,20 @@ namespace WM
                     avatars[ip] = InstanciateAvatarPrefabs(avatarIndex);
                 }
             }
+
+            public void DisconnectClient(string ip)
+            {
+                lock (avatars)
+                {
+                    if (avatars.ContainsKey(ip))
+                    {
+                        GameObject.Destroy(avatars[ip]);
+                        avatars.Remove(ip);
+                    }
+                }
+            }
+
+
             public void SetClientAvatar(
                 string ip,
                 int avatarIndex)
@@ -106,8 +120,9 @@ namespace WM
 
             public HUDMenu HudMenu = null;
 
-            public UnityEngine.GameObject m_gfxDebugPanelHUD = null;
-            public UnityEngine.UI.Text m_gfxDebugHUDText = null;
+            public UnityEngine.GameObject FpsPanelHUD = null;
+
+            public UnityEngine.UI.Text FpsTextHUD = null;
 
             public UnityEngine.GameObject m_ovrCameraRig = null;
 
@@ -356,31 +371,7 @@ namespace WM
                     HudMenu.AnchorEnabled = true;
                 }
                 //InstanciateAllAvatarPrefabs();
-
-                switch (NetworkMode)
-                {
-                    case NetworkMode.Server:
-                        {
-                            // Init network server
-                            Server.Init();
-
-                            // Init network client
-                            Client.InitialServerIP = NetUtil.GetLocalIPAddress(); // Let client connect to own server. (TODO: connect directly, ie without network middle layer.)
-                            Client.Init();
-                        }
-                        break;
-                    case NetworkMode.Client:
-                        {
-                            // Init network client only
-                            Client.Init();
-                        }
-                        break;
-                    case NetworkMode.Standalone:
-                        {
-                            // Init no network
-                        }
-                        break;
-                }
+                QueueCommand(new InitNetworkCommand(NetworkMode));
 
                 #region Automatically get build version
 
@@ -435,8 +426,11 @@ namespace WM
 
                 SetActiveMenu(null);
 
-                m_gfxDebugPanelHUD = GameObject.Find("FPSPanel");
-                m_gfxDebugHUDText = GameObject.Find("FPSText").GetComponent<UnityEngine.UI.Text>();
+                // FPS panel attached as HUD menu.
+                FpsPanelHUD = GameObject.Find("FPSPanel");
+                FpsTextHUD = GameObject.Find("FPSText").GetComponent<UnityEngine.UI.Text>();
+
+
                 // Left controller.
 
                 // Pick ray.
@@ -559,11 +553,6 @@ namespace WM
                     // Update positions of remote client avatars, with the avatar states received from the server via UDP.
                     Client.UpdateAvatarStatesFromUdp();
                 }
-
-                if (m_controllerInput.m_controllerState.lThumbstickDown)
-                    enableDebugGFX = !enableDebugGFX;
-
-                m_gfxDebugPanelHUD.SetActive(enableDebugGFX);
 
                 if (enableDebugGFX)
                 {
