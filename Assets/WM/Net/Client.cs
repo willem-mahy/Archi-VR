@@ -476,7 +476,17 @@ namespace WM.Net
 
             try
             {
+                if (tcpClient == null)
+                {
+                    return;
+                }
+
                 var networkStream = tcpClient.GetStream();
+
+                if (networkStream == null)
+                {
+                    return;
+                }
 
                 var bytes = Encoding.ASCII.GetBytes(data);
                 networkStream.Write(bytes, 0, bytes.Length);
