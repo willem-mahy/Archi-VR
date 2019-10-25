@@ -107,14 +107,6 @@ namespace WM.Net
             Status = "Connected to " + ServerIP;
             WM.Logger.Debug("Client: tcpClient connected.");
 
-            //// Broadcast the fact that you've connected.
-            //{
-            //    var ccc = new ConnectClientCommand();
-            //    ccc.ClientIP = WM.Net.NetUtil.GetLocalIPAddress();
-            //    ccc.AvatarIndex = application.AvatarIndex;
-            //    SendCommand(ccc);
-            //}
-
             // Broadcast your chosen avatar.
             {
                 var scac = new SetClientAvatarCommand();
@@ -122,7 +114,7 @@ namespace WM.Net
                 scac.AvatarIndex = application.AvatarIndex;
                 SendCommand(scac);
             }
-
+            
             // Get server stream from TCP client.
             var serverStream = tcpClient.GetStream();
                         
