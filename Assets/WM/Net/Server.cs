@@ -485,7 +485,7 @@ namespace WM
                 }
                 else if (obj is SetClientAvatarCommand)
                 {
-                     var scac = (SetClientAvatarCommand)obj;
+                    var scac = (SetClientAvatarCommand)obj;
                     clientConnection.AvatarIndex = scac.AvatarIndex;
                     PropagateData(messageXML, clientConnection);
                 }
