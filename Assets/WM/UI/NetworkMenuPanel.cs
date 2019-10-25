@@ -11,6 +11,8 @@ namespace WM.ArchiVR.UI
 {
     public class NetworkMenuPanel : MonoBehaviour
     {
+        #region Variables
+
         public ApplicationArchiVR ApplicationArchiVR;
 
         public Text IPValueText;
@@ -27,7 +29,9 @@ namespace WM.ArchiVR.UI
         public GameObject ServerPanel;
         public Text ServerStatusValueText;
         public Text ClientsValueText;
-        
+
+        #endregion
+
         // Start is called before the first frame update
         void Start()
         {
@@ -70,6 +74,25 @@ namespace WM.ArchiVR.UI
             UpdateUIToNetworkModeSelection(ApplicationArchiVR.NetworkMode);
 
             synchronizingUI = false;
+
+            #region Temporary keyboard shortcuts to aid in debugging until control trigger can be emulated in editor mode.
+
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                StandaloneToggleOnValueChanged(true);
+            }
+
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                ServerToggleOnValueChanged(true);
+            }
+
+            if (Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                ClientToggleOnValueChanged(true);
+            }
+
+            #endregion
         }
 
         void OnNetworkModeSelection(NetworkMode networkMode)
