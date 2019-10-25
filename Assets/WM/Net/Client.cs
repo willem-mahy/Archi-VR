@@ -5,10 +5,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
-
 using UnityEngine;
-
 using WM.ArchiVR;
 using WM.ArchiVR.Command;
 
@@ -288,8 +287,8 @@ namespace WM.Net
         {
             String tag = serverIP + ":" + Server.TcpPort + ", timeout:" + ConnectTimeout + "ms";
             WM.Logger.Debug("Client.TryConnectToServer(): Server:'" + tag);
-            
-            Status = "Trying to connected to " + tag;
+
+            Status = "Trying to connect to " + tag;
 
             var tcpClient = new TcpClient();
 
@@ -297,17 +296,18 @@ namespace WM.Net
 
             connectionAttempt.Wait(ConnectTimeout);
 
-            if (tcpClient.Connected)
+            if (connectionAttempt.IsCompleted)
             {
                 this.tcpClient = tcpClient;
                 WM.Logger.Debug("Client.TryConnectToServer(): Connected!");
+                return true;
             }
             else
             {
+                tcpClient.Close();
                 WM.Logger.Debug("Client.TryConnectToServer(): Failed to connect!");
+                return false;
             }
-
-            return tcpClient.Connected;
         }
 
         //! Returns whether this client is connected to a server.
