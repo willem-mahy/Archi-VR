@@ -18,6 +18,11 @@ namespace WM.ArchiVR.Command
         { 
         }
 
+        public DisconnectClientCommand(string clientIP)
+        {
+            ClientIP = clientIP;
+        }
+
         public void Execute(ApplicationArchiVR application)
         {
             Debug.Log("DisconnectClientCommand.Execute()");
