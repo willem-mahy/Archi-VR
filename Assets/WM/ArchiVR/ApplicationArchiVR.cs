@@ -139,7 +139,7 @@ namespace WM
 
             public TeleportCommand TeleportCommand { get; set; }
 
-            public GameObject Sun { get; set; } = null;
+            public GameObject Sun { get; set; };
 
             #region Project
 
