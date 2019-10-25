@@ -10,18 +10,30 @@ public class GraphicsMenu : MonoBehaviour
 {
     public ApplicationArchiVR ApplicationArchiVR;
 
-    public Dropdown QualityDropdown { get; set; }
+    public Dropdown QualityDropdown;
 
-    public Toggle ShowFpsToggle { get; set; }
+    public Toggle ShowFpsToggle;
 
     // Start is called before the first frame update
     void Start()
     {
-        #region Get references to UI components.
+        #region Get references to GameObjects.
 
         ApplicationArchiVR = GameObject.Find("Application").GetComponent<ApplicationArchiVR>();
-        QualityDropdown = GameObject.Find("GraphicsMenu_QualityDropdown").GetComponent<Dropdown>();
-        ShowFpsToggle = GameObject.Find("GraphicsMenu_ShowFpsToggle").GetComponent<Toggle>();
+
+        #endregion
+
+        #region Get references to UI components.
+
+        if (QualityDropdown == null)
+        {
+            QualityDropdown = GameObject.Find("GraphicsMenu_QualityDropdown").GetComponent<Dropdown>();
+        }
+
+        if (ShowFpsToggle == null)
+        {
+            ShowFpsToggle = GameObject.Find("GraphicsMenu_ShowFpsToggle").GetComponent<Toggle>();
+        }
 
         #endregion
 
@@ -81,7 +93,10 @@ public class GraphicsMenu : MonoBehaviour
 
     public void ShowFPSToggleOnValueChanged(bool value)
     {
-        ApplicationArchiVR.FpsPanelHUD.SetActive(value);
+        if (ApplicationArchiVR.FpsPanelHUD)
+        {
+            ApplicationArchiVR.FpsPanelHUD.SetActive(value);
+        }
     }
 
     #endregion
