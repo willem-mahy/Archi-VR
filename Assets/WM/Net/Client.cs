@@ -140,6 +140,8 @@ namespace WM.Net
                     Debug.Log("UDPReceive.ReceiveData(): Exception: " + e.ToString());
                 }
             }
+
+            return "";
         }
 
         //! Thread function executed by the thread.

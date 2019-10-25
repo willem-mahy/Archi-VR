@@ -106,7 +106,7 @@ namespace WM
             public static readonly string UdpBroadcastMessage = "Hello from ArchiVR server";
 
             // Broadcast UDP port.
-            public static readonly int BroadcastUdpPort = 8891;
+            public static readonly int BroadcastUdpPort = 8892;
 
             // CLient UDP port.
             public static readonly int UdpPort = 8890; // Must be different than server TCP port probably...
