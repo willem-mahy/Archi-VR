@@ -22,7 +22,7 @@ namespace WM.ArchiVR.UI
         public GameObject NetworkPanel;
 
         public GameObject ClientPanel;
-        public Text ServerIPValueText;
+        public Text ClientStatusValueText;
 
         public GameObject ServerPanel;
         public Text ServerStatusValueText;
@@ -117,7 +117,7 @@ namespace WM.ArchiVR.UI
                     ServerPanel.SetActive(false);
                     ClientPanel.SetActive(true);
 
-                    ServerIPValueText.text = ApplicationArchiVR.Client.ServerIP;
+                    ClientStatusValueText.text = ApplicationArchiVR.Client.Status;
                     AvatarDropdown.value = ApplicationArchiVR.AvatarIndex;
                     break;
             }

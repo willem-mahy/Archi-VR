@@ -20,6 +20,8 @@ namespace WM.Net
 
         public ApplicationArchiVR application;
 
+        public string Status = "Not initialized";
+
         public string InitialServerIP = "";//192.168.0.13";
 
         public int ConnectTimeout = 100;
@@ -60,7 +62,7 @@ namespace WM.Net
             thread.IsBackground = true;
             thread.Start();
 
-            Debug.Log("Client started");
+            WM.Logger.Debug("Client started");
         }
 
         public void Shutdown()
@@ -102,7 +104,8 @@ namespace WM.Net
                 }
             }
 
-            Debug.Log("Client: tcpClient connected.");
+            Status = "Connected to " + ServerIP;
+            WM.Logger.Debug("Client: tcpClient connected.");
 
             //// Broadcast the fact that you've connected.
             //{
@@ -250,7 +253,10 @@ namespace WM.Net
 
         private bool TryConnectToServer(string serverIP)
         {
-            WM.Logger.Debug("Client.TryConnectToServer(): Server:'" + serverIP + ":" + Server.TcpPort + ", timeout:" + ConnectTimeout + "ms");
+            String tag = serverIP + ":" + Server.TcpPort + ", timeout:" + ConnectTimeout + "ms";
+            WM.Logger.Debug("Client.TryConnectToServer(): Server:'" + tag);
+            
+            Status = "Trying to connected to " + tag;
 
             var tcpClient = new TcpClient();
 
