@@ -25,16 +25,22 @@ namespace WM.ArchiVR.Command
                 return; // NOOP: already running in requested network mode...
             }
 
-            if (application.Server != null)
+            // Teardown from previous network mode.
+            switch (application.NetworkMode)
             {
-                application.Client.Shutdown();
+                case NetworkMode.Client:
+                    {
+                        application.Client.Disconnect();
+                    }
+                    break;
+                case NetworkMode.Server:
+                    {
+                        application.Server.Shutdown();
+                    }
+                    break;
             }
 
-            if (application.Server != null)
-            {
-                application.Server.Shutdown();
-            }
-
+            // Initialize for new network mode.
             switch (NetworkMode)
             {
                 case NetworkMode.Server:

@@ -57,6 +57,7 @@ namespace WM.Net
 
         #endregion
 
+        //! 
         public void Init()
         {
             shutDown = false;
@@ -68,6 +69,17 @@ namespace WM.Net
             WM.Logger.Debug("Client started");
         }
 
+        //! 
+        public void Disconnect()
+        {
+            SendCommand(new DisconnectClientCommand());
+
+            while (Status != "DisconnectAcknoledged") ;
+
+            Shutdown();
+        }
+
+        //! 
         public void Shutdown()
         {
             shutDown = true;
@@ -85,8 +97,6 @@ namespace WM.Net
 
                 udpClient = null;
             }
-
-            SendCommand(new DisconnectClientCommand());
 
             if (tcpServerStream != null)
             {
@@ -238,6 +248,10 @@ namespace WM.Net
                         {
                             var command = (ServerShutdownCommand)obj;
                             application.QueueCommand(command);
+                        }
+                        else if (obj is ClientDisconnectAcknoledgeMessage)
+                        {
+                            Status = "DisconnectAcknoledged";
                         }
                     }
                 }

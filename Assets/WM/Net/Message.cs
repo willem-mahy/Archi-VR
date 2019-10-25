@@ -7,6 +7,12 @@ namespace WM
 {
     namespace Net
     {
+        // Sent by the server, when he has successfully disconnected the client.
+        [Serializable]
+        public class ClientDisconnectAcknoledgeMessage
+        {
+        }
+
         [Serializable]
         [XmlRoot("Message")]
         public class Message

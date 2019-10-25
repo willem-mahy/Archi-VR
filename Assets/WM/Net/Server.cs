@@ -22,6 +22,7 @@ namespace WM
             //! The IP of the client.
             public string remoteIP;
 
+            //! The index of the client's avatar.
             public int AvatarIndex = 0;
 
             #region TCP stuff
@@ -37,8 +38,21 @@ namespace WM
 
             #endregion
 
+            #region UDP stuff
+
             // The client-specific UDP sender.
             public UDPSend udpSend;
+
+            #endregion
+
+            public void Close()
+            {
+                tcpNetworkStream.Close();
+                tcpNetworkStream = null;
+
+                tcpClient.Close();
+                tcpClient = null;
+            }
         }
 
         public class Server : MonoBehaviour
@@ -106,6 +120,7 @@ namespace WM
 
             #endregion
 
+            //!
             public void Init()
             {
                 WM.Logger.Debug("Server.Init() Start");
@@ -186,7 +201,7 @@ namespace WM
                 }
             }
 
-
+            //!
             public void Shutdown()
             {
                 shutDown = true;
@@ -449,7 +464,6 @@ namespace WM
                                 // Process the message
                                 if (!ProcessMessage(messageXML, clientConnection))
                                 {
-                                    clientConnections.Remove(clientConnection);
                                     break;
                                 }
                             }
@@ -497,9 +511,26 @@ namespace WM
                 }
                 else if (obj is DisconnectClientCommand)
                 {
+                    // Client indicates that it is disconnecting.
                     var dcc = (DisconnectClientCommand)obj;                    
                     PropagateData(messageXML, clientConnection);
+
+                    // Step 1: remove connection from list of connections, so that no UDP or TCP reads/Writes will happen on its network streams anymore.
+                    clientConnections.Remove(clientConnection);
+
+                    // Step 2: send an acknoledge to the client that it is safe to continue disconnecting.
+                    SendData(GetObjectAsData(new ClientDisconnectAcknoledgeMessage()), clientConnection);
+
+                    // Step 3: close the clientconnection network streams.
+                    clientConnection.Close();                    
+
                     return false;
+                }
+                else if (obj is SetClientAvatarCommand)
+                {
+                    var scac = (SetClientAvatarCommand)obj;
+                    clientConnection.AvatarIndex = scac.AvatarIndex;
+                    PropagateData(messageXML, clientConnection);
                 }
                 else if (obj is SetClientAvatarCommand)
                 {
@@ -518,7 +549,7 @@ namespace WM
 
                 try
                 {
-                    string data = GetCommandAsData(command);
+                    string data = GetObjectAsData(command);
 
                     BroadcastData(data);
                 }
@@ -536,7 +567,7 @@ namespace WM
 
                 try
                 {
-                    string data = GetCommandAsData(command);
+                    string data = GetObjectAsData(command);
 
                     PropagateData(data, sourceClientConnection);
                 }
@@ -602,15 +633,13 @@ namespace WM
                 }
             }
 
-            private string GetCommandAsData(ICommand command)
+            //!
+            private string GetObjectAsData(object obj)
             {
-                var message = new Message();
-                message.Serialize(command);
-
                 var ser = new XmlSerializer(typeof(Message));
 
                 var writer = new StringWriter();
-                ser.Serialize(writer, message);
+                ser.Serialize(writer, GetObjectAsMessage(obj));
                 writer.Close();
 
                 var data = writer.ToString();
@@ -618,6 +647,15 @@ namespace WM
                 return data;
             }
 
+            private Message GetObjectAsMessage(object obj)
+            {
+                var message = new Message();
+                message.Serialize(obj);
+
+                return message;
+            }
+
+            //!
             private void SendCommand(
                 ICommand command,
                 ClientConnection clientConnection)
@@ -632,7 +670,7 @@ namespace WM
                         return;
                     }
 
-                    var data = GetCommandAsData(command);
+                    var data = GetObjectAsData(command);
 
                     SendData(data, clientConnection);
                 }
@@ -642,6 +680,7 @@ namespace WM
                 }
             }
 
+            //!
             private void SendData(
                 String data,
                 ClientConnection clientConnection)
@@ -664,13 +703,6 @@ namespace WM
                 {
                     WM.Logger.Error("Server.SendData(): Exception:" + e.Message);
                 }
-            }
-
-            private void DisconnectClients()
-            {
-                Debug.Log("Server::DisconnectClients");
-
-                BroadcastMessage("ServerShuttingDown");
             }
 
             public void SendDataToUdp(string data, int clientIndex)
@@ -706,6 +738,7 @@ namespace WM
                 }
             }
 
+            //!
             public string GetAvatarStateFromUdp(int clientIndex)
             {
                 try
