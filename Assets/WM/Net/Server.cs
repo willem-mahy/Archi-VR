@@ -176,7 +176,8 @@ namespace WM
                     receiveUdpThread.Name = "receiveUdpThread";
                     receiveUdpThread.Start();
 
-                    WM.Logger.Debug("Server started");
+                    Status = "Running";
+                    WM.Logger.Debug("Server running");
                 }
                 catch (Exception ex)
                 {

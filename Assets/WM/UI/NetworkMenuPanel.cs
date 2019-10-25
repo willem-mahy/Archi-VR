@@ -25,6 +25,7 @@ namespace WM.ArchiVR.UI
         public Text ServerIPValueText;
 
         public GameObject ServerPanel;
+        public Text ServerStatusValueText;
         public Text ClientsValueText;
 
         public Dropdown AvatarDropdown;
@@ -35,8 +36,6 @@ namespace WM.ArchiVR.UI
             #region Get references to UI components.
 
             ApplicationArchiVR = GameObject.Find("Application").GetComponent<ApplicationArchiVR>();
-            //QualityDropdown = GameObject.Find("GraphicsMenu_QualityDropdown").GetComponent<Dropdown>();
-            //ShowFpsToggle = GameObject.Find("GraphicsMenu_ShowFpsToggle").GetComponent<Toggle>();
 
             #endregion
 
@@ -67,17 +66,28 @@ namespace WM.ArchiVR.UI
             UpdateUIToNetworkModeSelection(ApplicationArchiVR.NetworkMode); // If startup mode is Standalone, the UI is not updated accordingly, so force that explicitely here...
         }
 
+        bool synchronizingUI = false;
+
         // Update is called once per frame
-        void Update()
+        void Update()        
         {
+            synchronizingUI = true;
+            
             IPValueText.text = NetUtil.GetLocalIPAddress();
+
+            if (ApplicationArchiVR.NetworkMode == NetworkMode.Server)
+            {
+                ServerStatusValueText.text = ApplicationArchiVR.Server.Status;
+            }
+
+            UpdateUIToNetworkModeSelection(ApplicationArchiVR.NetworkMode);
+
+            synchronizingUI = false;
         }
 
         void OnNetworkModeSelection(NetworkMode networkMode)
         {
             ApplicationArchiVR.QueueCommand(new InitNetworkCommand(networkMode));
-
-            UpdateUIToNetworkModeSelection(networkMode);
         }
         
         void UpdateUIToNetworkModeSelection(NetworkMode networkMode)
