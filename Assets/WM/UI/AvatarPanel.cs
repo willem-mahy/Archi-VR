@@ -49,6 +49,8 @@ public class AvatarPanel : MonoBehaviour
 
         synchronizingUI = false;
 
+        #region Temporary keyboard shortcuts to aid in debugging until control trigger can be emulated in editor mode.
+
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             PrevAvatarButtonOnClick();
@@ -58,6 +60,8 @@ public class AvatarPanel : MonoBehaviour
         {
             NextAvatarButtonOnClick();
         }
+
+        #endregion
     }
 
     #region UI event handlers
