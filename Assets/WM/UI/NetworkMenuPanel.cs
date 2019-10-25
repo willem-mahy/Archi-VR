@@ -77,17 +77,17 @@ namespace WM.ArchiVR.UI
 
             #region Temporary keyboard shortcuts to aid in debugging until control trigger can be emulated in editor mode.
 
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            if (Input.GetKeyDown(KeyCode.Alpha1))
             {
                 StandaloneToggleOnValueChanged(true);
             }
 
-            if (Input.GetKeyDown(KeyCode.DownArrow))
+            if (Input.GetKeyDown(KeyCode.Alpha2))
             {
                 ServerToggleOnValueChanged(true);
             }
 
-            if (Input.GetKeyDown(KeyCode.RightArrow))
+            if (Input.GetKeyDown(KeyCode.Alpha3))
             {
                 ClientToggleOnValueChanged(true);
             }

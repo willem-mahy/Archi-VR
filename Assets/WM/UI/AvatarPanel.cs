@@ -51,12 +51,12 @@ public class AvatarPanel : MonoBehaviour
 
         #region Temporary keyboard shortcuts to aid in debugging until control trigger can be emulated in editor mode.
 
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             PrevAvatarButtonOnClick();
         }
 
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        if (Input.GetKeyDown(KeyCode.Alpha5))
         {
             NextAvatarButtonOnClick();
         }
