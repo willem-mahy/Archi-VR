@@ -6,7 +6,7 @@ public class DebugLogMenu : MonoBehaviour
 {
     public ApplicationArchiVR ApplicationArchiVR;
 
-    int MaxNumLines = 15;
+    int MaxNumLines = 30;
 
     Text Text;
     
