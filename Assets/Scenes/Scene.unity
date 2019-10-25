@@ -1245,7 +1245,7 @@ GameObject:
   - component: {fileID: 122669309}
   - component: {fileID: 122669308}
   m_Layer: 5
-  m_Name: CLientStatusLabelText
+  m_Name: ClientStatusLabelText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8975,6 +8975,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   application: {fileID: 1858803769}
+  Status: 
   InitialServerIP: 
   ConnectTimeout: 100
   TcpPort: 8889
@@ -10851,7 +10852,7 @@ MonoBehaviour:
   ClientToggle: {fileID: 2015218469}
   NetworkPanel: {fileID: 2139648860}
   ClientPanel: {fileID: 413742015}
-  ServerIPValueText: {fileID: 565192359}
+  ClientStatusValueText: {fileID: 565192359}
   ServerPanel: {fileID: 481969999}
   ServerStatusValueText: {fileID: 1307063209}
   ClientsValueText: {fileID: 1065613847}
@@ -14466,7 +14467,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc105cf8598507245b0379eec41f5aa4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StartupNetworkMode: 1
+  StartupNetworkMode: 2
   NetworkMode: 0
   Version: 
   Server: {fileID: 1254469407}
