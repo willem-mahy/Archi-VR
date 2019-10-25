@@ -319,8 +319,6 @@ namespace WM
             // The HUD menu text
             string m_menuText = "";
 
-            public string RemoteClientIP = "127.0.0.1";
-
             #endregion
 
             #region L controller menu
