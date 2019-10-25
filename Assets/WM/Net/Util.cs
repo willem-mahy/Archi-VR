@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading;
-using System.Xml.Serialization;
-using UnityEngine;
+﻿using System.Net;
 
 namespace WM
 {
@@ -26,6 +19,13 @@ namespace WM
                 }
 
                 throw new WebException("Local IP address not found!");
+            }
+            
+            public static string GetLocalIPSubNet()
+            {
+                var address = GetLocalIPAddress();
+
+                return address.Substring(0, address.LastIndexOf('.') + 1);
             }
         }
     } // namespace Net
