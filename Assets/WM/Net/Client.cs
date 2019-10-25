@@ -67,15 +67,28 @@ namespace WM.Net
         {
             shutDown = true;
 
-            thread.Join();
-            
-            thread = null;
+            if (thread != null)
+            {
+                thread.Join();
 
-            udpClient.Close();
+                thread = null;
+            }
 
-            //TODO SendCommand(new DisconnectClientCommand());
+            if (udpClient != null)
+            {
+                udpClient.Close();
 
-            tcpClient.Close();
+                udpClient = null;
+            }
+
+            SendCommand(new DisconnectClientCommand());
+
+            if (tcpClient != null)
+            {
+                tcpClient.Close();
+
+                tcpClient = null;
+            }
         }
 
         //! Thread function executed by the thread.
@@ -83,7 +96,10 @@ namespace WM.Net
         {
             while (!shutDown)
             {
-                Connect();
+                if (TryConnect())
+                {
+                    break;
+                }
             }
 
             Debug.Log("Client: tcpClient connected.");
@@ -208,37 +224,33 @@ namespace WM.Net
             }
         }
 
-        private void Connect()
+        private bool TryConnect()
         {
-            while (true)
+            if (InitialServerIP != "")
             {
-                if (InitialServerIP != "")
+                // connect to a predefined server.
+                return TryConnectToServer(InitialServerIP);
+            }
+            else
+            {
+                // Search the local subnet for a server.
+                for (int i = 0; i < 256; ++i)
                 {
-                    // connect to a predefined server.
-                    if (TryConnectToServer(InitialServerIP))
-                    {
-                        return;
-                    }
-                }
-                else
-                {
-                    // Search the local subnet for a server.
-                    for (int i = 0; i < 256; ++i)
-                    {
-                        string serverIP = "192.168.0." + i;
+                    string serverIP = "192.168.0." + i;
 
-                        if (TryConnectToServer(serverIP))
-                        {
-                            return;
-                        }
+                    if (TryConnectToServer(serverIP))
+                    {
+                        return true;
                     }
                 }
+
+                return false;
             }
         }
 
         private bool TryConnectToServer(string serverIP)
         {
-            Debug.Log("Client.ConnectToServer(): Trying to connect TCP client to '" + serverIP + ":" + Server.TcpPort + "' (timeout: " + ConnectTimeout + "ms)");
+            WM.Logger.Debug("Client.TryConnectToServer(): Server:'" + serverIP + ":" + Server.TcpPort + ", timeout:" + ConnectTimeout + "ms");
 
             var tcpClient = new TcpClient();
 
@@ -249,6 +261,11 @@ namespace WM.Net
             if (tcpClient.Connected)
             {
                 this.tcpClient = tcpClient;
+                WM.Logger.Debug("Client.TryConnectToServer(): Connected!");
+            }
+            else
+            {
+                WM.Logger.Debug("Client.TryConnectToServer(): Failed to connect!");
             }
 
             return tcpClient.Connected;
@@ -316,7 +333,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                Debug.LogError("Clien.SendPositionToUDP(): Exception:" + e.Message);
+                WM.Logger.Error("Clien.SendPositionToUDP(): Exception:" + e.Message);
             }
         }
 
@@ -434,7 +451,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                Debug.LogError("Client.UpdateAvatarStatesFromUDP(): Exception:" + e.Message);
+                 WM.Logger.Error("Client.UpdateAvatarStatesFromUDP(): Exception:" + e.Message);
             }
         }
 
@@ -466,7 +483,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                Debug.LogError("Client.SendCommand(): Exception:" + e.Message);
+                 WM.Logger.Error("Client.SendCommand(): Exception:" + e.Message);
             }
         }
 
@@ -494,7 +511,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                Debug.LogError("Client.SendData(): Exception:" + e.Message);
+                 WM.Logger.Error("Client.SendData(): Exception:" + e.Message);
             }
         }
     }

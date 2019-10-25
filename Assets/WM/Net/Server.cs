@@ -44,6 +44,8 @@ namespace WM
 
             public ApplicationArchiVR application;
 
+            public string Status = "";
+
             #region TCP
 
             public static readonly int TcpPort =
@@ -103,17 +105,25 @@ namespace WM
 
             public void Init()
             {
-                Debug.Log("Server.Init() Start");
+                WM.Logger.Debug("Server.Init() Start");
 
                 shutDown = false;
+
+                Status = "Initializing";
 
                 try
                 {
                     Debug.Log("Server.Init() Create UDP client at port " + UdpPort);
                     udpClient = new UdpClient(UdpPort);
 
+                    Status = "UdpClient initialized";
+                    WM.Logger.Debug("Server.Init(): UdpClient initialized");
+
                     udpReceive = new UDPReceive(udpClient);
                     udpReceive.Init();
+
+                    Status = "UdpReceive initialized";
+                    WM.Logger.Debug("Server.Init(): UdpReceive initialized");
 
                     clientConnections = new List<ClientConnection>();
 
@@ -125,26 +135,28 @@ namespace WM
 
                     // Print all IP adresses:
                     {
-                        Debug.Log("Server IP addresses:");
+                        WM.Logger.Debug("Server IP addresses:");
 
                         foreach (var ipAddress in hostEntry.AddressList)
                         {
-                            Debug.Log("    - " + ipAddress);
+                            WM.Logger.Debug("    - " + ipAddress);
                         }
                     }
 
                     // Get first IPv4 address.
-                    var serverIpAddress = hostEntry.AddressList[1];
+                    var serverIpAddress = hostEntry.AddressList[hostEntry.AddressList.Length - 1];
 
                     // Create the TCP listener.
-                    Debug.Log("Server.Init() Create TCP listener @ " + serverIpAddress.ToString() + ":" + TcpPort.ToString());
+                    WM.Logger.Debug("Server.Init(); Create TCP listener @ " + serverIpAddress.ToString() + ":" + TcpPort.ToString());
                     tcpListener = new TcpListener(serverIpAddress, TcpPort);
 
                     // Start the server socket.
-                    Debug.Log("Server.Init() Start TCP listener");
+                    WM.Logger.Debug("Server.Init(): Start TCP listener");
                     tcpListener.Start();
 
-                    Debug.Log("Server.Init() TCP listener started");
+                    Status = "TcpListener started";
+
+                    WM.Logger.Debug("Server.Init() TCP listener started");
 
                     // Start a thread to listen for incoming connections from clients on the server TCP socket.
                     acceptClientThread = new Thread(new ThreadStart(AcceptClientFunction));
@@ -164,11 +176,11 @@ namespace WM
                     receiveUdpThread.Name = "receiveUdpThread";
                     receiveUdpThread.Start();
 
-                    Debug.Log("Server started");
+                    WM.Logger.Debug("Server started");
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError("Server.Init(): Exception: " + ex.ToString());
+                    WM.Logger.Error("Server.Init(): Exception: " + ex.ToString());
                 }
             }
 
@@ -177,27 +189,49 @@ namespace WM
             {
                 shutDown = true;
 
-                acceptClientThread.Join();
+                if (acceptClientThread != null)
+                {
+                    acceptClientThread.Join();
 
-                acceptClientThread = null;
+                    acceptClientThread = null;
+                }
 
-                receiveTcpThread.Join();
+                if (receiveTcpThread != null)
+                {
+                    receiveTcpThread.Join();
 
-                receiveTcpThread = null;
+                    receiveTcpThread = null;
+                }
 
-                receiveUdpThread.Join();
+                if (receiveUdpThread != null)
+                {
+                    receiveUdpThread.Join();
 
-                receiveUdpThread = null;
+                    receiveUdpThread = null;
+                }
 
-                udpClient.Close();
+                if (udpClient != null)
+                {
+                    udpClient.Close();
 
-                //TODO SendCommand(new ShutdownServerCommand());
+                    udpClient = null;
+                }
 
-                tcpListener.Stop();
+                //SendCommand(new ShutdownServerCommand());
 
-                tcpListener = null;
+                if (tcpListener != null)
+                {
+                    tcpListener.Stop();
 
-                clientConnections.Clear();
+                    tcpListener = null;
+                }
+
+                if (clientConnections != null)
+                {
+                    clientConnections.Clear();
+
+                    clientConnections = null;
+                }
             }
 
             //! Thread function executed by the 'Accept Client' thread.
@@ -221,7 +255,7 @@ namespace WM
                             var clientIP = clientEndPoint.Address.ToString();
                             newClientConnection.remoteIP = clientIP;
 
-                            Debug.Log("Server: Client connected: " + clientIP);
+                            WM.Logger.Debug("Server.AcceptClientFunction(): Client connected: " + clientIP);
 
                             newClientConnection.udpSend = new UDPSend(udpClient);
 
@@ -281,7 +315,7 @@ namespace WM
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogError("Server.AcceptClientFunction(): Exception: " + ex.ToString());
+                        WM.Logger.Error("Server.AcceptClientFunction(): Exception: " + ex.ToString());
                     }
                 }
             }
@@ -323,7 +357,7 @@ namespace WM
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogError("Server.ReceiveUdpFunction(): Exception: " + ex.ToString());
+                         WM.Logger.Error("Server.ReceiveUdpFunction(): Exception: " + ex.ToString());
                     }
                 }
             }
@@ -394,7 +428,11 @@ namespace WM
                                 clientConnection.tcpReceivedData = remainder;
 
                                 // Process the message
-                                ProcessMessage(messageXML, clientConnection);
+                                if (!ProcessMessage(messageXML, clientConnection))
+                                {
+                                    clientConnections.Remove(clientConnection);
+                                    break;
+                                }
                             }
 
                             clientsLockOwner = "None (last:ReceiveFromClientsFunction)";
@@ -403,12 +441,12 @@ namespace WM
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogError("Server.ReceiveTcpFunction(): Exception: " + ex.ToString());
+                        WM.Logger.Error("Server.ReceiveTcpFunction(): Exception: " + ex.ToString());
                     }
                 }
             }
 
-            private void ProcessMessage(
+            private bool ProcessMessage(
                 string messageXML,
                 ClientConnection clientConnection)
             {
@@ -438,12 +476,20 @@ namespace WM
                     clientConnection.AvatarIndex = ccc.AvatarIndex;
                     PropagateData(messageXML, clientConnection);
                 }
+                else if (obj is DisconnectClientCommand)
+                {
+                    var dcc = (DisconnectClientCommand)obj;                    
+                    PropagateData(messageXML, clientConnection);
+                    return false;
+                }
                 else if (obj is SetClientAvatarCommand)
                 {
                      var scac = (SetClientAvatarCommand)obj;
                     clientConnection.AvatarIndex = scac.AvatarIndex;
                     PropagateData(messageXML, clientConnection);
                 }
+
+                return true;
             }
                         
             public void Stop()
@@ -470,7 +516,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Server.BroadcastCommand(): Exception: " + e.Message);
+                    WM.Logger.Error("Server.BroadcastCommand(): Exception: " + e.Message);
                 }
             }
 
@@ -488,7 +534,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Server.PropagateCommand(): Exception: " + e.Message);
+                    WM.Logger.Error("Server.PropagateCommand(): Exception: " + e.Message);
                 }
             }
 
@@ -513,7 +559,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Server.BroadcastData(): Exception: " + e.Message);
+                    WM.Logger.Error("Server.BroadcastData(): Exception: " + e.Message);
                 }
             }
             
@@ -544,7 +590,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Server.PropagateData(): Exception: " + e.Message);
+                    WM.Logger.Error("Server.PropagateData(): Exception: " + e.Message);
                 }
             }
 
@@ -584,7 +630,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Server.SendCommand(): Exception:" + e.Message);
+                    WM.Logger.Error("Server.SendCommand(): Exception:" + e.Message);
                 }
             }
 
@@ -610,7 +656,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Server.SendData(): Exception:" + e.Message);
+                    WM.Logger.Error("Server.SendData(): Exception:" + e.Message);
                 }
             }
 
@@ -648,7 +694,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Server.SendData(): Exception:" + e.Message);
+                     WM.Logger.Error("Server.SendData(): Exception:" + e.Message);
                 }
             }
 
@@ -680,7 +726,7 @@ namespace WM
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError("Exception:" + e.Message);
+                         WM.Logger.Error("Exception:" + e.Message);
                     }
                 }
             }
@@ -754,7 +800,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("Server.GetAvatarStateFromUdp(): Exception: " + e.Message);
+                     WM.Logger.Error("Server.GetAvatarStateFromUdp(): Exception: " + e.Message);
                     return null;
                 }
             }

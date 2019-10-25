@@ -376,8 +376,8 @@ namespace WM
 
                 //InstanciateAllAvatarPrefabs();
 
-                //QueueCommand(new InitNetworkCommand(NetworkMode));
-                new InitNetworkCommand(NetworkMode).Execute(this);
+                //QueueCommand(new InitNetworkCommand(StartupNetworkMode));
+                new InitNetworkCommand(StartupNetworkMode).Execute(this);
 
                 #region Automatically get build version
 
