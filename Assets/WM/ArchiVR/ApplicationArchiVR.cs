@@ -119,21 +119,21 @@ namespace WM
 
             public Dictionary<string, GameObject> avatars = new Dictionary<string, GameObject>();
 
-            public Animator m_fadeAnimator = null;
+            public Animator m_fadeAnimator;
 
-            public HUDMenu HudMenu = null;
+            public HUDMenu HudMenu;
 
-            public GameObject FpsPanelHUD = null;
+            public GameObject FpsPanelHUD;
 
-            public UnityEngine.UI.Text FpsTextHUD = null;
+            public UnityEngine.UI.Text FpsTextHUD;
 
-            public GameObject m_ovrCameraRig = null;
+            public GameObject m_ovrCameraRig;
 
-            public GameObject m_centerEyeAnchor = null;
+            public GameObject m_centerEyeAnchor;
 
-            public GameObject m_leftHandAnchor = null;
+            public GameObject m_leftHandAnchor;
 
-            public GameObject m_rightHandAnchor = null;
+            public GameObject m_rightHandAnchor;
 
             #endregion
 
