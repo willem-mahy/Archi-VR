@@ -33,6 +33,9 @@ namespace WM.Net
         // The TCP client
         private TcpClient tcpClient;
 
+        // The network stream to the server over TCP.
+        private NetworkStream tcpServerStream;
+
         #endregion
 
         #region UDP
@@ -85,6 +88,16 @@ namespace WM.Net
 
             SendCommand(new DisconnectClientCommand());
 
+            if (tcpServerStream != null)
+            {
+                lock (tcpServerStream)
+                {
+                    tcpServerStream.Close();
+
+                    tcpServerStream = null;
+                }
+            }
+
             if (tcpClient != null)
             {
                 tcpClient.Close();
@@ -114,9 +127,9 @@ namespace WM.Net
                 scac.AvatarIndex = application.AvatarIndex;
                 SendCommand(scac);
             }
-            
+
             // Get server stream from TCP client.
-            var serverStream = tcpClient.GetStream();
+            tcpServerStream = tcpClient.GetStream();
                         
             // Initialize UDP sockets to/from server.
             {
@@ -135,18 +148,24 @@ namespace WM.Net
             {
                 string dataFromServer = "";
 
-                while (serverStream.DataAvailable)
+                if (tcpServerStream != null)
                 {
-                    // Receive data from server.
-                    var bytesFromServer = new byte[tcpClient.ReceiveBufferSize];
-                    var numBytesRead = serverStream.Read(bytesFromServer, 0, (int)tcpClient.ReceiveBufferSize);
+                    lock (tcpServerStream)
+                    {
+                        while (tcpServerStream.DataAvailable)
+                        {
+                            // Receive data from server.
+                            var bytesFromServer = new byte[tcpClient.ReceiveBufferSize];
+                            var numBytesRead = tcpServerStream.Read(bytesFromServer, 0, (int)tcpClient.ReceiveBufferSize);
 
-                    dataFromServer += Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);
+                            dataFromServer += Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);
+                        }
+                    }
                 }
 
                 if (dataFromServer.Length > 0)
                 {
-                    Debug.Log("Client: Data from server: " + dataFromServer);
+                    //WM.Logger.Debug("Client: Data from server: " + dataFromServer);
 
                     while (true)
                     {
@@ -205,15 +224,21 @@ namespace WM.Net
                             var command = (ConnectClientCommand)obj;
                             application.QueueCommand(command);
                         }
+                        else if (obj is DisconnectClientCommand)
+                        {
+                            var command = (DisconnectClientCommand)obj;
+                            application.QueueCommand(command);
+                        }
                         else if (obj is SetClientAvatarCommand)
                         {
                             var command = (SetClientAvatarCommand)obj;
                             application.QueueCommand(command);
                         }
-                        //else if (obj is DisconnectCommand)
-                        //{
-                        //    this.Disconnect()
-                        //}
+                        else if (obj is ServerShutdownCommand)
+                        {
+                            var command = (ServerShutdownCommand)obj;
+                            application.QueueCommand(command);
+                        }
                     }
                 }
             }

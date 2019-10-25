@@ -29,6 +29,9 @@ namespace WM
             // The client-specific TCP client.
             public TcpClient tcpClient;
 
+            // The client-specific TCP network stream.
+            public NetworkStream tcpNetworkStream;
+
             //
             public string tcpReceivedData = "";
 
@@ -125,8 +128,6 @@ namespace WM
                     Status = "UdpReceive initialized";
                     WM.Logger.Debug("Server.Init(): UdpReceive initialized");
 
-                    clientConnections = new List<ClientConnection>();
-
                     // Get host name for local machine.
                     var hostName = Dns.GetHostName();
 
@@ -190,6 +191,7 @@ namespace WM
             {
                 shutDown = true;
 
+                // Stop listening for new clients.
                 if (acceptClientThread != null)
                 {
                     acceptClientThread.Join();
@@ -197,13 +199,18 @@ namespace WM
                     acceptClientThread = null;
                 }
 
-                if (receiveTcpThread != null)
+                // Close TCP listener used to listen for new clients.
+                if (tcpListener != null)
                 {
-                    receiveTcpThread.Join();
+                    tcpListener.Stop();
 
-                    receiveTcpThread = null;
+                    tcpListener = null;
                 }
 
+                // Notify existing clients that the server is shutting down.
+                BroadcastCommand(new ServerShutdownCommand());
+
+                // Stop listening to existing clients for UDP messages
                 if (receiveUdpThread != null)
                 {
                     receiveUdpThread.Join();
@@ -218,20 +225,30 @@ namespace WM
                     udpClient = null;
                 }
 
-                //SendCommand(new ShutdownServerCommand());
-
-                if (tcpListener != null)
+                // Stop listening to existing clients for TCP messages
+                if (receiveTcpThread != null)
                 {
-                    tcpListener.Stop();
+                    receiveTcpThread.Join();
 
-                    tcpListener = null;
+                    receiveTcpThread = null;
                 }
 
-                if (clientConnections != null)
+                lock (clientConnections)
                 {
+                    clientsLockOwner = "Shutdown";
+
+                    foreach (var clientConnection in clientConnections)
+                    {
+                        clientConnection.tcpNetworkStream.Close();
+                        clientConnection.tcpNetworkStream = null;
+                        
+                        clientConnection.tcpClient.Close();
+                        clientConnection.tcpClient = null;
+                    }
+
                     clientConnections.Clear();
 
-                    clientConnections = null;
+                    clientsLockOwner = "None (Shutdown)";
                 }
             }
 
@@ -246,11 +263,9 @@ namespace WM
                         {
                             var newClientConnection = new ClientConnection();
 
-                            // Create the client TCP socket.
-                            newClientConnection.tcpClient = default(TcpClient);
-
                             // Accept the client TCP socket.
                             newClientConnection.tcpClient = tcpListener.AcceptTcpClient();
+                            newClientConnection.tcpNetworkStream = newClientConnection.tcpClient.GetStream();
 
                             var clientEndPoint = newClientConnection.tcpClient.Client.RemoteEndPoint as IPEndPoint;
                             var clientIP = clientEndPoint.Address.ToString();
@@ -286,7 +301,7 @@ namespace WM
                                         cc1.ClientIP = clientConnection.remoteIP;
                                         cc1.AvatarIndex = clientConnection.AvatarIndex;
 
-                                        SendCommand(cc1, newClientConnection.tcpClient);
+                                        SendCommand(cc1, newClientConnection);
                                     }
                                 }
                             }
@@ -298,13 +313,13 @@ namespace WM
                                 teleportCommand.ProjectIndex = application.ActiveProjectIndex;
                                 teleportCommand.POIName = application.ActivePOIName;
 
-                                SendCommand(teleportCommand, newClientConnection.tcpClient);
+                                SendCommand(teleportCommand, newClientConnection);
 
                                 // C) ...be in the same immersion mode.
                                 var setImmersionModeCommand = new SetImmersionModeCommand();
                                 setImmersionModeCommand.ImmersionModeIndex = application.ActiveImmersionModeIndex;
 
-                                SendCommand(setImmersionModeCommand, newClientConnection.tcpClient);
+                                SendCommand(setImmersionModeCommand, newClientConnection);
                             }
 
                             // Notify clients that another client connected.
@@ -354,7 +369,6 @@ namespace WM
 
                             clientsLockOwner = "None (last:ReceiveFromClientsFunction)";
                         }
-                        //Thread.Sleep(10);
                     }
                     catch (Exception ex)
                     {
@@ -386,16 +400,20 @@ namespace WM
                                     continue;
                                 }
 
+                                if (clientConnection.tcpNetworkStream == null)
                                 {
-                                    var networkStream = clientConnection.tcpClient.GetStream();
+                                    continue;
+                                }
 
-                                    var numBytesAvailable = clientConnection.tcpClient.Available;
-                                    if (numBytesAvailable > 0)
+                                {
+                                    var networkStream = clientConnection.tcpNetworkStream;
+
+                                    if (clientConnection.tcpNetworkStream.DataAvailable)
                                     {
                                         // Receive from client.
-                                        byte[] bytesFromClient = new byte[numBytesAvailable];
-                                        networkStream.Read(bytesFromClient, 0, numBytesAvailable);
-                                        clientConnection.tcpReceivedData+= System.Text.Encoding.ASCII.GetString(bytesFromClient);
+                                        var bytesFromClient = new byte[clientConnection.tcpClient.Available];
+                                        int bytesRead = networkStream.Read(bytesFromClient, 0, clientConnection.tcpClient.Available);
+                                        clientConnection.tcpReceivedData+= System.Text.Encoding.ASCII.GetString(bytesFromClient, 0, bytesRead);
                                     }
                                 }
 
@@ -407,7 +425,7 @@ namespace WM
 
                                 if (firstMessageBegin < 0)
                                 {
-                                    break;
+                                    continue;
                                 }
 
                                 // Remove all data in front of first message.
@@ -417,7 +435,7 @@ namespace WM
 
                                 if (firstMessageEnd < 0)
                                 {
-                                    break;
+                                    continue;
                                 }
 
                                 // XML-deserialize the message.
@@ -493,17 +511,6 @@ namespace WM
                 return true;
             }
                         
-            public void Stop()
-            {
-                Debug.Log("Server::Stop");
-
-                DisconnectClients();
-
-                CloseSockets();
-
-                Debug.Log("Server stopped");
-            }
-
             public void BroadcastCommand(
                 ICommand command)
             {
@@ -552,7 +559,7 @@ namespace WM
 
                         foreach (var clientConnection in clientConnections)
                         {
-                            SendData(data, clientConnection.tcpClient);
+                            SendData(data, clientConnection);
                         }
 
                         clientsLockOwner = "None (BoadcastData)";
@@ -583,7 +590,7 @@ namespace WM
                                 continue; // Do not send to the source client connection.
                             }
 
-                            SendData(data, clientConnection.tcpClient);
+                            SendData(data, clientConnection);
                         }
 
                         clientsLockOwner = "None (PropagateData)";
@@ -611,23 +618,23 @@ namespace WM
                 return data;
             }
 
-            public void SendCommand(
+            private void SendCommand(
                 ICommand command,
-                TcpClient tcpClient)
+                ClientConnection clientConnection)
             {
                 Debug.Log("Server:SendCommand()");
 
                 try
                 {
-                    if (tcpClient == null)
+                    if (clientConnection.tcpNetworkStream == null)
                     {
-                        Debug.LogWarning("Server.SendCommand(): tcpClient == null");
+                        Debug.LogWarning("Server.SendCommand(): clientConnection.tcpNetworkStream == null");
                         return;
                     }
 
                     var data = GetCommandAsData(command);
 
-                    SendData(data, tcpClient);
+                    SendData(data, clientConnection);
                 }
                 catch (Exception e)
                 {
@@ -635,25 +642,23 @@ namespace WM
                 }
             }
 
-            public void SendData(
+            private void SendData(
                 String data,
-                TcpClient tcpClient)
+                ClientConnection clientConnection)
             {
                 Debug.Log("Server:SendData()");
 
                 try
                 {
-                    if (tcpClient == null)
+                    if (clientConnection.tcpNetworkStream == null)
                     {
-                        Debug.LogWarning("Server.SendData(): tcpClient == null");
+                        Debug.LogWarning("Server.SendData(): clientConnection.tcpNetworkStream == null");
                         return;
                     }
 
-                    var networkStream = tcpClient.GetStream();
-
                     var bytes = Encoding.ASCII.GetBytes(data);
-                    networkStream.Write(bytes, 0, bytes.Length);
-                    networkStream.Flush();
+                    clientConnection.tcpNetworkStream.Write(bytes, 0, bytes.Length);
+                    clientConnection.tcpNetworkStream.Flush();
                 }
                 catch (Exception e)
                 {
@@ -666,37 +671,6 @@ namespace WM
                 Debug.Log("Server::DisconnectClients");
 
                 BroadcastMessage("ServerShuttingDown");
-            }
-
-            private void CloseSockets()
-            {
-                Debug.Log("Server::CloseSockets");
-
-                try
-                {
-                    lock (clientConnections)
-                    {
-                        clientsLockOwner = "CloseSockets";
-
-                        // Close the client sockets.
-                        foreach (var clientConnection in clientConnections)
-                        {
-                            clientConnection.tcpClient.Close();
-                            //clientConnection.udpSend.Close();
-                        }
-
-                        clientConnections.Clear();
-
-                        clientsLockOwner = "None (CloseSockets)";
-                    }
-
-                    // Stop the TCP listener.
-                    tcpListener.Stop();
-                }
-                catch (Exception e)
-                {
-                     WM.Logger.Error("Server.SendData(): Exception:" + e.Message);
-                }
             }
 
             public void SendDataToUdp(string data, int clientIndex)
