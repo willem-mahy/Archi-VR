@@ -267,10 +267,12 @@ namespace WM.Net
             }
             else
             {
+                var localSubNet = NetUtil.GetLocalIPSubNet();
+
                 // Search the local subnet for a server.
-                for (int i = 0; i < 256; ++i)
+                for (int i = 0; i < 255; ++i)
                 {
-                    string serverIP = "192.168.0." + i;
+                    string serverIP = localSubNet + i;
 
                     if (TryConnectToServer(serverIP))
                     {
