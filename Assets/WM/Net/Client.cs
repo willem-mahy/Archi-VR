@@ -289,24 +289,35 @@ namespace WM.Net
 
             Status = "Trying to connect to " + tag;
 
-            var tcpClient = new TcpClient();
-
-            var connectionAttempt = tcpClient.ConnectAsync(serverIP, Server.TcpPort);
-
-            connectionAttempt.Wait(ConnectTimeout);
-
-            if (connectionAttempt.IsCompleted)
+            try
             {
-                this.tcpClient = tcpClient;
-                WM.Logger.Debug("Client.TryConnectToServer(): Connected!");
-                return true;
+                var tcpClient = new TcpClient();
+
+                var connectionAttempt = tcpClient.ConnectAsync(serverIP, Server.TcpPort);
+
+                connectionAttempt.Wait(ConnectTimeout);
+
+                if (connectionAttempt.IsCompleted)
+                {
+                    this.tcpClient = tcpClient;
+                    WM.Logger.Debug("Client.TryConnectToServer(): Connected!");
+                    return true;
+                }
+                else
+                {
+                    tcpClient.Close();
+                    WM.Logger.Debug("Client.TryConnectToServer(): Failed to connect!");
+                    return false;
+                }
             }
-            else
+            catch (Exception e)
             {
-                tcpClient.Close();
-                WM.Logger.Debug("Client.TryConnectToServer(): Failed to connect!");
+                var txt = "Client.TryConnectToServer(): Exception: " + e.Message + ": " + e.InnerException;
+                Status = txt;
+                WM.Logger.Error(txt);
                 return false;
             }
+
         }
 
         //! Returns whether this client is connected to a server.
