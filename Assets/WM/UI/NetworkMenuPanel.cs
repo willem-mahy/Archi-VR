@@ -27,26 +27,13 @@ namespace WM.ArchiVR.UI
         public GameObject ServerPanel;
         public Text ServerStatusValueText;
         public Text ClientsValueText;
-
-        public Dropdown AvatarDropdown;
         
         // Start is called before the first frame update
         void Start()
         {
-            #region Get references to UI components.
+            #region Get references to GameObjects.
 
             ApplicationArchiVR = GameObject.Find("Application").GetComponent<ApplicationArchiVR>();
-
-            #endregion
-
-            #region initialize Avartor dropdown options
-
-            AvatarDropdown.options.Clear();
-
-            foreach (var avatar in ApplicationArchiVR.avatarPrefabs)
-            {
-                AvatarDropdown.options.Add(new Dropdown.OptionData(avatar.name));
-            }
 
             #endregion
 
@@ -87,6 +74,11 @@ namespace WM.ArchiVR.UI
 
         void OnNetworkModeSelection(NetworkMode networkMode)
         {
+            if (synchronizingUI)
+            {
+                return;
+            }
+
             ApplicationArchiVR.QueueCommand(new InitNetworkCommand(networkMode));
         }
         
@@ -106,8 +98,6 @@ namespace WM.ArchiVR.UI
                     ServerPanel.SetActive(true);
                     ClientPanel.SetActive(false);
 
-                    AvatarDropdown.value = ApplicationArchiVR.AvatarIndex;
-
                     ClientsValueText.text = ApplicationArchiVR.Server.GetClientInfo();
                     break;
                 case NetworkMode.Client:
@@ -117,34 +107,10 @@ namespace WM.ArchiVR.UI
                     ServerPanel.SetActive(false);
                     ClientPanel.SetActive(true);
 
-                    ClientStatusValueText.text = ApplicationArchiVR.Client.Status;
-                    AvatarDropdown.value = ApplicationArchiVR.AvatarIndex;
+                    ClientStatusValueText.text = ApplicationArchiVR.Client.Status;                    
                     break;
             }
         }
-
-        #region Avatar
-
-        public void AvatarDropdownValueChanged(int value)
-        {
-            ApplicationArchiVR.SetAvatar(value);
-        }
-
-        public void PrevAvatarButtonOnClick()
-        {
-            var avatarIndex = UtilIterate.MakeCycle(--ApplicationArchiVR.AvatarIndex, 0, ApplicationArchiVR.avatarPrefabs.Count);
-            ApplicationArchiVR.SetAvatar(avatarIndex);
-            AvatarDropdown.value = avatarIndex;
-        }
-
-        public void NextAvatarButtonOnClick()
-        {
-            var avatarIndex = UtilIterate.MakeCycle(++ApplicationArchiVR.AvatarIndex, 0, ApplicationArchiVR.avatarPrefabs.Count);
-            ApplicationArchiVR.SetAvatar(avatarIndex);
-            AvatarDropdown.value = avatarIndex;
-        }
-
-        #endregion
 
         public void StandaloneToggleOnValueChanged(bool value)
         {
