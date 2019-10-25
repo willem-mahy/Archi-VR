@@ -117,6 +117,8 @@ namespace WM.Net
 
         private string GetServerIPFromUdpBroadcast()
         {
+            Status = "Listening for servers";
+
             var udpClient = new UdpClient(Server.BroadcastUdpPort);
             var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
