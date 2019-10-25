@@ -72,7 +72,7 @@ namespace WM.Net
         //! 
         public void Disconnect()
         {
-            SendCommand(new DisconnectClientCommand());
+            SendCommand(new DisconnectClientCommand(NetUtil.GetLocalIPAddress()));
 
             while (Status != "DisconnectAcknoledged") ;
 
