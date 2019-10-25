@@ -96,6 +96,9 @@ namespace WM
             // The thread that accepts TCP data from connected clients.
             private Thread receiveTcpThread;
 
+            // The thread that broadcasts messages to any potential clients in order for them to find the server.
+            private Thread broadcastThread;
+
             // The thread that accepts client connections.
             private Thread acceptClientThread;
 
@@ -179,6 +182,12 @@ namespace WM
 
                     WM.Logger.Debug("Server.Init() TCP listener started");
 
+                    // Start a thread to broadcast via UDP.
+                    broadcastThread = new Thread(new ThreadStart(BroadcastFunction));
+                    broadcastThread.IsBackground = true;
+                    broadcastThread.Name = "broadcastThread";
+                    broadcastThread.Start();
+
                     // Start a thread to listen for incoming connections from clients on the server TCP socket.
                     acceptClientThread = new Thread(new ThreadStart(AcceptClientFunction));
                     acceptClientThread.IsBackground = true;
@@ -210,6 +219,14 @@ namespace WM
             public void Shutdown()
             {
                 shutDown = true;
+
+                // Stop broadcasting for potential new clients.
+                if (broadcastThread != null)
+                {
+                    broadcastThread.Join();
+
+                    broadcastThread = null;
+                }
 
                 // Stop listening for new clients.
                 if (acceptClientThread != null)
@@ -273,23 +290,41 @@ namespace WM
             }
 
             //! Thread function executed by the 'Accept Client' thread.
+            private void BroadcastFunction()
+            {
+                try
+                {
+                    var broadcastUdpClient = new UdpClient(BroadcastUdpPort);
+
+                    // Encode data to UTF8-encoding.
+                    byte[] udpBroadcastMessageData = Encoding.UTF8.GetBytes(UdpBroadcastMessage);
+
+                    var ep = new IPEndPoint(IPAddress.Broadcast, Server.BroadcastUdpPort);
+
+                    while (!shutDown)
+                    {
+                    
+                            // Send udpBroadcastMessageData to any potential clients.
+                            broadcastUdpClient.Send(udpBroadcastMessageData, udpBroadcastMessageData.Length, ep);
+
+                            Thread.Sleep(500);
+                    }
+
+                    broadcastUdpClient.Close();
+                }
+                catch (Exception ex)
+                {
+                    WM.Logger.Error("Server.BroadcastFunction(): Exception: " + ex.ToString());
+                }
+            }
+
+            //! Thread function executed by the 'Accept Client' thread.
             private void AcceptClientFunction()
             {
-                var broadcastUdpClient = new UdpClient(BroadcastUdpPort);
-
-                // Encode data to UTF8-encoding.
-                byte[] udpBroadcastMessageData = Encoding.UTF8.GetBytes(UdpBroadcastMessage);
-                
-                var ep = new IPEndPoint(IPAddress.Broadcast, Server.BroadcastUdpPort);
-
                 while (!shutDown)
                 {
                     try
                     {
-
-                        // Send udpBroadcastMessageData to remote client.
-                        broadcastUdpClient.Send(udpBroadcastMessageData, udpBroadcastMessageData.Length, ep);
-
                         if (tcpListener.Pending())
                         {
                             var newClientConnection = new ClientConnection();
