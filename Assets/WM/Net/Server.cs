@@ -103,7 +103,12 @@ namespace WM
 
             #region UDP
 
-            // Port for the UDP client.
+            public static readonly string UdpBroadcastMessage = "Hello from ArchiVR server";
+
+            // Broadcast UDP port.
+            public static readonly int BroadcastUdpPort = 8891;
+
+            // CLient UDP port.
             public static readonly int UdpPort = 8890; // Must be different than server TCP port probably...
 
             // The UDP cLient.
@@ -270,10 +275,21 @@ namespace WM
             //! Thread function executed by the 'Accept Client' thread.
             private void AcceptClientFunction()
             {
+                var broadcastUdpClient = new UdpClient(BroadcastUdpPort);
+
+                // Encode data to UTF8-encoding.
+                byte[] udpBroadcastMessageData = Encoding.UTF8.GetBytes(UdpBroadcastMessage);
+                
+                var ep = new IPEndPoint(IPAddress.Broadcast, Server.BroadcastUdpPort);
+
                 while (!shutDown)
                 {
                     try
                     {
+
+                        // Send udpBroadcastMessageData to remote client.
+                        broadcastUdpClient.Send(udpBroadcastMessageData, udpBroadcastMessageData.Length, ep);
+
                         if (tcpListener.Pending())
                         {
                             var newClientConnection = new ClientConnection();
@@ -292,7 +308,7 @@ namespace WM
 
                             newClientConnection.udpSend.remoteIP = clientIP;
                             newClientConnection.udpSend.remotePort = Client.UdpPort;
-                            newClientConnection.udpSend.Init();                            
+                            newClientConnection.udpSend.Init();
 
                             lock (clientConnections)
                             {
@@ -342,6 +358,10 @@ namespace WM
                             cc.ClientIP = newClientConnection.remoteIP;
                             cc.AvatarIndex = newClientConnection.AvatarIndex;
                             PropagateCommand(cc, newClientConnection);
+                        }
+                        else
+                        {
+                            Thread.Sleep(10);
                         }
                     }
                     catch (Exception ex)

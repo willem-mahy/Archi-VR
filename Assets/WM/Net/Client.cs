@@ -114,42 +114,74 @@ namespace WM.Net
             }
         }
 
+
+        private string GetServerIPFromUdpBroadcast()
+        {
+            var udpClient = new UdpClient(Server.BroadcastUdpPort);
+            var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+
+            while (!shutDown)
+            {
+                try
+                {
+                    // Receive bytes from any client.                    
+                    byte[] data = udpClient.Receive(ref remoteEndPoint);
+
+                    // Encode received bytes to UTF8- encoding.
+                    string text = Encoding.UTF8.GetString(data);
+
+                    if (text.Contains(Server.UdpBroadcastMessage))
+                    {
+                        return remoteEndPoint.Address.ToString();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.Log("UDPReceive.ReceiveData(): Exception: " + e.ToString());
+                }
+            }
+        }
+
         //! Thread function executed by the thread.
         private void ThreadFunction()
         {
+            if (InitialServerIP == "")
+            {
+                InitialServerIP = GetServerIPFromUdpBroadcast();
+            }
+
             while (!shutDown)
             {
                 if (TryConnect())
                 {
+                    Status = "Connected to " + ServerIP;
+                    WM.Logger.Debug("Client: tcpClient connected.");
+
+                    // Broadcast your chosen avatar.
+                    {
+                        var scac = new SetClientAvatarCommand();
+                        scac.ClientIP = WM.Net.NetUtil.GetLocalIPAddress();
+                        scac.AvatarIndex = application.AvatarIndex;
+                        SendCommand(scac);
+                    }
+
+                    // Get server stream from TCP client.
+                    tcpServerStream = tcpClient.GetStream();
+
+                    // Initialize UDP sockets to/from server.
+                    {
+                        udpClient = new UdpClient(UdpPort);
+
+                        udpSend = new UDPSend(udpClient);
+                        udpSend.remoteIP = ServerIP;
+                        udpSend.remotePort = Server.UdpPort;
+                        udpSend.Init();
+
+                        udpReceive = new UDPReceive(udpClient);
+                        udpReceive.Init();
+                    }
                     break;
                 }
-            }
-
-            Status = "Connected to " + ServerIP;
-            WM.Logger.Debug("Client: tcpClient connected.");
-
-            // Broadcast your chosen avatar.
-            {
-                var scac = new SetClientAvatarCommand();
-                scac.ClientIP = WM.Net.NetUtil.GetLocalIPAddress();
-                scac.AvatarIndex = application.AvatarIndex;
-                SendCommand(scac);
-            }
-
-            // Get server stream from TCP client.
-            tcpServerStream = tcpClient.GetStream();
-                        
-            // Initialize UDP sockets to/from server.
-            {
-                udpClient = new UdpClient(UdpPort);
-
-                udpSend = new UDPSend(udpClient);
-                udpSend.remoteIP = ServerIP;
-                udpSend.remotePort = Server.UdpPort;
-                udpSend.Init();
-
-                udpReceive = new UDPReceive(udpClient);
-                udpReceive.Init();
             }
 
             while (!shutDown)
