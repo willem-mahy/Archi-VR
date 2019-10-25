@@ -45,9 +45,19 @@ public class AvatarPanel : MonoBehaviour
     {
         synchronizingUI = true;
 
-        AvatarDropdown.value = ApplicationArchiVR.AvatarIndex;
+         AvatarDropdown.value = ApplicationArchiVR.AvatarIndex;
 
         synchronizingUI = false;
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            PrevAvatarButtonOnClick();
+        }
+
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            NextAvatarButtonOnClick();
+        }
     }
 
     #region UI event handlers
