@@ -6,11 +6,17 @@ using WM.ArchiVR;
 
 public class GraphicsMenu : MonoBehaviour
 {
+    #region Variables
+
     public ApplicationArchiVR ApplicationArchiVR;
 
     public Dropdown QualityDropdown;
 
     public Toggle ShowFpsToggle;
+
+    #endregion
+
+    #region GameObject overrides
 
     // Start is called before the first frame update
     void Start()
@@ -73,11 +79,6 @@ public class GraphicsMenu : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {   
-    }
-
     void OnEnable()
     {
         if (QualityDropdown != null)
@@ -85,6 +86,8 @@ public class GraphicsMenu : MonoBehaviour
             QualityDropdown.Select();
         }
     }
+
+    #endregion
 
     #region Quality
 
@@ -115,9 +118,12 @@ public class GraphicsMenu : MonoBehaviour
 
     public void ShowFPSToggleOnValueChanged(bool value)
     {
-        if (ApplicationArchiVR.FpsPanelHUD)
+        if (ApplicationArchiVR)
         {
-            ApplicationArchiVR.FpsPanelHUD.SetActive(value);
+            if (ApplicationArchiVR.FpsPanelHUD)
+            {
+                ApplicationArchiVR.FpsPanelHUD.SetActive(value);
+            }
         }
     }
 
