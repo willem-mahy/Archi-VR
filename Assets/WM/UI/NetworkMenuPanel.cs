@@ -30,6 +30,8 @@ namespace WM.ArchiVR.UI
         public Text ServerStatusValueText;
         public Text ClientsValueText;
 
+        bool synchronizingUI = false;
+
         #endregion
 
         // Start is called before the first frame update
@@ -56,8 +58,6 @@ namespace WM.ArchiVR.UI
 
             UpdateUIToNetworkModeSelection(ApplicationArchiVR.NetworkMode); // If startup mode is Standalone, the UI is not updated accordingly, so force that explicitely here...
         }
-
-        bool synchronizingUI = false;
 
         // Update is called once per frame
         void Update()        
@@ -93,6 +93,14 @@ namespace WM.ArchiVR.UI
             }
 
             #endregion
+        }
+
+        void OnEnable()
+        {
+            if (ServerToggle != null)
+            {
+                ServerToggle.Select();
+            }
         }
 
         void OnNetworkModeSelection(NetworkMode networkMode)
