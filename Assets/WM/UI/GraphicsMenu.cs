@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using WM;
 using WM.ArchiVR;
@@ -19,7 +17,7 @@ public class GraphicsMenu : MonoBehaviour
     {
         #region Get references to GameObjects.
 
-        ApplicationArchiVR = GameObject.Find("Application").GetComponent<ApplicationArchiVR>();
+        ApplicationArchiVR = UtilUnity.TryFindGameObject("Application").GetComponent<ApplicationArchiVR>();
 
         #endregion
 

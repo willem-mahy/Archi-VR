@@ -64,13 +64,11 @@ namespace WM
             //! Start is called before the first frame update
             void Start()
             {
-
             }
 
             //! Update is called once per frame
             void Update()
             {
-
             }
 
             //! Updates the button mapping labels to the pressed state of their corresponding button.

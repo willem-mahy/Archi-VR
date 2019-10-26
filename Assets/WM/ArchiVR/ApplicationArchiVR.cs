@@ -51,7 +51,7 @@ namespace WM
             // Reference to the avatar Prefabs. Drag Prefabs into this field in the Inspector.
             public List<GameObject> avatarPrefabs = new List<GameObject>();
 
-            // This script will simply instantiate the Prefab when the game starts.
+            //! Instantiates all available avatar prefabs.
             void InstanciateAllAvatarPrefabs()
             {
                 float x = -3;
@@ -70,29 +70,31 @@ namespace WM
             //! The avatar for the local player.
             public int AvatarIndex = 0;
 
+            //! Instanciates an avatar prefab to represent a newly connected client.
             public void ConnectClient(
-                string ip,
+                string clientIP,
                 int avatarIndex)
             {
                 lock (avatars)
                 {
-                    avatars[ip] = InstanciateAvatarPrefabs(avatarIndex);
+                    avatars[clientIP] = InstanciateAvatarPrefab(avatarIndex);
                 }
             }
 
-            public void DisconnectClient(string ip)
+            //! Destroys the avatar prefab for the given disconnected client.
+            public void DisconnectClient(string clientIP)
             {
                 lock (avatars)
                 {
-                    if (avatars.ContainsKey(ip))
+                    if (avatars.ContainsKey(clientIP))
                     {
-                        GameObject.Destroy(avatars[ip]);
-                        avatars.Remove(ip);
+                        GameObject.Destroy(avatars[clientIP]);
+                        avatars.Remove(clientIP);
                     }
                 }
             }
 
-
+            //! Updates the avatar type for the given connected client.
             public void SetClientAvatar(
                 string ip,
                 int avatarIndex)
@@ -106,7 +108,7 @@ namespace WM
                         Debug.LogWarning("SetClientAvatar(): No existing avatar found for client '" + ip + "'");
                     }
 
-                    avatars[ip] = InstanciateAvatarPrefabs(avatarIndex);
+                    avatars[ip] = InstanciateAvatarPrefab(avatarIndex);
 
                     if (oldAvatar != null)
                     {
@@ -115,7 +117,8 @@ namespace WM
                 }
             }
 
-            GameObject InstanciateAvatarPrefabs(int avatarIndex)
+            //! Instanciates the avatar type at given index, and returns a reference to the instance.
+            GameObject InstanciateAvatarPrefab(int avatarIndex)
             {
                 return Instantiate(
                         avatarPrefabs[avatarIndex],
@@ -123,7 +126,7 @@ namespace WM
                         Quaternion.identity);
             }
 
-
+            //! The avatar instanciations, mapped on the IP of the client they represent.
             public Dictionary<string, GameObject> avatars = new Dictionary<string, GameObject>();
 
             public Animator m_fadeAnimator;
@@ -320,9 +323,6 @@ namespace WM
             GameObject graphicsMenuPanel = null;
             GameObject networkMenuPanel = null;
             GameObject infoMenuPanel = null;
-
-            // The HUD menu text
-            string m_menuText = "";
 
             #endregion
 
@@ -631,8 +631,6 @@ namespace WM
                 {
                     GetActiveApplicationState().Update();
                 }
-
-                UpdateMenu();
             }
 
             #endregion
@@ -1127,50 +1125,16 @@ namespace WM
                     case MenuMode.Network:
                         SetActiveMenu(networkMenuPanel);
                         break;
+                    case MenuMode.Info:
+                        SetActiveMenu(infoMenuPanel);
+                        break;
                     case MenuMode.None:
                         SetActiveMenu(null);
                         break;
                     default:
-                        m_menuText += "Unsupported menu mode: " + menuMode.ToString();
+                        WM.Logger.Warning("ApplicationArchiVR.ToggleMenuMode(): Unsupported menu mode: " + menuMode.ToString());
                         break;
                 }
-            }
-
-            //! Updates the visibility and content of the HUD menu.
-            void UpdateMenu()
-            {
-                if (MenuMode.None == menuMode)
-                {
-                    return; // If menu is not shown, we need not update it.
-                }
-
-                // Reset HUD menu text.
-                m_menuText = "";
-
-                // Update HUD menu text. (if not 'None')
-                switch (menuMode)
-                {
-                    case MenuMode.DebugInput:
-                        UpdateMenuDebugInput();
-                        break;
-                    case MenuMode.DebugLog:
-                        break;
-                    case MenuMode.Graphics:
-                        break;
-                    case MenuMode.Network:
-                        break;
-                    case MenuMode.Info:
-                        UpdateMenuInfo();
-                        break;
-                    case MenuMode.None:
-                        break;
-                    default:
-                        m_menuText += "Unsupported menu mode: " + menuMode.ToString();
-                        break;
-                }
-
-                // Push HUD menu text to UI.
-                //m_centerEyeText.text = m_menuText;
             }
 
             //! Sets the avatar for the local player.
@@ -1186,98 +1150,6 @@ namespace WM
 
                 AvatarIndex = avatarIndex;
                 Client.SendCommand(new SetClientAvatarCommand(WM.Net.NetUtil.GetLocalIPAddress(), avatarIndex));
-            }
-
-            //!
-            void UpdateMenuDebugInput()
-            {
-                var controllerState = m_controllerInput.m_controllerState;
-
-                m_menuText += "\nInput mode: " + (m_controllerInput.m_inputMode == ControllerInput.InputMode.Unity ? "Unity" : "OVR");
-                m_menuText += "\n";
-                //text += "\nRemote connection: L=" + (lRemoteConnected ? "OK" : "NA") + " R=" + (rRemoteConnected ? "OK" : "NA");
-                m_menuText += "\nTouch controllers:" + (controllerState.lTouchConnected ? "L " : "") + " " + (controllerState.rTouchConnected ? " R" : "") +
-                        "(Active Controller: " + (controllerState.activeController == OVRInput.Controller.LTouch ? " L" : "") + (controllerState.activeController == OVRInput.Controller.RTouch ? " R" : "") + ")";
-                m_menuText += "\n";
-                m_menuText += "\nThumbstick: L(" + controllerState.lThumbStick.x + ", " + controllerState.lThumbStick.y + ") R(" + controllerState.rThumbStick.x + ", " + controllerState.rThumbStick.y + ")";
-                m_menuText += "\nL thumbstick:";
-                m_menuText += "\n Left: " + (controllerState.lThumbstickDirectionLeftDown ? "Down" : (controllerState.lThumbstickDirectionLeftPressed ? "Pressed" : ""));
-                m_menuText += "\n Right: " + (controllerState.lThumbstickDirectionRightDown ? "Down" : (controllerState.lThumbstickDirectionRightPressed ? "Pressed" : ""));
-                m_menuText += "\n Up: " + (controllerState.lThumbstickDirectionUpDown ? "Down" : (controllerState.lThumbstickDirectionUpPressed ? "Pressed" : ""));
-                m_menuText += "\n Down: " + (controllerState.lThumbstickDirectionDownDown ? "Down" : (controllerState.lThumbstickDirectionDownPressed ? "Pressed" : ""));
-
-                if (m_controllerInput.m_inputMode == ControllerInput.InputMode.Unity)
-                {
-                    m_menuText += "\nJoysticks:";
-                    foreach (var n in controllerState.joystickNames)
-                    {
-                        m_menuText += "\n -" + n;
-                    }
-                }
-                else
-                {
-                    // index finger trigger’s current position (range of 0.0f to 1.0f)
-
-                    // primary trigger (typically the Left) 
-                    //text += "\nPrimary IndexTrigger = " + OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) + (OVRInput.GetDown(OVRInput.RawButton.LIndexTrigger) ? " Down" : ""); ;
-                    // secondary trigger (typically the Right) 
-                    //text += "\nSecondary IndexTrigger = " + OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) + (OVRInput.GetDown(OVRInput.RawButton.RIndexTrigger) ? " Down" : ""); ;
-
-                    // left
-                    m_menuText += "\nL IndexTrigger = " + OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger) + (controllerState.rawButtonLIndexTriggerDown ? " Down" : "");
-
-                    // right
-                    m_menuText += "\nR IndexTrigger = " + OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger) + (controllerState.rawButtonRIndexTriggerDown ? " Down" : "");
-
-                    // returns true if the secondary gamepad button, typically “B”, is currently touched by the user.
-                    //text += "\nGetTouchTwo = " + OVRInput.Get(OVRInput.Touch.Two);   
-                }
-
-                m_menuText += "\n";
-
-                m_menuText += "\nButton 1 = " + (controllerState.button1Down ? "Down" : (controllerState.button1Pressed ? "Pressed" : ""));
-                m_menuText += "\nButton 2 = " + (controllerState.button2Down ? "Down" : (controllerState.button2Pressed ? "Pressed" : ""));
-                m_menuText += "\nButton 3 = " + (controllerState.button3Down ? "Down" : (controllerState.button3Pressed ? "Pressed" : ""));
-                m_menuText += "\nButton 4 = " + (controllerState.button4Down ? "Down" : (controllerState.button4Pressed ? "Pressed" : ""));
-                m_menuText += "\nButton 5 = " + (controllerState.button5Down ? "Down" : (controllerState.button5Pressed ? "Pressed" : ""));
-                m_menuText += "\nButton 6 = " + (controllerState.button6Down ? "Down" : (controllerState.button6Pressed ? "Pressed" : ""));
-                m_menuText += "\nButton 7 = " + (controllerState.button7Down ? "Down" : (controllerState.button7Pressed ? "Pressed" : ""));
-                m_menuText += "\nButton 8 = " + (controllerState.button8Down ? "Down" : (controllerState.button8Pressed ? "Pressed" : ""));
-                m_menuText += "\nButton Start = " + (controllerState.buttonStartDown ? "Down" : (controllerState.buttonStartPressed ? "Pressed" : ""));
-            }
-
-            //!
-            void UpdateMenuInfo()
-            {
-                var projectNames = GetProjectNames();
-
-                m_menuText += "\nProjects:";
-                foreach (var projectName in projectNames)
-                {
-                    m_menuText += "\n - " + projectName;
-                }
-
-                var activeProjectName = ActiveProjectName;
-
-                if (activeProjectName != null)
-                {
-                    m_menuText += "\n";
-                    m_menuText += "\n" + activeProjectName;
-
-                    var activePOI = ActivePOI;
-
-                    if (activePOI != null)
-                    {
-                        m_menuText += " > " + activePOI.name;
-                    }
-                }
-
-                m_menuText += "\n";
-                string myIP = NetUtil.GetLocalIPAddress();
-                m_menuText += "\nDevice IP: " + myIP;
-
-                m_menuText += "\n";
-                m_menuText += "\nversion: " + Version;
             }
 
             #endregion

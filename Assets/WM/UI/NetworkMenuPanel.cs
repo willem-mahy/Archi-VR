@@ -39,7 +39,7 @@ namespace WM.ArchiVR.UI
         {
             #region Get references to GameObjects.
 
-            ApplicationArchiVR = GameObject.Find("Application").GetComponent<ApplicationArchiVR>();
+            ApplicationArchiVR = UtilUnity.TryFindGameObject("Application").GetComponent<ApplicationArchiVR>();
 
             #endregion
 

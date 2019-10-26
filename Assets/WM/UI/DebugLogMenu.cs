@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using WM;
 using WM.ArchiVR;
 
 public class DebugLogMenu : MonoBehaviour
@@ -15,8 +16,8 @@ public class DebugLogMenu : MonoBehaviour
     {
         #region Get references to UI components.
 
-        ApplicationArchiVR = GameObject.Find("Application").GetComponent<ApplicationArchiVR>();
-        Text = GameObject.Find("DebugLogMenu_LogText").GetComponent<Text>();
+        ApplicationArchiVR = UtilUnity.TryFindGameObject("Application").GetComponent<ApplicationArchiVR>();
+        Text = UtilUnity.TryFindGameObject("DebugLogMenu_LogText").GetComponent<Text>();
 
         #endregion
     }
