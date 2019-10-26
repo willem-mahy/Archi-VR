@@ -43,6 +43,8 @@ namespace WM.ArchiVR.UI
 
             #endregion
 
+            synchronizingUI = true;
+
             switch (ApplicationArchiVR.NetworkMode)
             {
                 case NetworkMode.Standalone:
@@ -56,6 +58,10 @@ namespace WM.ArchiVR.UI
                     break;
             }
 
+            IPValueText.text = NetUtil.GetLocalIPAddress();
+
+            synchronizingUI = false;
+
             UpdateUIToNetworkModeSelection(ApplicationArchiVR.NetworkMode); // If startup mode is Standalone, the UI is not updated accordingly, so force that explicitely here...
         }
 
@@ -64,8 +70,6 @@ namespace WM.ArchiVR.UI
         {
             synchronizingUI = true;
             
-            IPValueText.text = NetUtil.GetLocalIPAddress();
-
             if (ApplicationArchiVR.NetworkMode == NetworkMode.Server)
             {
                 ServerStatusValueText.text = ApplicationArchiVR.Server.Status;
@@ -110,7 +114,10 @@ namespace WM.ArchiVR.UI
                 return;
             }
 
-            ApplicationArchiVR.QueueCommand(new InitNetworkCommand(networkMode));
+            if (ApplicationArchiVR)
+            {
+                ApplicationArchiVR.QueueCommand(new InitNetworkCommand(networkMode));
+            }
         }
         
         void UpdateUIToNetworkModeSelection(NetworkMode networkMode)
