@@ -143,6 +143,8 @@ namespace WM
 
             public GameObject m_rightHandAnchor;
 
+            public GameObject SelectionVisualizer;
+
             #endregion
 
             public TeleportCommand TeleportCommand { get; set; }
@@ -368,20 +370,8 @@ namespace WM
 
             #region GameObject overrides
 
-
-            //! Start is called before the first frame update
-            void Start()
+            public void OnEnable()
             {
-                if (Application.isEditor)
-                {
-                    HudMenu.AnchorEnabled = true;
-                }
-
-                //InstanciateAllAvatarPrefabs();
-
-                //QueueCommand(new InitNetworkCommand(StartupNetworkMode));
-                new InitNetworkCommand(StartupNetworkMode).Execute(this);
-
                 #region Automatically get build version
 
                 // Get from assembly meta info.
@@ -396,9 +386,23 @@ namespace WM
                 //Console.WriteLine("Build   : {0} = {1}", assemblyVersion.Build, buildDate.ToShortDateString());
                 //Console.WriteLine("Revision: {0} = {1}", assemblyVersion.Revision, buildDate.ToLongTimeString());
                 Version = buildDate.ToShortDateString() + " " + buildDate.ToLongTimeString();
-                Debug.Log("Application version: " + Version);
+                WM.Logger.Debug("Application version: " + Version);
 
                 #endregion
+            }
+
+            //! Start is called before the first frame update
+            void Start()
+            {
+                if (Application.isEditor)
+                {
+                    HudMenu.AnchorEnabled = true;
+                }
+
+                //InstanciateAllAvatarPrefabs();
+
+                //QueueCommand(new InitNetworkCommand(StartupNetworkMode));
+                new InitNetworkCommand(StartupNetworkMode).Execute(this);
 
                 #region Get handles to game objects
 

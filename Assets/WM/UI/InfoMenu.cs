@@ -18,7 +18,7 @@ public class InfoMenu : MonoBehaviour
 
         if (VersionText == null)
         {
-            var versionTextGO = UtilUnity.TryFindGameObject("InfoMenu_VersionText");
+            var versionTextGO = UtilUnity.TryFindGameObject("InfoMenu_VersionValueText");
 
             if (versionTextGO != null)
             {
@@ -32,10 +32,5 @@ public class InfoMenu : MonoBehaviour
         {
             VersionText.text = ApplicationArchiVR.Version;
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {        
     }
 }
