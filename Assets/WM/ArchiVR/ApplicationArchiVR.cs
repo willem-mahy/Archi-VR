@@ -366,6 +366,27 @@ namespace WM
 
             private GameObject Avatar;
 
+            private List<GameObject> selectionTargets = new List<GameObject>();
+
+            private bool HasSelectionTargets()
+            {
+                return selectionTargets.Count != 0;
+            }
+
+            public void AddSelectionTarget(GameObject selectionTarget)
+            {
+                selectionTargets.Add(selectionTarget);
+
+                SelectionVisualizer.SetActive(HasSelectionTargets());
+            }
+
+            public void RemoveSelectionTarget(GameObject selectionTarget)
+            {
+                selectionTargets.Add(selectionTarget);
+
+                SelectionVisualizer.SetActive(HasSelectionTargets());
+            }
+
             #endregion Variables
 
             #region GameObject overrides
@@ -507,6 +528,8 @@ namespace WM
                 SetActiveImmersionMode(DefaultImmersionModeIndex);
 
                 SetActiveProject(0);
+
+                SelectionVisualizer.SetActive(HasSelectionTargets());
             }
 
             private object commandQueueLock = new object();
