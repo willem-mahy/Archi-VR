@@ -27,12 +27,22 @@ public class GraphicsMenu : MonoBehaviour
 
         if (QualityDropdown == null)
         {
-            QualityDropdown = GameObject.Find("GraphicsMenu_QualityDropdown").GetComponent<Dropdown>();
+            var qualityDropdownGO = UtilUnity.TryFindGameObject("GraphicsMenu_QualityDropdown");
+
+            if (qualityDropdownGO != null)
+            {
+                QualityDropdown = qualityDropdownGO.GetComponent<Dropdown>();
+            }
         }
 
         if (ShowFpsToggle == null)
         {
-            ShowFpsToggle = GameObject.Find("GraphicsMenu_ShowFpsToggle").GetComponent<Toggle>();
+            var showFpsToggleGO = UtilUnity.TryFindGameObject("GraphicsMenu_ShowFpsToggle");
+
+            if (showFpsToggleGO != null)
+            {
+                ShowFpsToggle = showFpsToggleGO.GetComponent<Toggle>();
+            }
         }
 
         #endregion
@@ -54,14 +64,28 @@ public class GraphicsMenu : MonoBehaviour
 
         #endregion
 
-        ShowFpsToggle.isOn = ApplicationArchiVR.FpsPanelHUD.activeSelf;
+        if (ShowFpsToggle != null)
+        {
+            ShowFpsToggle.isOn = ApplicationArchiVR.FpsPanelHUD.activeSelf;
+        }
 
-        QualityDropdown.value = QualitySettings.GetQualityLevel();
+        if (QualityDropdown != null)
+        {
+            QualityDropdown.value = QualitySettings.GetQualityLevel();
+        }
     }
 
     // Update is called once per frame
     void Update()
     {   
+    }
+
+    void OnEnable()
+    {
+        if (QualityDropdown != null)
+        {
+            QualityDropdown.Select();
+        }
     }
 
     #region Quality

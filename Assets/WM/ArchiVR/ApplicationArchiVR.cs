@@ -18,8 +18,15 @@ namespace WM
         {
             #region Variables
 
+            #region Startup options
+            
             //! The startup network mode. (Default: Standalone)
             public NetworkMode StartupNetworkMode = NetworkMode.Standalone;
+
+            //! FPS UI visibility. (Default: false)
+            public bool StartupShowFps = false;
+
+            #endregion
 
             //! The current network mode.
             public NetworkMode NetworkMode = NetworkMode.Standalone; // TODO: make private...
@@ -124,8 +131,6 @@ namespace WM
             public HUDMenu HudMenu;
 
             public GameObject FpsPanelHUD;
-
-            public UnityEngine.UI.Text FpsTextHUD;
 
             public GameObject m_ovrCameraRig;
 
@@ -430,17 +435,15 @@ namespace WM
 
                 SetActiveMenu(null);
 
-                // FPS panel attached as HUD menu.
+                // Get reference to FPS panel.
                 if (FpsPanelHUD == null)
                 {
-                    FpsPanelHUD = GameObject.Find("FPSPanel");
+                    FpsPanelHUD = UtilUnity.TryFindGameObject("FPSPanel");
                 }
-
-                if (FpsTextHUD == null)
+                if (FpsPanelHUD != null)
                 {
-                    FpsTextHUD = GameObject.Find("FPSText").GetComponent<UnityEngine.UI.Text>();
+                    FpsPanelHUD.SetActive(StartupShowFps);
                 }
-
 
                 // Left controller.
 
