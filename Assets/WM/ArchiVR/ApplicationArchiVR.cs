@@ -26,6 +26,9 @@ namespace WM
             //! FPS UI visibility. (Default: false)
             public bool StartupShowFps = false;
 
+            // Menu mode (Default: None)
+            public MenuMode StartupMenuMode = MenuMode.None;
+
             #endregion
 
             //! The current network mode.
@@ -303,7 +306,7 @@ namespace WM
 
             #region HUD menu
 
-            enum MenuMode
+            public enum MenuMode
             {
                 None = 0,
                 Network, 
@@ -368,6 +371,13 @@ namespace WM
 
             private List<GameObject> selectionTargets = new List<GameObject>();
 
+            private void UpdateSelectionVisualizerVisibility()
+            {
+                WM.Logger.Warning("UpdateSelectionVisualizerVisibility() -> " + HasSelectionTargets());
+
+                SelectionVisualizer.SetActive(HasSelectionTargets());
+            }
+
             private bool HasSelectionTargets()
             {
                 return selectionTargets.Count != 0;
@@ -375,16 +385,20 @@ namespace WM
 
             public void AddSelectionTarget(GameObject selectionTarget)
             {
+                WM.Logger.Warning("AddSelectionTarget(" + selectionTarget.name + ")");
+
                 selectionTargets.Add(selectionTarget);
 
-                SelectionVisualizer.SetActive(HasSelectionTargets());
+                UpdateSelectionVisualizerVisibility();              
             }
 
             public void RemoveSelectionTarget(GameObject selectionTarget)
             {
-                selectionTargets.Add(selectionTarget);
+                WM.Logger.Warning("RemoveSelectionTarget(" + selectionTarget.name + ")");
 
-                SelectionVisualizer.SetActive(HasSelectionTargets());
+                selectionTargets.Remove(selectionTarget);
+
+                UpdateSelectionVisualizerVisibility();
             }
 
             #endregion Variables
@@ -415,50 +429,60 @@ namespace WM
             //! Start is called before the first frame update
             void Start()
             {
-                if (Application.isEditor)
-                {
-                    HudMenu.AnchorEnabled = true;
-                }
-
-                //InstanciateAllAvatarPrefabs();
-
-                //QueueCommand(new InitNetworkCommand(StartupNetworkMode));
-                new InitNetworkCommand(StartupNetworkMode).Execute(this);
-
                 #region Get handles to game objects
 
                 if (Avatar == null)
-                    Avatar = GameObject.Find("Avatar");
+                    Avatar = UtilUnity.TryFindGameObject("Avatar");
 
                 if (Sun == null)
-                    Sun = GameObject.Find("Sun");
+                    Sun = UtilUnity.TryFindGameObject("Sun");
 
                 if (m_ovrCameraRig == null)
-                    m_ovrCameraRig = GameObject.Find("OVRCameraRig");
+                    m_ovrCameraRig = UtilUnity.TryFindGameObject("OVRCameraRig");
 
                 if (m_centerEyeAnchor == null)
-                    m_centerEyeAnchor = GameObject.Find("CenterEyeAnchor");
+                    m_centerEyeAnchor = UtilUnity.TryFindGameObject("CenterEyeAnchor");
 
                 if (m_leftHandAnchor == null)
-                    m_leftHandAnchor = GameObject.Find("LeftHandAnchor");
+                    m_leftHandAnchor = UtilUnity.TryFindGameObject("LeftHandAnchor");
 
                 if (m_rightHandAnchor == null)
-                    m_rightHandAnchor = GameObject.Find("RightHandAnchor");
+                    m_rightHandAnchor = UtilUnity.TryFindGameObject("RightHandAnchor");
 
-                m_centerEyeCanvas = GameObject.Find("CenterEyeCanvas");
-                
-                debugInputMenuPanel = GameObject.Find("DebugInputMenuPanel");
+                if (m_centerEyeCanvas == null)
+                {
+                    m_centerEyeCanvas = UtilUnity.TryFindGameObject("CenterEyeCanvas");
+                }
+
+                if (debugInputMenuPanel == null)
+                {
+                    debugInputMenuPanel = UtilUnity.TryFindGameObject("DebugInputMenuPanel");
+                }
                 menus.Add(debugInputMenuPanel);
-                debugLogMenuPanel = GameObject.Find("DebugLogMenuPanel");
-                menus.Add(debugLogMenuPanel);
-                graphicsMenuPanel = GameObject.Find("GraphicsMenuPanel");
-                menus.Add(graphicsMenuPanel);
-                networkMenuPanel = GameObject.Find("NetworkMenuPanel");
-                menus.Add(networkMenuPanel);
-                infoMenuPanel = GameObject.Find("InfoMenuPanel");
-                menus.Add(infoMenuPanel);
 
-                SetActiveMenu(null);
+                if (debugLogMenuPanel == null)
+                {
+                    debugLogMenuPanel = UtilUnity.TryFindGameObject("DebugLogMenuPanel");
+                }
+                menus.Add(debugLogMenuPanel);
+
+                if (graphicsMenuPanel == null)
+                {
+                    graphicsMenuPanel = UtilUnity.TryFindGameObject("GraphicsMenuPanel");
+                }
+                menus.Add(graphicsMenuPanel);
+
+                if (networkMenuPanel == null)
+                {
+                    networkMenuPanel = UtilUnity.TryFindGameObject("NetworkMenuPanel");
+                }
+                menus.Add(networkMenuPanel);
+
+                if (infoMenuPanel == null)
+                {
+                    infoMenuPanel = UtilUnity.TryFindGameObject("InfoMenuPanel");
+                }
+                menus.Add(infoMenuPanel);
 
                 // Get reference to FPS panel.
                 if (FpsPanelHUD == null)
@@ -529,7 +553,19 @@ namespace WM
 
                 SetActiveProject(0);
 
-                SelectionVisualizer.SetActive(HasSelectionTargets());
+                UpdateSelectionVisualizerVisibility();
+
+                if (Application.isEditor)
+                {
+                    HudMenu.AnchorEnabled = true;
+                }
+
+                SetMenuMode(StartupMenuMode);
+
+                //InstanciateAllAvatarPrefabs();
+
+                //QueueCommand(new InitNetworkCommand(StartupNetworkMode));
+                new InitNetworkCommand(StartupNetworkMode).Execute(this);
             }
 
             private object commandQueueLock = new object();
@@ -1131,12 +1167,19 @@ namespace WM
             //! Activates the next menu mode.
             void ToggleMenuMode()
             {
+                var newMenuMode = (MenuMode)UtilIterate.MakeCycle((int)menuMode + 1, 0, menus.Count);
+
+                SetMenuMode(newMenuMode);
+            }
+
+            void SetMenuMode(MenuMode newMenuMode)
+            {
                 if (menuMode == MenuMode.None)
                 {
-                    HudMenu.UpdateAnchoring(); // Re-anchor the HUD menu to be in front of cam.
+                    HudMenu.UpdateAnchoring(); // Re-anchor the HUD menu to be in front of cam, when leaving None mode.
                 }
 
-                menuMode = (MenuMode)UtilIterate.MakeCycle((int)menuMode + 1, 0, menus.Count);
+                menuMode = newMenuMode;
 
                 switch (menuMode)
                 {
@@ -1162,6 +1205,8 @@ namespace WM
                         WM.Logger.Warning("ApplicationArchiVR.ToggleMenuMode(): Unsupported menu mode: " + menuMode.ToString());
                         break;
                 }
+
+                HudMenu.gameObject.SetActive(menuMode != MenuMode.None);
             }
 
             //! Sets the avatar for the local player.
