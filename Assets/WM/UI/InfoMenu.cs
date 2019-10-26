@@ -5,16 +5,26 @@ using WM.ArchiVR;
 
 public class InfoMenu : MonoBehaviour
 {
+    #region Variables
+
     public ApplicationArchiVR ApplicationArchiVR;
 
     public Text VersionText;
-    
+
+    #endregion
+
+    #region GameObject overrides
+
     // Start is called before the first frame update
     void Start()
     {
-        #region Get references to UI components.
+        #region Get references to GameObjects.
 
         ApplicationArchiVR = UtilUnity.TryFindGameObject("Application").GetComponent<ApplicationArchiVR>();
+
+        #endregion
+
+        #region Get references to UI components.
 
         if (VersionText == null)
         {
@@ -33,4 +43,6 @@ public class InfoMenu : MonoBehaviour
             VersionText.text = ApplicationArchiVR.Version;
         }
     }
+
+    #endregion
 }
