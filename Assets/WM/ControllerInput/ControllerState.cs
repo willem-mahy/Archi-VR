@@ -286,8 +286,11 @@ namespace WM
             if (Input.GetKey(KeyCode.DownArrow)) rThumbStick.y -= 1;
             if (Input.GetKey(KeyCode.UpArrow)) rThumbStick.y += 1;
 
-            if (Input.GetKeyDown(KeyCode.Plus)) rThumbstickPressed = true;
-            if (Input.GetMouseButtonDown(2)) rThumbstickPressed = true;
+            if (Input.GetKeyDown(KeyCode.Plus)) rThumbstickDown = true;
+            if (Input.GetKey(KeyCode.Plus)) rThumbstickPressed = true; 
+            
+            if (Input.GetMouseButtonDown(2)) rThumbstickDown = true;
+            if (Input.GetMouseButton(2)) rThumbstickPressed = true;
         }
     }
 }

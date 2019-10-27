@@ -1001,6 +1001,10 @@ namespace WM
 
             private TrackingSpaceManipulationMode trackingSpaceManipulationMode = TrackingSpaceManipulationMode.None;
 
+            //! Whether or not translating tracking space up/down is enabled (default: false)
+            public bool EnableTrackingSpaceTranslationUpDown = false;
+
+
             //!
             public void UpdateTrackingSpace()
             {
@@ -1027,7 +1031,7 @@ namespace WM
                 float magnitudeRotate = controllerState.lThumbStick.x;
 
                 // Translate Up/Down using left thumbstick Y.
-                float magnitudeUp = controllerState.lThumbStick.y;
+                float magnitudeUp = EnableTrackingSpaceTranslationUpDown ? controllerState.lThumbStick.y : 0.0f;
 
                 // Update maquette manipulationMode
                 bool manipulating = (Mathf.Abs(magnitudeRotate) > 0.1f) || (Mathf.Abs(magnitudeUp) > 0.1f);

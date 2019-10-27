@@ -60,6 +60,13 @@ namespace WM
                     return;
                 }
 
+                // Toggle Enable/Disable translating tracking space Up/Down using left thumbstick click.
+                if (m_application.m_controllerInput.m_controllerState.lThumbstickDown)
+                {
+                    m_application.EnableTrackingSpaceTranslationUpDown = !m_application.EnableTrackingSpaceTranslationUpDown;
+                    InitButtonMappingUI();
+                }
+
                 // By default, do not show the boundary.  We will set it visible in Fly() and UpdateTrackingSpace() below, if needed.
                 OVRManager.boundary.SetVisible(false);
 
@@ -121,38 +128,55 @@ namespace WM
                 var isEditor = Application.isEditor;
 
                 // Left controller
-                if (m_application.leftControllerButtonMapping != null)
                 {
-                    m_application.leftControllerButtonMapping.textLeftHandTrigger.text = "GFX Quality";
+                    var buttonMapping = m_application.leftControllerButtonMapping;
 
-                    m_application.leftControllerButtonMapping.textLeftIndexTrigger.text = "Verander schaal" + (isEditor ? " (R)" : "");
+                    if (buttonMapping != null)
+                    {
+                        buttonMapping.textLeftHandTrigger.text = "GFX Quality";
 
-                    m_application.leftControllerButtonMapping.textButtonStart.text = "Toggle menu" + (isEditor ? " (F11)" : "");
+                        buttonMapping.textLeftIndexTrigger.text = "Verander schaal" + (isEditor ? " (R)" : "");
 
-                    m_application.leftControllerButtonMapping.textButtonX.text = "Vorig project" + (isEditor ? " (F1)" : "");
-                    m_application.leftControllerButtonMapping.textButtonY.text = "Volgend project" + (isEditor ? " (F2)" : "");
+                        buttonMapping.textButtonStart.text = "Toggle menu" + (isEditor ? " (F11)" : "");
 
-                    m_application.leftControllerButtonMapping.textLeftThumbUp.text = "Beweeg omhoog" + (isEditor ? " (Z)" : "");
-                    m_application.leftControllerButtonMapping.textLeftThumbDown.text = "Beweeg omlaag" + (isEditor ? " (S)" : "");
-                    m_application.leftControllerButtonMapping.textLeftThumbLeft.text = "< Tracking " + (isEditor ? " (Q)" : "");
-                    m_application.leftControllerButtonMapping.textLeftThumbRight.text = "Tracking >" + (isEditor ? " (D)" : "");
+                        buttonMapping.textButtonX.text = "Vorig project" + (isEditor ? " (F1)" : "");
+                        buttonMapping.textButtonY.text = "Volgend project" + (isEditor ? " (F2)" : "");
+
+                        if (m_application.EnableTrackingSpaceTranslationUpDown)
+                        {
+                            buttonMapping.textLeftThumbUp.text = "Beweeg omhoog" + (isEditor ? " (Z)" : "");
+                            buttonMapping.textLeftThumbDown.text = "Beweeg omlaag" + (isEditor ? " (S)" : "");
+                        }
+                        else
+                        {
+                            buttonMapping.textLeftThumbUp.text = "";
+                            buttonMapping.textLeftThumbDown.text = "";
+                        }
+
+                        buttonMapping.textLeftThumbLeft.text = "< Tracking " + (isEditor ? " (Q)" : "");
+                        buttonMapping.textLeftThumbRight.text = "Tracking >" + (isEditor ? " (D)" : "");
+                    }
                 }
 
                 // Right controller
-                if (m_application.rightControllerButtonMapping != null)
                 {
-                    m_application.rightControllerButtonMapping.textRightIndexTrigger.text = "";
-                    m_application.rightControllerButtonMapping.textRightHandTrigger.text = "";
+                    var buttonMapping = m_application.rightControllerButtonMapping;
 
-                    m_application.rightControllerButtonMapping.textButtonOculus.text = "Exit" + (isEditor ? " ()" : "");
+                    if (buttonMapping != null)
+                    {
+                        buttonMapping.textRightIndexTrigger.text = "";
+                        buttonMapping.textRightHandTrigger.text = "";
 
-                    m_application.rightControllerButtonMapping.textButtonA.text = "Vorige locatie" + (isEditor ? " (F3)" : "");
-                    m_application.rightControllerButtonMapping.textButtonB.text = "Volgende locatie" + (isEditor ? " (F4)" : "");
+                        buttonMapping.textButtonOculus.text = "Exit" + (isEditor ? " ()" : "");
 
-                    m_application.rightControllerButtonMapping.textRightThumbUp.text = "Beweeg vooruit" + (isEditor ? " (ArrowUp)" : "");
-                    m_application.rightControllerButtonMapping.textRightThumbDown.text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
-                    m_application.rightControllerButtonMapping.textRightThumbLeft.text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
-                    m_application.rightControllerButtonMapping.textRightThumbRight.text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
+                        buttonMapping.textButtonA.text = "Vorige locatie" + (isEditor ? " (F3)" : "");
+                        buttonMapping.textButtonB.text = "Volgende locatie" + (isEditor ? " (F4)" : "");
+
+                        buttonMapping.textRightThumbUp.text = "Beweeg vooruit" + (isEditor ? " (ArrowUp)" : "");
+                        buttonMapping.textRightThumbDown.text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
+                        buttonMapping.textRightThumbLeft.text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
+                        buttonMapping.textRightThumbRight.text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
+                    }
                 }
             }
         }
