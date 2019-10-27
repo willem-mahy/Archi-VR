@@ -41,6 +41,8 @@ namespace WM
                 }
             }
 
+            #region GameObject overrides
+
             // Start is called before the first frame update
             void Start()
             {
@@ -60,6 +62,16 @@ namespace WM
             void Update()
             {
 
+            }
+
+            #endregion
+
+            //! Gets the picking ray, expressed in world space.
+            public Ray GetRay()
+            {
+                return new Ray(
+                    gameObject.transform.position,
+                    gameObject.transform.forward);
             }
 
             private Color defaultColor = new Color(1, 0, 0, 0.3f); // Default: 30% opaque red.
