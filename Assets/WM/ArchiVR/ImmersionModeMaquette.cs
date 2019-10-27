@@ -113,60 +113,65 @@ namespace WM
 
                 #region Maquette manipulation.
 
-                var cs = m_application.m_controllerInput.m_controllerState;
-
-                float magnitudeRotateMaquette = cs.lThumbStick.x;
-                float magnitudeTranslateMaquette = cs.lThumbStick.y;
-
-                // Update maquette manipulationMode
-                bool manipulating = (Mathf.Abs(magnitudeRotateMaquette) > 0.1f) || (Mathf.Abs(magnitudeTranslateMaquette) > 0.1f);
-                if (maquetteManipulationMode == MaquetteManipulationMode.None)
+                // Clients cannot manipulate model!
+                if (m_application.NetworkMode != Net.NetworkMode.Client)
                 {
-                    if (manipulating)
+                    var cs = m_application.m_controllerInput.m_controllerState;
+
+                    float magnitudeRotateMaquette = cs.lThumbStick.x;
+                    float magnitudeTranslateMaquette = cs.lThumbStick.y;
+
+                    // Update maquette manipulationMode
+                    bool manipulating = (Mathf.Abs(magnitudeRotateMaquette) > 0.1f) || (Mathf.Abs(magnitudeTranslateMaquette) > 0.1f);
+                    if (maquetteManipulationMode == MaquetteManipulationMode.None)
                     {
-                        maquetteManipulationMode = (Mathf.Abs(magnitudeRotateMaquette) > Mathf.Abs(magnitudeTranslateMaquette))
-                            ? MaquetteManipulationMode.Rotate
-                            : MaquetteManipulationMode.Translate;
+                        if (manipulating)
+                        {
+                            maquetteManipulationMode = (Mathf.Abs(magnitudeRotateMaquette) > Mathf.Abs(magnitudeTranslateMaquette))
+                                ? MaquetteManipulationMode.Rotate
+                                : MaquetteManipulationMode.Translate;
+                        }
+                        else
+                            maquetteManipulationMode = MaquetteManipulationMode.None;
                     }
                     else
-                        maquetteManipulationMode = MaquetteManipulationMode.None;
-                }
-                else
-                {
-                    if (!manipulating)
-                        maquetteManipulationMode = MaquetteManipulationMode.None;
-                }
+                    {
+                        if (!manipulating)
+                            maquetteManipulationMode = MaquetteManipulationMode.None;
+                    }
 
-                if (maquetteManipulationMode == MaquetteManipulationMode.Translate)
-                {
-                    // Translate Up/Down
-                    var maquetteMoveSpeed = 1.0f;
+                    if (maquetteManipulationMode == MaquetteManipulationMode.Translate)
+                    {
+                        // Translate Up/Down
+                        var maquetteMoveSpeed = 1.0f;
 
-                    m_maquetteOffset = Mathf.Clamp(m_maquetteOffset + magnitudeTranslateMaquette * maquetteMoveSpeed * Time.deltaTime, -1.0f, 0.6f);
+                        m_maquetteOffset = Mathf.Clamp(m_maquetteOffset + magnitudeTranslateMaquette * maquetteMoveSpeed * Time.deltaTime, -1.0f, 0.6f);
+                    }
+
+                    if (maquetteManipulationMode == MaquetteManipulationMode.Rotate)
+                    {
+                        // Rotate around 'up' vector.
+                        var maquetteRotateSpeed = 60.0f;
+
+                        m_maquetteRotation += magnitudeRotateMaquette * maquetteRotateSpeed * Time.deltaTime;
+                    }
+                    UpdateModelLocationAndScale();
                 }
-
-                if (maquetteManipulationMode == MaquetteManipulationMode.Rotate)
-                {
-                    // Rotate around 'up' vector.
-                    var maquetteRotateSpeed = 60.0f;
-
-                    m_maquetteRotation += magnitudeRotateMaquette * maquetteRotateSpeed * Time.deltaTime;
-                }
-                UpdateModelLocationAndScale();
 
                 #endregion
 
-                var pickRay = m_application.RPickRay.GetRay();
+                #region Updated picked model layer
 
-                float minHitDistance = float.NaN;
-
-                pickedLayer = null;
-
-                var recursive = true;
-
-                foreach (var layer in m_application.GetModelLayers())
+                // Clients cannot pick model layers!
+                if (m_application.NetworkMode != Net.NetworkMode.Client)
                 {
-                    if (recursive)
+                    var pickRay = m_application.RPickRay.GetRay();
+
+                    float minHitDistance = float.NaN;
+
+                    pickedLayer = null;
+
+                    foreach (var layer in m_application.GetModelLayers())
                     {
                         PickRecursively(
                             layer,
@@ -175,44 +180,11 @@ namespace WM
                             ref pickedLayer,
                             ref minHitDistance);
                     }
-                    else
-                    {
-                        foreach (Transform geometryTransform in layer.transform)
-                        {
-                            var geometryCollider = geometryTransform.GetComponent<Collider>();
 
-                            if (geometryCollider)
-                            {
-                                float hitDistance = -1;
-
-                                if (geometryCollider.bounds.IntersectRay(pickRay, out hitDistance))
-                                {
-                                    if (float.IsNaN(minHitDistance))
-                                    {
-                                        minHitDistance = hitDistance;
-                                        pickedLayer = layer;
-                                    }
-                                    else if (hitDistance < minHitDistance)
-                                    {
-                                        minHitDistance = hitDistance;
-                                        pickedLayer = layer;
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    m_application.RPickRay.HitDistance = minHitDistance;
                 }
 
-                m_application.RPickRay.HitDistance = minHitDistance;
-
-                /*
-                Debug.DrawRay(
-                    pickRay.origin,
-                    pickRay.direction * System.Math.Max(200, minHitDistance),
-                    Color.white,
-                    0.0f, // duration
-                    true); // depthTest
-                */
+                #endregion
             }
 
             private void PickRecursively(

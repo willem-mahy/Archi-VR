@@ -41,7 +41,7 @@ namespace WM
             // Whether to show the GFX quality level and FPS as HUD UI.
             private bool enableDebugGFX = false;
 
-            #region Network components
+            #region Network
 
             //! The current network mode.
             public NetworkMode NetworkMode = NetworkMode.Standalone; // TODO: make private...
@@ -51,6 +51,14 @@ namespace WM
 
             // The multiplayer client.
             public Client Client;
+
+            #region Shared Tracking space
+
+            public bool SharedTrackingSpace = false;
+
+            public GameObject SharedTrackingSpaceReference;
+
+            #endregion
 
             #endregion
 
@@ -939,6 +947,11 @@ namespace WM
             //!
             public void Fly()
             {
+                if ((NetworkMode == NetworkMode.Client) && (SharedTrackingSpace == true))
+                {
+                    return; // Only server can manipulate tracking space!
+                }
+
                 #region Compute translation offset vector.
 
                 // Translate Forward/Backward using right thumbstick Y.
@@ -976,7 +989,7 @@ namespace WM
 
                 #endregion
 
-                // Translate trasking space.
+                // Translate tracking space.
                 if (offset != Vector3.zero)
                 {
                     OVRManager.boundary.SetVisible(true);
@@ -988,6 +1001,11 @@ namespace WM
             //!
             public void UpdateTrackingSpace()
             {
+                if ((NetworkMode == NetworkMode.Client) && (SharedTrackingSpace == true))
+                {
+                    return; // Only server can manipulate tracking space!
+                }
+
                 if (m_ovrCameraRig == null)
                 {
                     return; // We have no handle to the tracking space.
