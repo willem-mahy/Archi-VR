@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using WM.ArchiVR.Command;
 
 namespace WM
 {
@@ -11,10 +12,16 @@ namespace WM
             // The surroundings in which the maquette is previewed
             private GameObject m_maquettePreviewContext = null;
 
-            // The translational (up) distance.
+            // The maquette translational manipulation speed.
+            float maquetteMoveSpeed = 1.0f;
+
+            // The maquette rotational manipulation speed.
+            float maquetteRotateSpeed = 60.0f;
+
+            // The translational offset distance along the up vector.
             private float m_maquetteOffset = 0;
 
-            // The maquette rotational offset.
+            // The rotational offset angle around the up vector.
             private float m_maquetteRotation = 0;
 
             // The layer currently being picked.
@@ -27,11 +34,7 @@ namespace WM
                 Rotate
             };
 
-            private MaquetteManipulationMode maquetteManipulationMode
-            {
-                get;
-                set;
-            } = MaquetteManipulationMode.None;
+            private MaquetteManipulationMode maquetteManipulationMode = MaquetteManipulationMode.None;
 
             #endregion
 
@@ -121,8 +124,10 @@ namespace WM
                     float magnitudeRotateMaquette = cs.lThumbStick.x;
                     float magnitudeTranslateMaquette = cs.lThumbStick.y;
 
-                    // Update maquette manipulationMode
+                    #region Update MaquetteManipulationMode
+
                     bool manipulating = (Mathf.Abs(magnitudeRotateMaquette) > 0.1f) || (Mathf.Abs(magnitudeTranslateMaquette) > 0.1f);
+                   
                     if (maquetteManipulationMode == MaquetteManipulationMode.None)
                     {
                         if (manipulating)
@@ -140,22 +145,38 @@ namespace WM
                             maquetteManipulationMode = MaquetteManipulationMode.None;
                     }
 
-                    if (maquetteManipulationMode == MaquetteManipulationMode.Translate)
-                    {
-                        // Translate Up/Down
-                        var maquetteMoveSpeed = 1.0f;
+                    #endregion
 
-                        m_maquetteOffset = Mathf.Clamp(m_maquetteOffset + magnitudeTranslateMaquette * maquetteMoveSpeed * Time.deltaTime, -1.0f, 0.6f);
+                    float positionOffset = m_maquetteOffset;
+                    float rotationOffset = m_maquetteRotation;
+
+                    switch (maquetteManipulationMode)
+                    {
+                        case MaquetteManipulationMode.Translate:
+                            {
+                                positionOffset = Mathf.Clamp(m_maquetteOffset + magnitudeTranslateMaquette * maquetteMoveSpeed * Time.deltaTime, -1.0f, 0.6f);
+                            }
+                            break;
+                        case MaquetteManipulationMode.Rotate:
+                            {
+                                rotationOffset += magnitudeRotateMaquette * maquetteRotateSpeed * Time.deltaTime;
+                            }
+                            break;
                     }
 
-                    if (maquetteManipulationMode == MaquetteManipulationMode.Rotate)
+                    if (maquetteManipulationMode != MaquetteManipulationMode.None)
                     {
-                        // Rotate around 'up' vector.
-                        var maquetteRotateSpeed = 60.0f;
+                        var command = new SetModelLocationCommand(positionOffset, rotationOffset);
 
-                        m_maquetteRotation += magnitudeRotateMaquette * maquetteRotateSpeed * Time.deltaTime;
+                        if (m_application.NetworkMode == Net.NetworkMode.Server)
+                        {
+                            m_application.Server.BroadcastCommand(command);
+                        }
+                        else
+                        {
+                            command.Execute(m_application);
+                        }
                     }
-                    UpdateModelLocationAndScale();
                 }
 
                 #endregion
@@ -185,6 +206,15 @@ namespace WM
                 }
 
                 #endregion
+            }
+
+            public void SetModelLocation(
+                float positionOffset,
+                float rotationOffset)
+            {
+                m_maquetteOffset = positionOffset;
+                m_maquetteRotation = rotationOffset;
+                UpdateModelLocationAndScale();
             }
 
             private void PickRecursively(

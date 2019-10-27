@@ -234,59 +234,16 @@ namespace WM.Net
                             break;
                         }
 
-                        //XML-deserialize the message.
+                        // Get the string with the XML-encoded message in it.
                         int messageLength = firstMessageEnd + EndTagLength;
                         string messageXML = dataFromServer.Substring(0, messageLength);
 
+                        // Clear all up to the last processed message from the receive buffer.
                         int c = dataFromServer.Length;
                         var remainder = dataFromServer.Substring(firstMessageEnd + EndTagLength);
                         dataFromServer = remainder;
 
-                        var ser = new XmlSerializer(typeof(Message));
-
-                        var reader = new StringReader(messageXML);
-
-                        var message = (Message)(ser.Deserialize(reader));
-
-                        reader.Close();
-
-                        // Binary-deserialize the object from the message.
-                        var obj = message.Deserialize();
-
-                        if (obj is TeleportCommand)
-                        {
-                            var teleportCommand = (TeleportCommand)obj;
-                            application.QueueCommand(teleportCommand);
-                        }
-                        else if (obj is SetImmersionModeCommand)
-                        {
-                            var command = (SetImmersionModeCommand)obj;
-                            application.QueueCommand(command);
-                        }
-                        else if (obj is ConnectClientCommand)
-                        {
-                            var command = (ConnectClientCommand)obj;
-                            application.QueueCommand(command);
-                        }
-                        else if (obj is DisconnectClientCommand)
-                        {
-                            var command = (DisconnectClientCommand)obj;
-                            application.QueueCommand(command);
-                        }
-                        else if (obj is SetClientAvatarCommand)
-                        {
-                            var command = (SetClientAvatarCommand)obj;
-                            application.QueueCommand(command);
-                        }
-                        else if (obj is ServerShutdownCommand)
-                        {
-                            var command = (ServerShutdownCommand)obj;
-                            application.QueueCommand(command);
-                        }
-                        else if (obj is ClientDisconnectAcknoledgeMessage)
-                        {
-                            Status = "DisconnectAcknoledged";
-                        }
+                        ProcessMessage(messageXML);
                     }
                 }
             }
@@ -379,6 +336,62 @@ namespace WM.Net
             }
         }
 
+        private void ProcessMessage(
+            string messageXML)
+        {
+            // XML-deserialize the message.
+            var ser = new XmlSerializer(typeof(Message));
+
+            var reader = new StringReader(messageXML);
+
+            var message = (Message)(ser.Deserialize(reader));
+
+            reader.Close();
+
+            // Binary-deserialize the object from the message.
+            var obj = message.Deserialize();
+
+            if (obj is TeleportCommand)
+            {
+                var teleportCommand = (TeleportCommand)obj;
+                application.QueueCommand(teleportCommand);
+            }
+            else if (obj is SetImmersionModeCommand)
+            {
+                var command = (SetImmersionModeCommand)obj;
+                application.QueueCommand(command);
+            }
+            else if (obj is ConnectClientCommand)
+            {
+                var command = (ConnectClientCommand)obj;
+                application.QueueCommand(command);
+            }
+            else if (obj is DisconnectClientCommand)
+            {
+                var command = (DisconnectClientCommand)obj;
+                application.QueueCommand(command);
+            }
+            else if (obj is SetClientAvatarCommand)
+            {
+                var command = (SetClientAvatarCommand)obj;
+                application.QueueCommand(command);
+            }
+            else if (obj is SetModelLocationCommand)
+            {
+                var command = (SetModelLocationCommand)obj;
+                application.QueueCommand(command);
+            }
+            else if (obj is ServerShutdownCommand)
+            {
+                var command = (ServerShutdownCommand)obj;
+                application.QueueCommand(command);
+            }
+            else if (obj is ClientDisconnectAcknoledgeMessage)
+            {
+                Status = "DisconnectAcknoledged";
+            }
+        }
+        
         public void SendAvatarStateToUdp(
             GameObject avatarHead,
             GameObject avatarLHand,

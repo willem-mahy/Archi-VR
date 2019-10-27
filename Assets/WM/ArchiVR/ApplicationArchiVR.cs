@@ -202,12 +202,19 @@ namespace WM
 
             public const int DefaultImmersionModeIndex = 0;
 
-            // The immersion mode.
+            // The 'Walkthrough'immersion mode.
+            ImmersionModeWalkthrough immersionModeWalkthrough = new ImmersionModeWalkthrough();
+
+            // The 'Maquette'immersion mode.
+            ImmersionModeMaquette immersionModeMaquette = new ImmersionModeMaquette();
+
+            // The immersion modes list.
             List<ImmersionMode> m_immersionModes = new List<ImmersionMode>();
 
             // The active immersion mode index.
             public int ActiveImmersionModeIndex { get; set; } = -1;
 
+            // The active immersion mode.
             public ImmersionMode ActiveImmersionMode
             {
                 get
@@ -218,6 +225,25 @@ namespace WM
                     }
 
                     return m_immersionModes[ActiveImmersionModeIndex];
+                }
+            }
+
+            // The 'Walkthrough' immersion mode.
+            public ImmersionModeWalkthrough ImmersionModeWalkthrough
+            {
+                get
+                {
+                    return immersionModeWalkthrough;
+                }
+            }
+
+
+            // The 'Maquette' immersion mode.
+            public ImmersionModeMaquette ImmersionModeMaquette
+            {
+                get
+                {
+                    return immersionModeMaquette;
                 }
             }
 
@@ -470,8 +496,8 @@ namespace WM
 
                 #region Init immersion modes.
 
-                m_immersionModes.Add(new ImmersionModeWalkthrough());
-                m_immersionModes.Add(new ImmersionModeMaquette());
+                m_immersionModes.Add(ImmersionModeWalkthrough);
+                m_immersionModes.Add(ImmersionModeMaquette);
 
                 foreach (var immersionMode in m_immersionModes)
                 {
