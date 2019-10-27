@@ -40,6 +40,9 @@ namespace ControllerSelection {
         [HideInInspector]
         public OVRInput.Controller activeController = OVRInput.Controller.None;
 
+        // WM: set to the right-hand pick ray in application.Update().
+        public Ray EditorRay = new Ray();
+
         void Awake() {
             if (trackingSpace == null) {
                 Debug.LogWarning("OVRPointerVisualizer did not have a tracking space set. Looking for one");
@@ -95,6 +98,14 @@ namespace ControllerSelection {
         void Update() {
             activeController = OVRInputHelpers.GetControllerForButton(OVRInput.Button.PrimaryIndexTrigger, activeController);
             Ray selectionRay = OVRInputHelpers.GetSelectionRay(activeController, trackingSpace);
+
+            if (Application.isEditor)
+            {
+                // WM: in Editor, force right touch controller to be active.
+                activeController = OVRInput.Controller.RTouch;
+                selectionRay = EditorRay;
+            }
+
             SetPointerVisibility();
             SetPointer(selectionRay);
         }

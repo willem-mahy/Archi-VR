@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ControllerSelection;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -78,7 +79,7 @@ namespace WM
 
             public GameObject m_rightHandAnchor;
 
-            public GameObject SelectionVisualizer;
+            public OVRPointerVisualizer SelectionVisualizer;
 
             // TODO: Either remove, or set active while no project is active.
             public GameObject Sun { get; set; }
@@ -305,7 +306,7 @@ namespace WM
             {
                 WM.Logger.Warning("UpdateSelectionVisualizerVisibility() -> " + HasSelectionTargets());
 
-                SelectionVisualizer.SetActive(HasSelectionTargets());
+                SelectionVisualizer.gameObject.SetActive(HasSelectionTargets());
             }
 
             private bool HasSelectionTargets()
@@ -1108,6 +1109,8 @@ namespace WM
 
                 m_leftHandAnchor.transform.rotation =
                 m_rightHandAnchor.transform.rotation = m_centerEyeAnchor.transform.rotation;
+
+                SelectionVisualizer.EditorRay = RPickRay.GetRay();
             }
 
             //! Translates the tracking space wby the given offset vector.
