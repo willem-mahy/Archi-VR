@@ -61,7 +61,7 @@ namespace WM
                 m_application.m_flySpeedUpDown = 0.0f;
 
                 // Enable only R pickray.
-                m_application.RPickRayGameObject.SetActive(true);
+                m_application.RPickRay.gameObject.SetActive(true);
 
                 maquetteManipulationMode = MaquetteManipulationMode.None;
             }
@@ -76,7 +76,7 @@ namespace WM
                 // Restore default moving up/down.
                 m_application.m_flySpeedUpDown = ApplicationArchiVR.DefaultFlySpeedUpDown;
 
-                m_application.RPickRayGameObject.SetActive(false);
+                m_application.RPickRay.gameObject.SetActive(false);
             }
 
             public override void Update()
@@ -156,9 +156,7 @@ namespace WM
 
                 #endregion
 
-                var pickRay = new Ray(
-                    m_application.RPickRayGameObject.transform.position,
-                    m_application.RPickRayGameObject.transform.forward);
+                var pickRay = m_application.RPickRay.GetRay();
 
                 float minHitDistance = float.NaN;
 

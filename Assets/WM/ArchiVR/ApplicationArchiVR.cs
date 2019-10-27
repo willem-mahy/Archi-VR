@@ -31,9 +31,6 @@ namespace WM
 
             #endregion
 
-            //! The current network mode.
-            public NetworkMode NetworkMode = NetworkMode.Standalone; // TODO: make private...
-
             //! The command queue.
             public List<ICommand> CommandQueue = new List<ICommand>();
 
@@ -43,91 +40,26 @@ namespace WM
             // Whether to show the GFX quality level and FPS as HUD UI.
             private bool enableDebugGFX = false;
 
+            #region Network components
+
+            //! The current network mode.
+            public NetworkMode NetworkMode = NetworkMode.Standalone; // TODO: make private...
+
             // The multiplayer server.
             public Server Server;
 
             // The multiplayer client.
             public Client Client;
 
+            #endregion
+
             #region Game objects
 
             // Reference to the avatar Prefabs. Drag Prefabs into this field in the Inspector.
             public List<GameObject> avatarPrefabs = new List<GameObject>();
 
-            //! Instantiates all available avatar prefabs.
-            void InstanciateAllAvatarPrefabs()
-            {
-                float x = -3;
-
-                foreach (var ap in avatarPrefabs)
-                {
-                    Instantiate(
-                        ap,
-                        new Vector3(x, 0, 0),
-                        Quaternion.identity);
-
-                    x += 2;
-                }
-            }
-
             //! The avatar for the local player.
             public int AvatarIndex = 0;
-
-            //! Instanciates an avatar prefab to represent a newly connected client.
-            public void ConnectClient(
-                string clientIP,
-                int avatarIndex)
-            {
-                lock (avatars)
-                {
-                    avatars[clientIP] = InstanciateAvatarPrefab(avatarIndex);
-                }
-            }
-
-            //! Destroys the avatar prefab for the given disconnected client.
-            public void DisconnectClient(string clientIP)
-            {
-                lock (avatars)
-                {
-                    if (avatars.ContainsKey(clientIP))
-                    {
-                        GameObject.Destroy(avatars[clientIP]);
-                        avatars.Remove(clientIP);
-                    }
-                }
-            }
-
-            //! Updates the avatar type for the given connected client.
-            public void SetClientAvatar(
-                string ip,
-                int avatarIndex)
-            {
-                lock (avatars)
-                {
-                    var oldAvatar = (avatars.ContainsKey(ip) ? avatars[ip] : null);
-
-                    if (oldAvatar == null)
-                    {
-                        Debug.LogWarning("SetClientAvatar(): No existing avatar found for client '" + ip + "'");
-                    }
-
-                    avatars[ip] = InstanciateAvatarPrefab(avatarIndex);
-
-                    if (oldAvatar != null)
-                    {
-                        Destroy(oldAvatar);
-                    }
-                }
-            }
-
-            //! Instanciates the avatar type at given index, and returns a reference to the instance.
-            GameObject InstanciateAvatarPrefab(int avatarIndex)
-            {
-                return Instantiate(
-                        avatarPrefabs[avatarIndex],
-                        new Vector3(0, 0, 0),
-                        Quaternion.identity);
-            }
 
             //! The avatar instanciations, mapped on the IP of the client they represent.
             public Dictionary<string, GameObject> avatars = new Dictionary<string, GameObject>();
@@ -148,11 +80,12 @@ namespace WM
 
             public GameObject SelectionVisualizer;
 
+            // TODO: Either remove, or set active while no project is active.
+            public GameObject Sun { get; set; }
+
             #endregion
 
             public TeleportCommand TeleportCommand { get; set; }
-
-            public GameObject Sun { get; set; }
 
             #region Project
 
@@ -293,11 +226,9 @@ namespace WM
             #region Pick Ray
 
             // Right controller pick ray.
-            public GameObject RPickRayGameObject = null;
             public PickRay RPickRay = null;
 
             // Right controller pick ray.
-            public GameObject LPickRayGameObject = null;
             public PickRay LPickRay = null;
 
             #endregion
@@ -367,8 +298,7 @@ namespace WM
 
             #endregion
 
-            private GameObject Avatar;
-
+            //! The list of all selection targets.
             private List<GameObject> selectionTargets = new List<GameObject>();
 
             private void UpdateSelectionVisualizerVisibility()
@@ -430,9 +360,6 @@ namespace WM
             void Start()
             {
                 #region Get handles to game objects
-
-                if (Avatar == null)
-                    Avatar = UtilUnity.TryFindGameObject("Avatar");
 
                 if (Sun == null)
                     Sun = UtilUnity.TryFindGameObject("Sun");
@@ -497,28 +424,40 @@ namespace WM
                 // Left controller.
 
                 // Pick ray.
-                LPickRayGameObject = GameObject.Find("L PickRay");
-                LPickRay = LPickRayGameObject.GetComponent<PickRay>();
+                {
+                    var LPickRayGameObject = UtilUnity.TryFindGameObject("L PickRay");
 
-                m_leftControllerCanvas = GameObject.Find("LeftControllerCanvas");
-                m_leftControllerPanel = GameObject.Find("LeftControllerPanel");
-                m_leftControllerText = GameObject.Find("LeftControllerText").GetComponent<UnityEngine.UI.Text>();
+                    if (LPickRayGameObject != null)
+                    {
+                        LPickRay = LPickRayGameObject.GetComponent<PickRay>();
+                    }
+                }
+
+                m_leftControllerCanvas = UtilUnity.TryFindGameObject("LeftControllerCanvas");
+                m_leftControllerPanel = UtilUnity.TryFindGameObject("LeftControllerPanel");
+                m_leftControllerText = UtilUnity.TryFindGameObject("LeftControllerText").GetComponent<UnityEngine.UI.Text>();
 
                 // Right controller.
 
                 // Pick ray.
-                RPickRayGameObject = GameObject.Find("R PickRay");
-                RPickRay = RPickRayGameObject.GetComponent<PickRay>();
+                {
+                    var RPickRayGameObject = UtilUnity.TryFindGameObject("R PickRay");
 
-                m_rightControllerCanvas = GameObject.Find("RightControllerCanvas");
-                m_rightControllerPanel = GameObject.Find("RightControllerPanel");
-                m_rightControllerText = GameObject.Find("RightControllerText").GetComponent<UnityEngine.UI.Text>();
+                    if (RPickRayGameObject != null)
+                    {
+                        RPickRay = RPickRayGameObject.GetComponent<PickRay>();
+                    }
+                }
+
+                m_rightControllerCanvas = UtilUnity.TryFindGameObject("RightControllerCanvas");
+                m_rightControllerPanel = UtilUnity.TryFindGameObject("RightControllerPanel");
+                m_rightControllerText = UtilUnity.TryFindGameObject("RightControllerText").GetComponent<UnityEngine.UI.Text>();
 
                 #endregion
 
                 // Disable all pickrays.
-                LPickRayGameObject.SetActive(false);
-                RPickRayGameObject.SetActive(false);
+                LPickRay.gameObject.SetActive(false);
+                RPickRay.gameObject.SetActive(false);
 
                 #region Init immersion modes.
 
@@ -730,6 +669,21 @@ namespace WM
                 return m_projectNames[projectIndex];
             }
 
+            //! Get the short-format (excluding prefix 'Project') project name for the given project name.
+            string GetProjectNameShort(string projectName)
+            {
+                string prefix = "project";
+
+                if (projectName.ToLower().StartsWith(prefix))
+                {
+                    return projectName.Substring(prefix.Length);
+                }
+                else
+                {
+                    return projectName;
+                }
+            }
+
             //! Gets the active project's name, or null if no project active.
             public string ActiveProjectName
             {
@@ -751,7 +705,7 @@ namespace WM
                         return null;
                     }
 
-                    return GameObject.Find("Project");
+                    return UtilUnity.TryFindGameObject("Project");
                 }
             }
 
@@ -1226,6 +1180,8 @@ namespace WM
 
             #endregion
 
+            #region Teleport
+
             public void TeleportToPOIInActiveProjectAtIndexOffset(int indexOffset)
             {
                 TeleportToPOIInActiveProject(ActivePOIIndex + indexOffset);
@@ -1377,23 +1333,99 @@ namespace WM
                     ActiveImmersionMode.UpdateTrackingSpacePosition();
 
                     m_fadeAnimator.SetTrigger("FadeIn");
-                }
+                }                
+            }
 
-                //! Get the short-format (excluding prefix 'Project') project name for the given project name.
-                string GetProjectNameShort(string projectName)
+            #endregion
+
+            #region Avatar management
+
+            //! Instanciates the avatar type at given index, and returns a reference to the instance.
+            GameObject InstanciateAvatarPrefab(
+                int avatarIndex,
+                Vector3 position,
+                Quaternion rotation)
+            {
+                return Instantiate(
+                        avatarPrefabs[avatarIndex],
+                        position,
+                        rotation);
+            }
+
+            //! Instantiates all available avatar prefabs.
+            void InstanciateAllAvatarPrefabs()
+            {
+                float x = -3;
+
+                foreach (var ap in avatarPrefabs)
                 {
-                    string prefix = "project";
+                    Instantiate(
+                        ap,
+                        new Vector3(x, 0, 0),
+                        Quaternion.identity);
 
-                    if (projectName.ToLower().StartsWith(prefix))
+                    x += 2;
+                }
+            }
+
+            #endregion
+
+            #region Client management
+
+            //! Instanciates an avatar prefab to represent a newly connected client.
+            public void ConnectClient(
+                string clientIP,
+                int avatarIndex)
+            {
+                lock (avatars)
+                {
+                    avatars[clientIP] = InstanciateAvatarPrefab(
+                        avatarIndex,
+                        Vector3.zero,
+                        Quaternion.identity);
+                }
+            }
+
+            //! Destroys the avatar prefab for the given disconnected client.
+            public void DisconnectClient(string clientIP)
+            {
+                lock (avatars)
+                {
+                    if (avatars.ContainsKey(clientIP))
                     {
-                        return projectName.Substring(prefix.Length);
-                    }
-                    else
-                    {
-                        return projectName;
+                        GameObject.Destroy(avatars[clientIP]);
+                        avatars.Remove(clientIP);
                     }
                 }
             }
+
+            //! Updates the avatar type for the given connected client.
+            public void SetClientAvatar(
+                string ip,
+                int avatarIndex)
+            {
+                lock (avatars)
+                {
+                    var oldAvatar = (avatars.ContainsKey(ip) ? avatars[ip] : null);
+
+                    if (oldAvatar == null)
+                    {
+                        Debug.LogWarning("SetClientAvatar(): No existing avatar found for client '" + ip + "'");
+                    }
+
+                    avatars[ip] = InstanciateAvatarPrefab(
+                        avatarIndex,
+                        oldAvatar.transform.position,
+                        oldAvatar.transform.rotation);
+
+                    if (oldAvatar != null)
+                    {
+                        Destroy(oldAvatar);
+                    }
+                }
+            }
+
+            #endregion
         }
     } // namespace ArchiVR
 } // namespace WM
