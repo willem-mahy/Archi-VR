@@ -954,16 +954,15 @@ namespace WM
 
                 #region Compute translation offset vector.
 
+                var controllerState = m_controllerInput.m_controllerState;
+
                 // Translate Forward/Backward using right thumbstick Y.
-                float magnitudeForward = m_controllerInput.m_controllerState.rThumbStick.y;
+                float magnitudeForward = controllerState.rThumbStick.y;
 
                 // Translate Left/Right using right thumbstick X.
-                float magnitudeRight = m_controllerInput.m_controllerState.rThumbStick.x;
+                float magnitudeRight = controllerState.rThumbStick.x;
 
-                // Translate Up/Down using left thumstick Y.
-                float magnitudeUp = m_controllerInput.m_controllerState.lThumbStick.y;
-
-                // First compose translation on the horizontal plane.
+                // Compose translation on the horizontal plane.
                 var offsetR = m_centerEyeAnchor.transform.right;
                 offsetR.y = 0;
                 offsetR.Normalize();
@@ -982,11 +981,6 @@ namespace WM
                     offset.Normalize();
                 }
 
-                // Then add Up/Down translation.
-                var offsetUp = magnitudeUp * m_flySpeedUpDown * Vector3.up;
-
-                offset += offsetUp;
-
                 #endregion
 
                 // Translate tracking space.
@@ -997,6 +991,15 @@ namespace WM
                     TranslateTrackingSpace(m_flySpeedHorizontal * Time.deltaTime * offset);
                 }
             }
+
+            private enum TrackingSpaceManipulationMode
+            {
+                None = 0,
+                Rotate,
+                TranslateUpDown
+            };
+
+            private TrackingSpaceManipulationMode trackingSpaceManipulationMode = TrackingSpaceManipulationMode.None;
 
             //!
             public void UpdateTrackingSpace()
@@ -1018,21 +1021,65 @@ namespace WM
 
                 float rotateSpeed = 45.0f;
 
-                float magnitudeRotate = m_controllerInput.m_controllerState.lThumbStick.x;
+                var controllerState = m_controllerInput.m_controllerState;
 
-                var rotateOffset = Time.deltaTime * magnitudeRotate * rotateSpeed;
+                // Rotate Left/Right using left thumbstick X.
+                float magnitudeRotate = controllerState.lThumbStick.x;
 
-                var doRotate = (rotateOffset != 0.0f);
+                // Translate Up/Down using left thumbstick Y.
+                float magnitudeUp = controllerState.lThumbStick.y;
 
-                if (doRotate)
+                // Update maquette manipulationMode
+                bool manipulating = (Mathf.Abs(magnitudeRotate) > 0.1f) || (Mathf.Abs(magnitudeUp) > 0.1f);
+                if (trackingSpaceManipulationMode == TrackingSpaceManipulationMode.None)
                 {
-                    // Rotate tracking space
-                    m_ovrCameraRig.transform.RotateAround(
-                        m_centerEyeAnchor.transform.position,
-                        Vector3.up,
-                        rotateOffset);
+                    if (manipulating)
+                    {
+                        trackingSpaceManipulationMode = (Mathf.Abs(magnitudeRotate) > Mathf.Abs(magnitudeUp))
+                            ? TrackingSpaceManipulationMode.Rotate
+                            : TrackingSpaceManipulationMode.TranslateUpDown;
+                    }
+                    else
+                        trackingSpaceManipulationMode = TrackingSpaceManipulationMode.None;
+                }
+                else
+                {
+                    if (!manipulating)
+                    {
+                        trackingSpaceManipulationMode = TrackingSpaceManipulationMode.None;
+                    }
+                }
 
-                    OVRManager.boundary.SetVisible(true);
+                switch (trackingSpaceManipulationMode)
+                {
+                    case TrackingSpaceManipulationMode.TranslateUpDown:
+                        {
+                            var offsetUp = magnitudeUp * m_flySpeedUpDown * Time.deltaTime * Vector3.up;
+
+                            OVRManager.boundary.SetVisible(true);
+
+                            TranslateTrackingSpace(offsetUp);
+                        }
+                        break;
+                    case TrackingSpaceManipulationMode.Rotate:
+                        {
+                            // Rotate around 'up' vector.
+                            var rotateOffset = Time.deltaTime * magnitudeRotate * rotateSpeed;
+
+                            var doRotate = (rotateOffset != 0.0f);
+
+                            if (doRotate)
+                            {
+                                // Rotate tracking space
+                                m_ovrCameraRig.transform.RotateAround(
+                                    m_centerEyeAnchor.transform.position,
+                                    Vector3.up,
+                                    rotateOffset);
+
+                                OVRManager.boundary.SetVisible(true);
+                            }
+                        }
+                        break;
                 }
             }
 
