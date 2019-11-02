@@ -115,12 +115,12 @@ namespace WM
             public static readonly int UdpPort = 8890; // Must be different than server TCP port probably...
 
             // The UDP cLient.
-            public UdpClient udpClient;// =  new UdpClient(UdpPort); //TODO: seems to not work?
+            UdpClient udpClient;// =  new UdpClient(UdpPort); //TODO: seems to not work?
 
             //! The UDP Receiver.
-            public UDPReceive udpReceive;
+            UDPReceive udpReceive;
 
-            private Thread receiveUdpThread;
+            Thread receiveUdpThread;
 
             #endregion
 
