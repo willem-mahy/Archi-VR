@@ -3,8 +3,6 @@ using System.Xml.Serialization;
 
 using UnityEngine;
 
-using WM.ArchiVR;
-
 namespace WM.ArchiVR.Command
 {
     [Serializable]
