@@ -587,11 +587,9 @@ namespace WM
                     clientConnection.AvatarIndex = scac.AvatarIndex;
                     PropagateData(messageXML, clientConnection);
                 }
-                else if (obj is SetClientAvatarCommand)
+                else if (obj is SetModelLocationCommand)
                 {
-                    var scac = (SetClientAvatarCommand)obj;
-                    clientConnection.AvatarIndex = scac.AvatarIndex;
-                    PropagateData(messageXML, clientConnection);
+                    BroadcastData(messageXML); // TODO: Or do???: PropagateData(messageXML, clientConnection);
                 }
 
                 return true;
