@@ -48,14 +48,19 @@ namespace WM.Net
 
         #endregion
 
-        // The thread.
+        // The client's worker thread.
         private Thread thread;
 
+        /// <summary>
+        /// Whether we are shutting down(true) or not(false).
+        /// </summary>
         private bool shutDown = false;
 
         #endregion
 
-        //! 
+        /// <summary>
+        /// Initialize the client.
+        /// </summary>
         public void Init()
         {
             shutDown = false;
@@ -67,7 +72,9 @@ namespace WM.Net
             WM.Logger.Debug("Client started");
         }
 
-        //! 
+        /// <summary>
+        /// Disconnect the client.
+        /// </summary>
         public void Disconnect()
         {
             SendCommand(new DisconnectClientCommand(NetUtil.GetLocalIPAddress()));
@@ -77,8 +84,10 @@ namespace WM.Net
             Shutdown();
         }
 
-        //! 
-        public void Shutdown()
+        /// <summary>
+        /// 
+        /// </summary>
+        private void Shutdown()
         {
             shutDown = true;
 
@@ -114,7 +123,10 @@ namespace WM.Net
             }
         }
 
-
+        /// <summary>
+        /// Synchronously start listening at the UDP broadcast port for UdpBroadcastMessages.
+        /// </summary>
+        /// <returns>A string containing the IP address of the first server from which we receive a valid UdpBroadcastMessage</returns>
         private string GetServerIPFromUdpBroadcast()
         {
             Status = "Listening for servers";
@@ -126,7 +138,7 @@ namespace WM.Net
             {
                 try
                 {
-                    // Receive bytes from any client.                    
+                    // Receive bytes from anyone.                    
                     byte[] data = udpClient.Receive(ref remoteEndPoint);
 
                     // Encode received bytes to UTF8- encoding.
@@ -146,7 +158,9 @@ namespace WM.Net
             return "";
         }
 
-        //! Thread function executed by the thread.
+        /// <summary>
+        /// Thread function executed by the client's worker thread.
+        /// </summary>
         private void ThreadFunction()
         {
             if (InitialServerIP == "")
@@ -249,6 +263,10 @@ namespace WM.Net
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private bool TryConnect()
         {
             if (InitialServerIP != "")
@@ -275,6 +293,11 @@ namespace WM.Net
             }
         }
 
+        /// <summary>
+        /// Try to connect to the server at given IP.
+        /// </summary>
+        /// <param name="serverIP"></param>
+        /// <returns></returns>
         private bool TryConnectToServer(string serverIP)
         {
             String tag = serverIP + ":" + Server.TcpPort + ", timeout:" + ConnectTimeout + "ms";
@@ -313,7 +336,9 @@ namespace WM.Net
 
         }
 
-        //! Returns whether this client is connected to a server.
+        /// <summary>
+        /// Whether this client is connected to a server.
+        /// </summary>
         public bool Connected
         {
             get
@@ -322,7 +347,9 @@ namespace WM.Net
             }
         }
 
-        //! Returns the IP address of the server to which this client is connected, or 'Not available' if not connected.
+        /// <summary>
+        /// Returns a string containing the IP address of the server to which this client is connected, or 'Not available' if not connected.
+        /// </summary>
         public string ServerIP
         {
             get
@@ -336,6 +363,10 @@ namespace WM.Net
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messageXML"></param>
         private void ProcessMessage(
             string messageXML)
         {
@@ -392,6 +423,12 @@ namespace WM.Net
             }
         }
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="avatarHead"></param>
+        /// <param name="avatarLHand"></param>
+        /// <param name="avatarRHand"></param>
         public void SendAvatarStateToUdp(
             GameObject avatarHead,
             GameObject avatarLHand,
@@ -435,6 +472,9 @@ namespace WM.Net
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void UpdateAvatarStatesFromUdp()
         {
             if (udpReceive == null)
@@ -553,6 +593,11 @@ namespace WM.Net
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
         private string GetCommandAsData(ICommand command)
         {
             var message = new Message();
@@ -569,6 +614,10 @@ namespace WM.Net
             return data;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="command"></param>
         public void SendCommand(ICommand command)
         {
             Debug.Log("Client:SendCommand()");
@@ -585,6 +634,10 @@ namespace WM.Net
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         public void SendData(String data)
         {
             Debug.Log("Client:SendData()");
