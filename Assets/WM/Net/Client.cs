@@ -18,8 +18,6 @@ namespace WM.Net
 
         public ApplicationArchiVR application;
 
-        public string Status = "Not initialized";
-
         public string InitialServerIP = "";//192.168.0.13";
 
         public int ConnectTimeout = 100;
@@ -51,11 +49,20 @@ namespace WM.Net
         // The client's worker thread.
         private Thread thread;
 
+        #region Internal state
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Status = "Not initialized";
+
         /// <summary>
         /// Whether we are shutting down(true) or not(false).
         /// </summary>
         private bool shutDown = false;
 
+        #endregion
+        
         #endregion
 
         /// <summary>
@@ -382,6 +389,23 @@ namespace WM.Net
             // Binary-deserialize the object from the message.
             var obj = message.Deserialize();
 
+            // If it is a generic message, process it here.
+            if (obj is ClientDisconnectAcknoledgeMessage)
+            {
+                Status = "DisconnectAcknoledged";
+                return;
+            }
+
+            // It is a not a generic message, delegate processing to application-specific logic.
+            DoProcessMessage(obj);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        void DoProcessMessage(object obj)
+        {
             if (obj is TeleportCommand)
             {
                 var teleportCommand = (TeleportCommand)obj;
@@ -417,10 +441,6 @@ namespace WM.Net
                 var command = (ServerShutdownCommand)obj;
                 application.QueueCommand(command);
             }
-            else if (obj is ClientDisconnectAcknoledgeMessage)
-            {
-                Status = "DisconnectAcknoledged";
-            }
         }
         
         /// <summary>
@@ -434,12 +454,6 @@ namespace WM.Net
             GameObject avatarLHand,
             GameObject avatarRHand)
         {
-            // Temporarily disabled the below check: udpSend is not null but still the if-clause evaluates to true?!? :-s
-            if (udpSend == null)
-            {
-                return; // Not connected yet...
-            }
-
             try
             {
                 var avatarState = new AvatarState();
@@ -462,13 +476,32 @@ namespace WM.Net
 
                 var data = writer.ToString();
 
-                udpSend.sendString(data);
-
-                //Debug.Log("Client: Sent frame " + frameIndex++);
+                SendDataUdp(data);
             }
             catch (Exception e)
             {
-                WM.Logger.Error("Clien.SendPositionToUDP(): Exception:" + e.Message);
+                WM.Logger.Error("Client.SendAvatarStateToUdp(): Exception:" + e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Send non-critical data to the server over UDP.
+        /// </summary>
+        /// <param name="data"></param>
+        public void SendDataUdp(String data)
+        {
+            if (udpSend == null)
+            {
+                return; // Not connected yet...
+            }
+
+            try
+            {
+                udpSend.sendString(data);
+            }
+            catch (Exception e)
+            {
+                WM.Logger.Error("Client.SendDataUdp(): Exception:" + e.Message);
             }
         }
 
