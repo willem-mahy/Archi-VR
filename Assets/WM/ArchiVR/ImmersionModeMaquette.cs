@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using WM.ArchiVR.Command;
+using WM.Net;
 
 namespace WM
 {
@@ -117,7 +118,7 @@ namespace WM
                 #region Maquette manipulation.
 
                 // Clients cannot manipulate model!
-                if (m_application.NetworkMode != Net.NetworkMode.Client)
+                if (m_application.NetworkMode != WM.Net.NetworkMode.Client)
                 {
                     var cs = m_application.m_controllerInput.m_controllerState;
 
@@ -168,7 +169,7 @@ namespace WM
                     {
                         var command = new SetModelLocationCommand(positionOffset, rotationOffset);
 
-                        if (m_application.NetworkMode == Net.NetworkMode.Server)
+                        if (m_application.NetworkMode == NetworkMode.Server)
                         {
                             m_application.Server.BroadcastCommand(command);
                         }
@@ -184,7 +185,7 @@ namespace WM
                 #region Updated picked model layer
 
                 // Clients cannot pick model layers!
-                if (m_application.NetworkMode != Net.NetworkMode.Client)
+                if (m_application.NetworkMode != NetworkMode.Client)
                 {
                     var pickRay = m_application.RPickRay.GetRay();
 

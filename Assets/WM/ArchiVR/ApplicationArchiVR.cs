@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using WM.ArchiVR.Command;
+using WM.ArchiVR.Net;
 using WM.Net;
 using WM.UI;
 using WM.VR;
@@ -50,7 +51,7 @@ namespace WM
             public Server Server;
 
             // The multiplayer client.
-            public Client Client;
+            public ClientArchiVR Client;
 
             #region Shared Tracking space
 
