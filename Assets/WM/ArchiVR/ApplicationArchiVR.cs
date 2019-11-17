@@ -974,6 +974,11 @@ namespace WM
             //!
             public void Fly()
             {
+                if (SharedTrackingSpace == true)
+                {
+                    Logger.Warning("Unsupported SharedTrackingSpace == true: movement will be impossible in editor mode clients!");
+                }
+
                 if ((NetworkMode == NetworkMode.Client) && (SharedTrackingSpace == true))
                 {
                     return; // Only server can manipulate tracking space!
