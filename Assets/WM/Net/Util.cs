@@ -6,6 +6,10 @@ namespace WM
     {
         class NetUtil
         {
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
             public static string GetLocalIPAddress()
             {
                 var host = Dns.GetHostEntry(Dns.GetHostName());
@@ -21,6 +25,10 @@ namespace WM
                 throw new WebException("Local IP address not found!");
             }
             
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
             public static string GetLocalIPSubNet()
             {
                 var address = GetLocalIPAddress();

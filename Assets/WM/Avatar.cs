@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace WM
 {
@@ -14,16 +15,23 @@ namespace WM
 
             public GameObject RHand = null;
 
-            // Start is called before the first frame update
-            void Start()
+            /// <summary>
+            /// Sets the avatar to the given state.
+            /// </summary>
+            /// <param name="state"></param>
+            public void SetState(AvatarState state)
             {
-        
-            }
+                Head.transform.position = state.HeadPosition;
+                Head.transform.rotation = state.HeadRotation;
 
-            // Update is called once per frame
-            void Update()
-            {
-        
+                Body.transform.position = state.HeadPosition - 0.9f * Vector3.up;
+                Body.transform.rotation = Quaternion.AngleAxis((float)(Math.Atan2(Head.transform.forward.x, Head.transform.forward.z)), Vector3.up);
+
+                LHand.transform.position = state.LHandPosition;
+                LHand.transform.rotation = state.LHandRotation;
+
+                RHand.transform.position = state.RHandPosition;
+                RHand.transform.rotation = state.RHandRotation;
             }
         }
     } // namespace Net

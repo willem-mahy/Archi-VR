@@ -420,19 +420,19 @@ namespace WM
                             for (int clientIndex = 0; clientIndex < clientConnections.Count; ++clientIndex)
                             {
                                 // Try to receive the x-th client frame.
-                                var trackedObjectXML = GetAvatarStateFromUdp(clientIndex);
+                                var messageXML = GetLastMessageXML(clientIndex);
 
                                 //Debug.Log("Server: Received frame from client " + clientIndex);
 
                                 // Broadcast the x-th client frame to all but the originating client. (so avatars can be updated.)
-                                if (trackedObjectXML != null)
+                                if (messageXML != null)
                                 {
                                     for (int broadcastClientIndex = 0; broadcastClientIndex < clientConnections.Count; ++broadcastClientIndex)
                                     {
                                         if (clientIndex == broadcastClientIndex)
                                             continue; // don't send own client updates back to self...
 
-                                        SendDataToUdp(trackedObjectXML, broadcastClientIndex);
+                                        SendDataToUdp(messageXML, broadcastClientIndex);
                                     }
                                 }
                             }
@@ -574,7 +574,7 @@ namespace WM
                     clientConnections.Remove(clientConnection);
 
                     // Step 2: send an acknoledge to the client that it is safe to continue disconnecting.
-                    SendData(GetObjectAsData(new ClientDisconnectAcknoledgeMessage()), clientConnection);
+                    SendData(GetObjectAsMessageXml(new ClientDisconnectAcknoledgeMessage()), clientConnection);
 
                     // Step 3: close the clientconnection network streams.
                     clientConnection.Close();                    
@@ -602,7 +602,7 @@ namespace WM
 
                 try
                 {
-                    string data = GetObjectAsData(command);
+                    string data = GetObjectAsMessageXml(command);
 
                     BroadcastData(data);
                 }
@@ -620,7 +620,7 @@ namespace WM
 
                 try
                 {
-                    string data = GetObjectAsData(command);
+                    string data = GetObjectAsMessageXml(command);
 
                     PropagateData(data, sourceClientConnection);
                 }
@@ -687,7 +687,7 @@ namespace WM
             }
 
             //!
-            private string GetObjectAsData(object obj)
+            private string GetObjectAsMessageXml(object obj)
             {
                 var ser = new XmlSerializer(typeof(Message));
 
@@ -723,7 +723,7 @@ namespace WM
                         return;
                     }
 
-                    var data = GetObjectAsData(command);
+                    var data = GetObjectAsMessageXml(command);
 
                     SendData(data, clientConnection);
                 }
@@ -791,8 +791,13 @@ namespace WM
                 }
             }
 
-            //!
-            public string GetAvatarStateFromUdp(int clientIndex)
+            /// <summary>
+            /// Gets a string with the XML-encoded last message from the client at given index.
+            /// Then clears the content of the client receive buffer up to and including the returned message.
+            /// </summary>
+            /// <param name="clientIndex"></param>
+            /// <returns>String with the XML-encoded last message from the client at given index. If no message was received from the given client, returns null.</returns>
+            public string GetLastMessageXML(int clientIndex)
             {
                 try
                 {
@@ -815,7 +820,7 @@ namespace WM
                         clientIP = clientConnections[clientIndex].remoteIP;
                     }
 
-                    string trackedObjectXML = "";
+                    string messageXML = "";
 
                     lock (udpReceive.allReceivedUDPPackets)
                     {
@@ -824,9 +829,8 @@ namespace WM
                             return null;
                         }
 
-                        string frameEndTag = "</AvatarState>";
-                        int frameEndTagLength = frameEndTag.Length;
-                        int lastFrameEnd = udpReceive.allReceivedUDPPackets[clientIP].LastIndexOf(frameEndTag);
+                        int frameEndTagLength = Message.XmlEndTag.Length;
+                        int lastFrameEnd = udpReceive.allReceivedUDPPackets[clientIP].LastIndexOf(Message.XmlEndTag);
 
                         if (lastFrameEnd < 0)
                         {
@@ -835,33 +839,40 @@ namespace WM
 
                         string temp = udpReceive.allReceivedUDPPackets[clientIP].Substring(0, lastFrameEnd + frameEndTagLength);
 
-                        int lastFrameBegin = temp.LastIndexOf("<AvatarState ");
+                        int lastFrameBegin = temp.LastIndexOf(Message.XmlBeginTag);
 
                         if (lastFrameBegin < 0)
                         {
                             return null;
                         }
 
-                        // Now get the frame string.
-                        trackedObjectXML = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
+                        // Now get the message XML string.
+                        messageXML = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
 
-                        // Clear old frames from receivebuffer.
+                        // TODO?:
+                        // test that the message can be XML deserialized properly
+                        // test that the object contained in the message can be deserialized properly
+                        // -> If not, continue search for older message...
+
+                        // Clear old messages from receivebuffer.
                         udpReceive.allReceivedUDPPackets[clientIP] = udpReceive.allReceivedUDPPackets[clientIP].Substring(lastFrameEnd + frameEndTagLength);
                     }
 
-                    var ser = new XmlSerializer(typeof(AvatarState));
+                    /*
+                        var ser = new XmlSerializer(typeof(AvatarState));
 
-                    //var reader = new StreamReader(avatarFilePath);
-                    var reader = new StringReader(trackedObjectXML);
+                        //var reader = new StreamReader(avatarFilePath);
+                        var reader = new StringReader(messageXML);
 
-                    var trackedObject = (AvatarState)(ser.Deserialize(reader));
-                    reader.Close();
+                        var trackedObject = (AvatarState)(ser.Deserialize(reader));
+                        reader.Close();
+                    */
 
-                    return trackedObjectXML;
+                    return messageXML;
                 }
                 catch (Exception e)
                 {
-                     WM.Logger.Error("Server.GetAvatarStateFromUdp(): Exception: " + e.Message);
+                     WM.Logger.Error("Server.GetLastMessageXML(" + clientIndex + "): Exception: " + e.Message);
                     return null;
                 }
             }

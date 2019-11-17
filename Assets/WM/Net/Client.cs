@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading;
 using System.Xml.Serialization;
 using UnityEngine;
-using WM.ArchiVR;
 using WM.ArchiVR.Command;
 
 namespace WM.Net
@@ -41,12 +40,6 @@ namespace WM.Net
         private UDPSend udpSend;
 
         private UDPReceive udpReceive;
-
-        /// <summary>
-        /// Temporary hack.  Remove ASAP after finalizing network refactoring.
-        /// </summary>
-        /// <returns></returns>
-        protected UDPReceive GetUdpReceive() { return udpReceive; }
 
         #endregion
 
@@ -229,14 +222,11 @@ namespace WM.Net
                 if (dataFromServer.Length > 0)
                 {
                     //WM.Logger.Debug("Client: Data from server: " + dataFromServer);
+                    int EndTagLength = Message.XmlEndTag.Length;
 
                     while (true)
                     {
-                        string beginTag = "<Message ";
-                        string endTag = "</Message>";
-                        int EndTagLength = endTag.Length;
-
-                        int firstMessageBegin = dataFromServer.IndexOf(beginTag);
+                        int firstMessageBegin = dataFromServer.IndexOf(Message.XmlBeginTag);
 
                         if (firstMessageBegin < 0)
                         {
@@ -246,7 +236,7 @@ namespace WM.Net
                         // Remove all data in front of first message.
                         dataFromServer = dataFromServer.Substring(firstMessageBegin);
 
-                        int firstMessageEnd = dataFromServer.IndexOf(endTag);
+                        int firstMessageEnd = dataFromServer.IndexOf(Message.XmlEndTag);
 
                         if (firstMessageEnd < 0)
                         {
@@ -429,30 +419,30 @@ namespace WM.Net
                 WM.Logger.Error("Client.SendDataUdp(): Exception:" + e.Message);
             }
         }
-        
+
         /// <summary>
-        /// 
+        /// Send the given object as non-critical (UDP) message to the server.
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        private string GetCommandAsData(ICommand command)
+        /// <param name="obj">The object to be sent.</param>
+        public void SendMessageUdp(object obj)
         {
-            var message = new Message();
-            message.Serialize(command);
+            if (udpSend == null)
+            {
+                return; // Not connected yet...
+            }
 
-            var ser = new XmlSerializer(typeof(Message));
-
-            var writer = new StringWriter();
-            ser.Serialize(writer, message);
-            writer.Close();
-
-            var data = writer.ToString();
-
-            return data;
+            try
+            {
+                udpSend.sendString(Message.EncodeObjectAsXml(obj));
+            }
+            catch (Exception e)
+            {
+                WM.Logger.Error("Client.SendMessageUdp(object obj): Exception:" + e.Message);
+            }
         }
 
         /// <summary>
-        /// 
+        /// Send the given command to the server over TCP.
         /// </summary>
         /// <param name="command"></param>
         public void SendCommand(ICommand command)
@@ -461,7 +451,7 @@ namespace WM.Net
 
             try
             {
-                var data = GetCommandAsData(command);
+                var data = Message.EncodeObjectAsXml(command);
 
                 SendData(data);
             }
@@ -472,7 +462,7 @@ namespace WM.Net
         }
 
         /// <summary>
-        /// 
+        /// Send the given string to the server over TCP.
         /// </summary>
         /// <param name="data"></param>
         public void SendData(String data)
@@ -500,6 +490,101 @@ namespace WM.Net
             catch (Exception e)
             {
                  WM.Logger.Error("Client.SendData(): Exception:" + e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Get all objects received from the server over UDP.
+        /// </summary>
+        public List<object> GetReceivedMessagesUdp()
+        {
+            if (udpReceive == null)
+            {
+                return null; // Not connected yet...
+            }
+
+            try
+            {
+                var receivedMessages = new List<object>();
+
+                lock (udpReceive.allReceivedUDPPackets)
+                {
+                    if (udpReceive.allReceivedUDPPackets.Keys.Count > 1)
+                    {
+                        Debug.LogWarning("Client.UpdateAvatarStatesFromUDP(): More than one receive buffer!?!");
+                        udpReceive.allReceivedUDPPackets.Clear();
+                        return null;
+                    }
+
+                    if (udpReceive.allReceivedUDPPackets.Keys.Count == 1)
+                    {
+                        // Get the first and only sender IP.
+                        var senderIPEnumerator = udpReceive.allReceivedUDPPackets.Keys.GetEnumerator();
+                        senderIPEnumerator.MoveNext();
+                        var senderIP = senderIPEnumerator.Current;
+
+                        // Get the corresponding receive buffer.
+                        var receiveBuffer = udpReceive.allReceivedUDPPackets[senderIP];
+
+                        while (true)
+                        {
+                            string messageEndTag = "</Message>";
+                            int messageEndTagLength = messageEndTag.Length;
+
+                            int messageBegin = receiveBuffer.IndexOf("<Message ");
+
+                            if (messageBegin < 0)
+                            {
+                                break; // We have no full avatar states to read left in the receivebuffer -> break parsing received avatar states.
+                            }
+
+                            // Get position of first frame begin tag in receive buffer.
+                            if (messageBegin > 0)
+                            {
+                                // Clear old data (older than first frame) from receivebuffer.
+                                receiveBuffer = receiveBuffer.Substring(messageBegin);
+                                messageBegin = 0;
+                            }
+
+                            // Get position of first frame end tag in receive buffer.
+                            int messageEnd = receiveBuffer.IndexOf(messageEndTag);
+
+                            if (messageEnd < 0)
+                            {
+                                break; // We have no full messages to read left in the receivebuffer -> break parsing received messagess.
+                            }
+
+                            // Now get the message XML string.
+                            string messageXML = receiveBuffer.Substring(0, messageEnd + messageEndTagLength);
+
+                            // Remove message XML from receivebuffer.
+                            receiveBuffer = receiveBuffer.Substring(messageEnd + messageEndTagLength);
+
+                            {
+                                var ser = new XmlSerializer(typeof(Message));
+
+                                var reader = new StringReader(messageXML);
+
+                                var message = (Message)(ser.Deserialize(reader));
+
+                                reader.Close();
+
+                                receivedMessages.Add(message.Deserialize());
+                            }
+                        }
+
+                        // We have processed all available fully received messages from the receive buffer.
+                        // Update the receive buffer to the unprocessed remainder.
+                        udpReceive.allReceivedUDPPackets[senderIP] = receiveBuffer;
+                    }
+                }
+
+                return receivedMessages;
+            }
+            catch (Exception e)
+            {
+                WM.Logger.Error("Client.GetReceivedMessagesUdp(): Exception:" + e.Message);
+                return null;
             }
         }
     }
