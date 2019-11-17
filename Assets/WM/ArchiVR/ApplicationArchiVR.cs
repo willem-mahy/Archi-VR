@@ -643,12 +643,12 @@ namespace WM
 
                 if (leftControllerButtonMapping != null)
                 {
-                    leftControllerButtonMapping.Update(m_controllerInput.m_controllerState);
+                    leftControllerButtonMapping.SetControllerState(m_controllerInput.m_controllerState);
                 }
 
                 if (rightControllerButtonMapping != null)
                 {
-                    rightControllerButtonMapping.Update(m_controllerInput.m_controllerState);
+                    rightControllerButtonMapping.SetControllerState(m_controllerInput.m_controllerState);
                 }
 
                 #endregion

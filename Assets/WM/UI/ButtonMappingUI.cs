@@ -62,7 +62,7 @@ namespace WM
             #endregion
 
             //! Updates the button mapping labels to the pressed state of their corresponding button.
-            public void Update(ControllerState controllerState)
+            public void SetControllerState(ControllerState controllerState)
             {
                 #region Left controller
 

@@ -17,7 +17,7 @@ namespace WM
     namespace Net
     {
         // Holds all data related to a client connected to the server.
-        class ClientConnection
+        public class ClientConnection
         {
             //! The IP of the client.
             public string remoteIP;
@@ -55,11 +55,9 @@ namespace WM
             }
         }
 
-        public class Server : MonoBehaviour
+        abstract public class Server : MonoBehaviour
         {
             #region Variables
-
-            public ApplicationArchiVR application;
 
             public string Status = "";
 
@@ -77,7 +75,7 @@ namespace WM
             private string clientsLockOwner = "";
 
             // The client connections.
-            private List<ClientConnection> clientConnections = new List<ClientConnection>();
+            /*private*/ protected List<ClientConnection> clientConnections = new List<ClientConnection>();
 
             //! Get a string with information about connected clients.
             public string GetClientInfo()
@@ -128,7 +126,9 @@ namespace WM
 
             #endregion
 
-            //!
+            /// <summary>
+            /// 
+            /// </summary>
             public void Init()
             {
                 WM.Logger.Debug("Server.Init() Start");
@@ -215,7 +215,9 @@ namespace WM
                 }
             }
 
-            //!
+            /// <summary>
+            /// 
+            /// </summary>
             public void Shutdown()
             {
                 shutDown = true;
@@ -289,7 +291,9 @@ namespace WM
                 }
             }
 
-            //! Thread function executed by the 'Accept Client' thread.
+            /// <summary>
+            /// Thread function executed by the 'Accept Client' thread.
+            /// </summary>
             private void BroadcastFunction()
             {
                 try
@@ -318,7 +322,9 @@ namespace WM
                 }
             }
 
-            //! Thread function executed by the 'Accept Client' thread.
+            /// <summary>
+            /// Thread function executed by the 'Accept Client' thread.
+            /// </summary>
             private void AcceptClientFunction()
             {
                 while (!shutDown)
@@ -372,27 +378,7 @@ namespace WM
                                 }
                             }
 
-                            // B) ...spawn at the current Project and POI.
-                            if (clientConnections.Count > 1) // Hack to distinguish the local client running on server host. -> will be taken cae of in ServerClient implementation.
-                            {
-                                var teleportCommand = new TeleportCommand();
-                                teleportCommand.ProjectIndex = application.ActiveProjectIndex;
-                                teleportCommand.POIName = application.ActivePOIName;
-
-                                SendCommand(teleportCommand, newClientConnection);
-
-                                // C) ...be in the same immersion mode.
-                                var setImmersionModeCommand = new SetImmersionModeCommand();
-                                setImmersionModeCommand.ImmersionModeIndex = application.ActiveImmersionModeIndex;
-
-                                SendCommand(setImmersionModeCommand, newClientConnection);
-                            }
-
-                            // Notify clients that another client connected.
-                            var cc = new ConnectClientCommand();
-                            cc.ClientIP = newClientConnection.remoteIP;
-                            cc.AvatarIndex = newClientConnection.AvatarIndex;
-                            PropagateCommand(cc, newClientConnection);
+                            OnClientConnected(newClientConnection);
                         }
                         else
                         {
@@ -406,7 +392,15 @@ namespace WM
                 }
             }
 
-            //! Thread function executed by the 'Receive UDP' thread.
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="newClientConnection"></param>
+            abstract public void OnClientConnected(ClientConnection newClientConnection);
+
+            /// <summary>
+            /// Thread function executed by the 'Receive UDP' thread.
+            /// </summary>
             private void ReceiveUdpFunction()
             {
                 while (!shutDown)
@@ -447,7 +441,9 @@ namespace WM
                 }
             }
 
-            //! Thread function executed by the 'Receive TCP' thread.
+            /// <summary>
+            /// Thread function executed by the 'Receive TCP' thread.
+            /// </summary>
             private void ReceiveTcpFunction()
             {
                 while (!shutDown)
@@ -487,11 +483,9 @@ namespace WM
                                     }
                                 }
 
-                                string beginTag = "<Message ";
-                                string endTag = "</Message>";
-                                int EndTagLength = endTag.Length;
+                                int EndTagLength = Message.XmlEndTag.Length;
 
-                                int firstMessageBegin = clientConnection.tcpReceivedData.IndexOf(beginTag);
+                                int firstMessageBegin = clientConnection.tcpReceivedData.IndexOf(Message.XmlBeginTag);
 
                                 if (firstMessageBegin < 0)
                                 {
@@ -501,7 +495,7 @@ namespace WM
                                 // Remove all data in front of first message.
                                 clientConnection.tcpReceivedData = clientConnection.tcpReceivedData.Substring(firstMessageBegin);
 
-                                int firstMessageEnd = clientConnection.tcpReceivedData.IndexOf(endTag);
+                                int firstMessageEnd = clientConnection.tcpReceivedData.IndexOf(Message.XmlEndTag);
 
                                 if (firstMessageEnd < 0)
                                 {
@@ -534,6 +528,12 @@ namespace WM
                 }
             }
 
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="messageXML"></param>
+            /// <param name="clientConnection"></param>
+            /// <returns></returns>
             private bool ProcessMessage(
                 string messageXML,
                 ClientConnection clientConnection)
@@ -574,7 +574,7 @@ namespace WM
                     clientConnections.Remove(clientConnection);
 
                     // Step 2: send an acknoledge to the client that it is safe to continue disconnecting.
-                    SendData(GetObjectAsMessageXml(new ClientDisconnectAcknoledgeMessage()), clientConnection);
+                    SendData(Message.EncodeObjectAsXml(new ClientDisconnectAcknoledgeMessage()), clientConnection);
 
                     // Step 3: close the clientconnection network streams.
                     clientConnection.Close();                    
@@ -594,7 +594,11 @@ namespace WM
 
                 return true;
             }
-                        
+            
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="command"></param>
             public void BroadcastCommand(
                 ICommand command)
             {
@@ -602,7 +606,7 @@ namespace WM
 
                 try
                 {
-                    string data = GetObjectAsMessageXml(command);
+                    string data = Message.EncodeObjectAsXml(command);
 
                     BroadcastData(data);
                 }
@@ -612,7 +616,13 @@ namespace WM
                 }
             }
 
-            private void PropagateCommand(
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="command"></param>
+            /// <param name="sourceClientConnection"></param>
+            /*private*/
+            protected void PropagateCommand(
                 ICommand command,
                 ClientConnection sourceClientConnection)
             {
@@ -620,7 +630,7 @@ namespace WM
 
                 try
                 {
-                    string data = GetObjectAsMessageXml(command);
+                    string data = Message.EncodeObjectAsXml(command);
 
                     PropagateData(data, sourceClientConnection);
                 }
@@ -630,6 +640,10 @@ namespace WM
                 }
             }
 
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="data"></param>
             private void BroadcastData(
                 string data)
             {
@@ -655,6 +669,11 @@ namespace WM
                 }
             }
             
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="data"></param>
+            /// <param name="sourceClientConnection"></param>
             private void PropagateData(
                 string data,
                 ClientConnection sourceClientConnection)
@@ -686,30 +705,13 @@ namespace WM
                 }
             }
 
-            //!
-            private string GetObjectAsMessageXml(object obj)
-            {
-                var ser = new XmlSerializer(typeof(Message));
-
-                var writer = new StringWriter();
-                ser.Serialize(writer, GetObjectAsMessage(obj));
-                writer.Close();
-
-                var data = writer.ToString();
-
-                return data;
-            }
-
-            private Message GetObjectAsMessage(object obj)
-            {
-                var message = new Message();
-                message.Serialize(obj);
-
-                return message;
-            }
-
-            //!
-            private void SendCommand(
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="command"></param>
+            /// <param name="clientConnection"></param>
+            /*private*/
+            protected void SendCommand(
                 ICommand command,
                 ClientConnection clientConnection)
             {
@@ -723,7 +725,7 @@ namespace WM
                         return;
                     }
 
-                    var data = GetObjectAsMessageXml(command);
+                    var data = Message.EncodeObjectAsXml(command);
 
                     SendData(data, clientConnection);
                 }
@@ -733,7 +735,11 @@ namespace WM
                 }
             }
 
-            //!
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="data"></param>
+            /// <param name="clientConnection"></param>
             private void SendData(
                 String data,
                 ClientConnection clientConnection)
