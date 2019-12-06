@@ -22,9 +22,6 @@ namespace WM
             //! The IP of the client.
             public string remoteIP;
 
-            //! The index of the client's avatar.
-            public int AvatarIndex = 0;
-
             #region TCP stuff
 
             // The client-specific TCP client.
@@ -74,8 +71,11 @@ namespace WM
             // Used for debugging client list lock related deadlocks.
             private string clientsLockOwner = "";
 
-            // The client connections.
-            /*private*/ protected List<ClientConnection> clientConnections = new List<ClientConnection>();
+            /// <summary>
+            /// The client connections.
+            /// </summary>
+            /*private*/
+            protected List<ClientConnection> clientConnections = new List<ClientConnection>();
 
             //! Get a string with information about connected clients.
             public string GetClientInfo()
@@ -85,7 +85,7 @@ namespace WM
                 {
                     foreach (var clientConnection in clientConnections)
                     {
-                        info += "- " + clientConnection.remoteIP + " AvatarType:" + clientConnection.AvatarIndex + "\n";
+                        info += "- IP: " + clientConnection.remoteIP + "\n";
                     }
                 }
                 return info;
@@ -360,24 +360,6 @@ namespace WM
                                 clientsLockOwner = "None (AcceptClientFunction)";
                             }
 
-                            // Now the client is connected, make him...
-
-                            // A) .. know its peer clients.  (For each existing client, send a 'ClientConnect' command to the new client.
-                            lock (clientConnections)
-                            {
-                                foreach (var clientConnection in clientConnections)
-                                {
-                                    if (clientConnection != newClientConnection)
-                                    {
-                                        var cc1 = new ConnectClientCommand();
-                                        cc1.ClientIP = clientConnection.remoteIP;
-                                        cc1.AvatarIndex = clientConnection.AvatarIndex;
-
-                                        SendCommand(cc1, newClientConnection);
-                                    }
-                                }
-                            }
-
                             OnClientConnected(newClientConnection);
                         }
                         else
@@ -561,7 +543,6 @@ namespace WM
                 else if (obj is ConnectClientCommand)
                 {
                     var ccc = (ConnectClientCommand)obj;
-                    clientConnection.AvatarIndex = ccc.AvatarIndex;
                     PropagateData(messageXML, clientConnection);
                 }
                 else if (obj is DisconnectClientCommand)
@@ -581,12 +562,12 @@ namespace WM
 
                     return false;
                 }
-                else if (obj is SetClientAvatarCommand)
-                {
-                    var scac = (SetClientAvatarCommand)obj;
-                    clientConnection.AvatarIndex = scac.AvatarIndex;
-                    PropagateData(messageXML, clientConnection);
-                }
+                //else if (obj is SetClientAvatarCommand)
+                //{
+                //    var scac = (SetClientAvatarCommand)obj;
+                //    clientConnection.AvatarIndex = scac.AvatarIndex;
+                //    PropagateData(messageXML, clientConnection);
+                //}
                 else if (obj is SetModelLocationCommand)
                 {
                     BroadcastData(messageXML); // TODO: Or do???: PropagateData(messageXML, clientConnection);

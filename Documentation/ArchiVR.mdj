@@ -5009,7 +5009,7 @@
 											"top": 969,
 											"width": 521.1298828125,
 											"height": 13,
-											"text": "+ShutDown(): void",
+											"text": "-ShutDown(): void",
 											"horizontalAlignment": 0
 										},
 										{
@@ -5065,23 +5065,6 @@
 										},
 										{
 											"_type": "UMLOperationView",
-											"_id": "AAAAAAFuLEbsW8dl9WY=",
-											"_parent": {
-												"$ref": "AAAAAAFuLD6xbq7NR/c="
-											},
-											"model": {
-												"$ref": "AAAAAAFuLEbsQ8dW0VA="
-											},
-											"font": "Arial;13;0",
-											"left": 1301,
-											"top": 1029,
-											"width": 521.1298828125,
-											"height": 13,
-											"text": "+Operation1()",
-											"horizontalAlignment": 0
-										},
-										{
-											"_type": "UMLOperationView",
 											"_id": "AAAAAAFuLEeGBck7DbA=",
 											"_parent": {
 												"$ref": "AAAAAAFuLD6xbq7NR/c="
@@ -5091,7 +5074,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 1301,
-											"top": 1044,
+											"top": 1029,
 											"width": 521.1298828125,
 											"height": 13,
 											"text": "-ProcessMessage(string messageXML): void",
@@ -5108,7 +5091,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 1301,
-											"top": 1059,
+											"top": 1044,
 											"width": 521.1298828125,
 											"height": 13,
 											"text": "+SendAvatarStateToUdp(GameObject head, GameObject lhand, GameObject rhand): void",
@@ -5125,7 +5108,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 1301,
-											"top": 1074,
+											"top": 1059,
 											"width": 521.1298828125,
 											"height": 13,
 											"text": "+UpdateAvatarStatesFromUdp(): void",
@@ -5142,7 +5125,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 1301,
-											"top": 1089,
+											"top": 1074,
 											"width": 521.1298828125,
 											"height": 13,
 											"text": "-GetCommandAsData(ICommand command): string",
@@ -5159,7 +5142,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 1301,
-											"top": 1104,
+											"top": 1089,
 											"width": 521.1298828125,
 											"height": 13,
 											"text": "+SendCommand(ICommand command)",
@@ -5176,7 +5159,7 @@
 											},
 											"font": "Arial;13;0",
 											"left": 1301,
-											"top": 1119,
+											"top": 1104,
 											"width": 521.1298828125,
 											"height": 13,
 											"text": "+SendData(String data): void",
@@ -5187,7 +5170,7 @@
 									"left": 1296,
 									"top": 934,
 									"width": 531.1298828125,
-									"height": 203
+									"height": 188
 								},
 								{
 									"_type": "UMLReceptionCompartmentView",
@@ -9988,7 +9971,7 @@
 											"font": "Arial;13;1",
 											"left": 101,
 											"top": 663,
-											"width": 188.24609375,
+											"width": 189,
 											"height": 13,
 											"text": "TeleportFader"
 										},
@@ -10019,7 +10002,7 @@
 									"font": "Arial;13;0",
 									"left": 96,
 									"top": 656,
-									"width": 198.24609375,
+									"width": 199,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAFuUKMNiw9ruK8="
@@ -10056,7 +10039,7 @@
 											"font": "Arial;13;0",
 											"left": 101,
 											"top": 686,
-											"width": 188.24609375,
+											"width": 189,
 											"height": 13,
 											"text": "+application: ApplicationArchiVR",
 											"horizontalAlignment": 0
@@ -10065,7 +10048,7 @@
 									"font": "Arial;13;0",
 									"left": 96,
 									"top": 681,
-									"width": 198.24609375,
+									"width": 199,
 									"height": 23
 								},
 								{
@@ -10090,7 +10073,7 @@
 											"font": "Arial;13;0",
 											"left": 101,
 											"top": 709,
-											"width": 188.24609375,
+											"width": 189,
 											"height": 13,
 											"text": "+OnFadeOutComplete()",
 											"horizontalAlignment": 0
@@ -10107,7 +10090,7 @@
 											"font": "Arial;13;0",
 											"left": 101,
 											"top": 724,
-											"width": 188.24609375,
+											"width": 189,
 											"height": 13,
 											"text": "+OnFadeInComplete()",
 											"horizontalAlignment": 0
@@ -10116,7 +10099,7 @@
 									"font": "Arial;13;0",
 									"left": 96,
 									"top": 704,
-									"width": 198.24609375,
+									"width": 199,
 									"height": 38
 								},
 								{
@@ -10152,7 +10135,7 @@
 							"containerChangeable": true,
 							"left": 96,
 							"top": 656,
-							"width": 198.24609375,
+							"width": 199,
 							"height": 86,
 							"nameCompartment": {
 								"$ref": "AAAAAAFuUKMNig9qisQ="
@@ -11426,6 +11409,7 @@
 								"$ref": "AAAAAAFuLD6xbq7ESG8="
 							},
 							"name": "ShutDown",
+							"visibility": "private",
 							"parameters": [
 								{
 									"_type": "UMLParameter",
@@ -11497,14 +11481,6 @@
 									"direction": "return"
 								}
 							]
-						},
-						{
-							"_type": "UMLOperation",
-							"_id": "AAAAAAFuLEbsQ8dW0VA=",
-							"_parent": {
-								"$ref": "AAAAAAFuLD6xbq7ESG8="
-							},
-							"name": "Operation1"
 						},
 						{
 							"_type": "UMLOperation",

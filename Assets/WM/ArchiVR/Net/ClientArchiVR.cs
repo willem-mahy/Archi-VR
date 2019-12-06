@@ -132,14 +132,14 @@ namespace WM.ArchiVR.Net
                 }
 
                 // Update avatars with received avatar states.
-                lock (application.avatars)
+                lock (application.remoteUsers)
                 {
                     // Apply the most recent states.
                     foreach (var clientIP in receivedAvatarStates.Keys)
                     {
-                        if (application.avatars.ContainsKey(clientIP))
+                        if (application.remoteUsers.ContainsKey(clientIP))
                         {
-                            var avatar = application.avatars[clientIP].GetComponent<Avatar>();
+                            var avatar = application.remoteUsers[clientIP].Avatar;
                             var avatarState = receivedAvatarStates[clientIP];
                             avatar.SetState(avatarState);                            
                         }

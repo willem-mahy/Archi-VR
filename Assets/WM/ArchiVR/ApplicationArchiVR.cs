@@ -1,4 +1,5 @@
-﻿using ControllerSelection;
+﻿using Assets.WM.ArchiVR;
+using ControllerSelection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -70,9 +71,6 @@ namespace WM
 
             //! The avatar for the local player.
             public int AvatarIndex = 0;
-
-            //! The avatar instanciations, mapped on the IP of the client they represent.
-            public Dictionary<string, GameObject> avatars = new Dictionary<string, GameObject>();
 
             public Animator m_fadeAnimator;
 
@@ -333,6 +331,13 @@ namespace WM
             public float m_flySpeedHorizontal = DefaultFlySpeedHorizontal;
 
             #endregion
+
+            /// <summary>
+            /// The remote users.
+            /// </summary>
+            /*private*/
+            public Dictionary<string, RemoteUser> remoteUsers = new Dictionary<string, RemoteUser>();
+
 
             //! The list of all selection targets.
             private List<GameObject> selectionTargets = new List<GameObject>();
@@ -1024,6 +1029,11 @@ namespace WM
                 }
             }
 
+            /// <summary>
+            /// How are we manipulating the tracking space?
+            /// - Rotate around local reference and vertical axis
+            /// - Translate up/down along vertical axis
+            /// </summary>
             private enum TrackingSpaceManipulationMode
             {
                 None = 0,
@@ -1031,13 +1041,18 @@ namespace WM
                 TranslateUpDown
             };
 
+            /// <summary>
+            /// 
+            /// </summary>
             private TrackingSpaceManipulationMode trackingSpaceManipulationMode = TrackingSpaceManipulationMode.None;
 
             //! Whether or not translating tracking space up/down is enabled (default: false)
             public bool EnableTrackingSpaceTranslationUpDown = false;
 
 
-            //!
+            /// <summary>
+            /// 
+            /// </summary>
             public void UpdateTrackingSpace()
             {
                 if ((NetworkMode == NetworkMode.Client) && (SharedTrackingSpace == true))
@@ -1474,31 +1489,42 @@ namespace WM
 
             #endregion
 
-            #region Client management
+            #region Remote user management
 
-            //! Instanciates an avatar prefab to represent a newly connected client.
+            /// <summary>
+            /// Does whatever needs doing upon new client connected event.
+            /// - Creates a representation for a newly connected user.
+            /// </summary>
+            /// <param name="clientIP"></param>
+            /// <param name="avatarIndex"></param>
             public void ConnectClient(
-                string clientIP,
-                int avatarIndex)
+                string clientIP)
             {
-                lock (avatars)
+                lock (remoteUsers)
                 {
-                    avatars[clientIP] = InstanciateAvatarPrefab(
-                        avatarIndex,
+                    // TODO first: move avatar instance management (creatiion, init, destruction) into RemoteUser.Init(avatarIndex, pos, rot)?
+                    var avatar = InstanciateAvatarPrefab(
+                        0,
                         Vector3.zero,
                         Quaternion.identity);
+
+                    var remoteUser = new RemoteUser();
+                    remoteUser.remoteIP = clientIP;
+                    remoteUser.Avatar = avatar.GetComponent<WM.Net.Avatar>();
+
+                    remoteUsers[remoteUser.remoteIP] = remoteUser;
                 }
             }
 
             //! Destroys the avatar prefab for the given disconnected client.
             public void DisconnectClient(string clientIP)
             {
-                lock (avatars)
+                lock (remoteUsers)
                 {
-                    if (avatars.ContainsKey(clientIP))
+                    if (remoteUsers.ContainsKey(clientIP))
                     {
-                        GameObject.Destroy(avatars[clientIP]);
-                        avatars.Remove(clientIP);
+                        GameObject.Destroy(remoteUsers[clientIP].Avatar.gameObject);
+                        remoteUsers.Remove(clientIP);
                     }
                 }
             }
@@ -1508,23 +1534,27 @@ namespace WM
                 string ip,
                 int avatarIndex)
             {
-                lock (avatars)
+                lock (remoteUsers)
                 {
-                    var oldAvatar = (avatars.ContainsKey(ip) ? avatars[ip] : null);
+                    var remoteUser = (remoteUsers.ContainsKey(ip) ? remoteUsers[ip] : null);
 
-                    if (oldAvatar == null)
+                    if (remoteUser == null)
                     {
-                        Debug.LogWarning("SetClientAvatar(): No existing avatar found for client '" + ip + "'");
+                        Debug.LogWarning("SetClientAvatar(): No existing remote user found for IP '" + ip + "'");
                     }
 
-                    avatars[ip] = InstanciateAvatarPrefab(
+                    var oldAvatar = remoteUser.Avatar;
+                    
+                    var avatar = InstanciateAvatarPrefab(
                         avatarIndex,
                         oldAvatar.transform.position,
                         oldAvatar.transform.rotation);
 
+                    remoteUser.Avatar = avatar.GetComponent<WM.Net.Avatar>();
+
                     if (oldAvatar != null)
                     {
-                        Destroy(oldAvatar);
+                        Destroy(oldAvatar.gameObject);
                     }
                 }
             }

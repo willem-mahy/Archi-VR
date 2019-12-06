@@ -18,14 +18,14 @@ namespace WM.ArchiVR.Command
         {
             Debug.Log("ServerShutdownCommand.Execute()");
 
-            lock (application.avatars)
+            lock (application.remoteUsers)
             {
-                foreach (var avatar in application.avatars.Values)
+                foreach (var remoteUsers in application.remoteUsers.Values)
                 {
-                    GameObject.Destroy(avatar);
+                    GameObject.Destroy(remoteUsers.Avatar.gameObject);
                 }
 
-                application.avatars.Clear();
+                application.remoteUsers.Clear();
             }
 
             new InitNetworkCommand(NetworkMode.Standalone).Execute(application);

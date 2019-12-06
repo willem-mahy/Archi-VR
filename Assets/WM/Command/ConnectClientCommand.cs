@@ -14,9 +14,6 @@ namespace WM.ArchiVR.Command
         [XmlElement("ClientIP")]
         public string ClientIP { get; set; }
 
-        [XmlElement("AvatarIndex")]
-        public int AvatarIndex { get; set; }
-
         public ConnectClientCommand()
         { 
         }
@@ -25,7 +22,7 @@ namespace WM.ArchiVR.Command
         {
             Debug.Log("ConnectClientCommand.Execute()");
 
-            application.ConnectClient(ClientIP, AvatarIndex);
+            application.ConnectClient(ClientIP);
         }
     }
 }
