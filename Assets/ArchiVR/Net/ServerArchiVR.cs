@@ -5,7 +5,7 @@ using WM.Net;
 
 namespace ArchiVR.Net
 {
-    class ServerArchiVR : Server
+    public class ServerArchiVR : Server
     {
         #region Variables
 

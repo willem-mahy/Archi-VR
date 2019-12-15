@@ -80,7 +80,10 @@ namespace WM
             /*private*/
             protected List<ClientConnection> clientConnections = new List<ClientConnection>();
 
-            //! Get a string with information about connected clients.
+            /// <summary>
+            /// Get a string with information about connected clients.
+            /// </summary>
+            /// <returns></returns>
             public string GetClientInfo()
             {
                 string info = "";
@@ -92,6 +95,21 @@ namespace WM
                     }
                 }
                 return info;
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            public int NumClients
+            {
+                get
+                {
+                    lock (clientConnections)
+                    {
+                        return clientConnections.Count;
+                    }
+                }
             }
 
             // The thread that accepts TCP data from connected clients.
