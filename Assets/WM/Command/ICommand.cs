@@ -1,9 +1,9 @@
-﻿using WM.ArchiVR;
+﻿using WM.Application;
 
-namespace WM.ArchiVR.Command
+namespace WM.Command
 {
     public interface ICommand
     {
-        void Execute(ApplicationArchiVR application);
+        void Execute(UnityApplication application);
     }
 }

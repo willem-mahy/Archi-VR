@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using WM;
-using WM.ArchiVR;
+using WM.Application;
 
 public class HUDMenu : MonoBehaviour
 {
     #region Variables
 
-    public ApplicationArchiVR ApplicationArchiVR;
+    public UnityApplication Application;
 
     //! WHether anchoring to the eye anchor is enabled.
     public bool AnchorEnabled = false;
@@ -32,7 +30,7 @@ public class HUDMenu : MonoBehaviour
     {
         #region Get references to GameObjects.
 
-        ApplicationArchiVR = UtilUnity.TryFindGameObject("Application").GetComponent<ApplicationArchiVR>();
+        Application = UtilUnity.TryFindGameObject("Application").GetComponent<UnityApplication>();
 
         EyeAnchor = UtilUnity.TryFindGameObject("CenterEyeAnchor");
 
@@ -41,19 +39,21 @@ public class HUDMenu : MonoBehaviour
 
     void OnEnable()
     {
-        WM.Logger.Warning("HudMenu.OnEnable()");
-        if (ApplicationArchiVR)
+        //WM.Logger.Warning("HudMenu.OnEnable()");
+
+        if (Application)
         {
-            ApplicationArchiVR.AddSelectionTarget(gameObject);
+            Application.AddSelectionTarget(gameObject);
         }
     }
 
     void OnDisable()
     {
-        WM.Logger.Warning("HudMenu.OnDisable()");
-        if (ApplicationArchiVR)
+        //WM.Logger.Warning("HudMenu.OnDisable()");
+
+        if (Application)
         {
-            ApplicationArchiVR.RemoveSelectionTarget(gameObject);
+            Application.RemoveSelectionTarget(gameObject);
         }
     }
 

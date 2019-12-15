@@ -6,7 +6,10 @@ namespace WM
     {
         public static List<string> s_log = new List<string>();
 
-        //! Logs a debug message.
+        /// <summary>
+        /// Logs a debug message.
+        /// </summary>
+        /// <param name="text"></param>
         public static void Debug(string text)
         {
             s_log.Add(text);
@@ -14,7 +17,10 @@ namespace WM
             UnityEngine.Debug.Log(text);
         }
 
-        //! Logs a warning message.
+        /// <summary>
+        /// Logs a warning message.
+        /// </summary>
+        /// <param name="text"></param>
         public static void Warning(string text)
         {
             s_log.Add("Error: " +text);
@@ -22,7 +28,10 @@ namespace WM
             UnityEngine.Debug.LogWarning(text);
         }
 
-        //! Logs an error message.
+        /// <summary>
+        /// Logs an error message.
+        /// </summary>
+        /// <param name="text"></param>
         public static void Error(string text)
         {
             s_log.Add("Warning: " + text);

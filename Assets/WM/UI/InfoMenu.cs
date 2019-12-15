@@ -1,13 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using WM;
-using WM.ArchiVR;
 
 public class InfoMenu : MonoBehaviour
 {
     #region Variables
 
-    public ApplicationArchiVR ApplicationArchiVR;
+    //public ApplicationArchiVR ApplicationArchiVR;
 
     public Text VersionText;
 
@@ -20,7 +19,7 @@ public class InfoMenu : MonoBehaviour
     {
         #region Get references to GameObjects.
 
-        ApplicationArchiVR = UtilUnity.TryFindGameObject("Application").GetComponent<ApplicationArchiVR>();
+        //ApplicationArchiVR = UtilUnity.TryFindGameObject("Application").GetComponent<ApplicationArchiVR>();
 
         #endregion
 
@@ -40,7 +39,7 @@ public class InfoMenu : MonoBehaviour
 
         if (VersionText != null)
         {
-            VersionText.text = ApplicationArchiVR.Version;
+            VersionText.text = "TODO: Factor out ApplicationArchiVR"; // ApplicationArchiVR.Version;
         }
     }
 

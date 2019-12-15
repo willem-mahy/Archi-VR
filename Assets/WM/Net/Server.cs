@@ -8,9 +8,7 @@ using System.Threading;
 using System.Xml.Serialization;
 
 using UnityEngine;
-
-using WM.ArchiVR;
-using WM.ArchiVR.Command;
+using WM.Command;
 
 namespace WM
 {
@@ -70,6 +68,11 @@ namespace WM
 
             // Used for debugging client list lock related deadlocks.
             private string clientsLockOwner = "";
+
+            public string ClientsLockOwner
+            {
+                get { return clientsLockOwner; }
+            }
 
             /// <summary>
             /// The client connections.
@@ -532,15 +535,7 @@ namespace WM
                 // Binary-deserialize the object from the message.
                 var obj = message.Deserialize();
 
-                if (obj is TeleportCommand)
-                {
-                    BroadcastData(messageXML);
-                }
-                else if (obj is SetImmersionModeCommand)
-                {
-                    BroadcastData(messageXML);
-                }
-                else if (obj is ConnectClientCommand)
+                if (obj is ConnectClientCommand)
                 {
                     var ccc = (ConnectClientCommand)obj;
                     PropagateData(messageXML, clientConnection);
@@ -562,15 +557,10 @@ namespace WM
 
                     return false;
                 }
-                //else if (obj is SetClientAvatarCommand)
-                //{
-                //    var scac = (SetClientAvatarCommand)obj;
-                //    clientConnection.AvatarIndex = scac.AvatarIndex;
-                //    PropagateData(messageXML, clientConnection);
-                //}
-                else if (obj is SetModelLocationCommand)
+                else
                 {
-                    BroadcastData(messageXML); // TODO: Or do???: PropagateData(messageXML, clientConnection);
+                    // Application-specific message, EG ArchiVR.SetModelLocationCommand
+                    BroadcastData(messageXML); // TODO: Implement a way to figure out wheter to propagate or broadcast messages here.
                 }
 
                 return true;

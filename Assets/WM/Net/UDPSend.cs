@@ -23,7 +23,7 @@ namespace WM
             UdpClient udpClient;
 
             // gui
-            string strMessage = "";
+            //string strMessage = "";
 
             public UDPSend(UdpClient udpClient)
             {

@@ -1,13 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using WM;
-using WM.ArchiVR;
+using WM.Application;
 
 public class AvatarPanel : MonoBehaviour
 {
-    public ApplicationArchiVR ApplicationArchiVR;
+    public UnityApplication Application;
 
     public Dropdown AvatarDropdown;
 
@@ -20,7 +19,7 @@ public class AvatarPanel : MonoBehaviour
 
         #region Get references to GameObjects.
 
-        ApplicationArchiVR = GameObject.Find("Application").GetComponent<ApplicationArchiVR>();
+        Application = GameObject.Find("Application").GetComponent<UnityApplication>();
 
         #endregion
 
@@ -28,7 +27,7 @@ public class AvatarPanel : MonoBehaviour
 
         var options = new List<Dropdown.OptionData>();
 
-        foreach (var avatar in ApplicationArchiVR.avatarPrefabs)
+        foreach (var avatar in Application.avatarPrefabs)
         {
             options.Add(new Dropdown.OptionData(avatar.name));
         }
@@ -45,7 +44,7 @@ public class AvatarPanel : MonoBehaviour
     {
         synchronizingUI = true;
 
-         AvatarDropdown.value = ApplicationArchiVR.AvatarIndex;
+         AvatarDropdown.value = Application.AvatarIndex;
 
         synchronizingUI = false;
 
@@ -73,7 +72,7 @@ public class AvatarPanel : MonoBehaviour
             return;
         }
 
-        ApplicationArchiVR.SetAvatar(value);
+        Application.SetAvatar(value);
     }
 
     public void PrevAvatarButtonOnClick()
@@ -83,8 +82,8 @@ public class AvatarPanel : MonoBehaviour
             return;
         }
 
-        var avatarIndex = UtilIterate.MakeCycle(--ApplicationArchiVR.AvatarIndex, 0, ApplicationArchiVR.avatarPrefabs.Count);
-        ApplicationArchiVR.SetAvatar(avatarIndex);
+        var avatarIndex = UtilIterate.MakeCycle(--Application.AvatarIndex, 0, Application.avatarPrefabs.Count);
+        Application.SetAvatar(avatarIndex);
         AvatarDropdown.value = avatarIndex;
     }
 
@@ -95,8 +94,8 @@ public class AvatarPanel : MonoBehaviour
             return;
         }
 
-        var avatarIndex = UtilIterate.MakeCycle(++ApplicationArchiVR.AvatarIndex, 0, ApplicationArchiVR.avatarPrefabs.Count);
-        ApplicationArchiVR.SetAvatar(avatarIndex);
+        var avatarIndex = UtilIterate.MakeCycle(++Application.AvatarIndex, 0, Application.avatarPrefabs.Count);
+        Application.SetAvatar(avatarIndex);
         AvatarDropdown.value = avatarIndex;
     }
 

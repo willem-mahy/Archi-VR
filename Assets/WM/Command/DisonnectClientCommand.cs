@@ -2,8 +2,9 @@
 using System.Xml.Serialization;
 
 using UnityEngine;
+using WM.Application;
 
-namespace WM.ArchiVR.Command
+namespace WM.Command
 {
     [Serializable]
     [XmlRoot("DisonnectClientCommand")]
@@ -21,7 +22,7 @@ namespace WM.ArchiVR.Command
             ClientIP = clientIP;
         }
 
-        public void Execute(ApplicationArchiVR application)
+        public void Execute(UnityApplication application)
         {
             Debug.Log("DisconnectClientCommand.Execute()");
 

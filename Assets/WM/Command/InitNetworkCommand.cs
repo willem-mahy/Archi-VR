@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Xml.Serialization;
+using WM.Application;
+using WM.Command;
 using WM.Net;
 
-namespace WM.ArchiVR.Command
+namespace WM.Command
 {
     [Serializable]
     [XmlRoot("InitNetworkCommand")]
@@ -16,7 +18,7 @@ namespace WM.ArchiVR.Command
             NetworkMode = networkMode;
         }
 
-        public void Execute(ApplicationArchiVR application)
+        public void Execute(UnityApplication application)
         {
             WM.Logger.Debug("InitNetworkCommand.Execute(): NetworkMode = " + NetworkMode);
 

@@ -18,7 +18,7 @@ namespace WM
         {
             var controllerState = new ControllerState();
 
-            if (Application.isEditor)
+            if (UnityEngine.Application.isEditor)
             {
                 controllerState.Update_Editor();
             }

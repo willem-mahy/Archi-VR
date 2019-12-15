@@ -4,7 +4,7 @@ namespace WM
 {
     /* Utility functions for Unity.
      */
-    class UtilUnity
+    public class UtilUnity
     {
         // Clamps value to range [minValue, maxValue[ by making it cycle, if necessary.
         public static GameObject TryFindGameObject(string name)

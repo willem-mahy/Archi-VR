@@ -4,7 +4,7 @@ namespace WM
 {
     namespace Net
     {
-        class NetUtil
+        public class NetUtil
         {
             /// <summary>
             /// 

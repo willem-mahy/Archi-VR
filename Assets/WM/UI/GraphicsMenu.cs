@@ -2,13 +2,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using WM;
-using WM.ArchiVR;
+using WM.Application;
 
 public class GraphicsMenu : MonoBehaviour
 {
     #region Variables
 
-    public ApplicationArchiVR ApplicationArchiVR;
+    public UnityApplication Application;
 
     public Dropdown QualityDropdown;
 
@@ -23,7 +23,7 @@ public class GraphicsMenu : MonoBehaviour
     {
         #region Get references to GameObjects.
 
-        ApplicationArchiVR = UtilUnity.TryFindGameObject("Application").GetComponent<ApplicationArchiVR>();
+        Application = UtilUnity.TryFindGameObject("Application").GetComponent<UnityApplication>();
 
         #endregion
 
@@ -70,7 +70,7 @@ public class GraphicsMenu : MonoBehaviour
 
         if (ShowFpsToggle != null)
         {
-            ShowFpsToggle.isOn = ApplicationArchiVR.FpsPanelHUD.activeSelf;
+            ShowFpsToggle.isOn = Application.FpsPanelHUD.activeSelf;
         }
 
         if (QualityDropdown != null)
@@ -118,11 +118,11 @@ public class GraphicsMenu : MonoBehaviour
 
     public void ShowFPSToggleOnValueChanged(bool value)
     {
-        if (ApplicationArchiVR)
+        if (Application)
         {
-            if (ApplicationArchiVR.FpsPanelHUD)
+            if (Application.FpsPanelHUD)
             {
-                ApplicationArchiVR.FpsPanelHUD.SetActive(value);
+                Application.FpsPanelHUD.SetActive(value);
             }
         }
     }

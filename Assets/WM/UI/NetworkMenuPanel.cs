@@ -1,19 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-
-using WM.ArchiVR;
-using WM.ArchiVR.Command;
+using WM.Application;
+using WM.Command;
 using WM.Net;
 
-namespace WM.ArchiVR.UI
+namespace WM.UI
 {
     public class NetworkMenuPanel : MonoBehaviour
     {
         #region Variables
 
-        public ApplicationArchiVR ApplicationArchiVR;
+        public UnityApplication Application;
 
         public Text IPValueText;
 
@@ -39,13 +36,13 @@ namespace WM.ArchiVR.UI
         {
             #region Get references to GameObjects.
 
-            ApplicationArchiVR = UtilUnity.TryFindGameObject("Application").GetComponent<ApplicationArchiVR>();
+            Application = UtilUnity.TryFindGameObject("Application").GetComponent<UnityApplication>();
 
             #endregion
 
             synchronizingUI = true;
 
-            switch (ApplicationArchiVR.NetworkMode)
+            switch (Application.NetworkMode)
             {
                 case NetworkMode.Standalone:
                     StandaloneToggle.isOn = true;
@@ -62,7 +59,7 @@ namespace WM.ArchiVR.UI
 
             synchronizingUI = false;
 
-            UpdateUIToNetworkModeSelection(ApplicationArchiVR.NetworkMode); // If startup mode is Standalone, the UI is not updated accordingly, so force that explicitely here...
+            UpdateUIToNetworkModeSelection(Application.NetworkMode); // If startup mode is Standalone, the UI is not updated accordingly, so force that explicitely here...
         }
 
         // Update is called once per frame
@@ -70,12 +67,12 @@ namespace WM.ArchiVR.UI
         {
             synchronizingUI = true;
             
-            if (ApplicationArchiVR.NetworkMode == NetworkMode.Server)
+            if (Application.NetworkMode == NetworkMode.Server)
             {
-                ServerStatusValueText.text = ApplicationArchiVR.Server.Status;
+                ServerStatusValueText.text = Application.Server.Status;
             }
 
-            UpdateUIToNetworkModeSelection(ApplicationArchiVR.NetworkMode);
+            UpdateUIToNetworkModeSelection(Application.NetworkMode);
 
             synchronizingUI = false;
 
@@ -114,9 +111,9 @@ namespace WM.ArchiVR.UI
                 return;
             }
 
-            if (ApplicationArchiVR)
+            if (Application)
             {
-                ApplicationArchiVR.QueueCommand(new InitNetworkCommand(networkMode));
+                Application.QueueCommand(new InitNetworkCommand(networkMode));
             }
         }
         
@@ -136,7 +133,7 @@ namespace WM.ArchiVR.UI
                     ServerPanel.SetActive(true);
                     ClientPanel.SetActive(false);
 
-                    ClientsValueText.text = ApplicationArchiVR.Server.GetClientInfo();
+                    ClientsValueText.text = Application.Server.GetClientInfo();
                     break;
                 case NetworkMode.Client:
                     ClientToggle.isOn = true;
@@ -145,7 +142,7 @@ namespace WM.ArchiVR.UI
                     ServerPanel.SetActive(false);
                     ClientPanel.SetActive(true);
 
-                    ClientStatusValueText.text = ApplicationArchiVR.Client.Status;                    
+                    ClientStatusValueText.text = Application.Client.Status;                    
                     break;
             }
         }

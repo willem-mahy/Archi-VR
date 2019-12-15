@@ -1,6 +1,6 @@
 ﻿namespace WM
 {
-    class UtilIterate
+    public class UtilIterate
     {
         // Clamps value to range [minValue, maxValue[ by making it cycle, if necessary.
         public static int MakeCycle(int value, int minValue, int maxValue)

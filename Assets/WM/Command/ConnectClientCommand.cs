@@ -2,10 +2,9 @@
 using System.Xml.Serialization;
 
 using UnityEngine;
+using WM.Application;
 
-using WM.ArchiVR;
-
-namespace WM.ArchiVR.Command
+namespace WM.Command
 {
     [Serializable]
     [XmlRoot("ConnectClientCommand")]
@@ -18,7 +17,7 @@ namespace WM.ArchiVR.Command
         { 
         }
 
-        public void Execute(ApplicationArchiVR application)
+        public void Execute(UnityApplication application)
         {
             Debug.Log("ConnectClientCommand.Execute()");
 

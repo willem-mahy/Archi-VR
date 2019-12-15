@@ -2,8 +2,10 @@
 using System.Xml.Serialization;
 
 using UnityEngine;
+using WM.Application;
+using WM.Command;
 
-namespace WM.ArchiVR.Command
+namespace WM.Command
 {
     [Serializable]
     [XmlRoot("SetClientAvatarCommand")]
@@ -27,7 +29,7 @@ namespace WM.ArchiVR.Command
             AvatarIndex = avatarIndex;
         }
 
-        public void Execute(ApplicationArchiVR application)
+        public void Execute(UnityApplication application)
         {
             Debug.Log("SetClientAvatarCommand.Execute()");
 

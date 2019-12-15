@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using WM.ArchiVR;
+using WM.Application;
 
 namespace WM.UI
 {
     public class DebugInputMenu : MonoBehaviour
     {
-        public ApplicationArchiVR ApplicationArchiVR;
+        public UnityApplication Application;
 
-        Text text;
+        Text text = null;
 
         // Start is called before the first frame update
         void Start()
@@ -19,7 +19,7 @@ namespace WM.UI
         // Update is called once per frame
         void Update()
         {
-            var controllerInput = ApplicationArchiVR.m_controllerInput;
+            var controllerInput = Application.m_controllerInput;
 
             var controllerState = controllerInput.m_controllerState;
 

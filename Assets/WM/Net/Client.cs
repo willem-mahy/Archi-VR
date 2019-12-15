@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Xml.Serialization;
 using UnityEngine;
-using WM.ArchiVR.Command;
+using WM.Command;
 
 namespace WM.Net
 {
