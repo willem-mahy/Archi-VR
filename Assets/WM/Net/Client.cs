@@ -102,6 +102,13 @@ namespace WM.Net
                 thread = null;
             }
 
+            if (udpReceive != null)
+            {
+                udpReceive.ShutDown();
+
+                udpReceive = null;
+            }
+
             if (udpClient != null)
             {
                 udpClient.Close();
