@@ -43,10 +43,29 @@ namespace WM
                 Debug.Log("UDPReceive running");
             }
 
-            // receive thread
+            private bool shutDown = false;
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public void ShutDown()
+            {
+                shutDown = true;
+
+                if (receiveThread != null)
+                {
+                    receiveThread.Join();
+
+                    receiveThread = null;
+                }
+            }
+
+            /// <summary>
+            /// Receive thread function.
+            /// </summary>
             private void ReceiveData()
             {
-                while (true)
+                while (!shutDown)
                 {
 
                     try
