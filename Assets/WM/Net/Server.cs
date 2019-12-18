@@ -348,12 +348,15 @@ namespace WM
             /// </summary>
             private void AcceptClientFunction()
             {
+                WM.Logger.Debug("AcceptClientFunction() Start()");
+
                 while (!shutDown)
                 {
                     try
                     {
                         if (tcpListener.Pending())
                         {
+                            WM.Logger.Debug("AcceptClientFunction(): Client connecting...");
                             var newClientConnection = new ClientConnection();
 
                             // Accept the client TCP socket.
