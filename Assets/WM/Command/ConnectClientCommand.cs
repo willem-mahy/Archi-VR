@@ -19,7 +19,7 @@ namespace WM.Command
 
         public void Execute(UnityApplication application)
         {
-            Debug.Log("ConnectClientCommand.Execute()");
+            WM.Logger.Debug("ConnectClientCommand.Execute()");
 
             application.ConnectClient(ClientIP);
         }

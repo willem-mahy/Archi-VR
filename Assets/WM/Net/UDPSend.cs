@@ -20,11 +20,13 @@ namespace WM
 
             // "connection" things
             IPEndPoint remoteEndPoint;
+
             UdpClient udpClient;
 
-            // gui
-            //string strMessage = "";
-
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="udpClient"></param>
             public UDPSend(UdpClient udpClient)
             {
                 this.udpClient = udpClient;
@@ -32,11 +34,11 @@ namespace WM
 
             public void Init()
             {
-                Debug.Log("UDPSend.Init()");
+                WM.Logger.Debug("UDPSend.Init(): Start");
 
                 remoteEndPoint = new IPEndPoint(IPAddress.Parse(remoteIP), remotePort);
 
-                Debug.Log("UDPSend running @ " + remoteIP + ":" + remotePort + ")");
+                WM.Logger.Debug("UDPSend.Init(): UDPSend running @ " + remoteIP + ":" + remotePort + ")");
             }
 
             //! Sends the given message to the remote client.
@@ -60,7 +62,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    Debug.Log("UDPSend.sendString(): Exception: " + e.ToString());
+                    WM.Logger.Error("UDPSend.sendString(): Exception: " + e.ToString());
                 }
             }
         }

@@ -18,7 +18,7 @@ namespace WM.Command
 
         public void Execute(UnityApplication application)
         {
-            Debug.Log("ServerShutdownCommand.Execute()");
+            WM.Logger.Debug("ServerShutdownCommand.Execute()");
 
             lock (application.remoteUsers)
             {

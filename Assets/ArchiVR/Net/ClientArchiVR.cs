@@ -16,6 +16,11 @@ namespace ArchiVR.Net
 
         #endregion
 
+        public ClientArchiVR()
+        {
+            UdpBroadcastMessage = Constants.BroadcastMessage;
+        }
+
         /// <summary>
         /// <see cref="Client"/> implementation.
         /// </summary>
@@ -66,9 +71,9 @@ namespace ArchiVR.Net
                 var command = (SetModelLocationCommand)obj;
                 application.QueueCommand(command);
             }
-            else if (obj is ServerShutdownCommand)
+            else if (obj is ServerShutdownCommand command)
             {
-                var command = (ServerShutdownCommand)obj;
+                //var command = (ServerShutdownCommand)obj;
                 application.QueueCommand(command);
             }
         }
@@ -146,7 +151,7 @@ namespace ArchiVR.Net
                         }
                         else
                         {
-                            Debug.LogWarning("Client.UpdateAvatarStatesFromUDP(): Received avatar state for non-existing avatar! (" + clientIP + ")");
+                            WM.Logger.Warning("Client.UpdateAvatarStatesFromUDP(): Received avatar state for non-existing avatar! (" + clientIP + ")");
                         }
                     }
                 }

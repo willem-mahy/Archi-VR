@@ -19,7 +19,7 @@ namespace ArchiVR.Command
 
         public void Execute(UnityApplication application)
         {
-            Debug.Log("TeleportCommand.Execute()");
+            WM.Logger.Debug("TeleportCommand.Execute()");
 
             var applicationArchiVR = (ApplicationArchiVR)application;
 

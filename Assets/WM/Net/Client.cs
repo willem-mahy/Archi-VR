@@ -21,7 +21,7 @@ namespace WM.Net
 
         #region TCP
 
-        public int TcpPort = 8889; // Must be different than server TCP port probably...
+        public int TcpPort = Constants.BasePort + 5;
 
         // The TCP client
         private TcpClient tcpClient;
@@ -33,7 +33,17 @@ namespace WM.Net
 
         #region UDP
 
-        public static readonly int UdpPort = 8891; // Must be different than server UDP port probably...
+        /// <summary>
+        /// The broadcast message to be broadcasted by the server.
+        /// To be implemented by concrete server types.
+        /// </summary>
+        public string UdpBroadcastMessage
+        {
+            get;
+            protected set;
+        }
+
+        public static readonly int UdpPort = Constants.BasePort + 4;
 
         private UdpClient udpClient;
 
@@ -81,10 +91,13 @@ namespace WM.Net
         /// </summary>
         public void Disconnect()
         {
+            WM.Logger.Debug("Client.Disconnect(): Start");
+
             SendCommand(new DisconnectClientCommand(NetUtil.GetLocalIPAddress()));
 
             while (Status != "DisconnectAcknoledged") ;
 
+            WM.Logger.Debug("Client.Disconnect(): DisconnectAcknoledged received: Shutting down...");
             Shutdown();
         }
 
@@ -93,6 +106,7 @@ namespace WM.Net
         /// </summary>
         private void Shutdown()
         {
+            WM.Logger.Debug("Client.Shutdown(): Start");
             shutDown = true;
 
             if (thread != null)
@@ -104,7 +118,7 @@ namespace WM.Net
 
             if (udpReceive != null)
             {
-                udpReceive.ShutDown();
+                udpReceive.Shutdown();
 
                 udpReceive = null;
             }
@@ -142,6 +156,8 @@ namespace WM.Net
         {
             Status = "Listening for servers";
 
+            WM.Logger.Debug(string.Format("Client: Listening to UDP broadcast Message '{0}' on port {1}", UdpBroadcastMessage, Server.BroadcastUdpPort));
+
             var udpClient = new UdpClient(Server.BroadcastUdpPort);
             var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
@@ -155,14 +171,20 @@ namespace WM.Net
                     // Encode received bytes to UTF8- encoding.
                     string text = Encoding.UTF8.GetString(data);
 
-                    if (text.Contains(Server.UdpBroadcastMessage))
+                    if (text.Contains(UdpBroadcastMessage))
                     {
-                        return remoteEndPoint.Address.ToString();
+                        var serverAddress = remoteEndPoint.Address.ToString();
+                        WM.Logger.Debug(string.Format("Client: received UDP broadcast Message from server '{0}'", serverAddress));
+                        return serverAddress;
+                    }
+                    else
+                    {
+                        WM.Logger.Warning(string.Format("Client: Received unexpected message '{0}' on server broadcast listener UDP client!", text));
                     }
                 }
                 catch (Exception e)
                 {
-                    Debug.Log("UDPReceive.ReceiveData(): Exception: " + e.ToString());
+                    WM.Logger.Debug("UDPReceive.ReceiveData(): Exception: " + e.ToString());
                 }
             }
 
@@ -454,7 +476,7 @@ namespace WM.Net
         /// <param name="command"></param>
         public void SendCommand(ICommand command)
         {
-            Debug.Log("Client:SendCommand()");
+            WM.Logger.Debug("Client:SendCommand()");
 
             try
             {
@@ -474,7 +496,7 @@ namespace WM.Net
         /// <param name="data"></param>
         public void SendData(String data)
         {
-            Debug.Log("Client:SendData()");
+            WM.Logger.Debug("Client:SendData()");
 
             try
             {
@@ -518,7 +540,7 @@ namespace WM.Net
                 {
                     if (udpReceive.allReceivedUDPPackets.Keys.Count > 1)
                     {
-                        Debug.LogWarning("Client.UpdateAvatarStatesFromUDP(): More than one receive buffer!?!");
+                        WM.Logger.Warning("Client.UpdateAvatarStatesFromUDP(): More than one receive buffer!?!");
                         udpReceive.allReceivedUDPPackets.Clear();
                         return null;
                     }

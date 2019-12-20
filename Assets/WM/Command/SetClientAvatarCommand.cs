@@ -31,7 +31,7 @@ namespace WM.Command
 
         public void Execute(UnityApplication application)
         {
-            Debug.Log("SetClientAvatarCommand.Execute()");
+            WM.Logger.Debug("SetClientAvatarCommand.Execute()");
 
             application.SetClientAvatar(ClientIP, AvatarIndex);
         }

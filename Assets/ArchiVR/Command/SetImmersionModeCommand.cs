@@ -17,7 +17,7 @@ namespace ArchiVR.Command
 
         public void Execute(UnityApplication application)
         {
-            Debug.Log("SetImmersionModeCommand.Execute()");
+            WM.Logger.Debug("SetImmersionModeCommand.Execute()");
 
             //if (application.RunAsServer)
             //{

@@ -903,7 +903,7 @@ namespace WM.Application
 
                 if (remoteUser == null)
                 {
-                    Debug.LogWarning("SetClientAvatar(): No existing remote user found for IP '" + ip + "'");
+                    WM.Logger.Warning("SetClientAvatar(): No existing remote user found for IP '" + ip + "'");
                 }
 
                 var oldAvatar = remoteUser.Avatar;

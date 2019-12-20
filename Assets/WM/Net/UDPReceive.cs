@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using UnityEngine;
+using System.Threading.Tasks;
 
 namespace WM
 {
@@ -14,17 +14,30 @@ namespace WM
          */
         public class UDPReceive
         {
-            // receiving Thread
+            /// <summary>
+            /// Receiving Thread
+            /// </summary>
             private Thread receiveThread;
 
-            // udpclient object
+            /// <summary>
+            /// UdpClient object
+            /// </summary>
             private UdpClient udpClient;
 
-            //
+            /// <summary>
+            /// 
+            /// </summary>
             public string lastReceivedUDPPacket = "";
 
-            // clean up this from time to time!
+            /// <summary>
+            /// Clean up this from time to time!
+            /// </summary>
             public Dictionary<string, string> allReceivedUDPPackets = new Dictionary<string, string>();
+
+            /// <summary>
+            /// 
+            /// </summary>
+            CancellationTokenSource shutdownTokenSource = new CancellationTokenSource();
 
             public UDPReceive(UdpClient udpClient)
             {
@@ -33,24 +46,29 @@ namespace WM
 
             public void Init()
             {
-                // Endpunkt definieren, von dem die Nachrichten gesendet werden.
-                Debug.Log("UDPReceive.Init()");
+                WM.Logger.Debug("UDPReceive.Init()");
+
+                if (shutdownTokenSource != null)
+                {
+                    shutdownTokenSource.Dispose();
+                }
+                shutdownTokenSource = new CancellationTokenSource();
 
                 receiveThread = new Thread(new ThreadStart(ReceiveData));
                 receiveThread.IsBackground = true;
                 receiveThread.Start();
 
-                Debug.Log("UDPReceive running");
+                WM.Logger.Debug("UDPReceive.Init() End");
             }
-
-            private bool shutDown = false;
 
             /// <summary>
             /// 
             /// </summary>
-            public void ShutDown()
+            public void Shutdown()
             {
-                shutDown = true;
+                WM.Logger.Debug("UDPReceive.Shutdown()");
+
+                shutdownTokenSource.Cancel();
 
                 if (receiveThread != null)
                 {
@@ -58,6 +76,8 @@ namespace WM
 
                     receiveThread = null;
                 }
+
+                WM.Logger.Debug("UDPReceive.Shutdown() End");
             }
 
             /// <summary>
@@ -65,17 +85,28 @@ namespace WM
             /// </summary>
             private void ReceiveData()
             {
-                while (!shutDown)
+                while (true)
                 {
-
                     try
                     {
-                        // Recive bytes from any client.
-                        var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                        byte[] data = udpClient.Receive(ref remoteEndPoint);
+                        // Receive bytes from any client.                        
+                        var task = udpClient.ReceiveAsync();
+
+                        try
+                        {
+                            task.Wait(shutdownTokenSource.Token);
+                        }
+                        catch (OperationCanceledException e)
+                        {
+                            return;
+                        }
+
+                        var result = task.Result;
+
+                        var remoteEndPoint = result.RemoteEndPoint;
 
                         // Encode received bytes to UTF8- encoding.
-                        string text = Encoding.UTF8.GetString(data);
+                        string text = Encoding.UTF8.GetString(result.Buffer);
 
                         // latest UDPpacket
                         lastReceivedUDPPacket = text;
@@ -97,7 +128,7 @@ namespace WM
                     }
                     catch (Exception e)
                     {
-                        Debug.Log("UDPReceive.ReceiveData(): Exception: " + e.ToString());
+                        WM.Logger.Error("UDPReceive.ReceiveData(): Exception: " + e.ToString());
                     }
                 }
             }

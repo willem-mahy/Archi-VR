@@ -24,7 +24,7 @@ namespace WM.Command
 
         public void Execute(UnityApplication application)
         {
-            Debug.Log("DisconnectClientCommand.Execute()");
+            WM.Logger.Debug("DisconnectClientCommand.Execute()");
 
             application.DisconnectClient(ClientIP);
         }
