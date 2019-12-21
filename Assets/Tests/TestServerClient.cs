@@ -2,6 +2,7 @@
 using ArchiVR.Net;
 using NUnit.Framework;
 using System.Collections;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -32,7 +33,6 @@ namespace Tests
 
             Assert.AreEqual(0, server.NumClients);
 
-            /*
             var client0GO = new GameObject();
             var client0 = client0GO.AddComponent(typeof(ClientArchiVR)) as ClientArchiVR;
             client0.application = applicationClient;
@@ -40,7 +40,6 @@ namespace Tests
             Assert.AreEqual(0, server.NumClients);
             Assert.AreEqual(false, client0.Connected);
 
-            
             // Let client A connect
             client0.Init();
 
@@ -58,8 +57,6 @@ namespace Tests
             
             // Client A should be disconnected.
             Assert.AreEqual(false, client0.Connected);
-
-            */
 
             // Server should have no clients connected.
             Assert.AreEqual(0, server.NumClients);
