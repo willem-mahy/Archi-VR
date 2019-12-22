@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace WM
 {
     namespace Net
     {
-        /*
+        /* Continuously (on its own worker thread) receives data on the given UDP socket.
+         * Received UDP packets are stored in a dictionary, mapped on the IP address of the sender.
          */
         public class UDPReceive
         {
@@ -37,7 +36,7 @@ namespace WM
             /// <summary>
             /// 
             /// </summary>
-            CancellationTokenSource shutdownTokenSource = new CancellationTokenSource();
+            private CancellationTokenSource shutdownTokenSource = new CancellationTokenSource();
 
             public UDPReceive(UdpClient udpClient)
             {

@@ -97,7 +97,7 @@ namespace WM.Net
                 return;
             }
 
-            udpSend.sendString(data);
+            udpSend.SendString(data);
         }
 
         /// <summary>

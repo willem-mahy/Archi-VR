@@ -441,7 +441,7 @@ namespace WM.Net
 
             try
             {
-                udpSend.sendString(data);
+                udpSend.SendString(data);
             }
             catch (Exception e)
             {
@@ -462,7 +462,7 @@ namespace WM.Net
 
             try
             {
-                udpSend.sendString(Message.EncodeObjectAsXml(obj));
+                udpSend.SendString(Message.EncodeObjectAsXml(obj));
             }
             catch (Exception e)
             {

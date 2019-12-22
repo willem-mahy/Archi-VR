@@ -2,68 +2,72 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using UnityEngine;
 
-namespace WM
+namespace WM.Net
 {
-    namespace Net
+    /*
+     */
+    public class UDPSend
     {
-        /*
-         */
-        public class UDPSend
+        /// <summary>
+        /// 
+        /// </summary>
+        private static int localPort;
+
+        /// <summary>
+        /// The remote end point IP. (Default: loop back)
+        /// </summary>
+        public string remoteIP = "127.0.0.1";
+
+        /// <summary>
+        /// The remote end point port. (Default: 8890)
+        /// </summary>
+        public int remotePort = 8890;
+
+        // "connection" things
+        IPEndPoint remoteEndPoint;
+
+        UdpClient udpClient;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="udpClient"></param>
+        public UDPSend(UdpClient udpClient)
         {
-            private static int localPort;
+            this.udpClient = udpClient;
+        }
 
-            // prefs
-            public string remoteIP = "127.0.0.1"; // 'loop back by default...
-            public int remotePort = 8890;
+        public void Init()
+        {
+            WM.Logger.Debug("UDPSend.Init(): Start");
 
-            // "connection" things
-            IPEndPoint remoteEndPoint;
+            remoteEndPoint = new IPEndPoint(IPAddress.Parse(remoteIP), remotePort);
 
-            UdpClient udpClient;
+            WM.Logger.Debug("UDPSend.Init(): UDPSend running @ " + remoteIP + ":" + remotePort + ")");
+        }
 
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="udpClient"></param>
-            public UDPSend(UdpClient udpClient)
+        /// <summary>
+        /// Sends the given message to the remote end point.
+        /// </summary>
+        /// <param name="message"></param>
+        public void SendString(string message)
+        {
+            if (remoteEndPoint == null)
             {
-                this.udpClient = udpClient;
+                return; // Not connected yet...
             }
 
-            public void Init()
+            try
             {
-                WM.Logger.Debug("UDPSend.Init(): Start");
+                var data = (message == null) ? new byte[0] : Encoding.UTF8.GetBytes(message);
 
-                remoteEndPoint = new IPEndPoint(IPAddress.Parse(remoteIP), remotePort);
-
-                WM.Logger.Debug("UDPSend.Init(): UDPSend running @ " + remoteIP + ":" + remotePort + ")");
+                // Send data to remote client.
+                udpClient.Send(data, data.Length, remoteEndPoint);
             }
-
-            //! Sends the given message to the remote client.
-            public void sendString(string message)
+            catch (Exception e)
             {
-                if (remoteEndPoint == null)
-                {
-                    return; // Not connected yet...
-                }
-
-                try
-                {
-                    if (message != "")
-                    {
-                        // Encode data to UTF8-encoding.
-                        byte[] data = Encoding.UTF8.GetBytes(message);
-
-                        // Send data to remote client.
-                        udpClient.Send(data, data.Length, remoteEndPoint);
-                    }
-                }
-                catch (Exception e)
-                {
-                    WM.Logger.Error("UDPSend.sendString(): Exception: " + e.ToString());
-                }
+                WM.Logger.Error("UDPSend.SendString(): Exception: " + e.ToString());
             }
         }
     }
