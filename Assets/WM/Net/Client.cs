@@ -540,7 +540,7 @@ namespace WM.Net
                 {
                     if (udpReceive.allReceivedUDPPackets.Keys.Count > 1)
                     {
-                        WM.Logger.Warning("Client.UpdateAvatarStatesFromUDP(): More than one receive buffer!?!");
+                        WM.Logger.Warning("Client.GetReceivedMessagesUdp(): More than one receive buffer!?!");
                         udpReceive.allReceivedUDPPackets.Clear();
                         return null;
                     }

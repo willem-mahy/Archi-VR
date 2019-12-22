@@ -25,12 +25,19 @@ namespace WM.Net
     /// </summary>    
     public class ClientConnection
     {
-        //! The IP of the client.
+        //! The remote endpoint IP.
         public string remoteIP
         {
             get;
             private set;
-        }
+        } = "";
+
+        //! The remote endpoint port.
+        public int remotePort
+        {
+            get;
+            private set;
+        } = -1;
 
         #region TCP stuff
 
@@ -621,7 +628,7 @@ namespace WM.Net
 
                         clientsLockOwner = "None (last:ReceiveFromClientsFunction)";
                     }
-                    //Thread.Sleep(10);
+                    Thread.Sleep(10);
                 }
                 catch (Exception ex)
                 {
@@ -853,6 +860,11 @@ namespace WM.Net
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="clientIndex"></param>
         public void SendDataToUdp(string data, int clientIndex)
         {
             lock (clientConnections)
@@ -890,7 +902,7 @@ namespace WM.Net
         {
             try
             {
-                var clientIP = "";
+                var clientKey = "";
 
                 lock (clientConnections)
                 {
@@ -906,27 +918,27 @@ namespace WM.Net
                         return null;
                     }
 
-                    clientIP = clientConnections[clientIndex].remoteIP;
+                    clientKey = UDPReceive.GetRemoteEndpointKey(clientConnection.remoteIP, clientConnection.remotePort);
                 }
 
                 string messageXML = "";
 
                 lock (udpReceive.allReceivedUDPPackets)
                 {
-                    if (!udpReceive.allReceivedUDPPackets.ContainsKey(clientIP))
+                    if (!udpReceive.allReceivedUDPPackets.ContainsKey(clientKey))
                     {
                         return null;
                     }
 
                     int frameEndTagLength = Message.XmlEndTag.Length;
-                    int lastFrameEnd = udpReceive.allReceivedUDPPackets[clientIP].LastIndexOf(Message.XmlEndTag);
+                    int lastFrameEnd = udpReceive.allReceivedUDPPackets[clientKey].LastIndexOf(Message.XmlEndTag);
 
                     if (lastFrameEnd < 0)
                     {
                         return null;
                     }
 
-                    string temp = udpReceive.allReceivedUDPPackets[clientIP].Substring(0, lastFrameEnd + frameEndTagLength);
+                    string temp = udpReceive.allReceivedUDPPackets[clientKey].Substring(0, lastFrameEnd + frameEndTagLength);
 
                     int lastFrameBegin = temp.LastIndexOf(Message.XmlBeginTag);
 
@@ -944,24 +956,14 @@ namespace WM.Net
                     // -> If not, continue search for older message...
 
                     // Clear old messages from receivebuffer.
-                    udpReceive.allReceivedUDPPackets[clientIP] = udpReceive.allReceivedUDPPackets[clientIP].Substring(lastFrameEnd + frameEndTagLength);
+                    udpReceive.allReceivedUDPPackets[clientKey] = udpReceive.allReceivedUDPPackets[clientKey].Substring(lastFrameEnd + frameEndTagLength);
                 }
-
-                /*
-                    var ser = new XmlSerializer(typeof(AvatarState));
-
-                    //var reader = new StreamReader(avatarFilePath);
-                    var reader = new StringReader(messageXML);
-
-                    var trackedObject = (AvatarState)(ser.Deserialize(reader));
-                    reader.Close();
-                */
 
                 return messageXML;
             }
             catch (Exception e)
             {
-                    WM.Logger.Error("Server.GetLastMessageXML(" + clientIndex + "): Exception: " + e.Message);
+                WM.Logger.Error("Server.GetLastMessageXML(" + clientIndex + "): Exception: " + e.Message);
                 return null;
             }
         }

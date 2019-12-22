@@ -1,40 +1,37 @@
 ﻿using System.Net;
 
-namespace WM
+namespace WM.Net
 {
-    namespace Net
+    public class NetUtil
     {
-        public class NetUtil
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public static string GetLocalIPAddress()
         {
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <returns></returns>
-            public static string GetLocalIPAddress()
-            {
-                var host = Dns.GetHostEntry(Dns.GetHostName());
+            var host = Dns.GetHostEntry(Dns.GetHostName());
 
-                foreach (var ip in host.AddressList)
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                 {
-                    if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    {
-                        return ip.ToString();
-                    }
+                    return ip.ToString();
                 }
-
-                throw new WebException("Local IP address not found!");
             }
-            
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <returns></returns>
-            public static string GetLocalIPSubNet()
-            {
-                var address = GetLocalIPAddress();
 
-                return address.Substring(0, address.LastIndexOf('.') + 1);
-            }
+            throw new WebException("Local IP address not found!");
         }
-    } // namespace Net
-} // namespace WM
+            
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public static string GetLocalIPSubNet()
+        {
+            var address = GetLocalIPAddress();
+
+            return address.Substring(0, address.LastIndexOf('.') + 1);
+        }
+    }
+}
