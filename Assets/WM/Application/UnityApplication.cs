@@ -990,7 +990,16 @@ namespace WM.Application
             {
                 if (remoteUsers.ContainsKey(clientID))
                 {
-                    GameObject.Destroy(remoteUsers[clientID].Avatar.gameObject);
+                    // We need to destroy ojects defferently in Edit Mode, otherwise Edit Mode Unit Tests complain.  :-(
+                    if (UnityEngine.Application.isEditor)
+                    {
+                        DestroyImmediate(remoteUsers[clientID].Avatar.gameObject);
+                    }
+                    else
+                    {
+                        Destroy(remoteUsers[clientID].Avatar.gameObject);
+                    }
+
                     remoteUsers.Remove(clientID);
                 }
             }

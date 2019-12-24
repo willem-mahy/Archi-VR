@@ -3,7 +3,6 @@ using System.Xml.Serialization;
 
 using UnityEngine;
 using WM.Application;
-using WM.Command;
 using WM.Net;
 
 namespace WM.Command
@@ -24,7 +23,15 @@ namespace WM.Command
             {
                 foreach (var remoteUsers in application.remoteUsers.Values)
                 {
-                    GameObject.Destroy(remoteUsers.Avatar.gameObject);
+                    // We need to destroy ojects defferently in Edit Mode, otherwise Edit Mode Unit Tests complain.  :-(
+                    if (UnityEngine.Application.isEditor)
+                    {
+                        GameObject.DestroyImmediate(remoteUsers.Avatar.gameObject);
+                    }
+                    else
+                    {
+                        GameObject.Destroy(remoteUsers.Avatar.gameObject);
+                    }
                 }
 
                 application.remoteUsers.Clear();
