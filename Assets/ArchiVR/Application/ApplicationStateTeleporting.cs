@@ -6,7 +6,7 @@ namespace ArchiVR.Application
         {
             #region variables
 
-            public ITeleportationSystem TeleportationSystem = null;
+            public ITeleportationSystem TeleportationSystem;
 
             #endregion
 
@@ -25,13 +25,20 @@ namespace ArchiVR.Application
                 m_application.m_leftControllerCanvas.SetActive(false);
                 m_application.m_rightControllerCanvas.SetActive(false);
 
-                m_application.leftControllerButtonMapping.gameObject.SetActive(false);
-                m_application.rightControllerButtonMapping.gameObject.SetActive(false);
+                if (m_application.leftControllerButtonMapping != null)
+                {
+                    m_application.leftControllerButtonMapping.gameObject.SetActive(false);
+                }
 
-                // Determine wheter we need a fading transition.
-                bool needFade = TeleportationSystem.NeedFadeOut; //m_application.ActiveProject != null) && (m_application.ActivePOI != null);
+                if (m_application.rightControllerButtonMapping != null)
+                {
+                    m_application.rightControllerButtonMapping.gameObject.SetActive(false);
+                }
 
-                if (needFade)
+                // Determine whether we need a fade-out transition.
+                bool needFadeOut = TeleportationSystem.NeedFadeOut; //m_application.ActiveProject != null) && (m_application.ActivePOI != null);
+
+                if (needFadeOut)
                 {
                     WM.Logger.Debug("Fading out...");
                     m_application.m_fadeAnimator.ResetTrigger("FadeIn");
@@ -54,8 +61,15 @@ namespace ArchiVR.Application
                 m_application.m_leftControllerCanvas.SetActive(true);
                 m_application.m_rightControllerCanvas.SetActive(true);
 
-                m_application.leftControllerButtonMapping.gameObject.SetActive(true);
-                m_application.rightControllerButtonMapping.gameObject.SetActive(true);
+                if (m_application.leftControllerButtonMapping != null)
+                {
+                    m_application.leftControllerButtonMapping.gameObject.SetActive(true);
+                }
+
+                if (m_application.rightControllerButtonMapping != null)
+                {
+                    m_application.rightControllerButtonMapping.gameObject.SetActive(true);
+                }
             }
 
             public override void Update()

@@ -14,8 +14,8 @@ namespace WM.Command
         [XmlElement("ClientIP")]
         public string ClientIP { get; set; }
 
-        [XmlElement("AvatarIndex")]
-        public int AvatarIndex { get; set; }
+        [XmlElement("AvatarID")]
+        public Guid AvatarID { get; set; }
 
         public SetClientAvatarCommand()
         {
@@ -23,17 +23,17 @@ namespace WM.Command
         
         public SetClientAvatarCommand(
             string clientIP,
-            int avatarIndex)
+            Guid avatarID)
         {
             ClientIP = clientIP;
-            AvatarIndex = avatarIndex;
+            AvatarID = avatarID;
         }
 
         public void Execute(UnityApplication application)
         {
             WM.Logger.Debug("SetClientAvatarCommand.Execute()");
 
-            application.SetClientAvatar(ClientIP, AvatarIndex);
+            application.SetClientAvatar(ClientIP, AvatarID);
         }
     }
 }

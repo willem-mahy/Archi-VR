@@ -19,6 +19,8 @@ namespace WM.Net
 
         public int ConnectTimeout = 100;
 
+        public int BasePort = 8800;
+
         #region TCP
 
         public int TcpPort = Constants.BasePort + 5;
@@ -43,7 +45,15 @@ namespace WM.Net
             protected set;
         }
 
-        public static readonly int UdpPort = Constants.BasePort + 4;
+        public static int GetUdpPort(int basePort)
+        {
+            return basePort + 1;
+        }
+
+        public int UdpPort
+        {
+            get { return BasePort + 1; }
+        }
 
         private UdpClient udpClient;
 
@@ -58,6 +68,21 @@ namespace WM.Net
 
         #region Internal state
 
+        public enum ClientState
+        {
+            Disconnected,
+            Connecting,
+            Connected,
+            Disconnecting,
+        }
+
+        private System.Object stateLock = new System.Object();
+        public ClientState state
+        {
+            get;
+            private set;
+        } = ClientState.Disconnected;
+
         /// <summary>
         /// 
         /// </summary>
@@ -69,21 +94,39 @@ namespace WM.Net
         private bool shutDown = false;
 
         #endregion
-        
+
         #endregion
 
         /// <summary>
         /// Initialize the client.
         /// </summary>
-        public void Init()
+        public void Connect()
         {
+            WM.Logger.Debug("Client.Connect()");
+
+            lock (stateLock)
+            {
+                switch (state)
+                {
+                    case ClientState.Disconnected:
+                        state = ClientState.Connecting;
+                        break;
+                    case ClientState.Connecting:
+                        throw new Exception("Connect() can not be called on Client while it is Connnecting.");
+                    case ClientState.Connected:
+                        throw new Exception("Connect() can not be called on CLient while it is Connected.");
+                    case ClientState.Disconnecting:
+                        throw new Exception("Connect() can not be called on CLient while it is Disconnecting.");
+                }
+            }
+
             shutDown = false;
 
             thread = new Thread(new ThreadStart(ThreadFunction));
             thread.IsBackground = true;
             thread.Start();
 
-            WM.Logger.Debug("Client started");
+            WM.Logger.Debug("Client connecting...");
         }
 
         /// <summary>
@@ -91,14 +134,32 @@ namespace WM.Net
         /// </summary>
         public void Disconnect()
         {
-            WM.Logger.Debug("Client.Disconnect(): Start");
+            WM.Logger.Debug("Client.Disconnect()");
 
-            SendCommand(new DisconnectClientCommand(NetUtil.GetLocalIPAddress()));
+            lock (stateLock)
+            {
+                switch (state)
+                {
+                    case ClientState.Connected:
+                        state = ClientState.Disconnecting;
+                        break;
+                    case ClientState.Disconnecting:
+                        throw new Exception("Disconnect() can not be called on Client while it is Disconnnecting.");
+                    case ClientState.Disconnected:
+                        throw new Exception("Disconnect() can not be called on Client while it is Disconnnected.");
+                    case ClientState.Connecting:
+                        throw new Exception("Disconnect() can not be called on Client while it is Connecting.");
+                }
 
-            while (Status != "DisconnectAcknoledged") ;
+                WM.Logger.Debug("Client disconnecting...");
 
-            WM.Logger.Debug("Client.Disconnect(): DisconnectAcknoledged received: Shutting down...");
-            Shutdown();
+                SendCommand(new DisconnectClientCommand(NetUtil.GetLocalIPAddress()));
+
+                while (Status != "DisconnectAcknoledged") ;
+
+                WM.Logger.Debug("Client.Disconnect(): DisconnectAcknoledged received: Shutting down...");
+                Shutdown();
+            }
         }
 
         /// <summary>
@@ -175,6 +236,9 @@ namespace WM.Net
                     {
                         var serverAddress = remoteEndPoint.Address.ToString();
                         WM.Logger.Debug(string.Format("Client: received UDP broadcast Message from server '{0}'", serverAddress));
+
+                        udpClient.Close();
+
                         return serverAddress;
                     }
                     else
@@ -188,6 +252,8 @@ namespace WM.Net
                 }
             }
 
+            udpClient.Close();
+
             return "";
         }
 
@@ -196,6 +262,8 @@ namespace WM.Net
         /// </summary>
         private void ThreadFunction()
         {
+            Debug.Assert(state == ClientState.Connecting);
+
             if (InitialServerIP == "")
             {
                 InitialServerIP = GetServerIPFromUdpBroadcast();
@@ -203,33 +271,39 @@ namespace WM.Net
 
             while (!shutDown)
             {
-                if (TryConnect())
+                lock (stateLock)
                 {
-                    Status = "Connected to " + ServerIP;
-                    WM.Logger.Debug("Client: tcpClient connected.");
-
-                    // Get server stream from TCP client.
-                    tcpServerStream = tcpClient.GetStream();
-
-                    // Initialize UDP sockets to/from server.
+                    if (TryConnect())
                     {
-                        udpClient = new UdpClient(UdpPort);
+                        Status = "Connected to " + ServerIP;
+                        WM.Logger.Debug("Client: tcpClient connected.");
 
-                        udpSend = new UDPSend(udpClient);
-                        udpSend.remoteIP = ServerIP;
-                        udpSend.remotePort = Server.UdpPort;
-                        udpSend.Init();
+                        // Get server stream from TCP client.
+                        tcpServerStream = tcpClient.GetStream();
 
-                        udpReceive = new UDPReceive(udpClient);
-                        udpReceive.Init();
-                    }
+                        // Initialize UDP sockets to/from server.
+                        {
+                            udpClient = new UdpClient(UdpPort);
 
-                    OnTcpConnected();
-                    break;
+                            udpSend = new UDPSend(udpClient);
+                            udpSend.remoteIP = ServerIP;
+                            udpSend.remotePort = Server.UdpPort;
+                            udpSend.Init();
+
+                            udpReceive = new UDPReceive(udpClient);
+                            udpReceive.Init();
+                        }
+
+                        OnTcpConnected();
+
+                        state = ClientState.Connected;
+                        break; // We are Connected: stop connecting...
+                    }                    
                 }
             }
 
-            while (!shutDown)
+            /// ... and start communicating with server...
+            while (!shutDown) // ... until shutdown has been initiated.
             {
                 string dataFromServer = "";
 

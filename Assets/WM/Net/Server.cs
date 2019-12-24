@@ -17,7 +17,7 @@ namespace WM.Net
     /// </summary>
     public class Constants
     {
-        public static readonly int BasePort = 8890;
+        public static readonly int BasePort = 8860;
     }
 
     /// <summary>
@@ -76,7 +76,7 @@ namespace WM.Net
 
             udpSend = new UDPSend(udpClient);
             udpSend.remoteIP = remoteIP;
-            udpSend.remotePort = Client.UdpPort;
+            udpSend.remotePort = Client.GetUdpPort(tcpRemoteEndPoint.Port);
             udpSend.Init();
         }
 

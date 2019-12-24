@@ -1,7 +1,6 @@
 ﻿using ArchiVR.Application;
 using System;
 using System.Xml.Serialization;
-using UnityEngine;
 using WM.Application;
 using WM.Command;
 
@@ -30,7 +29,14 @@ namespace ArchiVR.Command
 
             applicationArchiVR.TeleportCommand = this;
 
-            applicationArchiVR.SetActiveApplicationState(UnityApplication.ApplicationStates.Teleporting);
+            if (applicationArchiVR.m_fadeAnimator != null)
+            {
+                applicationArchiVR.SetActiveApplicationState(UnityApplication.ApplicationStates.Teleporting);
+            }
+            else
+            {
+                applicationArchiVR.Teleport();
+            }
         }
     }
 }

@@ -13,6 +13,9 @@ namespace WM.Command
         [XmlElement("ClientIP")]
         public string ClientIP { get; set; }
 
+        [XmlElement("ClientPort")]
+        public int ClientPort { get; set; }
+
         public ConnectClientCommand()
         { 
         }
@@ -21,7 +24,7 @@ namespace WM.Command
         {
             WM.Logger.Debug("ConnectClientCommand.Execute()");
 
-            application.ConnectClient(ClientIP);
+            application.ConnectClient(ClientIP, ClientPort);
         }
     }
 }

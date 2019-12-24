@@ -82,9 +82,10 @@ public class AvatarPanel : MonoBehaviour
             return;
         }
 
-        var avatarIndex = UtilIterate.MakeCycle(--Application.AvatarIndex, 0, Application.avatarPrefabs.Count);
-        Application.SetAvatar(avatarIndex);
-        AvatarDropdown.value = avatarIndex;
+        var newAvatarIndex = Application.AvatarIndex - 1;
+        UtilIterate.MakeCycle(newAvatarIndex, 0, Application.avatarPrefabs.Count);
+        Application.SetAvatar(newAvatarIndex);
+        AvatarDropdown.value = newAvatarIndex;
     }
 
     public void NextAvatarButtonOnClick()
@@ -94,9 +95,10 @@ public class AvatarPanel : MonoBehaviour
             return;
         }
 
-        var avatarIndex = UtilIterate.MakeCycle(++Application.AvatarIndex, 0, Application.avatarPrefabs.Count);
-        Application.SetAvatar(avatarIndex);
-        AvatarDropdown.value = avatarIndex;
+        var newAvatarIndex = Application.AvatarIndex + 1;
+        UtilIterate.MakeCycle(newAvatarIndex, 0, Application.avatarPrefabs.Count);
+        Application.SetAvatar(newAvatarIndex);
+        AvatarDropdown.value = newAvatarIndex;
     }
 
     #endregion

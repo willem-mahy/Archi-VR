@@ -30,7 +30,7 @@ namespace ArchiVR.Net
             {
                 var scac = new SetClientAvatarCommand();
                 scac.ClientIP = NetUtil.GetLocalIPAddress();
-                scac.AvatarIndex = application.AvatarIndex;
+                scac.AvatarID = application.AvatarID;
                 SendCommand(scac);
             }
         }

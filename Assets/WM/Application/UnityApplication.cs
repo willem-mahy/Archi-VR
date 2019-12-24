@@ -24,8 +24,11 @@ namespace WM.Application
     /// Base class for the logic of a multiplayer network-capable VR application.
     /// 
     /// Provides the following functionality:
-    /// - avatar management: 1 Local, N Remote
-    /// ???
+    /// - Client-Server based network multiplay
+    /// - Avatar management: 1 Local, N Remote
+    /// - Command management
+    /// - Application state
+    /// - ???
     /// </summary>
     public class UnityApplication : MonoBehaviour
     {
@@ -65,7 +68,15 @@ namespace WM.Application
         public Client Client;
 
         //! The avatar for the local player.
-        public int AvatarIndex = 0;
+        public Guid AvatarID = Guid.Empty;
+
+        public int AvatarIndex
+        {
+            get
+            {
+                return 0; ; // FIXME: TODO: Get Avatar index from avatar id guid!
+            }
+        }
 
         #region Shared Tracking space
 
@@ -79,7 +90,10 @@ namespace WM.Application
 
         #region Game objects
 
-        // Reference to the avatar Prefabs. Drag Prefabs into this field in the Inspector.
+        /// <summary>
+        /// The list of avatar Prefabs.
+        /// Drag Prefabs into this field in the Inspector.
+        /// </summary>
         public List<GameObject> avatarPrefabs = new List<GameObject>();
 
         public Animator m_fadeAnimator;
@@ -102,7 +116,7 @@ namespace WM.Application
 
         #region Application State
 
-        // The ammication states enumeration.
+        // The application states enumeration. // FIXME: Factor out! UnityApplication should not/cannot have an exhaustive enumeration of possible application states!
         public enum ApplicationStates : int
         {
             None = -1,
@@ -241,7 +255,12 @@ namespace WM.Application
 
         private void UpdateSelectionVisualizerVisibility()
         {
-            //WM.Logger.Warning("UpdateSelectionVisualizerVisibility() -> " + HasSelectionTargets());
+            WM.Logger.Debug("UpdateSelectionVisualizerVisibility() -> " + HasSelectionTargets());
+
+            if (SelectionVisualizer == null)
+            {
+                return;
+            }
 
             SelectionVisualizer.gameObject.SetActive(HasSelectionTargets());
         }
@@ -302,6 +321,8 @@ namespace WM.Application
 
         public virtual void Init()
         {
+            AvatarID = DefaultAvatarID;
+
             #region Get handles to game objects
 
             if (m_ovrCameraRig == null)
@@ -325,31 +346,51 @@ namespace WM.Application
             {
                 debugInputMenuPanel = UtilUnity.TryFindGameObject("DebugInputMenuPanel");
             }
-            menus.Add(debugInputMenuPanel);
+
+            if (debugInputMenuPanel != null)
+            {
+                menus.Add(debugInputMenuPanel);
+            }
 
             if (debugLogMenuPanel == null)
             {
                 debugLogMenuPanel = UtilUnity.TryFindGameObject("DebugLogMenuPanel");
             }
-            menus.Add(debugLogMenuPanel);
+
+            if (debugLogMenuPanel != null)
+            {
+                menus.Add(debugLogMenuPanel);
+            }
 
             if (graphicsMenuPanel == null)
             {
                 graphicsMenuPanel = UtilUnity.TryFindGameObject("GraphicsMenuPanel");
             }
-            menus.Add(graphicsMenuPanel);
+
+            if (graphicsMenuPanel != null)
+            {
+                menus.Add(graphicsMenuPanel);
+            }
 
             if (networkMenuPanel == null)
             {
                 networkMenuPanel = UtilUnity.TryFindGameObject("NetworkMenuPanel");
             }
-            menus.Add(networkMenuPanel);
+
+            if (networkMenuPanel != null)
+            {
+                menus.Add(networkMenuPanel);
+            }
 
             if (infoMenuPanel == null)
             {
                 infoMenuPanel = UtilUnity.TryFindGameObject("InfoMenuPanel");
             }
-            menus.Add(infoMenuPanel);
+
+            if (infoMenuPanel != null)
+            {
+                menus.Add(infoMenuPanel);
+            }
 
             // Get reference to FPS panel.
             if (FpsPanelHUD == null)
@@ -396,8 +437,15 @@ namespace WM.Application
             #endregion
 
             // Disable all pickrays.
-            LPickRay.gameObject.SetActive(false);
-            RPickRay.gameObject.SetActive(false);
+            if (LPickRay != null)
+            {
+                LPickRay.gameObject.SetActive(false);
+            }
+
+            if (RPickRay != null)
+            {
+                RPickRay.gameObject.SetActive(false);
+            }
 
             #region Init application states.
 
@@ -413,7 +461,10 @@ namespace WM.Application
 
             if (UnityEngine.Application.isEditor)
             {
-                HudMenu.AnchorEnabled = true;
+                if (HudMenu != null)
+                {
+                    HudMenu.AnchorEnabled = true;
+                }
             }
 
             SetMenuMode(StartupMenuMode);
@@ -453,8 +504,12 @@ namespace WM.Application
             get { return true; }
         }
 
-        //! Update is called once per frame
-        void Update()
+        /// <summary>
+        /// Update is called once per frame.
+        /// 
+        /// Made 'public' for unit testing.
+        /// </summary>
+        public void Update()
         {
             // TODO: WHY THAF is this necessary to make camera work in Editor?
             m_centerEyeAnchor.GetComponent<Camera>().enabled = false;
@@ -747,7 +802,10 @@ namespace WM.Application
             m_leftHandAnchor.transform.rotation =
             m_rightHandAnchor.transform.rotation = m_centerEyeAnchor.transform.rotation;
 
-            SelectionVisualizer.EditorRay = RPickRay.GetRay();
+            if (SelectionVisualizer != null)
+            {
+                SelectionVisualizer.EditorRay = RPickRay.GetRay();
+            }
         }
 
         //! Translates the tracking space wby the given offset vector.
@@ -770,7 +828,10 @@ namespace WM.Application
         {
             if (menuMode == MenuMode.None)
             {
-                HudMenu.UpdateAnchoring(); // Re-anchor the HUD menu to be in front of cam, when leaving None mode.
+                if (HudMenu != null)
+                {
+                    HudMenu.UpdateAnchoring(); // Re-anchor the HUD menu to be in front of cam, when leaving None mode.
+                }
             }
 
             menuMode = newMenuMode;
@@ -800,13 +861,36 @@ namespace WM.Application
                     break;
             }
 
-            HudMenu.gameObject.SetActive(menuMode != MenuMode.None);
+            if (HudMenu != null)
+            {
+                HudMenu.gameObject.SetActive(menuMode != MenuMode.None);
+            }
         }
 
-        //! Sets the avatar for the local player.
+        public Guid GetAvatarID(int avatarIndex)
+        {
+            return DefaultAvatarID; // FIXME: TODO: Convert avatar index to avatar ID Guid!
+        }
+
+        /// <summary>
+        /// Sets the avatar for the local player.
+        /// </summary>
+        /// <param name="avatarID"></param>
         public void SetAvatar(int avatarIndex)
         {
-            WM.Logger.Debug("SetAvatar(" + avatarIndex.ToString() + ")");
+            WM.Logger.Debug("SetAvatar(" + avatarIndex + ")");
+
+            var avatarID = GetAvatarID(avatarIndex);
+            SetAvatar(avatarID);
+        }
+
+        /// <summary>
+        /// Sets the avatar for the local player.
+        /// </summary>
+        /// <param name="avatarID"></param>
+        public void SetAvatar(Guid avatarID)
+        {
+            WM.Logger.Debug("SetAvatar(" + avatarID.ToString() + ")");
 
             if (NetworkMode == NetworkMode.Standalone)
             {
@@ -814,35 +898,45 @@ namespace WM.Application
                 return;
             }
 
-            AvatarIndex = avatarIndex;
-            Client.SendCommand(new SetClientAvatarCommand(WM.Net.NetUtil.GetLocalIPAddress(), avatarIndex));
+            AvatarID = avatarID;
+            Client.SendCommand(new SetClientAvatarCommand(WM.Net.NetUtil.GetLocalIPAddress(), avatarID));
         }
 
         #endregion
 
         #region Avatar management
 
-        //! Instanciates the avatar type at given index, and returns a reference to the instance.
-        GameObject InstanciateAvatarPrefab(
-            int avatarIndex,
+        public PrefabGameObjectFactory AvatarFactory = new PrefabGameObjectFactory();
+
+        /// <summary>
+        /// Instanciates the avatar prefabe at given index, and returns a reference to the avatar instance.
+        /// </summary>
+        /// <param name="avatarID"></param>
+        /// <param name="position"></param>
+        /// <param name="rotation"></param>
+        /// <returns>A reference to the created avatar instance.</returns>
+        GameObject InstantiateAvatarPrefab(
+            Guid avatarID,
             Vector3 position,
             Quaternion rotation)
         {
-            return Instantiate(
-                    avatarPrefabs[avatarIndex],
+            return AvatarFactory.Create(
+                    avatarID,
                     position,
                     rotation);
         }
 
-        //! Instantiates all available avatar prefabs.
+        /// <summary>
+        /// Instantiates all available avatar prefabs.
+        /// </summary>
         void InstanciateAllAvatarPrefabs()
         {
             float x = -3;
 
-            foreach (var ap in avatarPrefabs)
+            foreach (var avatarPrefab in avatarPrefabs)
             {
                 Instantiate(
-                    ap,
+                    avatarPrefab,
                     new Vector3(x, 0, 0),
                     Quaternion.identity);
 
@@ -854,20 +948,27 @@ namespace WM.Application
 
         #region Remote user management
 
+        public Guid DefaultAvatarID
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// Does whatever needs doing upon new client connected event.
         /// - Creates a representation for a newly connected user.
         /// </summary>
         /// <param name="clientIP"></param>
-        /// <param name="avatarIndex"></param>
+        /// <param name="clientPort"></param>
         public void ConnectClient(
-            string clientIP)
+            string clientIP,
+            int clientPort)
         {
             lock (remoteUsers)
             {
-                // TODO first: move avatar instance management (creatiion, init, destruction) into RemoteUser.Init(avatarIndex, pos, rot)?
-                var avatar = InstanciateAvatarPrefab(
-                    0,
+                // TODO first: move avatar instance management (creation, init, destruction) into RemoteUser.Init(avatarIndex, pos, rot)?
+                var avatar = InstantiateAvatarPrefab(
+                    DefaultAvatarID,
                     Vector3.zero,
                     Quaternion.identity);
 
@@ -879,37 +980,45 @@ namespace WM.Application
             }
         }
 
-        //! Destroys the avatar prefab for the given disconnected client.
-        public void DisconnectClient(string clientIP)
+        /// <summary>
+        /// Destroys the avatar prefab for the given disconnected client.
+        /// </summary>
+        /// <param name="clientID"></param>
+        public void DisconnectClient(string clientID)
         {
             lock (remoteUsers)
             {
-                if (remoteUsers.ContainsKey(clientIP))
+                if (remoteUsers.ContainsKey(clientID))
                 {
-                    GameObject.Destroy(remoteUsers[clientIP].Avatar.gameObject);
-                    remoteUsers.Remove(clientIP);
+                    GameObject.Destroy(remoteUsers[clientID].Avatar.gameObject);
+                    remoteUsers.Remove(clientID);
                 }
             }
         }
 
-        //! Updates the avatar type for the given connected client.
+        /// <summary>
+        /// Updates the avatar type for the connected client with given ID.
+        /// </summary>
+        /// <param name="clientID"></param>
+        /// <param name="avatarID"></param>
         public void SetClientAvatar(
-            string ip,
-            int avatarIndex)
+            string clientID,
+            Guid avatarID)
         {
             lock (remoteUsers)
             {
-                var remoteUser = (remoteUsers.ContainsKey(ip) ? remoteUsers[ip] : null);
+                var remoteUser = (remoteUsers.ContainsKey(clientID) ? remoteUsers[clientID] : null);
 
                 if (remoteUser == null)
                 {
-                    WM.Logger.Warning("SetClientAvatar(): No existing remote user found for IP '" + ip + "'");
+                    WM.Logger.Warning("SetClientAvatar(): User '" + clientID + "' not found!");
+                    return;
                 }
 
                 var oldAvatar = remoteUser.Avatar;
 
-                var avatar = InstanciateAvatarPrefab(
-                    avatarIndex,
+                var avatar = InstantiateAvatarPrefab(
+                    avatarID,
                     oldAvatar.transform.position,
                     oldAvatar.transform.rotation);
 
@@ -917,7 +1026,11 @@ namespace WM.Application
 
                 if (oldAvatar != null)
                 {
-                    Destroy(oldAvatar.gameObject);
+                    // We need to destroy ojects defferently in Edit Mode, otherwise Edit Mode Unit Tests complain.  :-(
+                    if (UnityEngine.Application.isEditor)
+                        DestroyImmediate(oldAvatar.gameObject);
+                    else
+                        Destroy(oldAvatar.gameObject);
                 }
             }
         }

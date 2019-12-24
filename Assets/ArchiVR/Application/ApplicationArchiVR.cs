@@ -40,11 +40,6 @@ namespace ArchiVR.Application
         /// <summary>
         /// 
         /// </summary>
-        public TeleportationSystemArchiVR TeleportationSystem;
-
-        /// <summary>
-        /// 
-        /// </summary>
         public TeleportCommand TeleportCommand { get; set; }
 
         /// <summary>
@@ -115,18 +110,16 @@ namespace ArchiVR.Application
 
         #endregion
 
-        //! Start is called before the first frame update
+        /// <summary>
+        /// Initialize all necessary stuff before the first frame update.
+        /// </summary>
         public override void Init()
         {
-            // Teleportation system
-            TeleportationSystem = new TeleportationSystemArchiVR(this);
-
-            // Application modes
-            m_applicationStateTeleporting.TeleportationSystem = TeleportationSystem;
+            // Initialize application modes
+            m_applicationStateTeleporting.TeleportationSystem = new TeleportationSystemArchiVR(this);
 
             m_applicationStates.Add(m_applicationStateDefault);
             m_applicationStates.Add(m_applicationStateTeleporting);
-
             
             base.Init();
 
@@ -448,7 +441,10 @@ namespace ArchiVR.Application
 
             ActiveImmersionMode.UpdateTrackingSpacePosition();
 
-            m_fadeAnimator.SetTrigger("FadeIn");
+            if (m_fadeAnimator != null)
+            {
+                m_fadeAnimator.SetTrigger("FadeIn");
+            }
         }
 
         #endregion
