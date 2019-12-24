@@ -19,9 +19,14 @@ namespace WM.Application
             Vector3 position,
             Quaternion rotation)
         {
+            if (key == Guid.Empty)
+            {
+                throw new Exception("Key cannot be Guid.Empty.");
+            }
+
             if (!prefabs.ContainsKey(key))
             {
-                throw new Exception("No prefab registered with gven key (" + key.ToString() + ").");
+                throw new Exception("No prefab registered for key (" + key.ToString() + ").");
             }
 
             return UnityEngine.Object.Instantiate(

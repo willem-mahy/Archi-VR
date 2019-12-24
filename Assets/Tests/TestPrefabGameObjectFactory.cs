@@ -50,7 +50,7 @@ namespace Tests
             }
             catch(Exception e)
             {
-                Assert.AreEqual(e.Message, "No prefab registered with gven key (" + nonRegisteredKey.ToString() + ").");
+                Assert.AreEqual(e.Message, "No prefab registered for key (" + nonRegisteredKey.ToString() + ").");
             }
         }
 
