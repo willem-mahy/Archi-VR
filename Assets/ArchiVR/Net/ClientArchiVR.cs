@@ -41,40 +41,33 @@ namespace ArchiVR.Net
         /// <param name="obj"></param>
         override public void DoProcessMessage(object obj)
         {
-            if (obj is TeleportCommand)
+            if (obj is TeleportCommand teleportCommand)
             {
-                var teleportCommand = (TeleportCommand)obj;
                 application.QueueCommand(teleportCommand);
             }
-            else if (obj is SetImmersionModeCommand)
+            else if (obj is SetImmersionModeCommand setImmersionModeCommand)
             {
-                var command = (SetImmersionModeCommand)obj;
-                application.QueueCommand(command);
+                application.QueueCommand(setImmersionModeCommand);
             }
-            else if (obj is ConnectClientCommand)
+            else if (obj is ConnectClientCommand connectClientCommand)
             {
-                var command = (ConnectClientCommand)obj;
-                application.QueueCommand(command);
+                application.QueueCommand(connectClientCommand);
             }
-            else if (obj is DisconnectClientCommand)
+            else if (obj is DisconnectClientCommand disconnectClientCommand)
             {
-                var command = (DisconnectClientCommand)obj;
-                application.QueueCommand(command);
+                application.QueueCommand(disconnectClientCommand);
             }
-            else if (obj is SetClientAvatarCommand)
+            else if (obj is SetClientAvatarCommand setClientAvatarCommand)
             {
-                var command = (SetClientAvatarCommand)obj;
-                application.QueueCommand(command);
+                application.QueueCommand(setClientAvatarCommand);
             }
-            else if (obj is SetModelLocationCommand)
+            else if (obj is SetModelLocationCommand setModelLocationCommand)
             {
-                var command = (SetModelLocationCommand)obj;
-                application.QueueCommand(command);
+                application.QueueCommand(setModelLocationCommand);
             }
-            else if (obj is ServerShutdownCommand command)
+            else if (obj is ServerShutdownCommand serverShutdownCommand)
             {
-                //var command = (ServerShutdownCommand)obj;
-                application.QueueCommand(command);
+                application.QueueCommand(serverShutdownCommand);
             }
         }
         
