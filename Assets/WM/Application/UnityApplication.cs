@@ -78,6 +78,12 @@ namespace WM.Application
             }
         }
 
+        /// <summary>
+        /// The remote users.
+        /// </summary>
+        /*private*/
+        public Dictionary<string, RemoteUser> remoteUsers = new Dictionary<string, RemoteUser>();
+
         #region Shared Tracking space
 
         public bool SharedTrackingSpace = false;
@@ -114,7 +120,7 @@ namespace WM.Application
 
         #endregion
 
-        #region Application State
+        #region Application state
 
         // The application states enumeration. // FIXME: Factor out! UnityApplication should not/cannot have an exhaustive enumeration of possible application states!
         public enum ApplicationStates : int
@@ -157,7 +163,7 @@ namespace WM.Application
             return m_applicationStates[m_activeApplicationStateIndex];
         }
 
-        #endregion
+        #endregion Application state
 
         #region Controller UI
 
@@ -243,16 +249,16 @@ namespace WM.Application
 
         #endregion
 
+        #region Pick selection
+
         /// <summary>
-        /// The remote users.
-        /// </summary>
-        /*private*/
-        public Dictionary<string, RemoteUser> remoteUsers = new Dictionary<string, RemoteUser>();
-
-
-        //! The list of all selection targets.
+        /// The list of all selection targets.
+        /// </summary>        
         private List<GameObject> selectionTargets = new List<GameObject>();
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void UpdateSelectionVisualizerVisibility()
         {
             WM.Logger.Debug("UpdateSelectionVisualizerVisibility() -> " + HasSelectionTargets());
@@ -265,11 +271,19 @@ namespace WM.Application
             SelectionVisualizer.gameObject.SetActive(HasSelectionTargets());
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private bool HasSelectionTargets()
         {
             return selectionTargets.Count != 0;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="selectionTarget"></param>
         public void AddSelectionTarget(GameObject selectionTarget)
         {
             //WM.Logger.Warning("AddSelectionTarget(" + selectionTarget.name + ")");
@@ -279,6 +293,10 @@ namespace WM.Application
             UpdateSelectionVisualizerVisibility();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="selectionTarget"></param>
         public void RemoveSelectionTarget(GameObject selectionTarget)
         {
             //WM.Logger.Warning("RemoveSelectionTarget(" + selectionTarget.name + ")");
@@ -287,6 +305,8 @@ namespace WM.Application
 
             UpdateSelectionVisualizerVisibility();
         }
+
+        #endregion Pick selection
 
         #endregion Variables
 
