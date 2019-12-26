@@ -11,6 +11,29 @@ using WM.Command;
 
 namespace WM.Net
 {
+    /// <summary>
+    /// Used to send Client information to the Server over TCP upon connection initialization.
+    /// </summary>
+    [Serializable]
+    public class ClientInfo
+    {
+        public string IP;
+
+        public int TcpPort;
+
+        public int UdpPort;
+
+        public ClientInfo(String IP, int tcpPort, int udpPort)
+        {
+            this.IP = IP;
+            TcpPort = tcpPort;
+            UdpPort = udpPort;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     abstract public class Client : MonoBehaviour
     {
         #region Variables

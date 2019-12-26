@@ -13,7 +13,7 @@ using WM.Command;
 namespace WM.Net
 {
     /// <summary>
-    /// 
+    /// Used to send Server information to Clients over TCP upon connection initialization.
     /// </summary>
     [Serializable]
     public class ServerInfo
@@ -27,23 +27,6 @@ namespace WM.Net
         public ServerInfo(String IP, int tcpPort, int udpPort)
         {
             this.IP = IP;
-            TcpPort = tcpPort;
-            UdpPort = udpPort;
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [Serializable]
-    public class ClientInfo
-    {
-        public int TcpPort;
-
-        public int UdpPort;
-
-        public ClientInfo(int tcpPort, int udpPort)
-        {
             TcpPort = tcpPort;
             UdpPort = udpPort;
         }
