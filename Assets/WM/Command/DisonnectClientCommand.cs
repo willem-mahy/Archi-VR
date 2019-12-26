@@ -10,23 +10,24 @@ namespace WM.Command
     [XmlRoot("DisonnectClientCommand")]
     public class DisconnectClientCommand : ICommand
     {
-        [XmlElement("ClientIP")]
-        public string ClientIP { get; set; }
+        [XmlElement("ClientID")]
+        public string ClientID { get; set; }
 
         public DisconnectClientCommand()
         { 
         }
 
-        public DisconnectClientCommand(string clientIP)
+        public DisconnectClientCommand(
+            string clientID)
         {
-            ClientIP = clientIP;
+            ClientID = clientID;
         }
 
         public void Execute(UnityApplication application)
         {
             WM.Logger.Debug("DisconnectClientCommand.Execute()");
 
-            application.DisconnectClient(ClientIP);
+            application.DisconnectClient(ClientID);
         }
     }
 }

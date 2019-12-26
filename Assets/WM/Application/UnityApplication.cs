@@ -919,7 +919,7 @@ namespace WM.Application
             }
 
             AvatarID = avatarID;
-            Client.SendCommand(new SetClientAvatarCommand(WM.Net.NetUtil.GetLocalIPAddress(), Client.BasePort, avatarID));
+            Client.SendCommand(new SetClientAvatarCommand(WM.Net.NetUtil.GetLocalIPAddress(), Client.TcpPort, avatarID));
         }
 
         #endregion
@@ -984,6 +984,8 @@ namespace WM.Application
             string clientIP,
             int clientPort)
         {
+            WM.Logger.Debug(string.Format(name + ":ConnectClient({0}:{1})", clientIP, clientPort));
+
             lock (remoteUsers)
             {
                 // TODO first: move avatar instance management (creation, init, destruction) into RemoteUser.Init(avatarIndex, pos, rot)?

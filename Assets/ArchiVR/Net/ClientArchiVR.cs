@@ -24,16 +24,27 @@ namespace ArchiVR.Net
         /// <summary>
         /// <see cref="Client"/> implementation.
         /// </summary>
-        override public void OnTcpConnected()
+        override public void OnConnect()
         {
             // Broadcast your chosen avatar.
             {
                 var scac = new SetClientAvatarCommand(
                     NetUtil.GetLocalIPAddress(),
-                    BasePort,
+                    TcpPort,
                     application.AvatarID);
 
                 SendCommand(scac);
+            }
+        }
+
+        /// <summary>
+        /// <see cref="Client"/> implementation.
+        /// </summary>
+        override public void OnDisconnect()
+        {
+            lock (application.remoteUsers)
+            {
+                application.remoteUsers.Clear();
             }
         }
 
@@ -136,17 +147,17 @@ namespace ArchiVR.Net
                 lock (application.remoteUsers)
                 {
                     // Apply the most recent states.
-                    foreach (var clientIP in receivedAvatarStates.Keys)
+                    foreach (var clientID in receivedAvatarStates.Keys)
                     {
-                        if (application.remoteUsers.ContainsKey(clientIP))
+                        if (application.remoteUsers.ContainsKey(clientID))
                         {
-                            var avatar = application.remoteUsers[clientIP].Avatar;
-                            var avatarState = receivedAvatarStates[clientIP];
+                            var avatar = application.remoteUsers[clientID].Avatar;
+                            var avatarState = receivedAvatarStates[clientID];
                             avatar.SetState(avatarState);                            
                         }
                         else
                         {
-                            WM.Logger.Warning("Client.UpdateAvatarStatesFromUDP(): Received avatar state for non-existing avatar! (" + clientIP + ")");
+                            WM.Logger.Warning("Client.UpdateAvatarStatesFromUDP(): Received avatar state for non-existing avatar! (" + clientID + ")");
                         }
                     }
                 }

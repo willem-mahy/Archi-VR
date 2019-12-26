@@ -35,19 +35,19 @@ namespace ArchiVR.Net
 
             // TODO: Step A should maybee better be performed by the clients themselves upon 'NewClientConnection()'?
 
-            // A) .. know its peer clients:
-            lock (application.remoteUsers)
+            // A) .. know its peer clients:  (TODO? Make this 'Hey I exist already' notification part of the Client class?)
+            lock (clientConnections)
             {
                 // For each existing client, ...
-                foreach (var remoteUser in application.remoteUsers)
+                foreach (var clientConnection in clientConnections)
                 {
                     //... each EXISTING client, (not the new one) ...
-                    if (remoteUser.Key != newClientConnection.remoteIP)
+                    if (clientConnection.ClientID != newClientConnection.ClientID)
                     {
                         // ... send a 'ClientConnect' command.
                         var cc1 = new ConnectClientCommand();
-                        cc1.ClientIP = remoteUser.Value.remoteIP;
-                        cc1.ClientPort = remoteUser.Value.remotePort;
+                        cc1.ClientIP = clientConnection.remoteIP;
+                        cc1.ClientPort = clientConnection.remotePortTCP;
                         
                         SendCommand(cc1, newClientConnection); // This makes the new client initialize a remote user for the existing client.
                     }

@@ -377,6 +377,7 @@ namespace WM.Net
                 // Start the server socket.
                 WM.Logger.Debug("Server.Init(): Start TCP listener");
                 tcpListener.Start();
+                WM.Logger.Debug("Server.Init(): TCP listener bound to port " + TcpPort);
 
                 Status = "TcpListener started";
 

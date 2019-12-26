@@ -11,8 +11,6 @@ namespace Tests
 {
     public class TestServerClient
     {
-        public int ClientBasePort = 8900;
-
         private static Guid DefaultAvatarID = Guid.NewGuid();
         private static Guid Avatar1ID = Guid.NewGuid();
         private static Guid Avatar2ID = Guid.NewGuid();
@@ -44,10 +42,11 @@ namespace Tests
         /// Create an ApplicationArchiVR with a Server and Client set.
         /// </summary>
         /// <returns></returns>
-        private ApplicationArchiVR CreateApplication(int clientBasePort)
+        private ApplicationArchiVR CreateApplication(string name)
         {
             // Create an application instance that will act as server.
             var applicationGO = new GameObject();
+            applicationGO.name = name;
             var application = applicationGO.AddComponent(typeof(ApplicationArchiVR)) as ApplicationArchiVR;
 
             application.DefaultAvatarID = DefaultAvatarID;
@@ -64,7 +63,6 @@ namespace Tests
 
             var clientGO = new GameObject();
             var client = clientGO.AddComponent(typeof(ClientArchiVR)) as ClientArchiVR;
-            client.BasePort = clientBasePort;
             client.application = application;
             application.Client = client;
 
@@ -115,15 +113,15 @@ namespace Tests
 
             // Create an application instance that will act as server.
             LogHeader("Initialize Server application");
-            applicationServer = CreateApplication(ClientBasePort);
+            applicationServer = CreateApplication("Server");
 
             // Create an application instance that will connect as client 1.
             LogHeader("Initialize Remote Client 1 application");
-            applicationClient1 = CreateApplication(ClientBasePort + 10);
+            applicationClient1 = CreateApplication("Client1");
 
             // Create an application instance that will connect as client 2.
             LogHeader("Initialize Remote Client 2 application");
-            applicationClient2 = CreateApplication(ClientBasePort + 20);
+            applicationClient2 = CreateApplication("Client2");
 
             #endregion
 
@@ -163,6 +161,11 @@ namespace Tests
                 // ... its Client is automatically connected to that server.
                 Assert.AreEqual(1, applicationServer.Server.NumClients);
                 Assert.IsTrue(applicationServer.Client.Connected);
+
+                // None of the application is connected to the Server, so none of them has remote users.
+                Assert.AreEqual(0, applicationServer.remoteUsers.Count);
+                Assert.AreEqual(0, applicationClient1.remoteUsers.Count);
+                Assert.AreEqual(0, applicationClient2.remoteUsers.Count);
             }
 
             #endregion
@@ -191,6 +194,11 @@ namespace Tests
                 // ... its Client is connected to the Server application's Server.
                 Assert.IsTrue(applicationClient1.Client.Connected);
                 Assert.AreEqual(2, applicationServer.Server.NumClients);
+
+                // Only Clients of Server and Client1 application are connected to the Server.
+                Assert.AreEqual(1, applicationServer.remoteUsers.Count);
+                Assert.AreEqual(1, applicationClient1.remoteUsers.Count);
+                Assert.AreEqual(0, applicationClient2.remoteUsers.Count);
             }
 
             #endregion
@@ -205,7 +213,7 @@ namespace Tests
                 applicationClient2.QueueCommand(new InitNetworkCommand(NetworkMode.Client));
                 Assert.AreEqual(NetworkMode.Standalone, applicationClient2.NetworkMode);
 
-                UpdateApplications(); // Make queued commands execute.
+                UpdateApplications(50); // Make queued commands execute.
             }
 
             // ... THEN ...
@@ -219,6 +227,12 @@ namespace Tests
                 // ... its Client is connected to the Server application's Server.
                 Assert.IsTrue(applicationClient2.Client.Connected);
                 Assert.AreEqual(3, applicationServer.Server.NumClients);
+
+                // All clients (Client of Server, Client1 and CLient2 application) are connected to the server.
+                // They should all list the other 2 as remote users.
+                Assert.AreEqual(2, applicationServer.remoteUsers.Count);
+                Assert.AreEqual(2, applicationClient1.remoteUsers.Count);
+                Assert.AreEqual(2, applicationClient2.remoteUsers.Count);
             }
 
             #endregion
@@ -249,10 +263,15 @@ namespace Tests
             // Server should have 1 client connected (it's own).            
             Assert.AreEqual(2, applicationServer.Server.NumClients);
 
+            // Only Clients of Server and Client1 application are connected to the Server.
+            Assert.AreEqual(1, applicationServer.remoteUsers.Count);
+            Assert.AreEqual(1, applicationClient1.remoteUsers.Count);
+            Assert.AreEqual(0, applicationClient2.remoteUsers.Count);
+
             #endregion
 
             #region Disconnect Client1
-            
+
             LogHeader("Disconnect Client1");
 
             // Make client1 application initialize network mode from 'Client' to 'Standalone'.

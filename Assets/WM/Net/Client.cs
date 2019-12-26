@@ -42,13 +42,16 @@ namespace WM.Net
 
         public int ConnectTimeout = 100;
 
-        public int BasePort = 8800;
-
         #region TCP
 
         public int TcpPort
         {
-            get { return BasePort + 5; }
+            get { return ((IPEndPoint)tcpClient.Client.LocalEndPoint).Port; }
+        }
+
+        public int UdpPort
+        {
+            get { return ((IPEndPoint)udpClient.Client.LocalEndPoint).Port; }
         }
 
         // The TCP client
@@ -69,16 +72,6 @@ namespace WM.Net
         {
             get;
             protected set;
-        }
-
-        public static int GetUdpPort(int basePort)
-        {
-            return basePort + 1;
-        }
-
-        public int UdpPort
-        {
-            get { return BasePort + 1; }
         }
 
         private UdpClient udpClient;
@@ -155,6 +148,23 @@ namespace WM.Net
             WM.Logger.Debug("Client connecting...");
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        abstract public void OnConnect();
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        abstract public void OnDisconnect();
+
+        public string ID
+        {
+            get { return NetUtil.GetLocalIPAddress() + ":" + TcpPort; }
+        }
+
         /// <summary>
         /// Disconnect the client.
         /// </summary>
@@ -170,7 +180,7 @@ namespace WM.Net
                         state = ClientState.Disconnecting;
                         break;
                     case ClientState.Disconnecting:
-                        throw new Exception("Disconnect() can not be called on Client while it is Disconnnecting.");
+                        throw new Exception("Disconnect() can not be called on Client while it is Disconnecting.");
                     case ClientState.Disconnected:
                         throw new Exception("Disconnect() can not be called on Client while it is Disconnnected.");
                     case ClientState.Connecting:
@@ -179,7 +189,9 @@ namespace WM.Net
 
                 WM.Logger.Debug("Client disconnecting...");
 
-                SendCommand(new DisconnectClientCommand(NetUtil.GetLocalIPAddress()));
+                OnDisconnect();
+
+                SendCommand(new DisconnectClientCommand(ID));
 
                 while (Status != "DisconnectAcknoledged") ;
 
@@ -347,7 +359,7 @@ namespace WM.Net
                             udpSend.Init();
                         }
 
-                        OnTcpConnected();
+                        OnConnect();
 
                         state = ClientState.Connected;
                         break; // We are Connected: stop connecting...
@@ -565,12 +577,7 @@ namespace WM.Net
         /// </summary>
         /// <param name="obj"></param>
         abstract public void DoProcessMessage(object obj);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        abstract public void OnTcpConnected();
-                
+                        
         /// <summary>
         /// Send non-critical data to the server over UDP.
         /// </summary>
