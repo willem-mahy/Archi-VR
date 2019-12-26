@@ -11,11 +11,11 @@ namespace Tests
 {
     public class TestServerClient
     {
-        public int ClientBasePort = 8800;
+        public int ClientBasePort = 8900;
 
         private static Guid DefaultAvatarID = Guid.NewGuid();
-
-        private static GameObject DefaultAvatarPrefab = CreateMockAvatarPrefab("DefaultAvatar");
+        private static Guid Avatar1ID = Guid.NewGuid();
+        private static Guid Avatar2ID = Guid.NewGuid();
 
         /// <summary>
         /// 
@@ -52,7 +52,9 @@ namespace Tests
 
             application.DefaultAvatarID = DefaultAvatarID;
 
-            application.AvatarFactory.Register(DefaultAvatarID, DefaultAvatarPrefab);
+            application.AvatarFactory.Register(DefaultAvatarID, CreateMockAvatarPrefab("DefaultAvatar"));
+            application.AvatarFactory.Register(Avatar2ID, CreateMockAvatarPrefab("Avatar1"));
+            application.AvatarFactory.Register(Avatar1ID, CreateMockAvatarPrefab("Avatar2"));
 
             // Create the server for the server application.
             var serverGO = new GameObject();
@@ -112,15 +114,20 @@ namespace Tests
             #region Setup
 
             // Create an application instance that will act as server.
+            LogHeader("Initialize Server application");
             applicationServer = CreateApplication(ClientBasePort);
 
             // Create an application instance that will connect as client 1.
+            LogHeader("Initialize Remote Client 1 application");
             applicationClient1 = CreateApplication(ClientBasePort + 10);
 
             // Create an application instance that will connect as client 2.
+            LogHeader("Initialize Remote Client 2 application");
             applicationClient2 = CreateApplication(ClientBasePort + 20);
 
             #endregion
+
+            #region Check initial application state
 
             Assert.AreEqual(0, applicationServer.Server.NumClients);
             Assert.AreEqual(0, applicationClient1.Server.NumClients); 
@@ -130,53 +137,123 @@ namespace Tests
             Assert.IsFalse(applicationClient1.Client.Connected);
             Assert.IsFalse(applicationClient2.Client.Connected);
 
+            #endregion Check initial application state
+
             #region Start Server.
+            
+            LogHeader("Start Server");
 
-            // Make server application initialize network mode from 'Standalone' to 'Server'.
-            Assert.AreEqual(NetworkMode.Standalone, applicationServer.NetworkMode);
-            applicationServer.QueueCommand(new InitNetworkCommand(NetworkMode.Server));
-            Assert.AreEqual(NetworkMode.Standalone, applicationServer.NetworkMode);
+            // WHEN the ServerApplication is initialized to 'Server' network mode...
+            {
+                Assert.AreEqual(NetworkMode.Standalone, applicationServer.NetworkMode);
+                applicationServer.QueueCommand(new InitNetworkCommand(NetworkMode.Server));
+                Assert.AreEqual(NetworkMode.Standalone, applicationServer.NetworkMode);
 
-            UpdateApplications(); // Make queued commands execute.
+                UpdateApplications(); // Make queued commands execute.
+            }
 
-            Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);
-            Assert.IsTrue(applicationServer.Client.Connected);
+            // ... THEN ...
+            {
+                // ... its network mode is 'Server'
+                Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);
 
-            // Starting the Server automatically connects the local-running Client to it.
-            Assert.AreEqual(1, applicationServer.Server.NumClients);
+                // ... its Server is Running
+                // TODO: Assert.AreEqual(ServerState.Running, applicationServer.Server.State);
+
+                // ... its Client is automatically connected to that server.
+                Assert.AreEqual(1, applicationServer.Server.NumClients);
+                Assert.IsTrue(applicationServer.Client.Connected);
+            }
 
             #endregion
 
-            // Make client1 application initialize network mode from 'Standalone' to 'Client'.
-            Assert.AreEqual(NetworkMode.Standalone, applicationClient1.NetworkMode);
-            applicationClient1.QueueCommand(new InitNetworkCommand(NetworkMode.Client));
-            Assert.AreEqual(NetworkMode.Standalone, applicationClient1.NetworkMode);
+            #region Connect Client1'.
+            
+            LogHeader("Connect Client1");
+
+            // WHEN the Client1 application is initialized to 'Client' network mode...
+            {
+                Assert.AreEqual(NetworkMode.Standalone, applicationClient1.NetworkMode);
+                applicationClient1.QueueCommand(new InitNetworkCommand(NetworkMode.Client));
+                Assert.AreEqual(NetworkMode.Standalone, applicationClient1.NetworkMode);
+
+                UpdateApplications(); // Make queued commands execute.
+            }
+
+            // ... THEN ...
+            {
+                // ... its network mode is 'Server'
+                Assert.AreEqual(NetworkMode.Client, applicationClient1.NetworkMode);
+
+                // ... its Server is not Running
+                // TODO: Assert.AreEqual(ServerState.Running, applicationClient1.Server.State);
+
+                // ... its Client is connected to the Server application's Server.
+                Assert.IsTrue(applicationClient1.Client.Connected);
+                Assert.AreEqual(2, applicationServer.Server.NumClients);
+            }
+
+            #endregion
+
+            #region Connect Client2
+
+            LogHeader("Connect Client2");
+
+            // WHEN the Client2 application is initialized to 'Client' network mode...
+            {
+                Assert.AreEqual(NetworkMode.Standalone, applicationClient2.NetworkMode);
+                applicationClient2.QueueCommand(new InitNetworkCommand(NetworkMode.Client));
+                Assert.AreEqual(NetworkMode.Standalone, applicationClient2.NetworkMode);
+
+                UpdateApplications(); // Make queued commands execute.
+            }
+
+            // ... THEN ...
+            {
+                // ... its network mode is 'Server'
+                Assert.AreEqual(NetworkMode.Client, applicationClient2.NetworkMode);
+
+                // ... its Server is not Running
+                // TODO: Assert.AreEqual(ServerState.Running, applicationClient2.Server.State);
+
+                // ... its Client is connected to the Server application's Server.
+                Assert.IsTrue(applicationClient2.Client.Connected);
+                Assert.AreEqual(3, applicationServer.Server.NumClients);
+            }
+
+            #endregion
+
+            #region Change server Avatar
+
+            //LogHeader("Change server Avatar");
+
+            //applicationServer.SetAvatar(Avatar1ID);
+
+            #endregion
+
+            #region Disconnect Client2
+
+            LogHeader("Disconnect Client2");
+
+            // Make client1 application initialize network mode from 'Client' to 'Standalone'.
+            Assert.AreEqual(NetworkMode.Client, applicationClient2.NetworkMode);
+            applicationClient2.QueueCommand(new InitNetworkCommand(NetworkMode.Standalone));
+            Assert.AreEqual(NetworkMode.Client, applicationClient2.NetworkMode);
 
             UpdateApplications(); // Make queued commands execute.
 
-            Assert.AreEqual(NetworkMode.Client, applicationClient1.NetworkMode);
-            Assert.IsTrue(applicationClient1.Client.Connected);
+            // Remote Client 1 should be disconnected.
+            Assert.AreEqual(NetworkMode.Standalone, applicationClient2.NetworkMode);
+            Assert.AreEqual(false, applicationClient2.Client.Connected);
 
+            // Server should have 1 client connected (it's own).            
             Assert.AreEqual(2, applicationServer.Server.NumClients);
 
-            /*
-            // Make client2 application initialize network mode from 'Standalone' to 'Client'.
-            Assert.AreEqual(NetworkMode.Standalone, applicationClient1.NetworkMode);
-            applicationClient2.QueueCommand(new InitNetworkCommand(NetworkMode.Client));
-            Assert.AreEqual(NetworkMode.Standalone, applicationClient1.NetworkMode);
+            #endregion
 
-            // Make the command to transition networkmode, execute.
-            UpdateApplications(10);
-
-            Assert.AreEqual(NetworkMode.Client, applicationClient2.NetworkMode);
-            Assert.IsTrue(applicationClient2.Client.Connected);
-
-            Assert.AreEqual(2, applicationServer.Server.NumClients);
-            */
-
-            #region Disconnect Remote Client 1
-
-            //applicationClient1.Client.Disconnect();
+            #region Disconnect Client1
+            
+            LogHeader("Disconnect Client1");
 
             // Make client1 application initialize network mode from 'Client' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Client, applicationClient1.NetworkMode);
@@ -184,8 +261,6 @@ namespace Tests
             Assert.AreEqual(NetworkMode.Client, applicationClient1.NetworkMode);
 
             UpdateApplications(); // Make queued commands execute.
-
-            //Thread.Sleep(1000);
 
             // Remote Client 1 should be disconnected.
             Assert.AreEqual(NetworkMode.Standalone, applicationClient1.NetworkMode);
@@ -195,19 +270,17 @@ namespace Tests
             Assert.AreEqual(1, applicationServer.Server.NumClients);
 
             #endregion
+            
+            #region Stop Server
 
-            #region Disconnect Server Client
+            LogHeader("Stop Server");
 
-            //applicationServer.Client.Disconnect(); // Taken care of by InitNetworkCommand
-
-            // Make client1 application initialize network mode from 'Server' to 'Standalone'.
+            // Make server application initialize network mode from 'Server' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);
             applicationServer.QueueCommand(new InitNetworkCommand(NetworkMode.Standalone));
             Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);
 
             UpdateApplications(); // Make queued commands execute.
-
-            //Thread.Sleep(1000);
 
             // Server should be in 'Standalone' network mode.
             Assert.AreEqual(NetworkMode.Standalone, applicationServer.NetworkMode);
@@ -219,23 +292,12 @@ namespace Tests
             Assert.AreEqual(0, applicationServer.Server.NumClients);
 
             #endregion
-
-            #region Shutdown Server.
-
-            applicationServer.Server.Shutdown();
-            // FIXME: TODO: Assert.AreEqual(ServerState.Down, applicationServer.Server.State);
-
-            #endregion
         }
 
-        //// A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
-        //// `yield return null;` to skip a frame.
-        //[UnityTest]
-        //public IEnumerator TestServerClientWithEnumeratorPasses()
-        //{
-        //    // Use the Assert class to test conditions.
-        //    // Use yield to skip a frame.
-        //    yield return null;
-        //}
+        private void LogHeader(string caption)
+        {
+            WM.Logger.Debug("");
+            WM.Logger.Debug("=======[" + caption + "]===============================");
+        }
     }
 }

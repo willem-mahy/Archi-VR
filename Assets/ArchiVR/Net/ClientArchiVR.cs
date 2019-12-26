@@ -28,9 +28,11 @@ namespace ArchiVR.Net
         {
             // Broadcast your chosen avatar.
             {
-                var scac = new SetClientAvatarCommand();
-                scac.ClientIP = NetUtil.GetLocalIPAddress();
-                scac.AvatarID = application.AvatarID;
+                var scac = new SetClientAvatarCommand(
+                    NetUtil.GetLocalIPAddress(),
+                    BasePort,
+                    application.AvatarID);
+
                 SendCommand(scac);
             }
         }

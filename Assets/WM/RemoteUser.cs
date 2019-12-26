@@ -10,6 +10,11 @@ namespace WM
         public string remoteIP;
 
         /// <summary>
+        /// The Port of the remote user.
+        /// </summary>
+        public int remotePort = -1;
+
+        /// <summary>
         /// The index of the user's avatar type.
         /// </summary>
         public int AvatarIndex = 0;

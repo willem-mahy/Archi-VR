@@ -919,7 +919,7 @@ namespace WM.Application
             }
 
             AvatarID = avatarID;
-            Client.SendCommand(new SetClientAvatarCommand(WM.Net.NetUtil.GetLocalIPAddress(), avatarID));
+            Client.SendCommand(new SetClientAvatarCommand(WM.Net.NetUtil.GetLocalIPAddress(), Client.BasePort, avatarID));
         }
 
         #endregion
@@ -994,9 +994,13 @@ namespace WM.Application
 
                 var remoteUser = new RemoteUser();
                 remoteUser.remoteIP = clientIP;
+                remoteUser.remotePort = clientPort;
                 remoteUser.Avatar = avatar.GetComponent<WM.Net.Avatar>();
 
-                remoteUsers[remoteUser.remoteIP] = remoteUser;
+                var clientID = remoteUser.remoteIP + ":" + remoteUser.remotePort;
+                remoteUsers[clientID] = remoteUser;
+
+                WM.Logger.Debug("Client " + clientID + " accepted");
             }
         }
 

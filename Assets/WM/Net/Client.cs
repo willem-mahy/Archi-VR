@@ -15,7 +15,7 @@ namespace WM.Net
     {
         #region Variables
 
-        public string InitialServerIP = "";//192.168.0.13";
+        public ServerInfo ServerInfo = null; // TODO? new ServerInfo(127.0.0.1, Server.DefaultTcpPort, Server.DefaultUdpPort);
 
         public int ConnectTimeout = 100;
 
@@ -23,7 +23,10 @@ namespace WM.Net
 
         #region TCP
 
-        public int TcpPort = Constants.BasePort + 5;
+        public int TcpPort
+        {
+            get { return BasePort + 5; }
+        }
 
         // The TCP client
         private TcpClient tcpClient;
@@ -213,37 +216,39 @@ namespace WM.Net
         /// Synchronously start listening at the UDP broadcast port for UdpBroadcastMessages.
         /// </summary>
         /// <returns>A string containing the IP address of the first server from which we receive a valid UdpBroadcastMessage</returns>
-        private string GetServerIPFromUdpBroadcast()
+        private ServerInfo GetServerInfoFromUdpBroadcast()
         {
             Status = "Listening for servers";
 
-            WM.Logger.Debug(string.Format("Client: Listening to UDP broadcast Message '{0}' on port {1}", UdpBroadcastMessage, Server.BroadcastUdpPort));
+            WM.Logger.Debug(string.Format("Client: Listening to UDP broadcast Message '{0}' on port {1}", UdpBroadcastMessage, Server.UdpBroadcastRemotePort));
 
-            var udpClient = new UdpClient(Server.BroadcastUdpPort);
+            var udpClient = new UdpClient(Server.UdpBroadcastRemotePort);
             var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
             while (!shutDown)
             {
                 try
                 {
-                    // Receive bytes from anyone.                    
+                    // Receive bytes from anyone on local port 'Server.UdpBroadcastRemotePort'.
                     byte[] data = udpClient.Receive(ref remoteEndPoint);
 
                     // Encode received bytes to UTF8- encoding.
-                    string text = Encoding.UTF8.GetString(data);
+                    string receivedText = Encoding.UTF8.GetString(data);
 
-                    if (text.Contains(UdpBroadcastMessage))
+                    var obj = GetObjectFromMessageXML(receivedText);
+                    
+                    if (obj is ServerInfo serverInfo) //receivedText.Contains(UdpBroadcastMessage))
                     {
-                        var serverAddress = remoteEndPoint.Address.ToString();
-                        WM.Logger.Debug(string.Format("Client: received UDP broadcast Message from server '{0}'", serverAddress));
+                        var serverIP = remoteEndPoint.Address.ToString();
+                        WM.Logger.Debug(string.Format("Client: Received UDP broadcast Message from server '{0}': TCP {1}, UDP {2}", serverIP, serverInfo.TcpPort, serverInfo.UdpPort));
 
                         udpClient.Close();
 
-                        return serverAddress;
+                        return serverInfo;
                     }
                     else
                     {
-                        WM.Logger.Warning(string.Format("Client: Received unexpected message '{0}' on server broadcast listener UDP client!", text));
+                        WM.Logger.Warning(string.Format("Client: Received unexpected message '{0}' on server broadcast listener UDP client!", receivedText));
                     }
                 }
                 catch (Exception e)
@@ -254,7 +259,7 @@ namespace WM.Net
 
             udpClient.Close();
 
-            return "";
+            return null;
         }
 
         /// <summary>
@@ -264,9 +269,9 @@ namespace WM.Net
         {
             Debug.Assert(state == ClientState.Connecting);
 
-            if (InitialServerIP == "")
+            if (ServerInfo == null)
             {
-                InitialServerIP = GetServerIPFromUdpBroadcast();
+                ServerInfo = GetServerInfoFromUdpBroadcast();
             }
 
             while (!shutDown)
@@ -276,22 +281,47 @@ namespace WM.Net
                     if (TryConnect())
                     {
                         Status = "Connected to " + ServerIP;
-                        WM.Logger.Debug("Client: tcpClient connected.");
+                        WM.Logger.Debug("Client: TcpClient connected to Server @ '" + ServerIP + ":" + ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Port + "'.");
 
                         // Get server stream from TCP client.
                         tcpServerStream = tcpClient.GetStream();
 
-                        // Initialize UDP sockets to/from server.
-                        {
-                            udpClient = new UdpClient(UdpPort);
+                        // Create UDP client.
+                        // Pass '0' to make the system pick an appropriate port for us.
+                        udpClient = new UdpClient(0);
 
-                            udpSend = new UDPSend(udpClient);
-                            udpSend.remoteIP = ServerIP;
-                            udpSend.remotePort = Server.UdpPort;
-                            udpSend.Init();
+                        // Send the UDP client port to the server, so that it knows where to send UDP messages to.
+                        var udpReceivePort = ((IPEndPoint)udpClient.Client.LocalEndPoint).Port;
+                        SendData("" + udpReceivePort);
 
+                        // Initialize UDP socket from server.
+                        {   
                             udpReceive = new UDPReceive(udpClient);
                             udpReceive.Init();
+                        }
+
+                        #region receive UDP port from server
+
+                        while (!tcpServerStream.DataAvailable)
+                        {
+                        }
+
+                        // Receive data from server.
+                        var bytesFromServer = new byte[tcpClient.ReceiveBufferSize];
+                        var numBytesRead = tcpServerStream.Read(bytesFromServer, 0, (int)tcpClient.ReceiveBufferSize);
+
+                        var dataFromServer = Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);
+
+                        var ServerUdpPort = int.Parse(dataFromServer);
+
+                        #endregion receive UDP port from server
+
+                        // Initialize UDP socket to server.
+                        {
+                            udpSend = new UDPSend(udpClient);
+                            udpSend.remoteIP = ServerIP;
+                            udpSend.remotePort = ServerUdpPort;
+                            udpSend.Init();
                         }
 
                         OnTcpConnected();
@@ -367,21 +397,24 @@ namespace WM.Net
         /// <returns></returns>
         private bool TryConnect()
         {
-            if (InitialServerIP != "")
+            if (ServerInfo != null)
             {
                 // connect to a predefined server.
-                return TryConnectToServer(InitialServerIP);
+                return TryConnectToServer(ServerInfo);
             }
             else
             {
+                // Connect to any server.
                 var localSubNet = NetUtil.GetLocalIPSubNet();
 
-                // Search the local subnet for a server.
+                ServerInfo = new ServerInfo("", 8880,8881); //TODO: Server.DefaultIP, Server.DefaultTcpPort, Server.
+
+                // Iterate all addresses in the local subnet, and try to connect to each address at default port.
                 for (int i = 0; i < 255; ++i)
                 {
-                    string serverIP = localSubNet + i;
+                    ServerInfo.IP = localSubNet + i; // TODO? skip own IP
 
-                    if (TryConnectToServer(serverIP))
+                    if (TryConnectToServer(ServerInfo))
                     {
                         return true;
                     }
@@ -396,9 +429,9 @@ namespace WM.Net
         /// </summary>
         /// <param name="serverIP"></param>
         /// <returns></returns>
-        private bool TryConnectToServer(string serverIP)
+        private bool TryConnectToServer(ServerInfo serverInfo)
         {
-            String tag = serverIP + ":" + Server.TcpPort + ", timeout:" + ConnectTimeout + "ms";
+            String tag = serverInfo.IP + ":" + serverInfo.TcpPort + " " + serverInfo.UdpPort + ", timeout:" + ConnectTimeout + "ms";
             WM.Logger.Debug("Client.TryConnectToServer(): Server:'" + tag);
 
             Status = "Trying to connect to " + tag;
@@ -407,7 +440,7 @@ namespace WM.Net
             {
                 var tcpClient = new TcpClient();
 
-                var connectionAttempt = tcpClient.ConnectAsync(serverIP, Server.TcpPort);
+                var connectionAttempt = tcpClient.ConnectAsync(serverInfo.IP, serverInfo.TcpPort);
 
                 connectionAttempt.Wait(ConnectTimeout);
 
@@ -465,8 +498,8 @@ namespace WM.Net
         /// 
         /// </summary>
         /// <param name="messageXML"></param>
-        private void ProcessMessage(
-            string messageXML)
+        /// <returns></returns>
+        private object GetObjectFromMessageXML(string messageXML)
         {
             // XML-deserialize the message.
             var ser = new XmlSerializer(typeof(Message));
@@ -479,6 +512,19 @@ namespace WM.Net
 
             // Binary-deserialize the object from the message.
             var obj = message.Deserialize();
+
+            // Return the object that has been parsed from the MessageXML
+            return obj;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messageXML"></param>
+        private void ProcessMessage(
+            string messageXML)
+        {
+            var obj = GetObjectFromMessageXML(messageXML);
 
             // If it is a generic message, process it here.
             if (obj is ClientDisconnectAcknoledgeMessage)
@@ -570,7 +616,7 @@ namespace WM.Net
         /// <param name="data"></param>
         public void SendData(String data)
         {
-            WM.Logger.Debug("Client:SendData()");
+            WM.Logger.Debug("Client:SendData(" + data + ")");
 
             try
             {
@@ -579,16 +625,14 @@ namespace WM.Net
                     return;
                 }
 
-                var networkStream = tcpClient.GetStream();
-
-                if (networkStream == null)
+                if (tcpServerStream == null)
                 {
                     return;
                 }
 
                 var bytes = Encoding.ASCII.GetBytes(data);
-                networkStream.Write(bytes, 0, bytes.Length);
-                networkStream.Flush();
+                tcpServerStream.Write(bytes, 0, bytes.Length);
+                tcpServerStream.Flush();
             }
             catch (Exception e)
             {

@@ -13,145 +13,39 @@ using WM.Command;
 namespace WM.Net
 {
     /// <summary>
-    /// Constants used throughout WM.Net namespace.
+    /// 
     /// </summary>
-    public class Constants
+    [Serializable]
+    public class ServerInfo
     {
-        public static readonly int BasePort = 8860;
+        public string IP;
+
+        public int TcpPort;
+
+        public int UdpPort;
+
+        public ServerInfo(String IP, int tcpPort, int udpPort)
+        {
+            this.IP = IP;
+            TcpPort = tcpPort;
+            UdpPort = udpPort;
+        }
     }
 
     /// <summary>
-    /// Holds all data related to a client connected to the server.
-    /// </summary>    
-    public class ClientConnection
+    /// 
+    /// </summary>
+    [Serializable]
+    public class ClientInfo
     {
-        //! The remote endpoint IP.
-        public string remoteIP
+        public int TcpPort;
+
+        public int UdpPort;
+
+        public ClientInfo(int tcpPort, int udpPort)
         {
-            get;
-            private set;
-        } = "";
-
-        //! The remote endpoint port.
-        public int remotePort
-        {
-            get;
-            private set;
-        } = -1;
-
-        #region TCP stuff
-
-        // The client-specific TCP client. (owned by the parent Server instance)
-        private TcpClient tcpClient;
-
-        // The client-specific TCP network stream. (TODO: make private!)
-        private NetworkStream tcpNetworkStream;
-
-        //
-        public string tcpReceivedData = "";
-
-        #endregion
-
-        #region UDP stuff
-
-        // The client-specific UDP sender (owned by self.)
-        private UDPSend udpSend;
-
-        #endregion
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tcpClient"></param>
-        /// <param name="udpClient"></param>
-        public ClientConnection(
-            TcpClient tcpClient,
-            UdpClient udpClient)
-        {
-            this.tcpClient = tcpClient;
-            tcpNetworkStream = tcpClient.GetStream();
-
-            var tcpRemoteEndPoint = tcpClient.Client.RemoteEndPoint as IPEndPoint;
-            remoteIP = tcpRemoteEndPoint.Address.ToString();
-
-            udpSend = new UDPSend(udpClient);
-            udpSend.remoteIP = remoteIP;
-            udpSend.remotePort = Client.GetUdpPort(tcpRemoteEndPoint.Port);
-            udpSend.Init();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void Close()
-        {
-            tcpNetworkStream.Close();
-            tcpNetworkStream = null;
-
-            tcpClient.Close();
-            tcpClient = null;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        public void SendUDP(string data)
-        {
-            if (udpSend == null)
-            {
-                Logger.Error("ClientConnection.SendUDP(): udpSend is null!");
-                return;
-            }
-
-            udpSend.SendString(data);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="data"></param>
-        public void SendTCP(string data)
-        {
-            if (tcpClient == null)
-            {
-                Logger.Error("ClientConnection.SendTCP(): tcpClient is null!");
-                return;
-            }
-
-            var bytes = Encoding.ASCII.GetBytes(data);
-            tcpNetworkStream.Write(bytes, 0, bytes.Length);
-            tcpNetworkStream.Flush();
-        }
-
-        /// <summary>
-        /// Receives any available data from the TCP socket.
-        /// </summary>
-        /// <returns>A bool indicating hether data was received.</returns>
-        public bool ReceiveDataTCP()
-        {
-            if (tcpClient == null)
-            {
-                Logger.Error("ClientConnection.ReceiveDataTCP(): tcpClient is null!");
-                return false;
-            }
-
-            if (tcpNetworkStream == null)
-            {
-                Logger.Error("ClientConnection.ReceiveDataTCP(): tcpNetworkStream is null!");
-                return false;
-            }
-
-            if (!tcpNetworkStream.DataAvailable)
-            {
-                return false;
-            }
-
-            var bytesFromClient = new byte[tcpClient.Available];
-            int bytesRead = tcpNetworkStream.Read(bytesFromClient, 0, tcpClient.Available);
-            tcpReceivedData += System.Text.Encoding.ASCII.GetString(bytesFromClient, 0, bytesRead);
-
-            return true; // Data received
+            TcpPort = tcpPort;
+            UdpPort = udpPort;
         }
     }
 
@@ -160,16 +54,177 @@ namespace WM.Net
     /// </summary>
     abstract public class Server : MonoBehaviour
     {
+        /// <summary>
+        /// Holds all data related to a client connected to the server.
+        /// </summary>    
+        public class ClientConnection
+        {
+            public string ClientID
+            {
+                get
+                {
+                    return remoteIP + ":" + remotePortTCP;
+                }
+            }
+
+            /// <summary>
+            /// The remote endpoint IP.
+            /// </summary>
+            public string remoteIP
+            {
+                get;
+                private set;
+            } = "";
+
+            /// <summary>
+            /// The remote endpoint port.
+            /// </summary>
+            public int remotePortTCP
+            {
+                get;
+                private set;
+            } = -1;
+
+            /// <summary>
+            /// The remote endpoint port.
+            /// </summary>
+            public int remotePortUDP
+            {
+                get;
+                private set;
+            } = -1;
+
+            #region TCP stuff
+
+            // The client-specific TCP client. (owned by the parent Server instance)
+            private TcpClient tcpClient;
+
+            // The client-specific TCP network stream. (TODO: make private!)
+            private NetworkStream tcpNetworkStream;
+
+            //
+            public string tcpReceivedData = "";
+
+            #endregion
+
+            #region UDP stuff
+
+            // The client-specific UDP sender (owned by self.)
+            private UDPSend udpSend;
+
+            #endregion
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="tcpClient"></param>
+            /// <param name="udpClient"></param>
+            public ClientConnection(
+                TcpClient tcpClient,
+                UdpClient udpClient)
+            {
+                this.tcpClient = tcpClient;
+                tcpNetworkStream = tcpClient.GetStream();
+
+                var tcpRemoteEndPoint = tcpClient.Client.RemoteEndPoint as IPEndPoint;
+                remoteIP = tcpRemoteEndPoint.Address.ToString();
+                remotePortTCP = tcpRemoteEndPoint.Port;
+
+                // Receive the port of the Client UDPReceive at the Client's side.
+                while (!ReceiveDataTCP())
+                {
+                }
+
+                remotePortUDP = int.Parse(tcpReceivedData);
+
+                udpSend = new UDPSend(udpClient);
+                udpSend.remoteIP = remoteIP;
+                udpSend.remotePort = remotePortUDP;
+                udpSend.Init();
+
+                WM.Logger.Debug("ClientConnection: Client UDP port is " + remotePortUDP);
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public void Close()
+            {
+                tcpNetworkStream.Close();
+                tcpNetworkStream = null;
+
+                tcpClient.Close();
+                tcpClient = null;
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="data"></param>
+            public void SendUDP(string data)
+            {
+                if (udpSend == null)
+                {
+                    Logger.Error("ClientConnection.SendUDP(): udpSend is null!");
+                    return;
+                }
+
+                udpSend.SendString(data);
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="data"></param>
+            public void SendTCP(string data)
+            {
+                if (tcpClient == null)
+                {
+                    Logger.Error("ClientConnection.SendTCP(): tcpClient is null!");
+                    return;
+                }
+
+                var bytes = Encoding.ASCII.GetBytes(data);
+                tcpNetworkStream.Write(bytes, 0, bytes.Length);
+                tcpNetworkStream.Flush();
+            }
+
+            /// <summary>
+            /// Receives any available data from the TCP socket.
+            /// </summary>
+            /// <returns>A bool indicating hether data was received.</returns>
+            public bool ReceiveDataTCP()
+            {
+                if (tcpClient == null)
+                {
+                    Logger.Error("ClientConnection.ReceiveDataTCP(): tcpClient is null!");
+                    return false;
+                }
+
+                if (tcpNetworkStream == null)
+                {
+                    Logger.Error("ClientConnection.ReceiveDataTCP(): tcpNetworkStream is null!");
+                    return false;
+                }
+
+                if (!tcpNetworkStream.DataAvailable)
+                {
+                    return false;
+                }
+
+                var bytesFromClient = new byte[tcpClient.Available];
+                int bytesRead = tcpNetworkStream.Read(bytesFromClient, 0, tcpClient.Available);
+                tcpReceivedData += System.Text.Encoding.ASCII.GetString(bytesFromClient, 0, bytesRead);
+
+                return true; // Data received
+            }
+        }
+
         #region Variables
 
         public string Status = "";
 
         #region TCP
-
-        /// <summary>
-        /// The port for the TCP message socket.
-        /// </summary>
-        public static readonly int TcpPort = Constants.BasePort;
 
         //! The TCP listener.
         TcpListener tcpListener;
@@ -233,11 +288,7 @@ namespace WM.Net
 
         #region UDP
 
-        /// <summary>
-        /// The UDP port for the local UDP endpoint from which the server, while running, continuously broadcasts the UdpBroadcastMessage from.
-        /// This UDP port must be different than the BroadcastUdpPort, in order to be able to run both a Server and a Client on the same host.
-        /// </summary>
-        private static readonly int LocalBroadcastUdpPort = Constants.BasePort + 1;
+        #region UDP Broadcast
 
         /// <summary>
         /// The broadcast message to be broadcasted by the server.
@@ -252,11 +303,18 @@ namespace WM.Net
         /// <summary>
         /// The UDP port to which the server, while running, continuously broadcasts the UdpBroadcastMessage to.
         /// Clients should make an UDP endpoint on this port and listen to it to discover running servers.
+        /// 
+        /// Note:
+        /// This UDP port is reused by multiple Clients in unit testing.
+        /// This is not an issue, because:
+        ///     A) Clients are only using this port while discovering server during their Connect(), and 
+        ///     B) and clients always connect sequentially (never concurrently) in unit testing.
         /// </summary>
-        public static readonly int BroadcastUdpPort = Constants.BasePort + 2;
+        public static readonly int UdpBroadcastRemotePort = 8881;
 
-        // CLient UDP port.
-        public static readonly int UdpPort = Constants.BasePort + 3;
+        #endregion UDP Broadcast
+
+        #region UDP Message send/receive
 
         // The UDP client.
         UdpClient udpClient;
@@ -266,18 +324,36 @@ namespace WM.Net
 
         Thread receiveUdpThread;
 
+        #endregion UDP Message send/receive
+
         #endregion
 
         private bool shutDown = false;
 
         #endregion
 
+        public int TcpPort
+        {
+            get
+            {
+                return ((IPEndPoint)(tcpListener.LocalEndpoint)).Port;
+            }
+        }
+
+        public int UdpPort
+        {
+            get
+            {
+                return ((IPEndPoint)udpClient.Client.LocalEndPoint).Port;
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
         public void Init()
         {
-            WM.Logger.Debug("Server.Init() Start");
+            WM.Logger.Debug("Server.Init()");
 
             shutDown = false;
 
@@ -285,17 +361,11 @@ namespace WM.Net
 
             try
             {
-
-                WM.Logger.Debug("Server.Init(): Creating UDP client at port " + UdpPort);
-                udpClient = new UdpClient(UdpPort);
-
-                Status = "UdpClient initialized";
-                WM.Logger.Debug("Server.Init(): UdpClient at port " + UdpPort + " created");
+                udpClient = new UdpClient(0);
+                WM.Logger.Debug("Server.Init(): UdpClient bound to port " + UdpPort);
 
                 udpReceive = new UDPReceive(udpClient);
                 udpReceive.Init();
-
-                Status = "UdpReceive initialized";
                 WM.Logger.Debug("Server.Init(): UdpReceive initialized");
 
                 // Get host name for local machine.
@@ -318,8 +388,8 @@ namespace WM.Net
                 var serverIpAddress = hostEntry.AddressList[hostEntry.AddressList.Length - 1];
 
                 // Create the TCP listener.
-                WM.Logger.Debug("Server.Init(): Create TCP listener @ " + serverIpAddress.ToString() + ":" + TcpPort.ToString());
-                tcpListener = new TcpListener(serverIpAddress, TcpPort);
+                tcpListener = new TcpListener(serverIpAddress, 0);
+                WM.Logger.Debug("Server.Init(): TCP listener bound to port " + TcpPort);
 
                 // Start the server socket.
                 WM.Logger.Debug("Server.Init(): Start TCP listener");
@@ -361,6 +431,7 @@ namespace WM.Net
                 WM.Logger.Error("Server.Init(): Exception: " + ex.ToString());
             }
         }
+
 
         /// <summary>
         /// 
@@ -445,26 +516,30 @@ namespace WM.Net
         }
 
         /// <summary>
-        /// Thread function executed by the 'Accept Client' thread.
+        /// Thread function executed by the 'Broadcast' thread.
         /// </summary>
         private void BroadcastFunction()
         {
             try
             {
-                WM.Logger.Debug(string.Format("Server: Starting to UDP broadcast Message '{0}' from port {1} to port {2}", UdpBroadcastMessage, LocalBroadcastUdpPort, BroadcastUdpPort));
+                var broadcastUdpClient = new UdpClient(0);
+                var broadcastUdpRemoteEndPoint = new IPEndPoint(IPAddress.Broadcast, Server.UdpBroadcastRemotePort);
 
-                var broadcastUdpClient = new UdpClient(LocalBroadcastUdpPort);
+                var UdpBroadcastMessage = WM.Net.Message.EncodeObjectAsXml(new ServerInfo(((IPEndPoint)this.tcpListener.LocalEndpoint).Address.ToString() ,TcpPort, UdpPort));
+
+                WM.Logger.Debug(
+                    string.Format("Server: Starting to UDP broadcast Message '{0}' from port {1} to port {2}",
+                    UdpBroadcastMessage,
+                    broadcastUdpRemoteEndPoint.Port,
+                    UdpBroadcastRemotePort));
 
                 // Encode data to UTF8-encoding.
                 byte[] udpBroadcastMessageData = Encoding.UTF8.GetBytes(UdpBroadcastMessage);
 
-                var ep = new IPEndPoint(IPAddress.Broadcast, Server.BroadcastUdpPort);
-
                 while (!shutDown)
-                {
-                    
+                {   
                         // Send udpBroadcastMessageData to any potential clients.
-                        broadcastUdpClient.Send(udpBroadcastMessageData, udpBroadcastMessageData.Length, ep);
+                        broadcastUdpClient.Send(udpBroadcastMessageData, udpBroadcastMessageData.Length, broadcastUdpRemoteEndPoint);
 
                         Thread.Sleep(500);
                 }
@@ -490,10 +565,18 @@ namespace WM.Net
                 {
                     if (tcpListener.Pending())
                     {
-                        WM.Logger.Debug("AcceptClientFunction(): Client connecting...");
+                        WM.Logger.Debug("Server.AcceptClientFunction(): Client connecting...");
                         
                         // Accept the client TCP socket.
                         var tcpClient = tcpListener.AcceptTcpClient();
+
+                        // Send Udp Port
+                        {
+                            var tcpNetworkStream = tcpClient.GetStream();
+                            var bytes = Encoding.ASCII.GetBytes("" + UdpPort);
+                            tcpNetworkStream.Write(bytes, 0, bytes.Length);
+                            tcpNetworkStream.Flush();
+                        }
 
                         var newClientConnection = new ClientConnection(tcpClient, udpClient);
 
@@ -505,6 +588,8 @@ namespace WM.Net
 
                             clientsLockOwner = "None (AcceptClientFunction)";
                         }
+
+                        WM.Logger.Debug("Server.AcceptClientFunction(): Client '" + newClientConnection.ClientID + "' connected.");
 
                         OnClientConnected(newClientConnection);
                     }
@@ -666,7 +751,7 @@ namespace WM.Net
             }
             else if (obj is DisconnectClientCommand)
             {
-                WM.Logger.Debug(string.Format("Server.ProcessMessage: Client {0} disconnecting.", clientConnection.remoteIP));
+                WM.Logger.Debug(string.Format("Server.ProcessMessage: Client {0} disconnecting.", clientConnection.ClientID));
 
                 // Client indicates that it is disconnecting.
                 var dcc = (DisconnectClientCommand)obj;                    
@@ -848,7 +933,7 @@ namespace WM.Net
             String data,
             ClientConnection clientConnection)
         {
-            WM.Logger.Debug("Server:SendData()");
+            WM.Logger.Debug("Server.SendData()");
 
             try
             {
@@ -867,6 +952,8 @@ namespace WM.Net
         /// <param name="clientIndex"></param>
         public void SendDataToUdp(string data, int clientIndex)
         {
+            WM.Logger.Debug("Server.SendDataToUdp()");
+
             lock (clientConnections)
             {
                 if (clientConnections.Count < clientIndex - 1)
@@ -887,7 +974,7 @@ namespace WM.Net
                 }
                 catch (Exception e)
                 {
-                        WM.Logger.Error("Exception:" + e.Message);
+                        WM.Logger.Error("Server.SendDataToUdp(): Exception:" + e.Message);
                 }
             }
         }
@@ -918,7 +1005,7 @@ namespace WM.Net
                         return null;
                     }
 
-                    clientKey = UDPReceive.GetRemoteEndpointKey(clientConnection.remoteIP, clientConnection.remotePort);
+                    clientKey = UDPReceive.GetRemoteEndpointKey(clientConnection.remoteIP, clientConnection.remotePortTCP);
                 }
 
                 string messageXML = "";

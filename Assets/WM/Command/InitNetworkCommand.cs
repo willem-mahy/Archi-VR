@@ -37,7 +37,7 @@ namespace WM.Command
                     break;
                 case NetworkMode.Server:
                     {
-                        application.Client.Disconnect(); // TODO: Investigate: Was this missing?
+                        application.Client.Disconnect();
                         application.Server.Shutdown();
                     }
                     break;
@@ -52,7 +52,13 @@ namespace WM.Command
                         application.Server.Init();
 
                         // Init network client
-                        application.Client.InitialServerIP = NetUtil.GetLocalIPAddress(); // Let client connect to own server. (TODO: connect directly, ie without network middle layer.)
+                        // Let client connect to own server. (TODO: connect directly, ie without network middle layer.)
+                        application.Client.ServerInfo = new ServerInfo(
+                            NetUtil.GetLocalIPAddress(),
+                            application.Server.TcpPort,
+                            application.Server.UdpPort);
+
+
                         application.Client.Connect();
                     }
                     break;

@@ -47,8 +47,8 @@ namespace ArchiVR.Net
                         // ... send a 'ClientConnect' command.
                         var cc1 = new ConnectClientCommand();
                         cc1.ClientIP = remoteUser.Value.remoteIP;
-                        //cc1.AvatarIndex = remoteUser.Value.AvatarIndex;
-
+                        cc1.ClientPort = remoteUser.Value.remotePort;
+                        
                         SendCommand(cc1, newClientConnection); // This makes the new client initialize a remote user for the existing client.
                     }
                 }
@@ -74,10 +74,11 @@ namespace ArchiVR.Net
             // TODO: Step C should maybee better be moved to Client.Connect()?
 
             //C) Notify existing clients that the new client connected.
-            var cc = new ConnectClientCommand();
-            cc.ClientIP = newClientConnection.remoteIP;
-            
-            PropagateCommand(cc, newClientConnection);  // This makes the existing clients initialize a remote user for the new client.
+            var connectClientCommand = new ConnectClientCommand();
+            connectClientCommand.ClientIP = newClientConnection.remoteIP;
+            connectClientCommand.ClientPort = newClientConnection.remotePortTCP;
+
+            PropagateCommand(connectClientCommand, newClientConnection);  // This makes the existing clients initialize a remote user for the new client.
         }
     }
 }
