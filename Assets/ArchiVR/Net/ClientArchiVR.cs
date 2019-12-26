@@ -44,7 +44,18 @@ namespace ArchiVR.Net
         {
             lock (application.remoteUsers)
             {
-                application.remoteUsers.Clear();
+                if (application.remoteUsers.Count > 0)
+                {
+                    string[] clientIDs = new string[application.remoteUsers.Keys.Count];
+                    application.remoteUsers.Keys.CopyTo(clientIDs, 0);
+
+                    WM.Logger.Debug("Client.Disconnect() Getting rid of remoteUsers:");
+                    foreach (var clientID in clientIDs)
+                    {
+                        WM.Logger.Debug(" - Bye, remoteUser '" + clientID + "'");
+                        application.DisconnectClient(clientID);
+                    }
+                }
             }
         }
 
