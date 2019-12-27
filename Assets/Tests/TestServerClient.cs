@@ -249,8 +249,17 @@ namespace Tests
             
             UpdateApplications(); // Make queued commands execute.
 
+            // Server should now have changed avatar on all connected applications.
             Assert.AreEqual(Avatar1ID, applicationServer.Player.AvatarID);
+            Assert.AreEqual(Avatar1ID, applicationClient1.Players[applicationServer.Player.ID].AvatarID);
+            Assert.AreEqual(Avatar1ID, applicationClient2.Players[applicationServer.Player.ID].AvatarID);
+
+            Assert.AreEqual(DefaultAvatarID, applicationServer.Players[applicationClient1.Player.ID].AvatarID);
             Assert.AreEqual(DefaultAvatarID, applicationClient1.Player.AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient2.Players[applicationClient1.Player.ID].AvatarID);
+
+            Assert.AreEqual(DefaultAvatarID, applicationServer.Players[applicationClient2.Player.ID].AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient1.Players[applicationClient2.Player.ID].AvatarID);
             Assert.AreEqual(DefaultAvatarID, applicationClient2.Player.AvatarID);
 
             #endregion

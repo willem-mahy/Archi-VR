@@ -1169,6 +1169,7 @@ namespace WM.Application
                     oldAvatar.transform.rotation);
 
                 player.Avatar = avatar.GetComponent<WM.Net.Avatar>();
+                player.AvatarID = avatarID;
 
                 if (oldAvatar != null)
                 {

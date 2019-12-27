@@ -50,7 +50,7 @@ namespace WM.Command
         /// </summary>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("SetClientAvatarCommand.Execute()");
+            WM.Logger.Debug(String.Format("SetClientAvatarCommand.Execute(PlayerID:{0}, AvatarID:{1})", PlayerID, AvatarID));
 
             application.SetPlayerAvatar(PlayerID, AvatarID);
         }
