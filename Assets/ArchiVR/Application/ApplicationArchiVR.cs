@@ -6,6 +6,7 @@ using WM;
 using WM.Net;
 using ArchiVR.Command;
 using ArchiVR.Net;
+using WM.Application;
 
 [assembly: System.Reflection.AssemblyVersion("1.0.*")]
 
@@ -29,13 +30,13 @@ namespace ArchiVR.Application
         }
     }
 
-    public class ApplicationArchiVR : WM.Application.UnityApplication
+    public class ApplicationArchiVR : UnityApplication
     {
         #region Variables
 
         // The typed application states.
-        public ApplicationStateDefault m_applicationStateDefault = new ApplicationStateDefault();
-        public ApplicationStateTeleporting m_applicationStateTeleporting = new ApplicationStateTeleporting();
+        public ApplicationStateDefault applicationStateDefault = new ApplicationStateDefault();
+        public ApplicationStateTeleporting applicationStateTeleporting = new ApplicationStateTeleporting();
 
         /// <summary>
         /// 
@@ -55,24 +56,37 @@ namespace ArchiVR.Application
 
         #region Project
 
-        // The list of names of all projects included in the build.
-        List<string> m_projectNames = new List<string>();
+        /// <summary>
+        /// The list of names of all projects included in the build.
+        /// </summary>
+        List<string> projectNames = new List<string>();
 
-        // The index of the currently active project.
+        /// <summary>
+        /// The index of the currently active project.
+        /// </summary>
         public int ActiveProjectIndex { get; set; } = -1;
 
         #endregion
 
         #region Model Layers
 
+        /// <summary>
+        /// The model layers.
+        /// </summary>
         private List<GameObject> m_modelLayers = new List<GameObject>();
 
         #endregion
 
         #region POI
 
+        /// <summary>
+        /// The index to the currently active POI.
+        /// </summary>
         private int activePOIIndex = -1;
 
+        /// <summary>
+        /// The index to the currently active POI.
+        /// </summary>
         public int ActivePOIIndex
         {
             get { return activePOIIndex; }
@@ -83,6 +97,9 @@ namespace ArchiVR.Application
             }
         }
 
+        /// <summary>
+        /// The currently active POI.
+        /// </summary>
         public GameObject ActivePOI
         {
             get
@@ -96,6 +113,9 @@ namespace ArchiVR.Application
             }
         }
 
+        /// <summary>
+        /// The currently active POI's name.
+        /// </summary>
         public string ActivePOIName
         {
             get; private set;
@@ -116,10 +136,10 @@ namespace ArchiVR.Application
         public override void Init()
         {
             // Initialize application modes
-            m_applicationStateTeleporting.TeleportationSystem = new TeleportationSystemArchiVR(this);
+            applicationStateTeleporting.TeleportationSystem = new TeleportationSystemArchiVR(this);
 
-            m_applicationStates.Add(m_applicationStateDefault);
-            m_applicationStates.Add(m_applicationStateTeleporting);
+            m_applicationStates.Add(applicationStateDefault);
+            m_applicationStates.Add(applicationStateTeleporting);
             
             base.Init();
 
@@ -162,16 +182,24 @@ namespace ArchiVR.Application
 
         public const int DefaultImmersionModeIndex = 0;
 
-        // The 'Walkthrough'immersion mode.
+        /// <summary>
+        /// The 'Walkthrough'immersion mode.
+        /// </summary>
         ImmersionModeWalkthrough immersionModeWalkthrough = new ImmersionModeWalkthrough();
 
-        // The 'Maquette'immersion mode.
+        /// <summary>
+        /// The 'Maquette'immersion mode.
+        /// </summary>
         ImmersionModeMaquette immersionModeMaquette = new ImmersionModeMaquette();
 
-        // The immersion modes list.
+        /// <summary>
+        /// The immersion modes list.
+        /// </summary>
         List<ImmersionMode> m_immersionModes = new List<ImmersionMode>();
 
-        // The active immersion mode index.
+        /// <summary>
+        /// The active immersion mode index.
+        /// </summary>
         public int ActiveImmersionModeIndex { get; set; } = -1;
 
         // The active immersion mode.
@@ -188,7 +216,9 @@ namespace ArchiVR.Application
             }
         }
 
-        // The 'Walkthrough' immersion mode.
+        /// <summary>
+        /// The 'Walkthrough' immersion mode.
+        /// </summary>
         public ImmersionModeWalkthrough ImmersionModeWalkthrough
         {
             get
@@ -197,8 +227,9 @@ namespace ArchiVR.Application
             }
         }
 
-
-        // The 'Maquette' immersion mode.
+        /// <summary>
+        /// The 'Maquette' immersion mode.
+        /// </summary>
         public ImmersionModeMaquette ImmersionModeMaquette
         {
             get
@@ -547,7 +578,7 @@ namespace ArchiVR.Application
         /// </summary>
         void GatherProjects()
         {
-            m_projectNames = GetProjectNames();
+            projectNames = GetProjectNames();
         }
 
         /// <summary>
@@ -574,7 +605,7 @@ namespace ArchiVR.Application
         //! Gets the name of a project, by index.
         public string GetProjectName(int projectIndex)
         {
-            return m_projectNames[projectIndex];
+            return projectNames[projectIndex];
         }
 
         //! Get the short-format (excluding prefix 'Project') project name for the given project name.
@@ -599,7 +630,7 @@ namespace ArchiVR.Application
             {
                 // We delip-berately do NOT return the temptingly simple ActiveProject.name here.
                 // This returns the name (always "Project) of the gameobjet representing the project in the scene.
-                return ActiveProjectIndex == -1 ? null : m_projectNames[ActiveProjectIndex];
+                return ActiveProjectIndex == -1 ? null : projectNames[ActiveProjectIndex];
             }
         }
 
@@ -620,14 +651,14 @@ namespace ArchiVR.Application
         //! Activates a project, by index.
         void SetActiveProject(int projectIndex)
         {
-            if (m_projectNames.Count == 0)
+            if (projectNames.Count == 0)
             {
                 projectIndex = -1;
                 return;
             }
             else
             {
-                projectIndex = UtilIterate.MakeCycle(projectIndex, 0, m_projectNames.Count);
+                projectIndex = UtilIterate.MakeCycle(projectIndex, 0, projectNames.Count);
             }
 
             if (projectIndex == ActiveProjectIndex)

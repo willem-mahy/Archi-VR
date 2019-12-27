@@ -135,10 +135,14 @@ namespace Tests
             Assert.IsFalse(applicationClient1.Client.Connected);
             Assert.IsFalse(applicationClient2.Client.Connected);
 
+            Assert.AreEqual(DefaultAvatarID, applicationServer.AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient1.AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient2.AvatarID);
+
             #endregion Check initial application state
 
             #region Start Server.
-            
+
             LogHeader("Start Server");
 
             // WHEN the ServerApplication is initialized to 'Server' network mode...
@@ -239,9 +243,14 @@ namespace Tests
 
             #region Change server Avatar
 
-            //LogHeader("Change server Avatar");
+            LogHeader("Set Server avatar to Avatar1");
+            applicationServer.SetAvatar(Avatar1ID);
+            
+            UpdateApplications(); // Make queued commands execute.
 
-            //applicationServer.SetAvatar(Avatar1ID);
+            Assert.AreEqual(Avatar1ID, applicationServer.AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient1.AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient2.AvatarID);
 
             #endregion
 
