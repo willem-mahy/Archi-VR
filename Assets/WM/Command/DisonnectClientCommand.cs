@@ -1,33 +1,42 @@
 ﻿using System;
-using System.Xml.Serialization;
-
-using UnityEngine;
 using WM.Application;
 
 namespace WM.Command
 {
     [Serializable]
-    [XmlRoot("DisonnectClientCommand")]
     public class DisconnectClientCommand : ICommand
     {
-        [XmlElement("ClientID")]
-        public string ClientID { get; set; }
+        #region Variables
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Guid ClientID { get; set; }
+
+        #endregion Variables
+    
+        #region Constructors
 
         public DisconnectClientCommand()
         { 
         }
 
         public DisconnectClientCommand(
-            string clientID)
+            Guid clientID)
         {
             ClientID = clientID;
         }
 
+        #endregion Constructors
+
+        /// <summary>
+        /// <see cref="ICommand.Execute(UnityApplication)"/> implementation.
+        /// </summary>
         public void Execute(UnityApplication application)
         {
             WM.Logger.Debug("DisconnectClientCommand.Execute()");
 
-            application.DisconnectClient(ClientID);
+            application.RemovePlayersByClient(ClientID);
         }
     }
 }

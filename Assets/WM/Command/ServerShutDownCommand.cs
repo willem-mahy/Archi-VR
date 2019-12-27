@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml.Serialization;
 
 using UnityEngine;
 using WM.Application;
@@ -8,33 +7,41 @@ using WM.Net;
 namespace WM.Command
 {
     [Serializable]
-    [XmlRoot("ServerShutdownCommand")]
     public class ServerShutdownCommand : ICommand
     {
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public ServerShutdownCommand()
         { 
         }
 
+        /// <summary>
+        /// <see cref="ICommand.Execute(UnityApplication)"/> implementation.
+        /// </summary>
         public void Execute(UnityApplication application)
         {
             WM.Logger.Debug("ServerShutdownCommand.Execute()");
 
-            lock (application.remoteUsers)
+            lock (application.Players)
             {
-                foreach (var remoteUsers in application.remoteUsers.Values)
+                foreach (var player in application.Players.Values)
                 {
-                    // We need to destroy ojects defferently in Edit Mode, otherwise Edit Mode Unit Tests complain.  :-(
-                    if (UnityEngine.Application.isEditor)
+                    if (player.Avatar != null)
                     {
-                        GameObject.DestroyImmediate(remoteUsers.Avatar.gameObject);
-                    }
-                    else
-                    {
-                        GameObject.Destroy(remoteUsers.Avatar.gameObject);
+                        // We need to destroy ojects differently in Edit Mode, otherwise Edit Mode Unit Tests complain.  :-(
+                        if (UnityEngine.Application.isEditor)
+                        {
+                            GameObject.DestroyImmediate(player.Avatar.gameObject);
+                        }
+                        else
+                        {
+                            GameObject.Destroy(player.Avatar.gameObject);
+                        }
                     }
                 }
 
-                application.remoteUsers.Clear();
+                application.Players.Clear();
             }
 
             new InitNetworkCommand(NetworkMode.Standalone).Execute(application);

@@ -26,15 +26,9 @@ namespace ArchiVR.Net
         /// </summary>
         override public void OnConnect()
         {
-            // Broadcast your chosen avatar.
-            {
-                var scac = new SetClientAvatarCommand(
-                    NetUtil.GetLocalIPAddress(),
-                    TcpPort,
-                    application.AvatarID);
-
-                SendCommand(scac);
-            }
+            // Notify other Clients about existence of your own player.
+            var addPlayerCommand = new AddPlayerCommand(application.Player);
+            SendCommand(addPlayerCommand);
         }
 
         /// <summary>
@@ -42,18 +36,18 @@ namespace ArchiVR.Net
         /// </summary>
         override public void OnDisconnect()
         {
-            lock (application.remoteUsers)
+            lock (application.Players)
             {
-                if (application.remoteUsers.Count > 0)
+                if (application.Players.Count > 0)
                 {
-                    string[] clientIDs = new string[application.remoteUsers.Keys.Count];
-                    application.remoteUsers.Keys.CopyTo(clientIDs, 0);
+                    var remotePlayerIDs = new Guid[application.Players.Keys.Count];
+                    application.Players.Keys.CopyTo(remotePlayerIDs, 0);
 
                     WM.Logger.Debug("Client.Disconnect() Getting rid of remoteUsers:");
-                    foreach (var clientID in clientIDs)
+                    foreach (var playerID in remotePlayerIDs)
                     {
-                        WM.Logger.Debug(" - Bye, remoteUser '" + clientID + "'");
-                        application.DisconnectClient(clientID);
+                        WM.Logger.Debug(" - Bye, remote player '" + playerID + "'");
+                        application.RemovePlayer(playerID);
                     }
                 }
             }
@@ -81,7 +75,7 @@ namespace ArchiVR.Net
             {
                 application.QueueCommand(disconnectClientCommand);
             }
-            else if (obj is SetClientAvatarCommand setClientAvatarCommand)
+            else if (obj is SetPlayerAvatarCommand setClientAvatarCommand)
             {
                 application.QueueCommand(setClientAvatarCommand);
             }
@@ -92,6 +86,10 @@ namespace ArchiVR.Net
             else if (obj is ServerShutdownCommand serverShutdownCommand)
             {
                 application.QueueCommand(serverShutdownCommand);
+            }
+            else if (obj is AddPlayerCommand addPlayerCommand)
+            {
+                application.QueueCommand(addPlayerCommand);
             }
         }
         
@@ -109,7 +107,7 @@ namespace ArchiVR.Net
             try
             {
                 var avatarState = new AvatarState();
-                avatarState.ClientIP = WM.Net.NetUtil.GetLocalIPAddress();
+                avatarState.PlayerID = application.Player.ID;
                 
                 avatarState.HeadPosition = avatarHead.transform.position;
                 avatarState.HeadRotation = avatarHead.transform.rotation;
@@ -144,25 +142,25 @@ namespace ArchiVR.Net
                 }
 
                 // We know that received UDP messages are always AvatarStates.
-                // From the received messages, build a map ClientID -> AvatarState.
-                var receivedAvatarStates = new Dictionary<string, AvatarState>();
+                // From the received messages, build a map PlayerID -> AvatarState.
+                var receivedAvatarStates = new Dictionary<Guid, AvatarState>();
 
                 foreach (var obj in receivedMessages)
                 {
                     var avatarState = (AvatarState)(obj);
 
-                    receivedAvatarStates[avatarState.ClientIP] = avatarState;
+                    receivedAvatarStates[avatarState.PlayerID] = avatarState;
                 }
 
                 // Update avatars with received avatar states.
-                lock (application.remoteUsers)
+                lock (application.Players)
                 {
                     // Apply the most recent states.
                     foreach (var clientID in receivedAvatarStates.Keys)
                     {
-                        if (application.remoteUsers.ContainsKey(clientID))
+                        if (application.Players.ContainsKey(clientID))
                         {
-                            var avatar = application.remoteUsers[clientID].Avatar;
+                            var avatar = application.Players[clientID].Avatar;
                             var avatarState = receivedAvatarStates[clientID];
                             avatar.SetState(avatarState);                            
                         }

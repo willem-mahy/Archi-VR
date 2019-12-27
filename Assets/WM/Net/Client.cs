@@ -17,16 +17,19 @@ namespace WM.Net
     [Serializable]
     public class ClientInfo
     {
-        public string IP;
+        /// <summary>
+        /// 
+        /// </summary>
+        public Guid ID;
 
-        public int TcpPort;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public int UdpPort;
 
-        public ClientInfo(String IP, int tcpPort, int udpPort)
+        public ClientInfo(Guid id, int udpPort)
         {
-            this.IP = IP;
-            TcpPort = tcpPort;
+            this.ID = id;
             UdpPort = udpPort;
         }
     }
@@ -37,6 +40,14 @@ namespace WM.Net
     abstract public class Client : MonoBehaviour
     {
         #region Variables
+
+        /// <summary>
+        /// The client ID.
+        /// </summary>
+        public Guid ID
+        {
+            get;
+        } = Guid.NewGuid();
 
         public ServerInfo ServerInfo = null; // TODO? new ServerInfo(127.0.0.1, Server.DefaultTcpPort, Server.DefaultUdpPort);
 
@@ -144,8 +155,6 @@ namespace WM.Net
             thread = new Thread(new ThreadStart(ThreadFunction));
             thread.IsBackground = true;
             thread.Start();
-
-            WM.Logger.Debug("Client connecting...");
         }
 
 
@@ -159,11 +168,6 @@ namespace WM.Net
         /// 
         /// </summary>
         abstract public void OnDisconnect();
-
-        public string ID
-        {
-            get { return NetUtil.GetLocalIPAddress() + ":" + TcpPort; }
-        }
 
         /// <summary>
         /// Disconnect the client.
@@ -276,7 +280,7 @@ namespace WM.Net
                     // Encode received bytes to UTF8- encoding.
                     string receivedText = Encoding.UTF8.GetString(data);
 
-                    var obj = GetObjectFromMessageXML(receivedText);
+                    var obj = Message.GetObjectFromMessageXML(receivedText);
                     
                     if (obj is ServerInfo serverInfo)
                     {
@@ -322,8 +326,7 @@ namespace WM.Net
                     if (TryConnect())
                     {
                         Status = "Connected to " + ServerIP;
-                        WM.Logger.Debug("Client: TcpClient connected to Server @ '" + ServerIP + ":" + ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Port + "'.");
-
+                        
                         // Get server stream from TCP client.
                         tcpServerStream = tcpClient.GetStream();
 
@@ -331,9 +334,13 @@ namespace WM.Net
                         // Pass '0' to make the system pick an appropriate port for us.
                         udpClient = new UdpClient(0);
 
-                        // Send the UDP client port to the server, so that it knows where to send UDP messages to.
-                        var udpReceivePort = ((IPEndPoint)udpClient.Client.LocalEndPoint).Port;
-                        SendData("" + udpReceivePort);
+                        // Send the ClientInfo to the server.
+                        var udpReceivePort = ((IPEndPoint)udpClient.Client.LocalEndPoint).Port;                        
+                        var clientInfo = new ClientInfo(ID, udpReceivePort);
+                        var clientInfoMessage = WM.Net.Message.EncodeObjectAsXml(clientInfo);
+
+                        WM.Logger.Debug("Client:TrheadFunction: Send ClientInfo");
+                        SendData(clientInfoMessage);
 
                         // Initialize UDP socket from server.
                         {   
@@ -341,8 +348,15 @@ namespace WM.Net
                             udpReceive.Init();
                         }
 
-                        #region receive UDP port from server
+                        // Initialize UDP socket to server.
+                        {
+                            udpSend = new UDPSend(udpClient);
+                            udpSend.remoteIP = ServerInfo.IP;
+                            udpSend.remotePort = ServerInfo.UdpPort;
+                            udpSend.Init();
+                        }
 
+                        WM.Logger.Debug("Client:ThreadFunction: Waiting for 'Connection Complete' from server");
                         while (!tcpServerStream.DataAvailable)
                         {
                         }
@@ -351,18 +365,15 @@ namespace WM.Net
                         var bytesFromServer = new byte[tcpClient.ReceiveBufferSize];
                         var numBytesRead = tcpServerStream.Read(bytesFromServer, 0, (int)tcpClient.ReceiveBufferSize);
 
-                        var dataFromServer = Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);
+                        var textFromServer = Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);
 
-                        var ServerUdpPort = int.Parse(dataFromServer);
-
-                        #endregion receive UDP port from server
-
-                        // Initialize UDP socket to server.
+                        if (textFromServer != "Connection Complete")
                         {
-                            udpSend = new UDPSend(udpClient);
-                            udpSend.remoteIP = ServerIP;
-                            udpSend.remotePort = ServerUdpPort;
-                            udpSend.Init();
+                            WM.Logger.Error("Client:ThreadFunction: Received '" + textFromServer + "' instead of 'Connection Complete'");
+                        }
+                        else
+                        {
+                            WM.Logger.Debug("Client:ThreadFunction: Received 'Connection Complete' from Server");
                         }
 
                         OnConnect();
@@ -472,8 +483,8 @@ namespace WM.Net
         /// <returns></returns>
         private bool TryConnectToServer(ServerInfo serverInfo)
         {
-            String tag = serverInfo.IP + ":" + serverInfo.TcpPort + " " + serverInfo.UdpPort + ", timeout:" + ConnectTimeout + "ms";
-            WM.Logger.Debug("Client.TryConnectToServer(): Server:'" + tag);
+            String tag = "Server(IP:" + serverInfo.IP + ", TCP:" + serverInfo.TcpPort + ", UDP:" + serverInfo.UdpPort + "), timeout:" + ConnectTimeout + "ms";
+            WM.Logger.Debug("Client.TryConnectToServer(): " + tag);
 
             Status = "Trying to connect to " + tag;
 
@@ -488,7 +499,7 @@ namespace WM.Net
                 if (connectionAttempt.IsCompleted)
                 {
                     this.tcpClient = tcpClient;
-                    WM.Logger.Debug("Client.TryConnectToServer(): Connected!");
+                    WM.Logger.Debug("Client.TryConnectToServer(): TcpClient connected!");
                     return true;
                 }
                 else
@@ -505,7 +516,6 @@ namespace WM.Net
                 WM.Logger.Error(txt);
                 return false;
             }
-
         }
 
         /// <summary>
@@ -539,33 +549,10 @@ namespace WM.Net
         /// 
         /// </summary>
         /// <param name="messageXML"></param>
-        /// <returns></returns>
-        private object GetObjectFromMessageXML(string messageXML)
-        {
-            // XML-deserialize the message.
-            var ser = new XmlSerializer(typeof(Message));
-
-            var reader = new StringReader(messageXML);
-
-            var message = (Message)(ser.Deserialize(reader));
-
-            reader.Close();
-
-            // Binary-deserialize the object from the message.
-            var obj = message.Deserialize();
-
-            // Return the object that has been parsed from the MessageXML
-            return obj;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messageXML"></param>
         private void ProcessMessage(
             string messageXML)
         {
-            var obj = GetObjectFromMessageXML(messageXML);
+            var obj = Message.GetObjectFromMessageXML(messageXML);
 
             // If it is a generic message, process it here.
             if (obj is ClientDisconnectAcknoledgeMessage)
@@ -632,7 +619,7 @@ namespace WM.Net
         /// <param name="command"></param>
         public void SendCommand(ICommand command)
         {
-            WM.Logger.Debug("Client:SendCommand()");
+            WM.Logger.Debug("Client:SendCommand(" + command.ToString() + ")");
 
             try
             {

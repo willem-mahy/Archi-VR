@@ -17,6 +17,37 @@ namespace WM
         [XmlRoot("Message")]
         public class Message
         {
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="messageXML"></param>
+            /// <returns></returns>
+            public static object GetObjectFromMessageXML(string messageXML)
+            {
+                try
+                {
+                    // XML-deserialize the message.
+                    var ser = new XmlSerializer(typeof(Message));
+
+                    var reader = new StringReader(messageXML);
+
+                    var message = (Message)(ser.Deserialize(reader));
+
+                    reader.Close();
+
+                    // Binary-deserialize the object from the message.
+                    var obj = message.Deserialize();
+
+                    // Return the object that has been parsed from the MessageXML
+                    return obj;
+                }
+                catch (Exception e)
+                {
+                    WM.Logger.Error("GetObjectFromMessageXML: Failed to parse object from message XML '" + messageXML + "'");
+                    throw e;
+                }
+            }
+
             public const string XmlBeginTag = "<Message ";
             public const string XmlEndTag = "</Message>";
 

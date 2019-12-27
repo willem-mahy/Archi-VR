@@ -42,18 +42,21 @@ namespace WM.Net
         /// </summary>    
         public class ClientConnection
         {
-            public string ClientID
+            #region Variables
+
+            /// <summary>
+            /// The client ID of the connected Client.
+            /// </summary>
+            public Guid ClientID
             {
-                get
-                {
-                    return remoteIP + ":" + remotePortTCP;
-                }
-            }
+                get;
+                private set;
+            } = Guid.Empty;
 
             /// <summary>
             /// The remote endpoint IP.
             /// </summary>
-            public string remoteIP
+            public string RemoteIP
             {
                 get;
                 private set;
@@ -62,7 +65,7 @@ namespace WM.Net
             /// <summary>
             /// The remote endpoint port.
             /// </summary>
-            public int remotePortTCP
+            public int RemotePortTCP
             {
                 get;
                 private set;
@@ -71,7 +74,7 @@ namespace WM.Net
             /// <summary>
             /// The remote endpoint port.
             /// </summary>
-            public int remotePortUDP
+            public int RemotePortUDP
             {
                 get;
                 private set;
@@ -88,14 +91,16 @@ namespace WM.Net
             //
             public string tcpReceivedData = "";
 
-            #endregion
+            #endregion TCP stuff
 
             #region UDP stuff
 
             // The client-specific UDP sender (owned by self.)
             private UDPSend udpSend;
 
-            #endregion
+            #endregion UDP stuff
+
+            #endregion Variables
 
             /// <summary>
             /// 
@@ -110,22 +115,33 @@ namespace WM.Net
                 tcpNetworkStream = tcpClient.GetStream();
 
                 var tcpRemoteEndPoint = tcpClient.Client.RemoteEndPoint as IPEndPoint;
-                remoteIP = tcpRemoteEndPoint.Address.ToString();
-                remotePortTCP = tcpRemoteEndPoint.Port;
+                RemoteIP = tcpRemoteEndPoint.Address.ToString();
+                RemotePortTCP = tcpRemoteEndPoint.Port;
 
                 // Receive the port of the Client UDPReceive at the Client's side.
                 while (!ReceiveDataTCP())
                 {
                 }
 
-                remotePortUDP = int.Parse(tcpReceivedData);
+                var obj = Message.GetObjectFromMessageXML(tcpReceivedData);
+                tcpReceivedData = "";
 
-                udpSend = new UDPSend(udpClient);
-                udpSend.remoteIP = remoteIP;
-                udpSend.remotePort = remotePortUDP;
-                udpSend.Init();
+                if (obj is ClientInfo clientInfo)
+                {
+                    WM.Logger.Debug("ClientConnection: Received ClientInfo");
 
-                WM.Logger.Debug("ClientConnection: Client UDP port is " + remotePortUDP);
+                    ClientID = clientInfo.ID;
+                    RemotePortUDP = clientInfo.UdpPort;
+
+                    udpSend = new UDPSend(udpClient);
+                    udpSend.remoteIP = RemoteIP;
+                    udpSend.remotePort = RemotePortUDP;
+                    udpSend.Init();
+                }
+                else
+                {
+                    throw new Exception("ClientConnection: Received non - ClientInfo");
+                }
             }
 
             /// <summary>
@@ -237,7 +253,7 @@ namespace WM.Net
             {
                 foreach (var clientConnection in clientConnections)
                 {
-                    info += "- IP: " + clientConnection.remoteIP + "\n";
+                    info += "- IP: " + clientConnection.RemoteIP + "\n";
                 }
             }
             return info;
@@ -315,6 +331,9 @@ namespace WM.Net
 
         #endregion
 
+        /// <summary>
+        /// The port of the TCP Listener, to which clients can connect.
+        /// </summary>
         public int TcpPort
         {
             get
@@ -323,6 +342,9 @@ namespace WM.Net
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int UdpPort
         {
             get
@@ -370,18 +392,12 @@ namespace WM.Net
                 // Get first IPv4 address.
                 var serverIpAddress = hostEntry.AddressList[hostEntry.AddressList.Length - 1];
 
-                // Create the TCP listener.
+                // Create the TCP listener, and bind it to any available port.
                 tcpListener = new TcpListener(serverIpAddress, 0);
-                WM.Logger.Debug("Server.Init(): TCP listener bound to port " + TcpPort);
-
-                // Start the server socket.
-                WM.Logger.Debug("Server.Init(): Start TCP listener");
                 tcpListener.Start();
                 WM.Logger.Debug("Server.Init(): TCP listener bound to port " + TcpPort);
 
                 Status = "TcpListener started";
-
-                WM.Logger.Debug("Server.Init() TCP listener started");
 
                 // Start a thread to broadcast via UDP.
                 broadcastThread = new Thread(new ThreadStart(BroadcastFunction));
@@ -554,14 +570,7 @@ namespace WM.Net
                         // Accept the client TCP socket.
                         var tcpClient = tcpListener.AcceptTcpClient();
 
-                        // Send Udp Port
-                        {
-                            var tcpNetworkStream = tcpClient.GetStream();
-                            var bytes = Encoding.ASCII.GetBytes("" + UdpPort);
-                            tcpNetworkStream.Write(bytes, 0, bytes.Length);
-                            tcpNetworkStream.Flush();
-                        }
-
+                        // Create a ClientConnection targeting the new Client.
                         var newClientConnection = new ClientConnection(tcpClient, udpClient);
 
                         lock (clientConnections)
@@ -574,6 +583,8 @@ namespace WM.Net
                         }
 
                         WM.Logger.Debug("Server.AcceptClientFunction(): Client '" + newClientConnection.ClientID + "' connected.");
+
+                        newClientConnection.SendTCP("Connection Complete");
 
                         OnClientConnected(newClientConnection);
                     }
@@ -716,29 +727,18 @@ namespace WM.Net
             string messageXML,
             ClientConnection clientConnection)
         {
-            // XML-deserialize the Message.
-            var ser = new XmlSerializer(typeof(Message));
+            var obj = Message.GetObjectFromMessageXML(messageXML);
 
-            var reader = new StringReader(messageXML);
-
-            var message = (Message)(ser.Deserialize(reader));
-
-            reader.Close();
-
-            // Binary-deserialize the object from the message.
-            var obj = message.Deserialize();
-
+            /*
             if (obj is ConnectClientCommand)
             {
-                var ccc = (ConnectClientCommand)obj;
                 PropagateData(messageXML, clientConnection);
             }
-            else if (obj is DisconnectClientCommand)
+            else */if (obj is DisconnectClientCommand)
             {
                 WM.Logger.Debug(string.Format("Server.ProcessMessage: Client {0} disconnecting.", clientConnection.ClientID));
 
                 // Client indicates that it is disconnecting.
-                var dcc = (DisconnectClientCommand)obj;                    
                 PropagateData(messageXML, clientConnection);
 
                 // Step 1: remove connection from list of connections, so that no UDP or TCP reads/Writes will happen on its network streams anymore.
@@ -755,6 +755,7 @@ namespace WM.Net
             else
             {
                 // Application-specific message, EG ArchiVR.SetModelLocationCommand
+                WM.Logger.Debug(string.Format("Server.ProcessMessage: {0}", obj.ToString()));
                 BroadcastData(messageXML); // TODO: Implement a way to figure out wheter to propagate or broadcast messages here.
             }
 
@@ -838,6 +839,8 @@ namespace WM.Net
             {
                 WM.Logger.Error("Server.BroadcastData(): Exception: " + e.Message);
             }
+
+            WM.Logger.Debug("Server:BroadcastData() End");
         }
             
         /// <summary>
@@ -886,7 +889,7 @@ namespace WM.Net
             ICommand command,
             ClientConnection clientConnection)
         {
-            WM.Logger.Debug("Server:SendCommand()");
+            WM.Logger.Debug("Server:SendCommand(" + command.ToString() + ")");
 
             try
             {
@@ -989,7 +992,7 @@ namespace WM.Net
                         return null;
                     }
 
-                    clientKey = UDPReceive.GetRemoteEndpointKey(clientConnection.remoteIP, clientConnection.remotePortTCP);
+                    clientKey = UDPReceive.GetRemoteEndpointKey(clientConnection.RemoteIP, clientConnection.RemotePortTCP);
                 }
 
                 string messageXML = "";

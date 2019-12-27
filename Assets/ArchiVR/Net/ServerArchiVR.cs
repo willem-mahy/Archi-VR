@@ -29,27 +29,19 @@ namespace ArchiVR.Net
 
         override public void OnClientConnected(ClientConnection newClientConnection)
         {
-            // Init new client...
+            // Now the client is connected, initialize it to the server's application state.
 
-            // Now the client is connected, make him...
-
-            // TODO: Step A should maybee better be performed by the clients themselves upon 'NewClientConnection()'?
-
-            // A) .. know its peer clients:  (TODO? Make this 'Hey I exist already' notification part of the Client class?)
-            lock (clientConnections)
+            // A) Make the new Client know about existing Players.
+            lock (application.Players)
             {
-                // For each existing client, ...
-                foreach (var clientConnection in clientConnections)
+                // For each existing player, ...
+                foreach (var player in application.Players.Values)
                 {
-                    //... each EXISTING client, (not the new one) ...
-                    if (clientConnection.ClientID != newClientConnection.ClientID)
+                    //... except players hostd  by the new client ...
+                    if (player.ClientID != newClientConnection.ClientID)
                     {
-                        // ... send a 'ClientConnect' command.
-                        var cc1 = new ConnectClientCommand();
-                        cc1.ClientIP = clientConnection.remoteIP;
-                        cc1.ClientPort = clientConnection.remotePortTCP;
-                        
-                        SendCommand(cc1, newClientConnection); // This makes the new client initialize a remote user for the existing client.
+                        // ... send an AddPlayerCommand.
+                        SendCommand(new AddPlayerCommand(player), newClientConnection); // This makes the new client initialize a remote user for the existing client.
                     }
                 }
             }
@@ -70,15 +62,6 @@ namespace ArchiVR.Net
 
                 SendCommand(setImmersionModeCommand, newClientConnection);
             }
-
-            // TODO: Step C should maybee better be moved to Client.Connect()?
-
-            //C) Notify existing clients that the new client connected.
-            var connectClientCommand = new ConnectClientCommand();
-            connectClientCommand.ClientIP = newClientConnection.remoteIP;
-            connectClientCommand.ClientPort = newClientConnection.remotePortTCP;
-
-            PropagateCommand(connectClientCommand, newClientConnection);  // This makes the existing clients initialize a remote user for the new client.
         }
     }
 }

@@ -5,14 +5,14 @@ using WM.Application;
 namespace WM.Command
 {
     [Serializable]
-    public class ConnectClientCommand : ICommand
+    public class AddPlayerCommand : ICommand
     {
         #region Variables
 
         /// <summary>
         /// 
         /// </summary>
-        public Guid ClientID
+        public Player Player
         {
             get;
             private set;
@@ -25,16 +25,16 @@ namespace WM.Command
         /// <summary>
         /// 
         /// </summary>
-        public ConnectClientCommand()
+        public AddPlayerCommand()
         { 
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public ConnectClientCommand(Guid clientID)
+        public AddPlayerCommand(Player player)
         {
-            ClientID = clientID;
+            Player = player;
         }
 
         #endregion Constructors
@@ -44,7 +44,9 @@ namespace WM.Command
         /// </summary>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("ConnectClientCommand.Execute()");
+            WM.Logger.Debug("AddPlayerCommand.Execute()");
+
+            application.AddPlayer(Player);
         }
     }
 }

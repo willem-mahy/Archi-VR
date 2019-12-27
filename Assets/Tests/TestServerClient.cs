@@ -50,7 +50,7 @@ namespace Tests
             var application = applicationGO.AddComponent(typeof(ApplicationArchiVR)) as ApplicationArchiVR;
 
             application.DefaultAvatarID = DefaultAvatarID;
-
+            
             application.AvatarFactory.Register(DefaultAvatarID, CreateMockAvatarPrefab("DefaultAvatar"));
             application.AvatarFactory.Register(Avatar2ID, CreateMockAvatarPrefab("Avatar1"));
             application.AvatarFactory.Register(Avatar1ID, CreateMockAvatarPrefab("Avatar2"));
@@ -69,6 +69,8 @@ namespace Tests
             application.StartupNetworkMode = NetworkMode.Standalone;
 
             application.Start();
+
+            application.SetPlayerName(name + " Player");
 
             Assert.AreEqual(0, application.Server.NumClients);
             
@@ -135,9 +137,9 @@ namespace Tests
             Assert.IsFalse(applicationClient1.Client.Connected);
             Assert.IsFalse(applicationClient2.Client.Connected);
 
-            Assert.AreEqual(DefaultAvatarID, applicationServer.AvatarID);
-            Assert.AreEqual(DefaultAvatarID, applicationClient1.AvatarID);
-            Assert.AreEqual(DefaultAvatarID, applicationClient2.AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationServer.Player.AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient1.Player.AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient2.Player.AvatarID);
 
             #endregion Check initial application state
 
@@ -166,10 +168,10 @@ namespace Tests
                 Assert.AreEqual(1, applicationServer.Server.NumClients);
                 Assert.IsTrue(applicationServer.Client.Connected);
 
-                // None of the application is connected to the Server, so none of them has remote users.
-                Assert.AreEqual(0, applicationServer.remoteUsers.Count);
-                Assert.AreEqual(0, applicationClient1.remoteUsers.Count);
-                Assert.AreEqual(0, applicationClient2.remoteUsers.Count);
+                // Server application is connected to the Server and introduced its own Player.
+                Assert.AreEqual(1, applicationServer.Players.Count);
+                Assert.AreEqual(0, applicationClient1.Players.Count);
+                Assert.AreEqual(0, applicationClient2.Players.Count);
             }
 
             #endregion
@@ -199,10 +201,10 @@ namespace Tests
                 Assert.IsTrue(applicationClient1.Client.Connected);
                 Assert.AreEqual(2, applicationServer.Server.NumClients);
 
-                // Only Clients of Server and Client1 application are connected to the Server.
-                Assert.AreEqual(1, applicationServer.remoteUsers.Count);
-                Assert.AreEqual(1, applicationClient1.remoteUsers.Count);
-                Assert.AreEqual(0, applicationClient2.remoteUsers.Count);
+                // Server and Client1 application are connected to the Server and introduced their own Player.
+                Assert.AreEqual(2, applicationServer.Players.Count);
+                Assert.AreEqual(2, applicationClient1.Players.Count);
+                Assert.AreEqual(0, applicationClient2.Players.Count);
             }
 
             #endregion
@@ -232,11 +234,10 @@ namespace Tests
                 Assert.IsTrue(applicationClient2.Client.Connected);
                 Assert.AreEqual(3, applicationServer.Server.NumClients);
 
-                // All clients (Client of Server, Client1 and CLient2 application) are connected to the server.
-                // They should all list the other 2 as remote users.
-                Assert.AreEqual(2, applicationServer.remoteUsers.Count);
-                Assert.AreEqual(2, applicationClient1.remoteUsers.Count);
-                Assert.AreEqual(2, applicationClient2.remoteUsers.Count);
+                // All clients are connected to the server and introduced their own Player.
+                Assert.AreEqual(3, applicationServer.Players.Count);
+                Assert.AreEqual(3, applicationClient1.Players.Count);
+                Assert.AreEqual(3, applicationClient2.Players.Count);
             }
 
             #endregion
@@ -244,13 +245,13 @@ namespace Tests
             #region Change server Avatar
 
             LogHeader("Set Server avatar to Avatar1");
-            applicationServer.SetAvatar(Avatar1ID);
+            applicationServer.SetPlayerAvatar(Avatar1ID);
             
             UpdateApplications(); // Make queued commands execute.
 
-            Assert.AreEqual(Avatar1ID, applicationServer.AvatarID);
-            Assert.AreEqual(DefaultAvatarID, applicationClient1.AvatarID);
-            Assert.AreEqual(DefaultAvatarID, applicationClient2.AvatarID);
+            Assert.AreEqual(Avatar1ID, applicationServer.Player.AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient1.Player.AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient2.Player.AvatarID);
 
             #endregion
 
@@ -272,10 +273,10 @@ namespace Tests
             // Server should have 1 client connected (it's own).            
             Assert.AreEqual(2, applicationServer.Server.NumClients);
 
-            // Only Clients of Server and Client1 application are connected to the Server.
-            Assert.AreEqual(1, applicationServer.remoteUsers.Count);
-            Assert.AreEqual(1, applicationClient1.remoteUsers.Count);
-            Assert.AreEqual(0, applicationClient2.remoteUsers.Count);
+            // Server and Client1 application are connected to the Server, and introduced their own Player.
+            Assert.AreEqual(2, applicationServer.Players.Count);
+            Assert.AreEqual(2, applicationClient1.Players.Count);
+            Assert.AreEqual(0, applicationClient2.Players.Count);
 
             #endregion
 
@@ -297,8 +298,13 @@ namespace Tests
             // Server should have 1 client connected (it's own).            
             Assert.AreEqual(1, applicationServer.Server.NumClients);
 
+            // Server application is connected to the Server, and introduced its own Player.
+            Assert.AreEqual(1, applicationServer.Players.Count);
+            Assert.AreEqual(0, applicationClient1.Players.Count);
+            Assert.AreEqual(0, applicationClient2.Players.Count);
+
             #endregion
-            
+
             #region Stop Server
 
             LogHeader("Stop Server");

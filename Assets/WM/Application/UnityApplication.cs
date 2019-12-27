@@ -47,6 +47,11 @@ namespace WM.Application
 
         #endregion
 
+        public Player Player
+        {
+            get;
+        } = new Player();
+
         //! The command queue.
         public List<ICommand> CommandQueue = new List<ICommand>();
 
@@ -67,22 +72,19 @@ namespace WM.Application
         // The multiplayer client.
         public Client Client;
 
-        //! The avatar for the local player.
-        public Guid AvatarID = Guid.Empty;
-
         public int AvatarIndex
         {
             get
             {
-                return 0; ; // FIXME: TODO: Get Avatar index from avatar id guid!
+                return 0; // FIXME: TODO: Get Avatar index from Player.AvatarID!
             }
         }
 
         /// <summary>
-        /// The remote users.
+        /// The players from remote connected Clients.
         /// </summary>
         /*private*/
-        public Dictionary<string, RemoteUser> remoteUsers = new Dictionary<string, RemoteUser>();
+        public Dictionary<Guid, Player> Players = new Dictionary<Guid, Player>();
 
         #region Shared Tracking space
 
@@ -310,6 +312,87 @@ namespace WM.Application
 
         #endregion Variables
 
+        #region Player Management
+
+        #region Player Name
+
+        /// <summary>
+        /// Sets the name of a remote player.
+        /// </summary>
+        /// <param name="name"></param>
+        public void SetPlayerName(
+            Guid playerID,
+            string playerName)
+        {
+            // Must not be called for the local player!
+            Debug.Assert(playerID != Player.ID);
+
+            // Targeted player should be known by the application!
+            Debug.Assert(Players.ContainsKey(playerID));
+
+            if (Players.ContainsKey(playerID))
+            {
+                var player = Players[playerID];
+                player.Name = playerName;
+            }
+        }
+
+        /// <summary>
+        /// Sets the name of the local player.
+        /// </summary>
+        /// <param name="name"></param>
+        public void SetPlayerName(string name)
+        {
+            Player.Name = name;
+
+            if (Client.Connected)
+            {
+                Client.SendCommand(new SetPlayerNameCommand(Player.ID, Player.Name));
+            }
+        }
+
+        #endregion Player Name
+
+        #region Player Avatar
+
+        /// <summary>
+        /// Sets the avatar for the local player.
+        /// </summary>
+        /// <param name="avatarID"></param>
+        public void SetPlayerAvatar(int avatarIndex)
+        {
+            WM.Logger.Debug("SetAvatar(" + avatarIndex + ")");
+
+            var avatarID = GetAvatarID(avatarIndex);
+            SetPlayerAvatar(avatarID);
+        }
+
+        /// <summary>
+        /// Sets the avatar for the local player.
+        /// </summary>
+        /// <param name="avatarID"></param>
+        public void SetPlayerAvatar(Guid avatarID)
+        {
+            WM.Logger.Debug("SetAvatar(" + avatarID.ToString() + ")");
+
+            if (NetworkMode == NetworkMode.Standalone)
+            {
+                WM.Logger.Warning("Network mode should not be 'Standalone'!");
+                return;
+            }
+
+            Player.AvatarID = avatarID;
+
+            if (Client.Connected)
+            {
+                Client.SendCommand(new SetPlayerAvatarCommand(Player.ID, avatarID));
+            }
+        }
+
+        #endregion Player Avatar
+
+        #endregion Player Management
+
         #region GameObject overrides
 
         public void OnEnable()
@@ -341,7 +424,8 @@ namespace WM.Application
 
         public virtual void Init()
         {
-            AvatarID = DefaultAvatarID;
+            Player.AvatarID = DefaultAvatarID;
+            Player.ClientID = Client.ID;
 
             #region Get handles to game objects
 
@@ -612,16 +696,18 @@ namespace WM.Application
 
         #region
         
-        //!
+        /// <summary>
+        /// 
+        /// </summary>
         public void ResetTrackingSpacePosition()
         {
             m_ovrCameraRig.transform.position = new Vector3();
             m_ovrCameraRig.transform.rotation = new Quaternion();
         }
 
-        #endregion
-
-        //!
+        /// <summary>
+        /// 
+        /// </summary>
         public void Fly()
         {
             if (SharedTrackingSpace == true)
@@ -686,6 +772,9 @@ namespace WM.Application
             TranslateUpDown
         };
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected virtual void UpdateNetwork()
         {
             /*
@@ -708,9 +797,10 @@ namespace WM.Application
         /// </summary>
         private TrackingSpaceManipulationMode trackingSpaceManipulationMode = TrackingSpaceManipulationMode.None;
 
-        //! Whether or not translating tracking space up/down is enabled (default: false)
+        /// <summary>
+        /// Whether or not translating tracking space up/down is enabled (default: false)
+        /// </summary>
         public bool EnableTrackingSpaceTranslationUpDown = false;
-
 
         /// <summary>
         /// 
@@ -834,9 +924,13 @@ namespace WM.Application
             m_ovrCameraRig.transform.position = m_ovrCameraRig.transform.position + offset;
         }
 
+        #endregion
+
         #region HUD menu
 
-        //! Activates the next menu mode.
+        /// <summary>
+        /// Activates the next menu mode.
+        /// </summary>
         void ToggleMenuMode()
         {
             var newMenuMode = (MenuMode)UtilIterate.MakeCycle((int)menuMode + 1, 0, menus.Count);
@@ -844,6 +938,10 @@ namespace WM.Application
             SetMenuMode(newMenuMode);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="newMenuMode"></param>
         void SetMenuMode(MenuMode newMenuMode)
         {
             if (menuMode == MenuMode.None)
@@ -886,46 +984,24 @@ namespace WM.Application
                 HudMenu.gameObject.SetActive(menuMode != MenuMode.None);
             }
         }
+        
+        #endregion
 
+        #region Avatar management
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="avatarIndex"></param>
+        /// <returns></returns>
         public Guid GetAvatarID(int avatarIndex)
         {
             return DefaultAvatarID; // FIXME: TODO: Convert avatar index to avatar ID Guid!
         }
 
         /// <summary>
-        /// Sets the avatar for the local player.
+        /// 
         /// </summary>
-        /// <param name="avatarID"></param>
-        public void SetAvatar(int avatarIndex)
-        {
-            WM.Logger.Debug("SetAvatar(" + avatarIndex + ")");
-
-            var avatarID = GetAvatarID(avatarIndex);
-            SetAvatar(avatarID);
-        }
-
-        /// <summary>
-        /// Sets the avatar for the local player.
-        /// </summary>
-        /// <param name="avatarID"></param>
-        public void SetAvatar(Guid avatarID)
-        {
-            WM.Logger.Debug("SetAvatar(" + avatarID.ToString() + ")");
-
-            if (NetworkMode == NetworkMode.Standalone)
-            {
-                WM.Logger.Warning("Network mode should not be 'Standalone'!");
-                return;
-            }
-
-            AvatarID = avatarID;
-            Client.SendCommand(new SetClientAvatarCommand(WM.Net.NetUtil.GetLocalIPAddress(), Client.TcpPort, avatarID));
-        }
-
-        #endregion
-
-        #region Avatar management
-
         public PrefabGameObjectFactory AvatarFactory = new PrefabGameObjectFactory();
 
         /// <summary>
@@ -968,6 +1044,9 @@ namespace WM.Application
 
         #region Remote user management
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Guid DefaultAvatarID
         {
             get;
@@ -980,84 +1059,116 @@ namespace WM.Application
         /// </summary>
         /// <param name="clientIP"></param>
         /// <param name="clientPort"></param>
-        public void ConnectClient(
-            string clientIP,
-            int clientPort)
+        public void AddPlayer(
+            Player player)
         {
-            WM.Logger.Debug(string.Format(name + ":ConnectClient({0}:{1})", clientIP, clientPort));
+            Debug.Assert(!Players.ContainsKey(player.ID));
 
-            lock (remoteUsers)
+            WM.Logger.Debug(string.Format(name + ":AddPlayer({0}, {1}, {2})", player.ClientID, player.ID, player.Name));
+
+            lock (Players)
             {
                 // TODO first: move avatar instance management (creation, init, destruction) into RemoteUser.Init(avatarIndex, pos, rot)?
-                var avatar = InstantiateAvatarPrefab(
+                var avatarGO = InstantiateAvatarPrefab(
                     DefaultAvatarID,
                     Vector3.zero,
                     Quaternion.identity);
 
-                var remoteUser = new RemoteUser();
-                remoteUser.remoteIP = clientIP;
-                remoteUser.remotePort = clientPort;
-                remoteUser.Avatar = avatar.GetComponent<WM.Net.Avatar>();
+                player.Avatar = avatarGO.GetComponent<WM.Net.Avatar>();
 
-                var clientID = remoteUser.remoteIP + ":" + remoteUser.remotePort;
-                remoteUsers[clientID] = remoteUser;
-
-                WM.Logger.Debug("Client " + clientID + " accepted");
+                Players[player.ID] = player;
             }
         }
 
         /// <summary>
-        /// Destroys the avatar prefab for the given disconnected client.
+        /// Disconnects the Client with given client ID.
         /// </summary>
         /// <param name="clientID"></param>
         public void DisconnectClient(string clientID)
         {
-            lock (remoteUsers)
+        }
+
+        /// <summary>
+        /// Removes the remote Player with given player ID.
+        /// </summary>
+        /// <param name="clientID"></param>
+        public void RemovePlayer(
+            Guid playerID)
+        {
+            lock (Players)
             {
-                if (remoteUsers.ContainsKey(clientID))
+                Debug.Assert(Players.ContainsKey(playerID));
+
+                if (Players.ContainsKey(playerID))
                 {
                     // We need to destroy ojects defferently in Edit Mode, otherwise Edit Mode Unit Tests complain.  :-(
                     if (UnityEngine.Application.isEditor)
                     {
-                        DestroyImmediate(remoteUsers[clientID].Avatar.gameObject);
+                        DestroyImmediate(Players[playerID].Avatar.gameObject);
                     }
                     else
                     {
-                        Destroy(remoteUsers[clientID].Avatar.gameObject);
+                        Destroy(Players[playerID].Avatar.gameObject);
                     }
 
-                    remoteUsers.Remove(clientID);
+                    Players.Remove(playerID);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Removes the remote Players that are hosted by the Client with given client ID.
+        /// </summary>
+        /// <param name="clientID"></param>
+        public void RemovePlayersByClient(
+            Guid clientID)
+        {
+            lock (Players)
+            {
+                var playersToRemove = new List<Guid>();
+
+                foreach (var player in Players.Values)
+                {
+                    if (player.ClientID == clientID)
+                    {
+                        playersToRemove.Add(player.ID);
+                    }
+                }
+
+                foreach (var playerID in playersToRemove)
+                {
+                    RemovePlayer(playerID);
                 }
             }
         }
 
         /// <summary>
-        /// Updates the avatar type for the connected client with given ID.
+        /// Updates the avatar type for the player with given ID.
         /// </summary>
-        /// <param name="clientID"></param>
+        /// <param name="playerID"></param>
         /// <param name="avatarID"></param>
-        public void SetClientAvatar(
-            string clientID,
+        public void SetPlayerAvatar(
+            Guid playerID,
             Guid avatarID)
         {
-            lock (remoteUsers)
+            lock (Players)
             {
-                var remoteUser = (remoteUsers.ContainsKey(clientID) ? remoteUsers[clientID] : null);
+                var player = (Players.ContainsKey(playerID) ? Players[playerID] : null);
 
-                if (remoteUser == null)
+                if (player == null)
                 {
-                    WM.Logger.Warning("SetClientAvatar(): User '" + clientID + "' not found!");
+                    WM.Logger.Warning("SetPlayerAvatar(): Player '" + playerID + "' not found!");
                     return;
                 }
 
-                var oldAvatar = remoteUser.Avatar;
+                var oldAvatar = player.Avatar;
 
                 var avatar = InstantiateAvatarPrefab(
                     avatarID,
                     oldAvatar.transform.position,
                     oldAvatar.transform.rotation);
 
-                remoteUser.Avatar = avatar.GetComponent<WM.Net.Avatar>();
+                player.Avatar = avatar.GetComponent<WM.Net.Avatar>();
 
                 if (oldAvatar != null)
                 {

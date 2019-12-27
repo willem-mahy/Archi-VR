@@ -1,32 +1,32 @@
-﻿using WM.Net;
+﻿//using WM.Net;
 
-namespace WM
-{
-    public class RemoteUser
-    {
-        /// <summary>
-        /// The IP of the remote user.
-        /// </summary>
-        public string remoteIP;
+//namespace WM
+//{
+//    public class RemoteUser
+//    {
+//        /// <summary>
+//        /// The IP of the remote user.
+//        /// </summary>
+//        public string remoteIP;
 
-        /// <summary>
-        /// The Port of the remote user.
-        /// </summary>
-        public int remotePort = -1;
+//        /// <summary>
+//        /// The Port of the remote user.
+//        /// </summary>
+//        public int remotePort = -1;
 
-        /// <summary>
-        /// The index of the user's avatar type.
-        /// </summary>
-        public int AvatarIndex = 0;
+//        /// <summary>
+//        /// The index of the user's avatar type.
+//        /// </summary>
+//        public int AvatarIndex = 0;
 
-        /// <summary>
-        /// The user name.
-        /// </summary>
-        public string Name = "";
+//        /// <summary>
+//        /// The user name.
+//        /// </summary>
+//        public string Name = "";
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public Avatar Avatar;
-    }
-}
+//        /// <summary>
+//        /// 
+//        /// </summary>
+//        public Avatar Avatar;
+//    }
+//}

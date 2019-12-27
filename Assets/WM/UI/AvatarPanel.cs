@@ -72,7 +72,7 @@ public class AvatarPanel : MonoBehaviour
             return;
         }
 
-        Application.SetAvatar(value);
+        Application.SetPlayerAvatar(value);
     }
 
     public void PrevAvatarButtonOnClick()
@@ -84,7 +84,7 @@ public class AvatarPanel : MonoBehaviour
 
         var newAvatarIndex = Application.AvatarIndex - 1;
         UtilIterate.MakeCycle(newAvatarIndex, 0, Application.avatarPrefabs.Count);
-        Application.SetAvatar(newAvatarIndex);
+        Application.SetPlayerAvatar(newAvatarIndex);
         AvatarDropdown.value = newAvatarIndex;
     }
 
@@ -97,7 +97,7 @@ public class AvatarPanel : MonoBehaviour
 
         var newAvatarIndex = Application.AvatarIndex + 1;
         UtilIterate.MakeCycle(newAvatarIndex, 0, Application.avatarPrefabs.Count);
-        Application.SetAvatar(newAvatarIndex);
+        Application.SetPlayerAvatar(newAvatarIndex);
         AvatarDropdown.value = newAvatarIndex;
     }
 

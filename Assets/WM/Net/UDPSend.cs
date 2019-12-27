@@ -24,9 +24,14 @@ namespace WM.Net
         /// </summary>
         public int remotePort = 8890;
 
-        // "connection" things
+        /// <summary>
+        /// 
+        /// </summary>
         IPEndPoint remoteEndPoint;
 
+        /// <summary>
+        /// 
+        /// </summary>
         UdpClient udpClient;
 
         /// <summary>
@@ -40,11 +45,13 @@ namespace WM.Net
 
         public void Init()
         {
-            WM.Logger.Debug("UDPSend.Init(): Start");
+            WM.Logger.Debug("UDPSend.Init()");
 
             remoteEndPoint = new IPEndPoint(IPAddress.Parse(remoteIP), remotePort);
 
-            WM.Logger.Debug("UDPSend.Init(): UDPSend running @ " + remoteIP + ":" + remotePort + ")");
+            WM.Logger.Debug("UDPSend.Init(): UDPSend running (Target " + remoteIP + ":" + remotePort + ")");
+
+            WM.Logger.Debug("UDPSend.Init() End");
         }
 
         /// <summary>
