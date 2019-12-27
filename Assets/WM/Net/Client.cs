@@ -117,7 +117,7 @@ namespace WM.Net
         #endregion
 
         /// <summary>
-        /// Initialize the client.
+        /// Starts initializing the connection to the Server.
         /// </summary>
         public void Connect()
         {
@@ -248,36 +248,42 @@ namespace WM.Net
         }
 
         /// <summary>
-        /// Synchronously start listening at the UDP broadcast port for UdpBroadcastMessages.
+        /// Synchronously tries to discover any Server to connect to.
+        /// 1) Starts listening at port 'Server.UdpBroadcastRemotePort' for discovery messages from a Server.
+        /// 2) Tries to parse any incoming data on the port as a 'ServerInfo' message.
+        /// 3) Returns the first received ServerInfo, or 'null' if Client shutdown was initiated before receiving a ServerInfo on the port.
         /// </summary>
-        /// <returns>A string containing the IP address of the first server from which we receive a valid UdpBroadcastMessage</returns>
+        /// <returns>The first received ServerInfo.</returns>
         private ServerInfo GetServerInfoFromUdpBroadcast()
         {
             Status = "Listening for servers";
 
             WM.Logger.Debug(string.Format("Client: Listening to UDP broadcast Message '{0}' on port {1}", UdpBroadcastMessage, Server.UdpBroadcastRemotePort));
 
-            var udpClient = new UdpClient(Server.UdpBroadcastRemotePort);
-            var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            var discoveryUdpClient = new UdpClient(Server.UdpBroadcastRemotePort);
+
+            // The address from which to receive data.
+            // In this case we are interested in data from any IP and any port.
+            var discoveryUdpRemoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
             while (!shutDown)
             {
                 try
                 {
                     // Receive bytes from anyone on local port 'Server.UdpBroadcastRemotePort'.
-                    byte[] data = udpClient.Receive(ref remoteEndPoint);
+                    byte[] data = discoveryUdpClient.Receive(ref discoveryUdpRemoteEndPoint);
 
                     // Encode received bytes to UTF8- encoding.
                     string receivedText = Encoding.UTF8.GetString(data);
 
                     var obj = GetObjectFromMessageXML(receivedText);
                     
-                    if (obj is ServerInfo serverInfo) //receivedText.Contains(UdpBroadcastMessage))
+                    if (obj is ServerInfo serverInfo)
                     {
-                        var serverIP = remoteEndPoint.Address.ToString();
+                        var serverIP = discoveryUdpRemoteEndPoint.Address.ToString();
                         WM.Logger.Debug(string.Format("Client: Received UDP broadcast Message from server '{0}': TCP {1}, UDP {2}", serverIP, serverInfo.TcpPort, serverInfo.UdpPort));
 
-                        udpClient.Close();
+                        discoveryUdpClient.Close();
 
                         return serverInfo;
                     }
@@ -292,7 +298,7 @@ namespace WM.Net
                 }
             }
 
-            udpClient.Close();
+            discoveryUdpClient.Close();
 
             return null;
         }
