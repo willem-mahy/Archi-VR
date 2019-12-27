@@ -91,7 +91,7 @@ namespace Tests
         /// After each call, sleep for a while.
         /// </summary>
         /// <param name="count"></param>
-        private void UpdateApplications(int count = 20, int sleepMillis = 20)
+        private void UpdateApplications(int count = 50, int sleepMillis = 20)
         {
             for (int i = 0; i < count; ++i)
             {
@@ -213,7 +213,7 @@ namespace Tests
                 applicationClient2.QueueCommand(new InitNetworkCommand(NetworkMode.Client));
                 Assert.AreEqual(NetworkMode.Standalone, applicationClient2.NetworkMode);
 
-                UpdateApplications(50); // Make queued commands execute.
+                UpdateApplications(); // Make queued commands execute.
             }
 
             // ... THEN ...
