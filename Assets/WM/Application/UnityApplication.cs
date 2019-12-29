@@ -324,16 +324,18 @@ namespace WM.Application
             Guid playerID,
             string playerName)
         {
-            // Must not be called for the local player!
-            Debug.Assert(playerID != Player.ID);
+            WM.Logger.Debug("SetPlayerName(" + playerID + ", " + name + ")");
 
             // Targeted player should be known by the application!
             Debug.Assert(Players.ContainsKey(playerID));
 
-            if (Players.ContainsKey(playerID))
+            lock (Players)
             {
-                var player = Players[playerID];
-                player.Name = playerName;
+                if (Players.ContainsKey(playerID))
+                {
+                    var player = Players[playerID];
+                    player.Name = playerName;
+                }
             }
         }
 
@@ -343,6 +345,8 @@ namespace WM.Application
         /// <param name="name"></param>
         public void SetPlayerName(string name)
         {
+            WM.Logger.Debug("SetPlayerName(" + name + ")");
+
             Player.Name = name;
 
             if (Client.Connected)
@@ -1151,6 +1155,11 @@ namespace WM.Application
             Guid playerID,
             Guid avatarID)
         {
+            WM.Logger.Debug("SetPlayerName(" + playerID + ", " + avatarID + ")");
+
+            // Targeted player should be known by the application!
+            Debug.Assert(Players.ContainsKey(playerID));
+
             lock (Players)
             {
                 var player = (Players.ContainsKey(playerID) ? Players[playerID] : null);

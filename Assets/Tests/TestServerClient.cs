@@ -70,7 +70,7 @@ namespace Tests
 
             application.Start();
 
-            application.SetPlayerName(name + " Player");
+            application.SetPlayerName(name + " player");
 
             Assert.AreEqual(0, application.Server.NumClients);
             
@@ -140,6 +140,10 @@ namespace Tests
             Assert.AreEqual(DefaultAvatarID, applicationServer.Player.AvatarID);
             Assert.AreEqual(DefaultAvatarID, applicationClient1.Player.AvatarID);
             Assert.AreEqual(DefaultAvatarID, applicationClient2.Player.AvatarID);
+
+            Assert.AreEqual("Server player", applicationServer.Player.Name);
+            Assert.AreEqual("Client1 player", applicationClient1.Player.Name);
+            Assert.AreEqual("Client2 player", applicationClient2.Player.Name);
 
             #endregion Check initial application state
 
@@ -261,6 +265,72 @@ namespace Tests
             Assert.AreEqual(DefaultAvatarID, applicationServer.Players[applicationClient2.Player.ID].AvatarID);
             Assert.AreEqual(DefaultAvatarID, applicationClient1.Players[applicationClient2.Player.ID].AvatarID);
             Assert.AreEqual(DefaultAvatarID, applicationClient2.Player.AvatarID);
+
+            #endregion
+
+            #region Change server player name
+
+            LogHeader("Change Server player name");
+            applicationServer.SetPlayerName("New Server player");
+
+            UpdateApplications(); // Make queued commands execute.
+
+            // Server should now have changed avatar on all connected applications.
+            Assert.AreEqual(Avatar1ID, applicationServer.Player.AvatarID);
+            Assert.AreEqual(Avatar1ID, applicationClient1.Players[applicationServer.Player.ID].AvatarID);
+            Assert.AreEqual(Avatar1ID, applicationClient2.Players[applicationServer.Player.ID].AvatarID);
+
+            Assert.AreEqual(DefaultAvatarID, applicationServer.Players[applicationClient1.Player.ID].AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient1.Player.AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient2.Players[applicationClient1.Player.ID].AvatarID);
+
+            Assert.AreEqual(DefaultAvatarID, applicationServer.Players[applicationClient2.Player.ID].AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient1.Players[applicationClient2.Player.ID].AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient2.Player.AvatarID);
+
+            Assert.AreEqual("New Server player", applicationServer.Player.Name);
+            Assert.AreEqual("New Server player", applicationClient1.Players[applicationServer.Player.ID].Name);
+            Assert.AreEqual("New Server player", applicationClient2.Players[applicationServer.Player.ID].Name);
+
+            Assert.AreEqual("Client1 player", applicationClient1.Player.Name);
+            Assert.AreEqual("Client2 player", applicationClient2.Player.Name);
+
+            #endregion
+
+            #region Change Client1 player name
+
+            LogHeader("Change Server player name");
+            applicationClient1.SetPlayerName("New Client1 player");
+
+            UpdateApplications(); // Make queued commands execute.
+
+            // Server should now have changed avatar on all connected applications.
+            Assert.AreEqual(Avatar1ID, applicationServer.Player.AvatarID);
+            Assert.AreEqual(Avatar1ID, applicationClient1.Players[applicationServer.Player.ID].AvatarID);
+            Assert.AreEqual(Avatar1ID, applicationClient2.Players[applicationServer.Player.ID].AvatarID);
+
+            Assert.AreEqual(DefaultAvatarID, applicationServer.Players[applicationClient1.Player.ID].AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient1.Player.AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient2.Players[applicationClient1.Player.ID].AvatarID);
+
+            Assert.AreEqual(DefaultAvatarID, applicationServer.Players[applicationClient2.Player.ID].AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient1.Players[applicationClient2.Player.ID].AvatarID);
+            Assert.AreEqual(DefaultAvatarID, applicationClient2.Player.AvatarID);
+
+            // Check Server player name
+            Assert.AreEqual("New Server player", applicationServer.Player.Name);
+            Assert.AreEqual("New Server player", applicationClient1.Players[applicationServer.Player.ID].Name);
+            Assert.AreEqual("New Server player", applicationClient2.Players[applicationServer.Player.ID].Name);
+
+            // Check Client1 player name
+            Assert.AreEqual("New Client1 player", applicationServer.Players[applicationClient1.Player.ID].Name);
+            Assert.AreEqual("New Client1 player", applicationClient1.Player.Name);
+            Assert.AreEqual("New Client1 player", applicationClient2.Players[applicationClient1.Player.ID].Name);
+
+            // Check Client2 player name
+            Assert.AreEqual("Client2 player", applicationServer.Players[applicationClient2.Player.ID].Name);
+            Assert.AreEqual("Client2 player", applicationClient1.Players[applicationClient2.Player.ID].Name);
+            Assert.AreEqual("Client2 player", applicationClient2.Player.Name);
 
             #endregion
 

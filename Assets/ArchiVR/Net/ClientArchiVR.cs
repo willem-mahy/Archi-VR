@@ -75,6 +75,10 @@ namespace ArchiVR.Net
             {
                 application.QueueCommand(disconnectClientCommand);
             }
+            else if (obj is SetPlayerNameCommand setPlayerNameCommand)
+            {
+                application.QueueCommand(setPlayerNameCommand);
+            }
             else if (obj is SetPlayerAvatarCommand setClientAvatarCommand)
             {
                 application.QueueCommand(setClientAvatarCommand);
