@@ -195,11 +195,26 @@ namespace WM.Net
 
                 OnDisconnect();
 
-                SendCommand(new DisconnectClientCommand(ID));
+                // Try to Disconnect cleanly 10 times.
+                for (int retryDisconnect = 0; retryDisconnect < 3; ++retryDisconnect)
+                {
+                    SendCommand(new DisconnectClientCommand(ID));
 
-                while (Status != "DisconnectAcknoledged") ;
+                    for (int check = 0; check < 10; ++check)
+                    {
+                        if (Status == "DisconnectAcknoledged")
+                        {
+                            WM.Logger.Debug("Client.Disconnect(): Shutting down after DisconnectAcknoledged from Server.");
+                            Shutdown();
+                            return;
+                        }
+                    }
 
-                WM.Logger.Debug("Client.Disconnect(): DisconnectAcknoledged received: Shutting down...");
+                    WM.Logger.Debug("Client.Disconnect(): Retry " + (retryDisconnect + 1) + " failed.");
+                }
+
+                // No response from server ?!  Shut down anyway...
+                WM.Logger.Warning("Client.Disconnect(): Shutting down without DisconnectAcknoledged from server...");
                 Shutdown();
             }
         }
