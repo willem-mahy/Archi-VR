@@ -27,7 +27,10 @@ namespace ArchiVR.Net
             UdpBroadcastMessage = Constants.BroadcastMessage;
         }
 
-        override public void OnClientConnected(ClientConnection newClientConnection)
+        /// <summary>
+        /// <see cref="Server.OnClientConnected(ClientConnection)"/> implementation.
+        /// </summary>        
+        override protected void OnClientConnected(ClientConnection newClientConnection)
         {
             // Now the client is connected, initialize it to the server's application state.
 
@@ -62,6 +65,18 @@ namespace ArchiVR.Net
 
                 SendCommand(setImmersionModeCommand, newClientConnection);
             }
+        }
+
+        /// <summary>
+        /// <see cref="Server.DoProcessMessage(string, ClientConnection, object)"/> implementation.
+        /// </summary>
+        override protected void DoProcessMessage(
+            string messageXML,
+            ClientConnection clientConnection,
+            object obj)
+        {
+            WM.Logger.Debug(string.Format("ServerArchiVR.ProcessMessage: {0}", obj.ToString()));
+            BroadcastData(messageXML); // TODO: Implement a way to figure out wheter to propagate or broadcast messages here.
         }
     }
 }

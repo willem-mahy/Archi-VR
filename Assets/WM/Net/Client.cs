@@ -93,7 +93,9 @@ namespace WM.Net
 
         #endregion
 
-        // The client's worker thread.
+        /// <summary>
+        /// The client's worker thread.
+        /// </summary>
         private Thread thread;
 
         #region Internal state
@@ -156,19 +158,7 @@ namespace WM.Net
             thread.IsBackground = true;
             thread.Start();
         }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        abstract public void OnConnect();
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        abstract public void OnDisconnect();
-
+        
         /// <summary>
         /// Disconnect the client.
         /// </summary>
@@ -218,6 +208,16 @@ namespace WM.Net
                 Shutdown();
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        abstract protected void OnConnect();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        abstract protected void OnDisconnect();
 
         /// <summary>
         /// 
@@ -584,7 +584,7 @@ namespace WM.Net
         /// 
         /// </summary>
         /// <param name="obj"></param>
-        abstract public void DoProcessMessage(object obj);
+        abstract protected void DoProcessMessage(object obj);
                         
         /// <summary>
         /// Send non-critical data to the server over UDP.

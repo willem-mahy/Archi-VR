@@ -223,11 +223,6 @@ namespace WM.Net
 
         public string Status = "";
 
-        #region TCP
-
-        //! The TCP listener.
-        TcpListener tcpListener;
-
         // Used for debugging client list lock related deadlocks.
         private string clientsLockOwner = "";
 
@@ -283,6 +278,22 @@ namespace WM.Net
         // The thread that accepts client connections.
         private Thread acceptClientThread;
 
+        #region TCP
+
+        //! The TCP listener.
+        TcpListener tcpListener;
+
+        /// <summary>
+        /// The port of the TCP Listener, to which clients can connect.
+        /// </summary>
+        public int TcpPort
+        {
+            get
+            {
+                return ((IPEndPoint)(tcpListener.LocalEndpoint)).Port;
+            }
+        }
+
         #endregion
 
         #region UDP
@@ -311,6 +322,17 @@ namespace WM.Net
         /// </summary>
         public static readonly int UdpBroadcastRemotePort = 8881;
 
+        /// <summary>
+        /// The port of the local endpoint of the UdpCLient used to send/receive non-critical data to/from Clients.
+        /// </summary>
+        public int UdpPort
+        {
+            get
+            {
+                return ((IPEndPoint)udpClient.Client.LocalEndPoint).Port;
+            }
+        }
+
         #endregion UDP Broadcast
 
         #region UDP Message send/receive
@@ -330,28 +352,6 @@ namespace WM.Net
         private bool shutDown = false;
 
         #endregion
-
-        /// <summary>
-        /// The port of the TCP Listener, to which clients can connect.
-        /// </summary>
-        public int TcpPort
-        {
-            get
-            {
-                return ((IPEndPoint)(tcpListener.LocalEndpoint)).Port;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int UdpPort
-        {
-            get
-            {
-                return ((IPEndPoint)udpClient.Client.LocalEndPoint).Port;
-            }
-        }
 
         /// <summary>
         /// 
@@ -431,8 +431,7 @@ namespace WM.Net
                 WM.Logger.Error("Server.Init(): Exception: " + ex.ToString());
             }
         }
-
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -557,7 +556,7 @@ namespace WM.Net
         /// </summary>
         private void AcceptClientFunction()
         {
-            WM.Logger.Debug("AcceptClientFunction() Start()");
+            WM.Logger.Debug("AcceptClientFunction()");
 
             while (!shutDown)
             {
@@ -601,10 +600,21 @@ namespace WM.Net
         }
 
         /// <summary>
-        /// 
+        /// Called when a Client is connected to this Server.
         /// </summary>
         /// <param name="newClientConnection"></param>
-        abstract public void OnClientConnected(ClientConnection newClientConnection);
+        abstract protected void OnClientConnected(ClientConnection newClientConnection);
+
+        /// <summary>
+        /// To be implemented by application-specific Server implementations, to process application-specific messages.
+        /// </summary>
+        /// <param name="messageXML">The message, as received from the ClientCOnnection.  (a string containing the XML-encoded message)</param>
+        /// <param name="clientConnection">The ClientConnection from which the meaasga was received.</param>
+        /// <param name="obj">The object parsed from the messageXML.</param>
+        abstract protected void DoProcessMessage(
+            string messageXML,
+            ClientConnection clientConnection,
+            object obj);
 
         /// <summary>
         /// Thread function executed by the 'Receive UDP' thread.
@@ -644,7 +654,7 @@ namespace WM.Net
                 }
                 catch (Exception ex)
                 {
-                        WM.Logger.Error("Server.ReceiveUdpFunction(): Exception: " + ex.ToString());
+                    WM.Logger.Error("Server.ReceiveUdpFunction(): Exception: " + ex.ToString());
                 }
             }
         }
@@ -754,9 +764,9 @@ namespace WM.Net
             }
             else
             {
-                // Application-specific message, EG ArchiVR.SetModelLocationCommand
-                WM.Logger.Debug(string.Format("Server.ProcessMessage: {0}", obj.ToString()));
-                BroadcastData(messageXML); // TODO: Implement a way to figure out wheter to propagate or broadcast messages here.
+                // Application-specific message. (EG ArchiVR.SetModelLocationCommand)
+                // Delegate processing to the application-specific Server implementation.
+                DoProcessMessage(messageXML, clientConnection, obj);
             }
 
             return true;
@@ -816,7 +826,7 @@ namespace WM.Net
         /// 
         /// </summary>
         /// <param name="data"></param>
-        private void BroadcastData(
+        protected void BroadcastData(
             string data)
         {
             WM.Logger.Debug("Server:BroadcastData()");
@@ -880,7 +890,7 @@ namespace WM.Net
         }
 
         /// <summary>
-        /// 
+        /// Send the given command to the Client of the given ClientConnection.
         /// </summary>
         /// <param name="command"></param>
         /// <param name="clientConnection"></param>

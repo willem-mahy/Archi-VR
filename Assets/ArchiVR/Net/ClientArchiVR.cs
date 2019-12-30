@@ -24,7 +24,7 @@ namespace ArchiVR.Net
         /// <summary>
         /// <see cref="Client"/> implementation.
         /// </summary>
-        override public void OnConnect()
+        override protected void OnConnect()
         {
             // Notify other Clients about existence of your own player.
             var addPlayerCommand = new AddPlayerCommand(application.Player);
@@ -34,7 +34,7 @@ namespace ArchiVR.Net
         /// <summary>
         /// <see cref="Client"/> implementation.
         /// </summary>
-        override public void OnDisconnect()
+        override protected void OnDisconnect()
         {
             lock (application.Players)
             {
@@ -57,7 +57,7 @@ namespace ArchiVR.Net
         /// <see cref="Client"/> implementation.
         /// </summary>
         /// <param name="obj"></param>
-        override public void DoProcessMessage(object obj)
+        override protected void DoProcessMessage(object obj)
         {
             if (obj is TeleportCommand teleportCommand)
             {
