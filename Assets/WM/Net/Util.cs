@@ -7,20 +7,40 @@ namespace WM.Net
         /// <summary>
         /// 
         /// </summary>
-        /// <returns></returns>
-        public static string GetLocalIPAddress()
+        /// <param name=""></param>
+        public static void PrintAllIPAdresses(IPHostEntry hostEntry)
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
+            WM.Logger.Debug("Host IP addresses:");
 
-            foreach (var ip in host.AddressList)
+            foreach (var ipAddress in hostEntry.AddressList)
             {
-                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                WM.Logger.Debug("    - " + ipAddress);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public static IPAddress GetLocalIPAddress()
+        {
+            // Get host name for local machine.
+            var hostName = Dns.GetHostName();
+
+            // Get host entry from host name.
+            var hostEntry = Dns.GetHostEntry(hostName);
+
+            PrintAllIPAdresses(hostEntry);
+
+            foreach (var ip in hostEntry.AddressList)
+            {
+                if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) // Return first IP v4 address.
                 {
-                    return ip.ToString();
+                    return ip;
                 }
             }
 
-            throw new WebException("Local IP address not found!");
+            throw new WebException("IP v4 address for local host not found!");
         }
             
         /// <summary>
@@ -29,7 +49,7 @@ namespace WM.Net
         /// <returns></returns>
         public static string GetLocalIPSubNet()
         {
-            var address = GetLocalIPAddress();
+            var address = GetLocalIPAddress().ToString();
 
             return address.Substring(0, address.LastIndexOf('.') + 1);
         }

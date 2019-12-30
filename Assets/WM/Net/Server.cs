@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Xml.Serialization;
 
 using UnityEngine;
 using WM.Command;
@@ -221,11 +219,14 @@ namespace WM.Net
 
         #region Variables
 
-        public string Status = "";
-
-        // Used for debugging client list lock related deadlocks.
+        /// <summary>
+        /// Used for debugging client list lock related deadlocks.
+        /// </summary>
         private string clientsLockOwner = "";
 
+        /// <summary>
+        /// Used for debugging client list lock related deadlocks.
+        /// </summary>
         public string ClientsLockOwner
         {
             get { return clientsLockOwner; }
@@ -255,7 +256,7 @@ namespace WM.Net
         }
 
         /// <summary>
-        /// 
+        /// Gets the number of connected Clients.
         /// </summary>
         /// <returns></returns>
         public int NumClients
@@ -269,13 +270,19 @@ namespace WM.Net
             }
         }
 
-        // The thread that accepts TCP data from connected clients.
+        /// <summary>
+        /// The thread that accepts TCP data from connected clients.
+        /// </summary>
         private Thread receiveTcpThread;
 
-        // The thread that broadcasts messages to any potential clients in order for them to find the server.
+        /// <summary>
+        /// The thread that broadcasts messages to any potential clients in order for them to find the server.
+        /// </summary>
         private Thread broadcastThread;
 
-        // The thread that accepts client connections.
+        /// <summary>
+        /// The thread that accepts client connections.
+        /// </summary>
         private Thread acceptClientThread;
 
         #region TCP
@@ -349,169 +356,242 @@ namespace WM.Net
 
         #endregion
 
-        private bool shutDown = false;
+        #region Internal state
+
+        /// <summary>
+        ///  The possible server states.
+        ///  
+        /// A freshly constructed Server is always in 'NotRunning' state.
+        /// 
+        /// By calling 'Init()', the Server transitions into state 'Initializing'.
+        /// 
+        /// If initialization procedure succeeds, the Server automatically transitions into state 'Running'
+        /// 
+        /// TODO? If initialization fails, the Server automatically transitions into state 'InitializationFailed'
+        /// 
+        /// By calling 'Shutdown()', the Server transitions into state 'ShuttingDown'.
+        /// 
+        /// If shutdown procedure succeeds, the Server automatically transitions into state 'Running'
+        /// 
+        /// TODO? If initialization procedure fails, the Server automatically transitions into state 'ShutdownFailed'
+        /// </summary>
+        public enum ServerState
+        {
+            Initializing,
+            Running,
+            ShuttingDown,
+            NotRunning,
+        }
+
+        /// <summary>
+        /// Lock object for the 'State'.
+        /// </summary>
+        private System.Object stateLock = new System.Object();
+
+        /// <summary>
+        /// The state.
+        /// </summary>
+        public ServerState State
+        {
+            get;
+            private set;
+        } = ServerState.NotRunning;
+
+        /// <summary>
+        /// Returns a string representing the internal server state.
+        /// To be used for displaying in the UI.
+        /// </summary>
+        public String Status
+        {
+            get
+            {
+                switch (State)
+                {
+                    case ServerState.NotRunning:
+                        return "Not running";
+                    case ServerState.Initializing:
+                        return "Initializing";
+                    case ServerState.Running:
+                        return "Running";
+                    case ServerState.ShuttingDown:
+                        return "Shutting down";
+                    default:
+                        return "Unknown state " + State.ToString();
+                }
+            }
+        }
+
+        #endregion Internal State
 
         #endregion
 
         /// <summary>
-        /// 
+        /// \pre The Server must be in state 'NotRunning' for this method to succeed.
         /// </summary>
         public void Init()
         {
             WM.Logger.Debug("Server.Init()");
 
-            shutDown = false;
-
-            Status = "Initializing";
-
-            try
+            lock (stateLock)
             {
-                udpClient = new UdpClient(0);
-                WM.Logger.Debug("Server.Init(): UdpClient bound to port " + UdpPort);
-
-                udpReceive = new UDPReceive(udpClient);
-                udpReceive.Init();
-                WM.Logger.Debug("Server.Init(): UdpReceive initialized");
-
-                // Get host name for local machine.
-                var hostName = Dns.GetHostName();
-
-                // Get host entry.
-                var hostEntry = Dns.GetHostEntry(hostName);
-
-                // Print all IP adresses:
+                switch (State)
                 {
-                    WM.Logger.Debug("Server.Init(): Host IP addresses:");
-
-                    foreach (var ipAddress in hostEntry.AddressList)
-                    {
-                        WM.Logger.Debug("    - " + ipAddress);
-                    }
+                    case ServerState.NotRunning:
+                        State = ServerState.Initializing;
+                        break;
+                    case ServerState.Initializing:
+                        throw new Exception("Init() can not be called on Server while it is Initializing.");
+                    case ServerState.Running:
+                        throw new Exception("Init() can not be called on Server while it is Running.");
+                    case ServerState.ShuttingDown:
+                        throw new Exception("Init() can not be called on Server while it is ShuttingDown.");
                 }
 
-                // Get first IPv4 address.
-                var serverIpAddress = hostEntry.AddressList[hostEntry.AddressList.Length - 1];
+                try
+                {
+                    udpClient = new UdpClient(0);
+                    WM.Logger.Debug("Server.Init(): UdpClient bound to port " + UdpPort);
 
-                // Create the TCP listener, and bind it to any available port.
-                tcpListener = new TcpListener(serverIpAddress, 0);
-                tcpListener.Start();
-                WM.Logger.Debug("Server.Init(): TCP listener bound to port " + TcpPort);
+                    udpReceive = new UDPReceive(udpClient);
+                    udpReceive.Init();
+                    WM.Logger.Debug("Server.Init(): UdpReceive initialized");
 
-                Status = "TcpListener started";
+                    var ipAddress = WM.Net.NetUtil.GetLocalIPAddress();
 
-                // Start a thread to broadcast via UDP.
-                broadcastThread = new Thread(new ThreadStart(BroadcastFunction));
-                broadcastThread.IsBackground = true;
-                broadcastThread.Name = "broadcastThread";
-                broadcastThread.Start();
+                    // Create the TCP listener, and bind it to any available port.
+                    tcpListener = new TcpListener(ipAddress, 0);
+                    tcpListener.Start();
+                    WM.Logger.Debug("Server.Init(): TCP listener bound to port " + TcpPort);
 
-                // Start a thread to listen for incoming connections from clients on the server TCP socket.
-                acceptClientThread = new Thread(new ThreadStart(AcceptClientFunction));
-                acceptClientThread.IsBackground = true;
-                acceptClientThread.Name = "acceptClientThread";
-                acceptClientThread.Start();
+                    // Start a thread to broadcast via UDP.
+                    broadcastThread = new Thread(new ThreadStart(BroadcastFunction));
+                    broadcastThread.IsBackground = true;
+                    broadcastThread.Name = "broadcastThread";
+                    broadcastThread.Start();
 
-                // Start a thread to listen for incoming data from connected clients on the server TCP socket.
-                receiveTcpThread = new Thread(new ThreadStart(ReceiveTcpFunction));
-                receiveTcpThread.IsBackground = true;
-                receiveTcpThread.Name = "receiveTcpThread";
-                receiveTcpThread.Start();
+                    // Start a thread to listen for incoming connections from clients on the server TCP socket.
+                    acceptClientThread = new Thread(new ThreadStart(AcceptClientFunction));
+                    acceptClientThread.IsBackground = true;
+                    acceptClientThread.Name = "acceptClientThread";
+                    acceptClientThread.Start();
 
-                // Start a thread to listen for incoming data from connected clients on the server UDP socket.
-                receiveUdpThread = new Thread(new ThreadStart(ReceiveUdpFunction));
-                receiveUdpThread.IsBackground = true;
-                receiveUdpThread.Name = "receiveUdpThread";
-                receiveUdpThread.Start();
+                    // Start a thread to listen for incoming data from connected clients on the server TCP socket.
+                    receiveTcpThread = new Thread(new ThreadStart(ReceiveTcpFunction));
+                    receiveTcpThread.IsBackground = true;
+                    receiveTcpThread.Name = "receiveTcpThread";
+                    receiveTcpThread.Start();
 
-                Status = "Running";
-                WM.Logger.Debug("Server running");
-            }
-            catch (Exception ex)
-            {
-                WM.Logger.Error("Server.Init(): Exception: " + ex.ToString());
+                    // Start a thread to listen for incoming data from connected clients on the server UDP socket.
+                    receiveUdpThread = new Thread(new ThreadStart(ReceiveUdpFunction));
+                    receiveUdpThread.IsBackground = true;
+                    receiveUdpThread.Name = "receiveUdpThread";
+                    receiveUdpThread.Start();
+
+                    State = ServerState.Running;
+                    WM.Logger.Debug("Server.Init(): Server running");
+                }
+                catch (Exception ex)
+                {
+                    WM.Logger.Error("Server.Init(): Exception: " + ex.ToString());
+                }
             }
         }
-        
+
         /// <summary>
-        /// 
+        /// \pre The Server must be in state 'Running' for this method to succeed.
         /// </summary>
         public void Shutdown()
         {
-            WM.Logger.Debug("Server.Shutdown(): Start");
+            WM.Logger.Debug("Server.Shutdown()");
 
-            shutDown = true;
-
-            // Stop broadcasting for potential new clients.
-            if (broadcastThread != null)
+            lock (stateLock)
             {
-                broadcastThread.Join();
-
-                broadcastThread = null;
-            }
-
-            // Stop listening for new clients.
-            if (acceptClientThread != null)
-            {
-                acceptClientThread.Join();
-
-                acceptClientThread = null;
-            }
-
-            // Close TCP listener used to listen for new clients.
-            if (tcpListener != null)
-            {
-                tcpListener.Stop();
-
-                tcpListener = null;
-            }
-
-            // Notify existing clients that the server is shutting down.
-            BroadcastCommand(new ServerShutdownCommand());
-
-            // Stop listening to existing clients for UDP messages
-            if (receiveUdpThread != null)
-            {
-                receiveUdpThread.Join();
-
-                receiveUdpThread = null;
-            }
-
-            if (udpReceive != null)
-            {
-                udpReceive.Shutdown();
-                udpReceive = null;
-            }
-
-            if (udpClient != null)
-            {
-                udpClient.Close();
-
-                udpClient = null;
-            }
-
-            // Stop listening to existing clients for TCP messages
-            if (receiveTcpThread != null)
-            {
-                receiveTcpThread.Join();
-
-                receiveTcpThread = null;
-            }
-
-            lock (clientConnections)
-            {
-                clientsLockOwner = "Shutdown";
-
-                foreach (var clientConnection in clientConnections)
+                switch (State)
                 {
-                    clientConnection.Close();
+                    case ServerState.Running:
+                        State = ServerState.ShuttingDown;
+                        break;
+                    case ServerState.ShuttingDown:
+                        throw new Exception("Shutdown() can not be called on Client while it is ShuttingDown.");
+                    case ServerState.NotRunning:
+                        throw new Exception("Shutdown() can not be called on Client while it is NotRunning.");
+                    case ServerState.Initializing:
+                        throw new Exception("Shutdown() can not be called on Client while it is Initializing.");
+                }
+                
+                // Stop broadcasting for potential new clients.
+                if (broadcastThread != null)
+                {
+                    broadcastThread.Join();
+
+                    broadcastThread = null;
                 }
 
-                clientConnections.Clear();
+                // Stop listening for new clients.
+                if (acceptClientThread != null)
+                {
+                    acceptClientThread.Join();
 
-                clientsLockOwner = "None (Shutdown)";
+                    acceptClientThread = null;
+                }
+
+                // Close TCP listener used to listen for new clients.
+                if (tcpListener != null)
+                {
+                    tcpListener.Stop();
+
+                    tcpListener = null;
+                }
+
+                // Notify existing clients that the server is shutting down.
+                BroadcastCommand(new ServerShutdownCommand());
+
+                // Stop listening to existing clients for UDP messages
+                if (receiveUdpThread != null)
+                {
+                    receiveUdpThread.Join();
+
+                    receiveUdpThread = null;
+                }
+
+                if (udpReceive != null)
+                {
+                    udpReceive.Shutdown();
+                    udpReceive = null;
+                }
+
+                if (udpClient != null)
+                {
+                    udpClient.Close();
+
+                    udpClient = null;
+                }
+
+                // Stop listening to existing clients for TCP messages
+                if (receiveTcpThread != null)
+                {
+                    receiveTcpThread.Join();
+
+                    receiveTcpThread = null;
+                }
+
+                lock (clientConnections)
+                {
+                    clientsLockOwner = "Shutdown";
+
+                    foreach (var clientConnection in clientConnections)
+                    {
+                        clientConnection.Close();
+                    }
+
+                    clientConnections.Clear();
+
+                    clientsLockOwner = "None (Shutdown)";
+                }
+
+                State = ServerState.NotRunning;
+                WM.Logger.Debug("Server.Shutdown(): Server not running");
             }
-
-            WM.Logger.Debug("Server.Shutdown(): End");
         }
 
         /// <summary>
@@ -535,7 +615,7 @@ namespace WM.Net
                 // Encode data to UTF8-encoding.
                 byte[] udpBroadcastMessageData = Encoding.UTF8.GetBytes(UdpBroadcastMessage);
 
-                while (!shutDown)
+                while (State != ServerState.ShuttingDown)
                 {   
                         // Send udpBroadcastMessageData to any potential clients.
                         broadcastUdpClient.Send(udpBroadcastMessageData, udpBroadcastMessageData.Length, broadcastUdpRemoteEndPoint);
@@ -558,7 +638,7 @@ namespace WM.Net
         {
             WM.Logger.Debug("AcceptClientFunction()");
 
-            while (!shutDown)
+            while (State != ServerState.ShuttingDown)
             {
                 try
                 {
@@ -621,7 +701,7 @@ namespace WM.Net
         /// </summary>
         private void ReceiveUdpFunction()
         {
-            while (!shutDown)
+            while (State != ServerState.ShuttingDown)
             {
                 try
                 {
@@ -664,7 +744,7 @@ namespace WM.Net
         /// </summary>
         private void ReceiveTcpFunction()
         {
-            while (!shutDown)
+            while (State != ServerState.ShuttingDown)
             {
                 try
                 {
@@ -739,12 +819,7 @@ namespace WM.Net
         {
             var obj = Message.GetObjectFromMessageXML(messageXML);
 
-            /*
-            if (obj is ConnectClientCommand)
-            {
-                PropagateData(messageXML, clientConnection);
-            }
-            else */if (obj is DisconnectClientCommand)
+            if (obj is DisconnectClientCommand)
             {
                 WM.Logger.Debug(string.Format("Server.ProcessMessage: Client {0} disconnecting.", clientConnection.ClientID));
 

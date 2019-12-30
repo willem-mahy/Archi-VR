@@ -109,7 +109,7 @@ namespace WM.Net
         }
 
         private System.Object stateLock = new System.Object();
-        public ClientState state
+        public ClientState State
         {
             get;
             private set;
@@ -131,6 +131,8 @@ namespace WM.Net
 
         /// <summary>
         /// Starts initializing the connection to the Server.
+        /// 
+        /// \pre The Client must be in state 'Disconnected' for this method to succeed.
         /// </summary>
         public void Connect()
         {
@@ -138,17 +140,17 @@ namespace WM.Net
 
             lock (stateLock)
             {
-                switch (state)
+                switch (State)
                 {
                     case ClientState.Disconnected:
-                        state = ClientState.Connecting;
+                        State = ClientState.Connecting;
                         break;
                     case ClientState.Connecting:
-                        throw new Exception("Connect() can not be called on Client while it is Connnecting.");
+                        throw new Exception("Connect() can not be called on Client while it is Connecting.");
                     case ClientState.Connected:
-                        throw new Exception("Connect() can not be called on CLient while it is Connected.");
+                        throw new Exception("Connect() can not be called on Client while it is Connected.");
                     case ClientState.Disconnecting:
-                        throw new Exception("Connect() can not be called on CLient while it is Disconnecting.");
+                        throw new Exception("Connect() can not be called on Client while it is Disconnecting.");
                 }
             }
 
@@ -168,10 +170,10 @@ namespace WM.Net
 
             lock (stateLock)
             {
-                switch (state)
+                switch (State)
                 {
                     case ClientState.Connected:
-                        state = ClientState.Disconnecting;
+                        State = ClientState.Disconnecting;
                         break;
                     case ClientState.Disconnecting:
                         throw new Exception("Disconnect() can not be called on Client while it is Disconnecting.");
@@ -188,7 +190,14 @@ namespace WM.Net
                 // Try to Disconnect cleanly 10 times.
                 for (int retryDisconnect = 0; retryDisconnect < 3; ++retryDisconnect)
                 {
-                    SendCommand(new DisconnectClientCommand(ID));
+                    try
+                    {
+                        SendCommand(new DisconnectClientCommand(ID));
+                    }
+                    catch (Exception /*e*/)
+                    {
+                        break;
+                    }
 
                     for (int check = 0; check < 10; ++check)
                     {
@@ -203,7 +212,7 @@ namespace WM.Net
                     WM.Logger.Debug("Client.Disconnect(): Retry " + (retryDisconnect + 1) + " failed.");
                 }
 
-                // No response from server ?!  Shut down anyway...
+                // Not able to send DisconnectCommand to server, or no response from server ?!  Shut down anyway...
                 WM.Logger.Warning("Client.Disconnect(): Shutting down without DisconnectAcknoledged from server...");
                 Shutdown();
             }
@@ -327,7 +336,7 @@ namespace WM.Net
         /// </summary>
         private void ThreadFunction()
         {
-            Debug.Assert(state == ClientState.Connecting);
+            Debug.Assert(State == ClientState.Connecting);
 
             if (ServerInfo == null)
             {
@@ -393,7 +402,7 @@ namespace WM.Net
 
                         OnConnect();
 
-                        state = ClientState.Connected;
+                        State = ClientState.Connected;
                         break; // We are Connected: stop connecting...
                     }                    
                 }

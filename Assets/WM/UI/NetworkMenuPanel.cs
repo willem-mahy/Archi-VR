@@ -55,7 +55,7 @@ namespace WM.UI
                     break;
             }
 
-            IPValueText.text = NetUtil.GetLocalIPAddress();
+            IPValueText.text = NetUtil.GetLocalIPAddress().ToString();
 
             synchronizingUI = false;
 

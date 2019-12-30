@@ -54,7 +54,7 @@ namespace WM.Command
                         // Init network client
                         // Let client connect to own server. (TODO: connect directly, ie without network middle layer.)
                         application.Client.ServerInfo = new ServerInfo(
-                            NetUtil.GetLocalIPAddress(),
+                            NetUtil.GetLocalIPAddress().ToString(),
                             application.Server.TcpPort,
                             application.Server.UdpPort);
 
