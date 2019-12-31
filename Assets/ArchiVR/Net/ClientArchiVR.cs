@@ -8,6 +8,9 @@ using WM.Net;
 
 namespace ArchiVR.Net
 {
+    /// <summary>
+    /// Archi-VR application specific Client implementation.
+    /// </summary>
     public class ClientArchiVR : Client
     {
         #region Variables
@@ -16,9 +19,11 @@ namespace ArchiVR.Net
 
         #endregion
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public ClientArchiVR()
         {
-            UdpBroadcastMessage = Constants.BroadcastMessage;
         }
 
         /// <summary>

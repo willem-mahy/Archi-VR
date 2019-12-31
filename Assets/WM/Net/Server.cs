@@ -308,22 +308,13 @@ namespace WM.Net
         #region UDP Broadcast
 
         /// <summary>
-        /// The broadcast message to be broadcasted by the server.
-        /// To be implemented by concrete server types.
-        /// </summary>
-        public string UdpBroadcastMessage
-        {
-            get;
-            protected set;
-        }
-
-        /// <summary>
-        /// The UDP port to which the server, while running, continuously broadcasts the UdpBroadcastMessage to.
+        /// The UDP port to which the server, while running, continuously broadcasts its own ServerInfo to.
         /// Clients should make an UDP endpoint on this port and listen to it to discover running servers.
         /// 
         /// Note:
-        /// This UDP port is reused by multiple Clients in unit testing.
-        /// This is not an issue, because:
+        /// This is the only hard-coded port in the WM.Net codebase.
+        /// It is reused by multiple Clients in unit testing.
+        /// Although these Clients run on the same host, this is not an issue, because:
         ///     A) Clients are only using this port while discovering server during their Connect(), and 
         ///     B) and clients always connect sequentially (never concurrently) in unit testing.
         /// </summary>
@@ -604,21 +595,21 @@ namespace WM.Net
                 var broadcastUdpClient = new UdpClient(0);
                 var broadcastUdpRemoteEndPoint = new IPEndPoint(IPAddress.Broadcast, Server.UdpBroadcastRemotePort);
 
-                var UdpBroadcastMessage = WM.Net.Message.EncodeObjectAsXml(new ServerInfo(((IPEndPoint)this.tcpListener.LocalEndpoint).Address.ToString() ,TcpPort, UdpPort));
+                var broadcastMessage = WM.Net.Message.EncodeObjectAsXml(new ServerInfo(((IPEndPoint)this.tcpListener.LocalEndpoint).Address.ToString() ,TcpPort, UdpPort));
 
                 WM.Logger.Debug(
                     string.Format("Server: Starting to UDP broadcast Message '{0}' from port {1} to port {2}",
-                    UdpBroadcastMessage,
+                    broadcastMessage,
                     broadcastUdpRemoteEndPoint.Port,
                     UdpBroadcastRemotePort));
 
                 // Encode data to UTF8-encoding.
-                byte[] udpBroadcastMessageData = Encoding.UTF8.GetBytes(UdpBroadcastMessage);
+                byte[] broadcastMessageData = Encoding.UTF8.GetBytes(broadcastMessage);
 
                 while (State != ServerState.ShuttingDown)
                 {   
                         // Send udpBroadcastMessageData to any potential clients.
-                        broadcastUdpClient.Send(udpBroadcastMessageData, udpBroadcastMessageData.Length, broadcastUdpRemoteEndPoint);
+                        broadcastUdpClient.Send(broadcastMessageData, broadcastMessageData.Length, broadcastUdpRemoteEndPoint);
 
                         Thread.Sleep(500);
                 }

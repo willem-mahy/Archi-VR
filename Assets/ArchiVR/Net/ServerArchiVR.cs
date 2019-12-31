@@ -5,15 +5,9 @@ using WM.Net;
 
 namespace ArchiVR.Net
 {
-    public class Constants
-    {
-        /// <summary>
-        /// The message used for discovery of running ArchiVRServer instances by ClientArchiVR instances.
-        /// Broadcast by ArchiVRServer, and listenend for by ArchiVRClient.
-        /// </summary>
-        public static readonly string BroadcastMessage = "Hello from ArchiVR server";
-    }
-
+    /// <summary>
+    /// Archi-VR application specific Server implementation.
+    /// </summary>
     public class ServerArchiVR : Server
     {
         #region Variables        
@@ -22,9 +16,11 @@ namespace ArchiVR.Net
 
         #endregion
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public ServerArchiVR()
         {
-            UdpBroadcastMessage = Constants.BroadcastMessage;
         }
 
         /// <summary>

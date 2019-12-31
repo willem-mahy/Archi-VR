@@ -81,16 +81,6 @@ namespace WM.Net
 
         #region UDP
 
-        /// <summary>
-        /// The broadcast message to be broadcasted by the server.
-        /// To be implemented by concrete server types.
-        /// </summary>
-        public string UdpBroadcastMessage
-        {
-            get;
-            protected set;
-        }
-
         private UdpClient udpClient;
 
         private UDPSend udpSend;
@@ -294,7 +284,7 @@ namespace WM.Net
         {
             Status = "Listening for servers";
 
-            WM.Logger.Debug(string.Format("Client: Listening to UDP broadcast Message '{0}' on port {1}", UdpBroadcastMessage, Server.UdpBroadcastRemotePort));
+            WM.Logger.Debug(string.Format("Client: Listening on UDP port {0} for broadcast messages from Servers.", Server.UdpBroadcastRemotePort));
 
             var discoveryUdpClient = new UdpClient(Server.UdpBroadcastRemotePort);
 
