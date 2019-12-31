@@ -49,8 +49,14 @@ namespace WM.Net
             get;
         } = Guid.NewGuid();
 
+        /// <summary>
+        /// The ServerInfo describing the designated server.
+        /// </summary>
         public ServerInfo ServerInfo = null; // TODO? new ServerInfo(127.0.0.1, Server.DefaultTcpPort, Server.DefaultUdpPort);
 
+        /// <summary>
+        /// The timeout of a connection attempt, in millis.
+        /// </summary>
         public int ConnectTimeout = 100;
 
         #region TCP
@@ -100,6 +106,9 @@ namespace WM.Net
 
         #region Internal state
 
+        /// <summary>
+        /// The possible Client states.
+        /// </summary>
         public enum ClientState
         {
             Disconnected,
@@ -108,7 +117,14 @@ namespace WM.Net
             Disconnecting,
         }
 
+        /// <summary>
+        /// Locking object for the Client state.
+        /// </summary>
         private System.Object stateLock = new System.Object();
+
+        /// <summary>
+        /// The Client state.
+        /// </summary>
         public ClientState State
         {
             get;
