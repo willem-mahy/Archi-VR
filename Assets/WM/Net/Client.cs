@@ -61,30 +61,51 @@ namespace WM.Net
 
         #region TCP
 
+        /// <summary>
+        /// The TCP port.
+        /// </summary>
         public int TcpPort
         {
             get { return ((IPEndPoint)tcpClient.Client.LocalEndPoint).Port; }
         }
 
-        public int UdpPort
-        {
-            get { return ((IPEndPoint)udpClient.Client.LocalEndPoint).Port; }
-        }
-
-        // The TCP client
+        /// <summary>
+        /// The TCP client.
+        /// </summary>
         private TcpClient tcpClient;
 
-        // The network stream to the server over TCP.
+        /// <summary>
+        /// The network stream to the server over TCP.
+        /// </summary>
         private NetworkStream tcpServerStream;
+
+        string dataFromServer = "";
 
         #endregion
 
         #region UDP
 
+        /// <summary>
+        /// The UDP port.
+        /// </summary>
+        public int UdpPort
+        {
+            get { return ((IPEndPoint)udpClient.Client.LocalEndPoint).Port; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         private UdpClient udpClient;
 
+        /// <summary>
+        /// 
+        /// </summary>
         private UDPSend udpSend;
 
+        /// <summary>
+        /// 
+        /// </summary>
         private UDPReceive udpReceive;
 
         #endregion
@@ -124,7 +145,34 @@ namespace WM.Net
         /// <summary>
         /// 
         /// </summary>
-        public string Status = "Not initialized";
+        public string Status
+        {
+            get
+            {
+                switch (State)
+                {
+                    case ClientState.Disconnected:
+                        return "Disconnected";
+                    case ClientState.Connecting:
+                        return "Connecting";
+                    case ClientState.Connected:
+                        return "Connected";
+                    case ClientState.Disconnecting:
+                        return "Disconnecting";
+                    default:
+                        return "Unknown client state '" + State.ToString() + "'";
+                }
+            }
+        }
+
+        /// <summary>
+        /// The current action.
+        /// </summary>
+        public string Action
+        {
+            get;
+            private set;
+        } = "";
 
         #endregion
 
@@ -184,36 +232,9 @@ namespace WM.Net
 
                 WM.Logger.Debug("Client disconnecting...");
 
-                OnDisconnect();
-
-                // Try to Disconnect cleanly 10 times.
-                for (int retryDisconnect = 0; retryDisconnect < 3; ++retryDisconnect)
-                {
-                    try
-                    {
-                        SendCommand(new DisconnectClientCommand(ID));
-                    }
-                    catch (Exception /*e*/)
-                    {
-                        break;
-                    }
-
-                    for (int check = 0; check < 10; ++check)
-                    {
-                        if (Status == "DisconnectAcknoledged")
-                        {
-                            WM.Logger.Debug("Client.Disconnect(): Shutting down after DisconnectAcknoledged from Server.");
-                            Shutdown();
-                            return;
-                        }
-                    }
-
-                    WM.Logger.Debug("Client.Disconnect(): Retry " + (retryDisconnect + 1) + " failed.");
-                }
-
-                // Not able to send DisconnectCommand to server, or no response from server ?!  Shut down anyway...
-                WM.Logger.Warning("Client.Disconnect(): Shutting down without DisconnectAcknoledged from server...");
                 Shutdown();
+
+                OnDisconnect();
             }
         }
 
@@ -234,6 +255,7 @@ namespace WM.Net
         {
             WM.Logger.Debug("Client.Shutdown()");
 
+            // First make sure the receiving thread is stopped.
             if (thread != null)
             {
                 thread.Join();
@@ -241,6 +263,9 @@ namespace WM.Net
                 thread = null;
             }
 
+            InformServerAboutDisconnection();
+
+            // Stop the worker thread receiving UDP messages.
             if (udpReceive != null)
             {
                 udpReceive.Shutdown();
@@ -248,6 +273,7 @@ namespace WM.Net
                 udpReceive = null;
             }
 
+            // Close the UDP connection to the Server.
             if (udpClient != null)
             {
                 udpClient.Close();
@@ -255,6 +281,7 @@ namespace WM.Net
                 udpClient = null;
             }
 
+            // Close the TCP connection to the Server.
             if (tcpServerStream != null)
             {
                 lock (tcpServerStream)
@@ -274,6 +301,44 @@ namespace WM.Net
         }
 
         /// <summary>
+        /// Tries (and retries for a limited number of times) to notify the server and get a DisconnectAcknoledged back.
+        /// </summary>
+        private void InformServerAboutDisconnection(
+            int pollClientDisconnectAcknoledgeMessageNumRetries = 3,
+            int pollClientDisconnectAcknoledgeMessageInterval = 200)
+        {
+            try
+            {
+                SendCommand(new DisconnectClientCommand(ID));
+            }
+            catch (Exception /*e*/)
+            {
+                WM.Logger.Debug("Client[ID].InformServerAboutDisconnection(): Sending DisconnectClientCommand failed.");
+                return;
+            }
+
+            // Then wait for the server to respond with a ClientDisconnectAcknoledgeMessage.
+            // From then on we can safely tear down all connections (UDP, TCP) to the Server, because it will not longer be using them.
+            for (int i = 0; i < pollClientDisconnectAcknoledgeMessageNumRetries; ++i)
+            {
+                var messages = ReceiveTcpMessagesFromServer();
+
+                foreach (var messageXML in messages)
+                {
+                    var obj = Message.GetObjectFromMessageXML(messageXML);
+
+                    if (obj is ClientDisconnectAcknoledgeMessage)
+                    {
+                        WM.Logger.Debug("Client[ID].InformServerAboutDisconnection(): DisconnectAcknoledged from Server received after " + i + " polls.");
+                        return;
+                    }
+                }
+
+                Thread.Sleep(pollClientDisconnectAcknoledgeMessageInterval);
+            }
+        }
+
+        /// <summary>
         /// Synchronously tries to discover any Server to connect to.
         /// 1) Starts listening at port 'Server.UdpBroadcastRemotePort' for discovery messages from a Server.
         /// 2) Tries to parse any incoming data on the port as a 'ServerInfo' message.
@@ -282,7 +347,7 @@ namespace WM.Net
         /// <returns>The first received ServerInfo.</returns>
         private ServerInfo GetServerInfoFromUdpBroadcast()
         {
-            Status = "Listening for servers";
+            //Action = "Listening for servers";
 
             WM.Logger.Debug(string.Format("Client: Listening on UDP port {0} for broadcast messages from Servers.", Server.UdpBroadcastRemotePort));
 
@@ -330,6 +395,85 @@ namespace WM.Net
         }
 
         /// <summary>
+        /// First receive all available critical messages (TCP) from the Server.
+        /// </summary>
+        /// <returns></returns>
+        private List<String> ReceiveTcpMessagesFromServer()
+        {
+            var receivedMessages = new List<String>();
+
+            // First receive all available data from the TCP connection into the data buffer.
+            if (tcpServerStream != null)
+            {
+                lock (tcpServerStream)
+                {
+                    while (tcpServerStream.DataAvailable)
+                    {
+                        var bytesFromServer = new byte[tcpClient.ReceiveBufferSize];
+                        var numBytesRead = tcpServerStream.Read(bytesFromServer, 0, (int)tcpClient.ReceiveBufferSize);
+
+                        dataFromServer += Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);
+                    }
+                }
+            }
+
+            // Then extract all messages from data buffer.
+            if (dataFromServer.Length == 0)
+            {
+                return receivedMessages; // There is no data to extract messages from.
+            }
+
+            int EndTagLength = Message.XmlEndTag.Length;
+
+            while (true)
+            {
+                // Get the position of the first 'Message Begin' tag in the receive data buffer.
+                int firstMessageBegin = dataFromServer.IndexOf(Message.XmlBeginTag);
+
+                if (firstMessageBegin < 0)
+                {
+                    // Although no 'Message Begin' tag was found, do NOT clear the receive data buffer at this point:
+                    // The receive data buffer might be ending on a partial 'Message Begin' tag!
+                    return receivedMessages;
+                }
+
+                // Remove all data in front of first 'Message Begin' tag in the receive data buffer
+                // (since it's unparseable, and thus useless).
+                if (firstMessageBegin > 0)
+                {
+                    dataFromServer = dataFromServer.Substring(firstMessageBegin);
+
+                    // Should this even happen in a normal use case? -> Let's log it to find out...
+                    WM.Logger.Warning("Client[" + ID + "].ReceiveTcpMessagesFromServer: Removing useless data buffer begin '" + dataFromServer.Substring(0, firstMessageBegin) + "'");
+                }
+
+                // Get the position of the first 'Message End' tag in the data buffer.
+                int firstMessageEnd = dataFromServer.IndexOf(Message.XmlEndTag);
+
+                if (firstMessageEnd < 0)
+                {
+                    // Although no 'Message Begin' tag was found, do NOT clear the receive data buffer at this point:
+                    // The data buffer is probably containing a non-finished message, for which the rest is under way!
+                    return receivedMessages;
+                }
+
+                // We have a complete Message in the front of the receive data buffer now!
+                Debug.Assert(firstMessageBegin < firstMessageEnd);
+
+                // Extract the XML-encoded message string from the data buffer, and add it to the output messages list.
+                int messageLength = firstMessageEnd + EndTagLength;
+                string messageXML = dataFromServer.Substring(0, messageLength);
+                receivedMessages.Add(messageXML);
+
+                // Clear all up to the last extracted message from the receive data buffer.
+                int c = dataFromServer.Length;
+                var remainder = dataFromServer.Substring(firstMessageEnd + EndTagLength);
+                dataFromServer = remainder;
+            }
+        }
+
+
+        /// <summary>
         /// Thread function executed by the client's worker thread.
         /// </summary>
         private void ThreadFunction()
@@ -347,8 +491,6 @@ namespace WM.Net
                 {
                     if (TryConnect())
                     {
-                        Status = "Connected to " + ServerIP;
-                        
                         // Get server stream from TCP client.
                         tcpServerStream = tcpClient.GetStream();
 
@@ -407,60 +549,15 @@ namespace WM.Net
             }
 
             /// ... and start communicating with server...
+            dataFromServer = "";
+
             while (State != ClientState.Disconnecting) // ... until shutdown has been initiated.
             {
-                string dataFromServer = "";
+                var messagesFromServer = ReceiveTcpMessagesFromServer();
 
-                if (tcpServerStream != null)
+                foreach (var messageXML in messagesFromServer)
                 {
-                    lock (tcpServerStream)
-                    {
-                        while (tcpServerStream.DataAvailable)
-                        {
-                            // Receive data from server.
-                            var bytesFromServer = new byte[tcpClient.ReceiveBufferSize];
-                            var numBytesRead = tcpServerStream.Read(bytesFromServer, 0, (int)tcpClient.ReceiveBufferSize);
-
-                            dataFromServer += Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);
-                        }
-                    }
-                }
-
-                if (dataFromServer.Length > 0)
-                {
-                    //WM.Logger.Debug("Client: Data from server: " + dataFromServer);
-                    int EndTagLength = Message.XmlEndTag.Length;
-
-                    while (true)
-                    {
-                        int firstMessageBegin = dataFromServer.IndexOf(Message.XmlBeginTag);
-
-                        if (firstMessageBegin < 0)
-                        {
-                            break;
-                        }
-
-                        // Remove all data in front of first message.
-                        dataFromServer = dataFromServer.Substring(firstMessageBegin);
-
-                        int firstMessageEnd = dataFromServer.IndexOf(Message.XmlEndTag);
-
-                        if (firstMessageEnd < 0)
-                        {
-                            break;
-                        }
-
-                        // Get the string with the XML-encoded message in it.
-                        int messageLength = firstMessageEnd + EndTagLength;
-                        string messageXML = dataFromServer.Substring(0, messageLength);
-
-                        // Clear all up to the last processed message from the receive buffer.
-                        int c = dataFromServer.Length;
-                        var remainder = dataFromServer.Substring(firstMessageEnd + EndTagLength);
-                        dataFromServer = remainder;
-
-                        ProcessMessage(messageXML);
-                    }
+                    ProcessMessage(messageXML);
                 }
             }
         }
@@ -508,7 +605,7 @@ namespace WM.Net
             String tag = "Server(IP:" + serverInfo.IP + ", TCP:" + serverInfo.TcpPort + ", UDP:" + serverInfo.UdpPort + "), timeout:" + ConnectTimeout + "ms";
             WM.Logger.Debug("Client.TryConnectToServer(): " + tag);
 
-            Status = "Trying to connect to " + tag;
+            Action = "Trying to connect to " + tag;
 
             try
             {
@@ -534,7 +631,6 @@ namespace WM.Net
             catch (Exception e)
             {
                 var txt = "Client.TryConnectToServer(): Exception: " + e.Message + ": " + e.InnerException;
-                Status = txt;
                 WM.Logger.Error(txt);
                 return false;
             }
@@ -577,13 +673,13 @@ namespace WM.Net
             var obj = Message.GetObjectFromMessageXML(messageXML);
 
             // If it is a generic message, process it here.
-            if (obj is ClientDisconnectAcknoledgeMessage)
-            {
-                Status = "DisconnectAcknoledged";
-                return;
-            }
+            
+            //if (obj is XXX)
+            //{
+            //    ...
+            //}
 
-            // It is a not a generic message, delegate processing to application-specific logic.
+            // It is an application-specific logic message, so delegate to the application-specific Client logic.
             DoProcessMessage(obj);
         }
 

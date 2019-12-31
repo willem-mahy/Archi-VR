@@ -407,7 +407,7 @@ namespace WM.Net
                     case ServerState.ShuttingDown:
                         return "Shutting down";
                     default:
-                        return "Unknown state " + State.ToString();
+                        return "Unknown server state '" + State.ToString() + "'";
                 }
             }
         }
