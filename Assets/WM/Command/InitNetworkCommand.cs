@@ -7,17 +7,26 @@ using WM.Net;
 namespace WM.Command
 {
     [Serializable]
-    [XmlRoot("InitNetworkCommand")]
     public class InitNetworkCommand : ICommand
     {
-        [XmlElement("NetworkMode")]
+        /// <summary>
+        /// The network mode to initialize the application into.
+        /// </summary>
         public NetworkMode NetworkMode { get; set; }
 
+        /// <summary>
+        /// Parametrized constructor.
+        /// </summary>
+        /// <param name="networkMode">The network mode to initialize the application into.</param>
         public InitNetworkCommand(NetworkMode networkMode)
         {
             NetworkMode = networkMode;
         }
 
+        /// <summary>
+        /// <see cref="ICommand.Execute(UnityApplication)"/> implementation.
+        /// </summary>
+        /// <param name="application"></param>
         public void Execute(UnityApplication application)
         {
             WM.Logger.Debug("InitNetworkCommand.Execute(): NetworkMode = " + NetworkMode);
@@ -27,7 +36,7 @@ namespace WM.Command
                 return; // NOOP: already running in requested network mode...
             }
 
-            // Teardown from previous network mode.
+            // Teardown from current network mode.
             switch (application.NetworkMode)
             {
                 case NetworkMode.Client:
