@@ -136,11 +136,6 @@ namespace WM.Net
         /// </summary>
         public string Status = "Not initialized";
 
-        /// <summary>
-        /// Whether we are shutting down(true) or not(false).
-        /// </summary>
-        private bool shutDown = false;
-
         #endregion
 
         #endregion
@@ -169,8 +164,6 @@ namespace WM.Net
                         throw new Exception("Connect() can not be called on Client while it is Disconnecting.");
                 }
             }
-
-            shutDown = false;
 
             thread = new Thread(new ThreadStart(ThreadFunction));
             thread.IsBackground = true;
@@ -249,8 +242,7 @@ namespace WM.Net
         /// </summary>
         private void Shutdown()
         {
-            WM.Logger.Debug("Client.Shutdown(): Start");
-            shutDown = true;
+            WM.Logger.Debug("Client.Shutdown()");
 
             if (thread != null)
             {
@@ -310,7 +302,7 @@ namespace WM.Net
             // In this case we are interested in data from any IP and any port.
             var discoveryUdpRemoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
-            while (!shutDown)
+            while (State != ClientState.Disconnecting)
             {
                 try
                 {
@@ -359,7 +351,7 @@ namespace WM.Net
                 ServerInfo = GetServerInfoFromUdpBroadcast();
             }
 
-            while (!shutDown)
+            while (State != ClientState.Disconnecting)
             {
                 lock (stateLock)
                 {
@@ -425,7 +417,7 @@ namespace WM.Net
             }
 
             /// ... and start communicating with server...
-            while (!shutDown) // ... until shutdown has been initiated.
+            while (State != ClientState.Disconnecting) // ... until shutdown has been initiated.
             {
                 string dataFromServer = "";
 
