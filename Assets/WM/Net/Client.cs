@@ -493,12 +493,18 @@ namespace WM.Net
 
             InformServerAboutDisconnection();
 
-            // Stop the worker thread receiving UDP messages.
+            // Dispose of the UDP receive component.
             if (udpReceive != null)
             {
                 udpReceive.Shutdown();
 
                 udpReceive = null;
+            }
+
+            // Dispose of the UDP send component.
+            if (udpSend != null)
+            {
+                udpSend = null;
             }
 
             // Close the UDP connection to the Server.
