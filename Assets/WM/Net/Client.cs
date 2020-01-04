@@ -271,6 +271,8 @@ namespace WM.Net
                 Shutdown();
 
                 OnDisconnect();
+
+                State = ClientState.Disconnected;
             }
         }
 

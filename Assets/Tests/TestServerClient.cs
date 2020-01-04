@@ -585,40 +585,40 @@ namespace Tests
             // Shutdown Network (Without disconnecting Clients first)
             StopServer();
 
-            //// Re-init network (Server + 2 Clients)
+            // Re-init network (Server + 2 Clients)
 
-            //#region Start Server.
+            #region Restart Server.
 
-            //LogHeader("Start Server");
+            LogHeader("Restart Server");
 
-            //// WHEN the ServerApplication is initialized to 'Server' network mode...
-            //{
-            //    Assert.AreEqual(NetworkMode.Standalone, applicationServer.NetworkMode);
-            //    applicationServer.QueueCommand(new InitNetworkCommand(NetworkMode.Server));
-            //    Assert.AreEqual(NetworkMode.Standalone, applicationServer.NetworkMode);
+            // WHEN the ServerApplication is initialized to 'Server' network mode...
+            {
+                Assert.AreEqual(NetworkMode.Standalone, applicationServer.NetworkMode);
+                applicationServer.QueueCommand(new InitNetworkCommand(NetworkMode.Server));
+                Assert.AreEqual(NetworkMode.Standalone, applicationServer.NetworkMode);
 
-            //    UpdateApplications(); // Make queued commands execute.
-            //}
+                UpdateApplications(); // Make queued commands execute.
+            }
 
-            //// ... THEN ...
-            //{
-            //    // ... its network mode is 'Server'
-            //    Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);
+            // ... THEN ...
+            {
+                // ... its network mode is 'Server'
+                Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);
 
-            //    // ... its Server is Running
-            //    // TODO: Assert.AreEqual(ServerState.Running, applicationServer.Server.State);
+                // ... its Server is Running
+                // TODO: Assert.AreEqual(ServerState.Running, applicationServer.Server.State);
 
-            //    // ... its Client is automatically connected to that server.
-            //    Assert.AreEqual(1, applicationServer.Server.NumClients);
-            //    Assert.IsTrue(applicationServer.Client.Connected);
+                // ... its Client is automatically connected to that server.
+                Assert.AreEqual(1, applicationServer.Server.NumClients);
+                Assert.IsTrue(applicationServer.Client.Connected);
 
-            //    // Server application is connected to the Server and introduced its own Player.
-            //    Assert.AreEqual(1, applicationServer.Players.Count);
-            //    Assert.AreEqual(0, applicationClient1.Players.Count);
-            //    Assert.AreEqual(0, applicationClient2.Players.Count);
-            //}
+                // Server application is connected to the Server and introduced its own Player.
+                Assert.AreEqual(1, applicationServer.Players.Count);
+                Assert.AreEqual(0, applicationClient1.Players.Count);
+                Assert.AreEqual(0, applicationClient2.Players.Count);
+            }
 
-            //#endregion
+            #endregion Restart Server.
 
             //#region Connect Client1
 
@@ -737,27 +737,27 @@ namespace Tests
 
             //#endregion
 
-            //#region Stop Server
+            #region Stop Server
 
-            //LogHeader("Stop Server");
+            LogHeader("Stop Server");
 
-            //// Make server application initialize network mode from 'Server' to 'Standalone'.
-            //Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);
-            //applicationServer.QueueCommand(new InitNetworkCommand(NetworkMode.Standalone));
-            //Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);
+            // Make server application initialize network mode from 'Server' to 'Standalone'.
+            Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);
+            applicationServer.QueueCommand(new InitNetworkCommand(NetworkMode.Standalone));
+            Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);
 
-            //UpdateApplications(); // Make queued commands execute.
+            UpdateApplications(); // Make queued commands execute.
 
-            //// Server should be in 'Standalone' network mode.
-            //Assert.AreEqual(NetworkMode.Standalone, applicationServer.NetworkMode);
+            // Server should be in 'Standalone' network mode.
+            Assert.AreEqual(NetworkMode.Standalone, applicationServer.NetworkMode);
 
-            //// Server's local running Client should be disconnected.
-            //Assert.IsFalse(applicationServer.Client.Connected);
+            // Server's local running Client should be disconnected.
+            Assert.IsFalse(applicationServer.Client.Connected);
 
-            //// Server should have no Client connected.
-            //Assert.AreEqual(0, applicationServer.Server.NumClients);
+            // Server should have no Client connected.
+            Assert.AreEqual(0, applicationServer.Server.NumClients);
 
-            //#endregion
+            #endregion
         }
     }
 }
