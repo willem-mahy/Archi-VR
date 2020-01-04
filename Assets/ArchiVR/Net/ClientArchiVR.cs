@@ -41,6 +41,9 @@ namespace ArchiVR.Net
         /// </summary>
         override protected void OnDisconnect()
         {
+            var callLogTag = LogID + ".OnDisconnect()";
+            WM.Logger.Debug(callLogTag);
+
             lock (application.Players)
             {
                 if (application.Players.Count > 0)
@@ -48,10 +51,8 @@ namespace ArchiVR.Net
                     var remotePlayerIDs = new Guid[application.Players.Keys.Count];
                     application.Players.Keys.CopyTo(remotePlayerIDs, 0);
 
-                    WM.Logger.Debug("Client.Disconnect() Getting rid of remoteUsers:");
                     foreach (var playerID in remotePlayerIDs)
                     {
-                        WM.Logger.Debug(" - Bye, remote player '" + playerID + "'");
                         application.RemovePlayer(playerID);
                     }
                 }

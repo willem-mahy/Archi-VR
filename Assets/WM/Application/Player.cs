@@ -21,6 +21,15 @@ namespace WM.Application
         } = Guid.NewGuid();
 
         /// <summary>
+        /// Short version of the player ID.
+        /// To be used for debug logging purposes only - the short ID is NOT guaranteed to be unique!
+        /// </summary>
+        public String LogID
+        {
+            get { return WM.Net.NetUtil.ShortID(ID); }
+        }
+
+        /// <summary>
         /// The ID of the Client that is hosting this player.
         /// </summary>
         public Guid ClientID

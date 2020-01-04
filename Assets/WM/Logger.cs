@@ -6,12 +6,17 @@ namespace WM
     {
         public static List<string> s_log = new List<string>();
 
+        public static bool Enabled = false;
+
         /// <summary>
         /// Logs a debug message.
         /// </summary>
         /// <param name="text"></param>
         public static void Debug(string text)
         {
+            if (!Enabled)
+                return;
+
             s_log.Add(text);
 
             UnityEngine.Debug.Log(text);
@@ -23,6 +28,9 @@ namespace WM
         /// <param name="text"></param>
         public static void Warning(string text)
         {
+            if (!Enabled)
+                return;
+
             s_log.Add("Error: " +text);
 
             UnityEngine.Debug.LogWarning(text);
@@ -34,6 +42,9 @@ namespace WM
         /// <param name="text"></param>
         public static void Error(string text)
         {
+            if (!Enabled)
+                return;
+
             s_log.Add("Warning: " + text);
 
             UnityEngine.Debug.LogError(text);

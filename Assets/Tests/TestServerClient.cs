@@ -2,6 +2,7 @@
 using ArchiVR.Net;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using WM.Command;
@@ -11,8 +12,8 @@ namespace Tests
 {
     public class TestServerClient
     {
-        // TODO? Instead of separate var for each application, provide a single
-        // List<ApplicationArchiVR> applications = new List<ApplicationArchiVR>();
+        // List of applications.
+        List<ApplicationArchiVR> applications = new List<ApplicationArchiVR>();
 
         // Application instance that will act as server.
         ApplicationArchiVR applicationServer;
@@ -58,6 +59,8 @@ namespace Tests
         /// <returns></returns>
         private ApplicationArchiVR CreateApplication(string name)
         {
+            LogHeader("Create application '" + name + "'");
+
             // Create an application instance that will act as server.
             var applicationGO = new GameObject();
             applicationGO.name = name;
@@ -102,9 +105,9 @@ namespace Tests
         {
             for (int i = 0; i < count; ++i)
             {
-                applicationClient1.Update();
-                applicationClient2.Update();
-                applicationServer.Update();
+                foreach (var application in applications) 
+                    application.Update();
+
                 Thread.Sleep(sleepMillis);
             }
         }
@@ -153,16 +156,16 @@ namespace Tests
             #region Setup
 
             // Create an application instance that will act as server.
-            LogHeader("Initialize Server application");
             applicationServer = CreateApplication("Server");
+            applications.Add(applicationServer);
 
             // Create an application instance that will connect as client 1.
-            LogHeader("Initialize Remote Client 1 application");
             applicationClient1 = CreateApplication("Client1");
+            applications.Add(applicationClient1);
 
             // Create an application instance that will connect as client 2.
-            LogHeader("Initialize Remote Client 2 application");
             applicationClient2 = CreateApplication("Client2");
+            applications.Add(applicationClient2);
 
             #endregion
 
@@ -185,6 +188,8 @@ namespace Tests
             Assert.AreEqual("Client2 player", applicationClient2.Player.Name);
 
             #endregion Check initial application state
+
+            WM.Logger.Enabled = true;
 
             #region Start Server.
 
@@ -441,16 +446,16 @@ namespace Tests
             #region Setup
 
             // Create an application instance that will act as server.
-            LogHeader("Initialize Server application");
             applicationServer = CreateApplication("Server");
+            applications.Add(applicationServer);
 
             // Create an application instance that will connect as client 1.
-            LogHeader("Initialize Remote Client 1 application");
             applicationClient1 = CreateApplication("Client1");
+            applications.Add(applicationClient1);
 
             // Create an application instance that will connect as client 2.
-            LogHeader("Initialize Remote Client 2 application");
             applicationClient2 = CreateApplication("Client2");
+            applications.Add(applicationClient2);
 
             #endregion
 
@@ -473,6 +478,8 @@ namespace Tests
             Assert.AreEqual("Client2 player", applicationClient2.Player.Name);
 
             #endregion Check initial application state
+
+            WM.Logger.Enabled = true;
 
             // Init network (Server + 2 Clients)
 

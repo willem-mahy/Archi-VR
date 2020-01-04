@@ -1,9 +1,19 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 
 namespace WM.Net
 {
     public class NetUtil
     {
+        /// <summary>
+        /// Short version of a GUID.
+        /// To be used for debug logging purposes only - the short ID is NOT guaranteed to be unique!
+        /// </summary>
+        public static string ShortID(Guid guid)
+        {
+            return guid.ToString().Substring(0, 4);
+        }
+
         /// <summary>
         /// 
         /// </summary>

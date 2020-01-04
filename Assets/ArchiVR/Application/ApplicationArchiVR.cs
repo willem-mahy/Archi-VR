@@ -163,6 +163,9 @@ namespace ArchiVR.Application
             SetActiveProject(0);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected override void UpdateNetwork()
         {
             if (((m_centerEyeAnchor.transform.position - m_centerEyeAnchorPrev).magnitude > 0.01f) || (frame++ % 10 == 0))
@@ -180,6 +183,9 @@ namespace ArchiVR.Application
 
         #region Immersion mode
 
+        /// <summary>
+        /// 
+        /// </summary>
         public const int DefaultImmersionModeIndex = 0;
 
         /// <summary>
@@ -740,13 +746,18 @@ namespace ArchiVR.Application
 
         #region Model Layer management
 
-        //! Gets a handle to the list of model layers.
+        /// <summary>
+        /// Gets a handle to the list of model layers.
+        /// </summary>
+        /// <returns></returns>
         public IList<GameObject> GetModelLayers()
         {
             return m_modelLayers;
         }
 
-        //! Unhides all model layers.
+        /// <summary>
+        /// Unhides all model layers.
+        /// </summary>
         public void UnhideAllModelLayers()
         {
             foreach (var layer in m_modelLayers)
@@ -755,7 +766,9 @@ namespace ArchiVR.Application
             }
         }
 
-        //! Gathers all model layers for the currently active project.
+        /// <summary>
+        /// Gathers all model layers for the currently active project.
+        /// </summary>
         public void GatherActiveProjectLayers()
         {
             m_modelLayers.Clear();

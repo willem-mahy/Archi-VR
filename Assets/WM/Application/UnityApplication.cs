@@ -47,18 +47,19 @@ namespace WM.Application
 
         #endregion
 
-        public Player Player
-        {
-            get;
-        } = new Player();
-
-        //! The command queue.
+        /// <summary>
+        /// The command queue.
+        /// </summary>
         public List<ICommand> CommandQueue = new List<ICommand>();
 
-        // The application version.
+        /// <summary>
+        /// The application version.
+        /// </summary>
         public string Version = "";
 
-        // Whether to show the GFX quality level and FPS as HUD UI.
+        /// <summary>
+        /// Whether to show the GFX quality level and FPS as HUD UI.
+        /// </summary>
         private bool enableDebugGFX = false;
 
         #region Network
@@ -313,6 +314,14 @@ namespace WM.Application
         #endregion Variables
 
         #region Player Management
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Player Player
+        {
+            get;
+        } = new Player();
 
         #region Player Name
 
@@ -1068,7 +1077,7 @@ namespace WM.Application
         {
             Debug.Assert(!Players.ContainsKey(player.ID));
 
-            WM.Logger.Debug(string.Format(name + ":AddPlayer({0}, {1}, {2})", player.ClientID, player.ID, player.Name));
+            WM.Logger.Debug(string.Format(name + ":AddPlayer(Client:{0}, Player:{1}, Name:'{2}')", WM.Net.NetUtil.ShortID(player.ClientID), player.LogID, player.Name));
 
             lock (Players)
             {
@@ -1102,6 +1111,8 @@ namespace WM.Application
             lock (Players)
             {
                 Debug.Assert(Players.ContainsKey(playerID));
+                
+                WM.Logger.Debug(string.Format(name + ":RemovePlayer(Player:{0})", Net.NetUtil.ShortID(playerID)));
 
                 if (Players.ContainsKey(playerID))
                 {
@@ -1117,6 +1128,10 @@ namespace WM.Application
 
                     Players.Remove(playerID);
                 }
+                else
+                {
+                    WM.Logger.Debug(string.Format(name + ":RemovePlayer(Player:{0}): Player '{1}' not found!", Net.NetUtil.ShortID(playerID), playerID));
+                }
             }
         }
         
@@ -1127,6 +1142,9 @@ namespace WM.Application
         public void RemovePlayersByClient(
             Guid clientID)
         {
+            var callLogTag = name + ":RemovePlayersByClient(Client:" + WM.Net.NetUtil.ShortID(clientID) + ")";
+            WM.Logger.Debug(callLogTag);
+
             lock (Players)
             {
                 var playersToRemove = new List<Guid>();
@@ -1155,7 +1173,8 @@ namespace WM.Application
             Guid playerID,
             Guid avatarID)
         {
-            WM.Logger.Debug("SetPlayerName(" + playerID + ", " + avatarID + ")");
+            var callLogTag = name + ":SetPlayerAvatar(Player:" + WM.Net.NetUtil.ShortID(playerID) + ", " + WM.Net.NetUtil.ShortID(avatarID) + ")";
+            WM.Logger.Debug(callLogTag);
 
             // Targeted player should be known by the application!
             Debug.Assert(Players.ContainsKey(playerID));
@@ -1166,7 +1185,7 @@ namespace WM.Application
 
                 if (player == null)
                 {
-                    WM.Logger.Warning("SetPlayerAvatar(): Player '" + playerID + "' not found!");
+                    WM.Logger.Warning(callLogTag + ": Player '" + playerID + "' not found!");
                     return;
                 }
 
