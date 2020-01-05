@@ -37,18 +37,21 @@ namespace Tests
         /// <returns></returns>
         private static GameObject CreateMockAvatarPrefab(String name)
         {
-            GameObject avatarGO = new GameObject(name);
-
-            GameObject avatarHead = new GameObject();
-            avatarHead.transform.SetParent(avatarGO.transform);
-
-            GameObject avatarHandL = new GameObject();
-            avatarHandL.transform.SetParent(avatarGO.transform);
-
-            GameObject avatarHandR = new GameObject();
-            avatarHandR.transform.SetParent(avatarGO.transform);
+            var avatarGO = new GameObject(name);
 
             var avatar = avatarGO.AddComponent(typeof(WM.Net.Avatar)) as WM.Net.Avatar;
+            
+            avatar.Head = new GameObject("Avatar Head");
+            avatar.Head.transform.SetParent(avatarGO.transform);
+
+            avatar.Body = new GameObject("Avatar Body");
+            avatar.Body.transform.SetParent(avatarGO.transform);
+
+            avatar.LHand = new GameObject("Avatar Left Hand");
+            avatar.LHand.transform.SetParent(avatarGO.transform);
+
+            avatar.RHand = new GameObject("Avatar Right Hand");
+            avatar.RHand.transform.SetParent(avatarGO.transform);
 
             return avatarGO;
         }
@@ -83,6 +86,10 @@ namespace Tests
             client.application = application;
             application.Client = client;
 
+            application.m_centerEyeAnchor = new GameObject();
+            application.m_leftHandAnchor = new GameObject();
+            application.m_rightHandAnchor = new GameObject();
+            
             application.StartupNetworkMode = NetworkMode.Standalone;
 
             application.Start();
@@ -189,8 +196,6 @@ namespace Tests
 
             #endregion Check initial application state
 
-            WM.Logger.Enabled = true;
-
             #region Start Server.
 
             LogHeader("Start Server");
@@ -224,8 +229,10 @@ namespace Tests
 
             #endregion
 
+            WM.Logger.Enabled = true;
+
             #region Connect Client1
-            
+
             LogHeader("Connect Client1");
 
             // WHEN the Client1 application is initialized to 'Client' network mode...
@@ -378,9 +385,38 @@ namespace Tests
 
             #endregion
 
-            // TODO: Test UDP message sending:
-            // - Player movements
-            // - Player laserpointer state ???
+            //WM.Logger.Enabled = true;
+
+            /*
+            #region Test player state synchronisation
+
+            var playerServerHeadPosition = new Vector3(1, 2, 3);
+            var playerClient1HeadPosition = new Vector3(4, 5, 6);
+            var playerClient2HeadPosition = new Vector3(7, 8, 9);
+
+            // WHEN player state is updated
+            applicationServer.m_centerEyeAnchor.transform.position = playerServerHeadPosition;
+            applicationClient1.m_centerEyeAnchor.transform.position = playerClient1HeadPosition;
+            applicationClient2.m_centerEyeAnchor.transform.position = playerClient2HeadPosition;
+
+            UpdateApplications();
+
+            WM.Logger.Enabled = false;
+
+            foreach (var application in applications)
+            {
+                if (application != applicationServer)
+                    Assert.AreEqual(playerServerHeadPosition, application.Players[applicationServer.Player.ID].Avatar.Head.transform.position);
+
+                if (application != applicationClient1)
+                    Assert.AreEqual(playerClient1HeadPosition, application.Players[applicationClient1.Player.ID].Avatar.Head.transform.position);
+
+                if (application != applicationClient2) 
+                    Assert.AreEqual(playerClient2HeadPosition, application.Players[applicationClient2.Player.ID].Avatar.Head.transform.position);
+            }
+
+            #endregion Test player state synchronisation
+            */
 
             #region Disconnect Client2
 

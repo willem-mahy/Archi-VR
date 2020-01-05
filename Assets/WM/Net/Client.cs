@@ -313,8 +313,13 @@ namespace WM.Net
         /// <param name="obj">The object to be sent.</param>
         public void SendMessageUdp(object obj)
         {
+            var logCallTag = LogID + ".SendMessageUdp()";
+
+            WM.Logger.Debug(logCallTag);
+
             if (udpSend == null)
             {
+                WM.Logger.Warning(logCallTag + ": Not connected yet!");
                 return; // Not connected yet...
             }
 
@@ -324,7 +329,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                WM.Logger.Error("Client.SendMessageUdp(object obj): Exception:" + e.Message);
+                WM.Logger.Error(logCallTag + ": Exception:" + e.Message);
             }
         }
 
@@ -384,6 +389,10 @@ namespace WM.Net
         /// </summary>
         public List<object> GetReceivedMessagesUdp()
         {
+            var logCallTag = LogID + ".GetReceivedMessagesUdp()";
+
+            WM.Logger.Debug(logCallTag);
+
             if (udpReceive == null)
             {
                 return null; // Not connected yet...
@@ -397,7 +406,7 @@ namespace WM.Net
                 {
                     if (udpReceive.allReceivedUDPPackets.Keys.Count > 1)
                     {
-                        WM.Logger.Warning("Client.GetReceivedMessagesUdp(): More than one receive buffer!?!");
+                        WM.Logger.Warning(logCallTag + ": More than one receive buffer!?!");
                         udpReceive.allReceivedUDPPackets.Clear();
                         return null;
                     }
@@ -469,7 +478,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                WM.Logger.Error("Client.GetReceivedMessagesUdp(): Exception:" + e.Message);
+                WM.Logger.Error(logCallTag + ": Exception:" + e.Message);
                 return null;
             }
         }

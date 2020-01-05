@@ -114,6 +114,10 @@ namespace ArchiVR.Net
             GameObject avatarLHand,
             GameObject avatarRHand)
         {
+            var logCallTag = LogID + ".SendAvatarStateToUdp()";
+
+            WM.Logger.Debug(logCallTag);
+
             try
             {
                 var avatarState = new AvatarState();
@@ -132,7 +136,7 @@ namespace ArchiVR.Net
             }
             catch (Exception e)
             {
-                WM.Logger.Error("Client.SendAvatarStateToUdp(): Exception:" + e.Message);
+                WM.Logger.Error(logCallTag + ": Exception:" + e.Message);
             }
         }
 
@@ -141,6 +145,10 @@ namespace ArchiVR.Net
         /// </summary>
         public void UpdateAvatarStatesFromUdp()
         {
+            var logCallTag = LogID + ".UpdateAvatarStatesFromUdp()";
+
+            WM.Logger.Debug(logCallTag);
+
             try
             {
                 // Get all received UDP messages.
@@ -159,6 +167,8 @@ namespace ArchiVR.Net
                 {
                     var avatarState = (AvatarState)(obj);
 
+                    WM.Logger.Debug(logCallTag + ": Received avatar state for player[" + avatarState.PlayerID + "].");
+
                     receivedAvatarStates[avatarState.PlayerID] = avatarState;
                 }
 
@@ -176,14 +186,14 @@ namespace ArchiVR.Net
                         }
                         else
                         {
-                            WM.Logger.Warning("Client.UpdateAvatarStatesFromUDP(): Received avatar state for non-existing avatar! (" + clientID + ")");
+                            WM.Logger.Warning(logCallTag + ".UpdateAvatarStatesFromUDP(): Received avatar state for non-existing avatar! (" + clientID + ")");
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                 WM.Logger.Error("Client.UpdateAvatarStatesFromUDP(): Exception:" + e.Message);
+                 WM.Logger.Error(logCallTag + ": Exception:" + e.Message);
             }
         }
     }

@@ -134,7 +134,7 @@ namespace WM.Net
                     lastReceivedUDPPacket = text;
 
                     // ....
-                    var senderIP = remoteEndPoint.Address.ToString() + ":" + remoteEndPoint.Port;
+                    var senderIP = GetRemoteEndpointKey(remoteEndPoint.Address.ToString(), remoteEndPoint.Port);
 
                     lock (allReceivedUDPPackets)
                     {

@@ -352,12 +352,19 @@ namespace WM.Net
 
         #region UDP Message send/receive
 
-        // The UDP client.
+        /// <summary>
+        /// The UDP client.
+        /// </summary>
         UdpClient udpClient;
 
-        //! The UDP Receiver.
+        /// <summary>
+        /// The UDP Receiver.
+        /// </summary>
         UDPReceive udpReceive;
 
+        /// <summary>
+        /// The UDP Receive thread.
+        /// </summary>
         Thread receiveUdpThread;
 
         #endregion UDP Message send/receive
@@ -760,6 +767,8 @@ namespace WM.Net
                     WM.Logger.Error(callLogTag + ".ReceiveUdpFunction(): Exception: " + ex.ToString());
                 }
             }
+
+            WM.Logger.Debug(callLogTag + ": end");
         }
 
         /// <summary>
@@ -1039,7 +1048,7 @@ namespace WM.Net
             String data,
             ClientConnection clientConnection)
         {
-            var callLogTag = LogID + ".SendData()";
+            var callLogTag = LogID + ".SendData(Client:" + WM.Net.NetUtil.ShortID(clientConnection.ClientID) + ")";
             WM.Logger.Debug(callLogTag);
 
             try
@@ -1097,6 +1106,8 @@ namespace WM.Net
         {
             var callLogTag = LogID + ".GetLastMessageXML(" + clientIndex + ")";
 
+            //WM.Logger.Debug(callLogTag);
+
             try
             {
                 var clientKey = "";
@@ -1115,37 +1126,58 @@ namespace WM.Net
                         return null;
                     }
 
-                    clientKey = UDPReceive.GetRemoteEndpointKey(clientConnection.RemoteIP, clientConnection.RemotePortTCP);
+                    clientKey = UDPReceive.GetRemoteEndpointKey(clientConnection.RemoteIP, clientConnection.RemotePortUDP);
                 }
 
                 string messageXML = "";
 
                 lock (udpReceive.allReceivedUDPPackets)
                 {
+                    if (udpReceive.allReceivedUDPPackets.Count == 0)
+                    {
+                        return null;
+                    }
+
                     if (!udpReceive.allReceivedUDPPackets.ContainsKey(clientKey))
                     {
+                        /*
+                        WM.Logger.Debug(callLogTag + ": udpReceive.allReceivedUDPPackets does not contain '" + clientKey + "'!");
+
+                        foreach (var key in udpReceive.allReceivedUDPPackets)
+                        {
+                            WM.Logger.Debug("udpReceive.allReceivedUDPPackets key: " + key);
+                        }
+                        */
+
                         return null;
                     }
+
+                    if (udpReceive.allReceivedUDPPackets[clientKey] != "")
+                        WM.Logger.Debug(callLogTag + ": udpReceive.allReceivedUDPPackets[" + clientKey + "] = '" + udpReceive.allReceivedUDPPackets[clientKey] + "'");
 
                     int frameEndTagLength = Message.XmlEndTag.Length;
-                    int lastFrameEnd = udpReceive.allReceivedUDPPackets[clientKey].LastIndexOf(Message.XmlEndTag);
+                    int lastMessageEnd = udpReceive.allReceivedUDPPackets[clientKey].LastIndexOf(Message.XmlEndTag);
 
-                    if (lastFrameEnd < 0)
+                    if (lastMessageEnd < 0)
                     {
                         return null;
                     }
 
-                    string temp = udpReceive.allReceivedUDPPackets[clientKey].Substring(0, lastFrameEnd + frameEndTagLength);
+                    WM.Logger.Debug(callLogTag + ": found message end!");
 
-                    int lastFrameBegin = temp.LastIndexOf(Message.XmlBeginTag);
+                    string temp = udpReceive.allReceivedUDPPackets[clientKey].Substring(0, lastMessageEnd + frameEndTagLength);
 
-                    if (lastFrameBegin < 0)
+                    int lastMessageBegin = temp.LastIndexOf(Message.XmlBeginTag);
+
+                    if (lastMessageBegin < 0)
                     {
                         return null;
                     }
+
+                    WM.Logger.Debug(callLogTag + ": found message begin!");
 
                     // Now get the message XML string.
-                    messageXML = temp.Substring(lastFrameBegin, temp.Length - lastFrameBegin);
+                    messageXML = temp.Substring(lastMessageBegin, temp.Length - lastMessageBegin);
 
                     // TODO?:
                     // test that the message can be XML deserialized properly
@@ -1153,7 +1185,7 @@ namespace WM.Net
                     // -> If not, continue search for older message...
 
                     // Clear old messages from receivebuffer.
-                    udpReceive.allReceivedUDPPackets[clientKey] = udpReceive.allReceivedUDPPackets[clientKey].Substring(lastFrameEnd + frameEndTagLength);
+                    udpReceive.allReceivedUDPPackets[clientKey] = udpReceive.allReceivedUDPPackets[clientKey].Substring(lastMessageEnd + frameEndTagLength);
                 }
 
                 return messageXML;

@@ -30,7 +30,7 @@ namespace WM.Application
     /// - Application state
     /// - ???
     /// </summary>
-    public class UnityApplication : MonoBehaviour
+    public abstract class UnityApplication : MonoBehaviour
     {
         #region Variables
 
@@ -629,8 +629,12 @@ namespace WM.Application
         public void Update()
         {
             // TODO: WHY THAF is this necessary to make camera work in Editor?
-            m_centerEyeAnchor.GetComponent<Camera>().enabled = false;
-            m_centerEyeAnchor.GetComponent<Camera>().enabled = true;
+            var camera = m_centerEyeAnchor.GetComponent<Camera>();
+            if (camera != null)
+            {
+                camera.enabled = false;
+                camera.enabled = true;
+            }
 
             UpdateControllersLocation();
 
@@ -790,20 +794,13 @@ namespace WM.Application
         /// </summary>
         protected virtual void UpdateNetwork()
         {
-            /*
-            if (((m_centerEyeAnchor.transform.position - m_centerEyeAnchorPrev).magnitude > 0.01f) || (frame++ % 10 == 0))
-            {
-                Client.SendAvatarStateToUdp(
-                    m_centerEyeAnchor,
-                    m_leftHandAnchor,
-                    m_rightHandAnchor);
-                m_centerEyeAnchorPrev = m_centerEyeAnchor.transform.position;
-            }
-
-            // Update positions of remote client avatars, with the avatar states received from the server via UDP.
-            Client.UpdateAvatarStatesFromUdp();
-            ¨*/
+            DoUpdateNetwork();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        abstract protected void DoUpdateNetwork();
 
         /// <summary>
         /// 

@@ -45,13 +45,11 @@ namespace WM.Net
 
         public void Init()
         {
-            WM.Logger.Debug("UDPSend.Init()");
+            var logCallTag = "UDPSend.Init()";
 
             remoteEndPoint = new IPEndPoint(IPAddress.Parse(remoteIP), remotePort);
 
-            WM.Logger.Debug("UDPSend.Init(): UDPSend running (Target " + remoteIP + ":" + remotePort + ")");
-
-            WM.Logger.Debug("UDPSend.Init() End");
+            WM.Logger.Debug(logCallTag + ": UDPSend running. (Target: " + remoteIP + ":" + remotePort + ")");
         }
 
         /// <summary>
@@ -60,6 +58,10 @@ namespace WM.Net
         /// <param name="message"></param>
         public void SendString(string message)
         {
+            var logCallTag = "UDPSend.SendString()";
+
+            WM.Logger.Debug(logCallTag);
+
             if (remoteEndPoint == null)
             {
                 return; // Not connected yet...
@@ -74,7 +76,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                WM.Logger.Error("UDPSend.SendString(): Exception: " + e.ToString());
+                WM.Logger.Error(logCallTag + ": Exception: " + e.ToString());
             }
         }
     }

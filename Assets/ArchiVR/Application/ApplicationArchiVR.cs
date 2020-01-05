@@ -177,7 +177,7 @@ namespace ArchiVR.Application
                 m_centerEyeAnchorPrev = m_centerEyeAnchor.transform.position;
             }
 
-            // Update positions of remote client avatars, with the avatar states received from the server via UDP.
+            // Update player states, with the avatar states received from the server via UDP.
             ((ClientArchiVR)Client).UpdateAvatarStatesFromUdp();
         }
 
@@ -789,6 +789,26 @@ namespace ArchiVR.Application
 
                 m_modelLayers.Add(layer);
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected override void DoUpdateNetwork()
+        {
+            WM.Logger.Debug(name + ".DoUpdateNetwork()");
+
+            if (((m_centerEyeAnchor.transform.position - m_centerEyeAnchorPrev).magnitude > 0.01f) || (frame++ % 10 == 0))
+            {
+                ((ClientArchiVR)Client).SendAvatarStateToUdp(
+                    m_centerEyeAnchor,
+                    m_leftHandAnchor,
+                    m_rightHandAnchor);
+                m_centerEyeAnchorPrev = m_centerEyeAnchor.transform.position;
+            }
+
+            // Update positions of remote client avatars, with the avatar states received from the server via UDP.
+            ((ClientArchiVR)Client).UpdateAvatarStatesFromUdp();
         }
 
         #endregion
