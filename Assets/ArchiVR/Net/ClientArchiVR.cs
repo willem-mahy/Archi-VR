@@ -65,7 +65,14 @@ namespace ArchiVR.Net
         /// <param name="obj"></param>
         override protected void DoProcessMessage(object obj)
         {
-            if (obj is TeleportCommand teleportCommand)
+            // FIXME: This is a NOOP currently -> Remove?
+
+            //if (obj is ICommand command)
+            //{
+            //    application.QueueCommand(command);
+            //}
+            /*
+            else if (obj is TeleportCommand teleportCommand)
             {
                 application.QueueCommand(teleportCommand);
             }
@@ -101,8 +108,9 @@ namespace ArchiVR.Net
             {
                 application.QueueCommand(addPlayerCommand);
             }
+            */
         }
-        
+
         /// <summary>
         /// 
         /// </summary>

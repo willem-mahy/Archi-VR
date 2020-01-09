@@ -84,6 +84,7 @@ namespace Tests
             var clientGO = new GameObject();
             var client = clientGO.AddComponent(typeof(ClientArchiVR)) as ClientArchiVR;
             client.application = application;
+            client.MessageProcessor = application;
             application.Client = client;
 
             application.m_centerEyeAnchor = new GameObject();
@@ -160,6 +161,8 @@ namespace Tests
         [Test]
         public void Test_ArchiVR_Multiplay_NominalWorkflow_Full_2Clients()
         {
+            WM.Logger.Enabled = false;
+
             #region Setup
 
             // Create an application instance that will act as server.
@@ -196,6 +199,8 @@ namespace Tests
 
             #endregion Check initial application state
 
+            WM.Logger.Enabled = true;
+
             #region Start Server.
 
             LogHeader("Start Server");
@@ -229,7 +234,7 @@ namespace Tests
 
             #endregion
 
-            WM.Logger.Enabled = true;
+            //WM.Logger.Enabled = true;
 
             #region Connect Client1
 

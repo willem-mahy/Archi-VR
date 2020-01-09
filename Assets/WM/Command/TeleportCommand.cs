@@ -1,10 +1,10 @@
-﻿using ArchiVR.Application;
+﻿//using ArchiVR.Application;
 using System;
 using System.Xml.Serialization;
 using WM.Application;
 using WM.Command;
 
-namespace ArchiVR.Command
+namespace WM.Command
 {
     [Serializable]
     [XmlRoot("TeleportCommand")]
@@ -20,7 +20,10 @@ namespace ArchiVR.Command
         {
             WM.Logger.Debug("TeleportCommand.Execute()");
 
-            var applicationArchiVR = (ApplicationArchiVR)application;
+            application.TeleportationSystem.Teleport(this);
+
+            /*
+            var applicationArchiVR = application as ArchiVR.Application.ApplicationArchiVR;
 
             if ((applicationArchiVR.ActiveProjectIndex == ProjectIndex) && (applicationArchiVR.ActivePOIName == POIName))
             {
@@ -37,6 +40,7 @@ namespace ArchiVR.Command
             {
                 applicationArchiVR.Teleport();
             }
+            */
         }
     }
 }

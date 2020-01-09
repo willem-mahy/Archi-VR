@@ -7,6 +7,7 @@ using WM.Net;
 using ArchiVR.Command;
 using ArchiVR.Net;
 using WM.Application;
+using WM.Command;
 
 [assembly: System.Reflection.AssemblyVersion("1.0.*")]
 
@@ -24,9 +25,30 @@ namespace ArchiVR.Application
             }
         }
 
+        bool ITeleportationSystem.NeedFadeOut => throw new System.NotImplementedException();
+
         public TeleportationSystemArchiVR(ApplicationArchiVR application)
         {
             Application = application;
+        }
+
+        void ITeleportationSystem.Teleport(TeleportCommand command)
+        {
+            if ((Application.ActiveProjectIndex == command.ProjectIndex) && (Application.ActivePOIName == command.POIName))
+            {
+                return;
+            }
+
+            Application.TeleportCommand = command;
+
+            if (Application.m_fadeAnimator != null)
+            {
+                Application.SetActiveApplicationState(UnityApplication.ApplicationStates.Teleporting);
+            }
+            else
+            {
+                Application.Teleport();
+            }
         }
     }
 
@@ -37,22 +59,6 @@ namespace ArchiVR.Application
         // The typed application states.
         public ApplicationStateDefault applicationStateDefault = new ApplicationStateDefault();
         public ApplicationStateTeleporting applicationStateTeleporting = new ApplicationStateTeleporting();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public TeleportCommand TeleportCommand { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        protected new bool CanProcessCommands
-        {
-            get
-            {
-                return (TeleportCommand == null);
-            }
-        }
 
         #region Project
 
@@ -136,7 +142,7 @@ namespace ArchiVR.Application
         public override void Init()
         {
             // Initialize application modes
-            applicationStateTeleporting.TeleportationSystem = new TeleportationSystemArchiVR(this);
+            applicationStateTeleporting.TeleportationSystem = this.TeleportationSystem = new TeleportationSystemArchiVR(this);
 
             m_applicationStates.Add(applicationStateDefault);
             m_applicationStates.Add(applicationStateTeleporting);
@@ -277,6 +283,9 @@ namespace ArchiVR.Application
             WM.Logger.Debug("ApplicationArchiVR::OnTeleportFadeInComplete()");
 
             m_fadeAnimator.ResetTrigger("FadeIn");
+            
+            // This denotifies that we are no longer teleporting, and makes the command processor resume.
+            TeleportCommand = null;
 
             var applicationState = GetActiveApplicationState();
             if (applicationState != null)
@@ -320,27 +329,7 @@ namespace ArchiVR.Application
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="teleportCommand"></param>
-        private void Teleport(TeleportCommand teleportCommand)
-        {
-            switch (NetworkMode)
-            {
-                case NetworkMode.Server:
-                    Server.BroadcastCommand(teleportCommand);
-                    break;
-                case NetworkMode.Client:
-                    // NOOP: server has control...
-                    break;
-                case NetworkMode.Standalone:
-                    QueueCommand(teleportCommand);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool NeedFadeOutUponTeleport
+        public bool NeedFadeOutUponTeleport // TODO: move to teleportationSystem...
         {
             get
             {

@@ -53,6 +53,9 @@ namespace WM
 
             public byte[] Data { get; set; }
 
+            /// <summary>
+            /// Serialize the given object into the message.
+            /// </summary>
             public void Serialize(object obj)
             {
                 using (var stream = new MemoryStream())
@@ -63,6 +66,10 @@ namespace WM
                 }
             }
 
+            /// <summary>
+            /// Deserialize the object that is contained in the message.
+            /// </summary>
+            /// <returns>The deserialized object.</returns>
             public object Deserialize()
             {
                 object result = null;

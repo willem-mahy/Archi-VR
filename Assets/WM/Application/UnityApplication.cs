@@ -18,6 +18,8 @@ namespace WM.Application
         {
             get;
         }
+
+        void Teleport(TeleportCommand command);
     }
 
     /// <summary>
@@ -30,7 +32,7 @@ namespace WM.Application
     /// - Application state
     /// - ???
     /// </summary>
-    public abstract class UnityApplication : MonoBehaviour
+    public abstract class UnityApplication : MonoBehaviour, IMessageProcessor
     {
         #region Variables
 
@@ -46,11 +48,6 @@ namespace WM.Application
         public MenuMode StartupMenuMode = MenuMode.None;
 
         #endregion
-
-        /// <summary>
-        /// The command queue.
-        /// </summary>
-        public List<ICommand> CommandQueue = new List<ICommand>();
 
         /// <summary>
         /// The application version.
@@ -310,6 +307,80 @@ namespace WM.Application
         }
 
         #endregion Pick selection
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ITeleportationSystem TeleportationSystem { get; set; }
+
+        #region Command processing
+
+        /// <summary>
+        /// The locking object for the command queue.
+        /// 
+        /// Everyone that wants to use the command queue, should lock() on this object while doing so.
+        /// </summary>
+        private object commandQueueLock = new object();
+
+        /// <summary>
+        /// The command queue.
+        /// </summary>
+        public List<ICommand> CommandQueue = new List<ICommand>();
+
+
+        /// <summary>
+        /// Queue a command to be executed async.
+        /// </summary>
+        /// <param name="command"></param>
+        public void QueueCommand(ICommand command)
+        {
+            lock (commandQueueLock)
+            {
+                CommandQueue.Add(command);
+            }
+        }
+
+        /// <summary>
+        /// While teleporting: reference to the ongoing teleport command.
+        /// Else: null
+        /// </summary>
+        public TeleportCommand TeleportCommand { get; set; } // TODO: find a better place for this (TeleportationSystemBase perhaps?)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected bool CanProcessCommands
+        {
+            get
+            {
+                bool canProcessCommands = true; // We can always process commands.
+                //bool canProcessCommands = (TeleportCommand == null);  // We cannot process commands while teleporting...
+
+                return canProcessCommands;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="teleportCommand"></param>
+        protected void Teleport(TeleportCommand teleportCommand)
+        {
+            switch (NetworkMode)
+            {
+                case NetworkMode.Server:
+                    Server.BroadcastCommand(teleportCommand);
+                    break;
+                case NetworkMode.Client:
+                    // NOOP: server has control...
+                    break;
+                case NetworkMode.Standalone:
+                    QueueCommand(teleportCommand);
+                    break;
+            }
+        }
+
+        #endregion Command processing
 
         #endregion Variables
 
@@ -589,16 +660,6 @@ namespace WM.Application
             new InitNetworkCommand(StartupNetworkMode).Execute(this);
         }
 
-        private object commandQueueLock = new object();
-
-        public void QueueCommand(ICommand command)
-        {
-            lock (commandQueueLock)
-            {
-                CommandQueue.Add(command);
-            }
-        }
-
         public GameObject ActiveMenu { get; private set; }
 
         private void SetActiveMenu(GameObject activeMenu)
@@ -615,11 +676,6 @@ namespace WM.Application
         protected Vector3 m_centerEyeAnchorPrev = new Vector3();
 
         protected int frame = 0;
-
-        protected bool CanProcessCommands
-        {
-            get { return true; }
-        }
 
         /// <summary>
         /// Update is called once per frame.
@@ -1205,6 +1261,13 @@ namespace WM.Application
                         Destroy(oldAvatar.gameObject);
                 }
             }
+        }
+
+        void IMessageProcessor.Process(object message)
+        {
+            // If it's a command, queue it.
+            if (message is ICommand command)
+                QueueCommand(command);
         }
 
         #endregion

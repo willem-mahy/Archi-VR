@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Xml.Serialization;
 using UnityEngine;
+using WM.Application;
 using WM.Command;
 
 namespace WM.Net
@@ -885,6 +886,8 @@ namespace WM.Net
             }
         }
 
+        public IMessageProcessor MessageProcessor;
+
         /// <summary>
         /// 
         /// </summary>
@@ -892,17 +895,24 @@ namespace WM.Net
         private void ProcessMessage(
             string messageXML)
         {
-            var obj = Message.GetObjectFromMessageXML(messageXML);
+            var message = Message.GetObjectFromMessageXML(messageXML);
 
-            // If it is a generic message, process it here.
+            if (MessageProcessor != null)
+            {
+                MessageProcessor.Process(message);
+            }
+            else
+            {
+                //if (obj is ICommand command)
+                //{
+                //    this.A.QueueCommand(command);
+                //}
 
-            //if (obj is XXX)
-            //{
-            //    ...
-            //}
+                throw new Exception("Client.ProcessMessage: MessageProcessor is null");
+            }
 
             // It is an application-specific logic message, so delegate to the application-specific Client logic.
-            DoProcessMessage(obj);
+            DoProcessMessage(message);
         }
 
         /// <summary>
