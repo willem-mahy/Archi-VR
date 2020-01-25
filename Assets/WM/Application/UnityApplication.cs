@@ -32,7 +32,9 @@ namespace WM.Application
     /// - Application state
     /// - ???
     /// </summary>
-    public abstract class UnityApplication : MonoBehaviour, IMessageProcessor
+    public abstract class UnityApplication
+        : MonoBehaviour
+        , IMessageProcessor
     {
         #region Variables
 
@@ -383,6 +385,15 @@ namespace WM.Application
         #endregion Command processing
 
         #endregion Variables
+
+        void IMessageProcessor.Process(object message)
+        {
+            // If it's a command, queue it.
+            if (message is ICommand command)
+            {
+                QueueCommand(command);
+            }
+        }
 
         #region Player Management
 
@@ -1261,13 +1272,6 @@ namespace WM.Application
                         Destroy(oldAvatar.gameObject);
                 }
             }
-        }
-
-        void IMessageProcessor.Process(object message)
-        {
-            // If it's a command, queue it.
-            if (message is ICommand command)
-                QueueCommand(command);
         }
 
         #endregion
