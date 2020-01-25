@@ -31,38 +31,12 @@ namespace Tests
         #region Utility functions
 
         /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        private static GameObject CreateMockAvatarPrefab(String name)
-        {
-            var avatarGO = new GameObject(name);
-
-            var avatar = avatarGO.AddComponent(typeof(WM.Net.Avatar)) as WM.Net.Avatar;
-            
-            avatar.Head = new GameObject("Avatar Head");
-            avatar.Head.transform.SetParent(avatarGO.transform);
-
-            avatar.Body = new GameObject("Avatar Body");
-            avatar.Body.transform.SetParent(avatarGO.transform);
-
-            avatar.LHand = new GameObject("Avatar Left Hand");
-            avatar.LHand.transform.SetParent(avatarGO.transform);
-
-            avatar.RHand = new GameObject("Avatar Right Hand");
-            avatar.RHand.transform.SetParent(avatarGO.transform);
-
-            return avatarGO;
-        }
-
-        /// <summary>
         /// Create an ApplicationArchiVR with a Server and Client set.
         /// </summary>
         /// <returns></returns>
         private ApplicationArchiVR CreateApplication(string name)
         {
-            LogHeader("Create application '" + name + "'");
+            Log.Header("Create application '" + name + "'");
 
             // Create an application instance that will act as server.
             var applicationGO = new GameObject();
@@ -71,9 +45,9 @@ namespace Tests
 
             application.DefaultAvatarID = DefaultAvatarID;
 
-            application.AvatarFactory.Register(DefaultAvatarID, CreateMockAvatarPrefab("DefaultAvatar"));
-            application.AvatarFactory.Register(Avatar2ID, CreateMockAvatarPrefab("Avatar1"));
-            application.AvatarFactory.Register(Avatar1ID, CreateMockAvatarPrefab("Avatar2"));
+            application.AvatarFactory.Register(DefaultAvatarID, MockFactory.CreateAvatarGameObject("DefaultAvatar"));
+            application.AvatarFactory.Register(Avatar2ID, MockFactory.CreateAvatarGameObject("Avatar1"));
+            application.AvatarFactory.Register(Avatar1ID, MockFactory.CreateAvatarGameObject("Avatar2"));
 
             // Create the server for the server application.
             var serverGO = new GameObject();
@@ -120,19 +94,9 @@ namespace Tests
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="caption"></param>
-        private void LogHeader(string caption)
-        {
-            WM.Logger.Debug("");
-            WM.Logger.Debug("=======[" + caption + "]===============================");
-        }
-
         private void StopServer()
         {
-            LogHeader("Stop Server");
+            Log.Header("Stop Server");
 
             // Make server application initialize network mode from 'Server' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);
@@ -203,7 +167,7 @@ namespace Tests
 
             #region Start Server.
 
-            LogHeader("Start Server");
+            Log.Header("Start Server");
 
             // WHEN the ServerApplication is initialized to 'Server' network mode...
             {
@@ -238,7 +202,7 @@ namespace Tests
 
             #region Connect Client1
 
-            LogHeader("Connect Client1");
+            Log.Header("Connect Client1");
 
             // WHEN the Client1 application is initialized to 'Client' network mode...
             {
@@ -271,7 +235,7 @@ namespace Tests
 
             #region Connect Client2
 
-            LogHeader("Connect Client2");
+            Log.Header("Connect Client2");
 
             // WHEN the Client2 application is initialized to 'Client' network mode...
             {
@@ -304,7 +268,7 @@ namespace Tests
 
             #region Change server Avatar
 
-            LogHeader("Set Server avatar to Avatar1");
+            Log.Header("Set Server avatar to Avatar1");
             applicationServer.SetPlayerAvatar(Avatar1ID);
             
             UpdateApplications(); // Make queued commands execute.
@@ -326,7 +290,7 @@ namespace Tests
 
             #region Change server player name
 
-            LogHeader("Change Server player name");
+            Log.Header("Change Server player name");
             applicationServer.SetPlayerName("New Server player");
 
             UpdateApplications(); // Make queued commands execute.
@@ -355,7 +319,7 @@ namespace Tests
 
             #region Change Client1 player name
 
-            LogHeader("Change Server player name");
+            Log.Header("Change Server player name");
             applicationClient1.SetPlayerName("New Client1 player");
 
             UpdateApplications(); // Make queued commands execute.
@@ -425,7 +389,7 @@ namespace Tests
 
             #region Disconnect Client2
 
-            LogHeader("Disconnect Client2");
+            Log.Header("Disconnect Client2");
 
             // Make client1 application initialize network mode from 'Client' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Client, applicationClient2.NetworkMode);
@@ -450,7 +414,7 @@ namespace Tests
 
             #region Disconnect Client1
 
-            LogHeader("Disconnect Client1");
+            Log.Header("Disconnect Client1");
 
             // Make client1 application initialize network mode from 'Client' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Client, applicationClient1.NetworkMode);
@@ -526,7 +490,7 @@ namespace Tests
 
             #region Start Server.
 
-            LogHeader("Start Server");
+            Log.Header("Start Server");
 
             // WHEN the ServerApplication is initialized to 'Server' network mode...
             {
@@ -559,7 +523,7 @@ namespace Tests
 
             #region Connect Client1
 
-            LogHeader("Connect Client1");
+            Log.Header("Connect Client1");
 
             // WHEN the Client1 application is initialized to 'Client' network mode...
             {
@@ -592,7 +556,7 @@ namespace Tests
 
             #region Connect Client2
 
-            LogHeader("Connect Client2");
+            Log.Header("Connect Client2");
 
             // WHEN the Client2 application is initialized to 'Client' network mode...
             {
@@ -632,7 +596,7 @@ namespace Tests
 
             #region Restart Server.
 
-            LogHeader("Restart Server");
+            Log.Header("Restart Server");
 
             // WHEN the ServerApplication is initialized to 'Server' network mode...
             {
@@ -665,7 +629,7 @@ namespace Tests
 
             #region Connect Client1
 
-            LogHeader("Connect Client1");
+            Log.Header("Connect Client1");
 
             // The server will run at different ports after restart, so clear the stale ServerInfo cached in the Client.
             applicationClient1.Client.ServerInfo = null;
@@ -701,7 +665,7 @@ namespace Tests
 
             #region Connect Client2
 
-            LogHeader("Connect Client2");
+            Log.Header("Connect Client2");
 
             // The server will run at different ports after restart, so clear the stale ServerInfo cached in the Client.
             applicationClient2.Client.ServerInfo = null;
@@ -741,7 +705,7 @@ namespace Tests
 
             #region Disconnect Client2
 
-            LogHeader("Disconnect Client2");
+            Log.Header("Disconnect Client2");
 
             // Make client1 application initialize network mode from 'Client' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Client, applicationClient2.NetworkMode);
@@ -766,7 +730,7 @@ namespace Tests
 
             #region Disconnect Client1
 
-            LogHeader("Disconnect Client1");
+            Log.Header("Disconnect Client1");
 
             // Make client1 application initialize network mode from 'Client' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Client, applicationClient1.NetworkMode);
@@ -791,7 +755,7 @@ namespace Tests
 
             #region Stop Server
 
-            LogHeader("Stop Server");
+            Log.Header("Stop Server");
 
             // Make server application initialize network mode from 'Server' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);

@@ -7,6 +7,8 @@ namespace WM.Net
     [Serializable]
     public class AvatarState
     {
+        #region Fields
+
         /// <summary>
         /// 
         /// </summary>
@@ -41,5 +43,19 @@ namespace WM.Net
         /// 
         /// </summary>
         public SerializableQuaternion RHandRotation { get; set; } = new SerializableQuaternion();
+
+        #endregion Fields
+
+        public bool Equals(AvatarState s)
+        {
+            return
+                PlayerID.Equals(s.PlayerID) &&
+                HeadPosition.Equals(s.HeadPosition) &&
+                HeadRotation.Equals(s.HeadRotation) &&
+                LHandPosition.Equals(s.LHandPosition) &&
+                LHandRotation.Equals(s.LHandRotation) &&
+                RHandPosition.Equals(s.RHandPosition) &&
+                RHandRotation.Equals(s.RHandRotation);
+        }
     }
 }

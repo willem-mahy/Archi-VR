@@ -30,14 +30,29 @@ namespace Assets.WM.Unity
                 w = q.w
             };
         }
+
+        public SerializableQuaternion()
+        {
+            x = y = z = 0;
+            w = 1;
+        }
+
+        public bool Equals(SerializableQuaternion s)
+        {
+            return
+                x == s.x &&
+                y == s.y &&
+                z == s.z &&
+                w == s.w;
+        }
     }
 
     [System.Serializable]
     public class SerializableVector3
     {   
-        public float x;
-        public float y;
-        public float z;
+        public float x = 0;
+        public float y = 0;
+        public float z = 0;
 
         // Vector3
         public static implicit operator Vector3(SerializableVector3 sv)
@@ -53,6 +68,14 @@ namespace Assets.WM.Unity
                 y = v.y,
                 z = v.z
             };
+        }
+
+        public bool Equals(SerializableVector3 s)
+        {
+            return
+                x == s.x &&
+                y == s.y &&
+                z == s.z;
         }
     }
 }
