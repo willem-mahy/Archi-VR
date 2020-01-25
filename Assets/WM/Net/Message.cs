@@ -54,6 +54,16 @@ namespace WM
             public byte[] Data { get; set; }
 
             /// <summary>
+            /// Serialize the given object into a new message.
+            /// </summary>
+            public static Message EncodeObject(object obj)
+            {
+                var message = new Message();
+                message.Serialize(obj);
+                return message;
+            }
+
+            /// <summary>
             /// Serialize the given object into the message.
             /// </summary>
             public void Serialize(object obj)
