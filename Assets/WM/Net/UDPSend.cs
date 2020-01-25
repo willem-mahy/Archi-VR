@@ -79,5 +79,31 @@ namespace WM.Net
                 WM.Logger.Error(logCallTag + ": Exception: " + e.ToString());
             }
         }
+
+        /// <summary>
+        /// Sends the given message to the remote end point.
+        /// </summary>
+        /// <param name="message"></param>
+        public void Send(byte[] data)
+        {
+            var logCallTag = "UDPSend.Send()";
+
+            WM.Logger.Debug(logCallTag);
+
+            if (remoteEndPoint == null)
+            {
+                return; // Not connected yet...
+            }
+
+            try
+            {
+                // Send data to remote client.
+                udpClient.Send(data, data.Length, remoteEndPoint);
+            }
+            catch (Exception e)
+            {
+                WM.Logger.Error(logCallTag + ": Exception: " + e.ToString());
+            }
+        }
     }
 }
