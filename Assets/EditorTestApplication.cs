@@ -28,14 +28,14 @@ public class EditorTestApplication : MonoBehaviour
                 throw new System.Exception("EditorTestApplication.Start(): ApplicationScene ("+ i +") not found!");
             }
 
-            
+            //applicationScene.transform.parent = null;
 
             //var rootGameObjects = applicationPreviewScene.GetRootGameObjects();
             //applicationScene.transform.parent = rootGameObjects[0].transform;
 
 
             //PrefabUtility.LoadPrefabContentsIntoPreviewScene(path, applicationPreviewScene);
-            
+
 
             EditorSceneManager.MoveGameObjectToScene(applicationScene, applicationPreviewScene);
 
