@@ -17,6 +17,9 @@ namespace ArchiVR.Application
     {
         public ApplicationArchiVR Application;
 
+        /// <summary>
+        /// <see cref="ITeleportationSystem.NeedFadeOut"/> implementation.
+        /// </summary>
         public bool NeedFadeOut
         {
             get
@@ -24,8 +27,6 @@ namespace ArchiVR.Application
                 return (Application.ActiveProject != null) && (Application.ActivePOI != null);
             }
         }
-
-        bool ITeleportationSystem.NeedFadeOut => throw new System.NotImplementedException();
 
         public TeleportationSystemArchiVR(ApplicationArchiVR application)
         {
