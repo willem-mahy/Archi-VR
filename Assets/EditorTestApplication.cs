@@ -7,10 +7,27 @@ using UnityEngine.SceneManagement;
 
 public class EditorTestApplication : MonoBehaviour
 {
-    private const string ApplicationSceneName = "Scene";
+    private int DefaultViewLayout = 8;
+
+    private const string ApplicationSceneName = "ArchiVR";
 
     // Start is called before the first frame update
     void Start()
+    {
+        HideDefaultScenes();
+
+        SetViewLayout(DefaultViewLayout);
+
+        //CreateApplicationPreviewScenes();
+
+        // Load first scene.
+        LoadApplicationScene(ApplicationSceneName, 0);        
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void CreateApplicationPreviewScenes()
     {
         for (int i = 0; i < 4; ++i)
         {
@@ -24,37 +41,74 @@ public class EditorTestApplication : MonoBehaviour
             //LoadDefaultApplicationScene(i);
 
             // Setup the i'th camera to render only its corresponding tested application instance.
-            var camera = GetCamera(i);
+            var camera = GetDefaultCamera(i);
 
             camera.scene = applicationPreviewScene;
         }
-
-        // Load first scene.
-        LoadApplicationScene(ApplicationSceneName, 0);
-
-        SetViewLayout(8);
     }
 
-    private void LoadDefaultApplicationScene(int applicationInstanceIndex)
+    /// <summary>
+    /// 
+    /// </summary>
+    private void HideDefaultScenes()
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            var defaultSceneGO = GameObject.Find("DefaultScene (" + i + ")");
+
+            if (defaultSceneGO == null)
+            {
+                throw new System.Exception("EditorTestApplication.HideDefaultScenes(): DefaultScene (" + i + ") not found!");
+            }
+
+            defaultSceneGO.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="applicationInstanceIndex"></param>
+    private void LoadDefaultApplicationSceneIntoPreviewScene(int applicationInstanceIndex)
     {
         var applicationScene = GameObject.Find("ApplicationScene (" + applicationInstanceIndex + ")");
 
         if (applicationScene == null)
         {
-            throw new System.Exception("EditorTestApplication.Start(): ApplicationScene (" + applicationInstanceIndex + ") not found!");
+            throw new Exception("EditorTestApplication.LoadApplicationSceneIntoPreviewScene(): ApplicationScene (" + applicationInstanceIndex + ") not found!");
         }
 
         EditorSceneManager.MoveGameObjectToScene(applicationScene, applicationPreviewScenes[applicationInstanceIndex]);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sceneName"></param>
+    /// <param name="applicationInstanceIndex"></param>
     private void LoadApplicationScene(string sceneName, int applicationInstanceIndex)
     {
         SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
     }
 
-    List<Scene> applicationPreviewScenes = new List<Scene>();
-    DateTime lastToggle = DateTime.Now;
-    int viewLayout = -1;
+    /// <summary>
+    /// The application preview scenes.
+    /// </summary>
+    private List<Scene> applicationPreviewScenes = new List<Scene>();
+
+    /// <summary>
+    /// The application scenes.
+    /// </summary>
+    private List<Scene> applicationScenes = new List<Scene>();
+
+    /// <summary>
+    /// The active view layout.
+    /// </summary>
+    private int _viewLayout = -1;
+
+    /// <summary>
+    /// 
+    /// </summary>
     bool[] isSceneMerged = { false, false, false, false };
 
     // Update is called once per frame
@@ -70,32 +124,56 @@ public class EditorTestApplication : MonoBehaviour
                 {
                     isSceneMerged[index] = true;
 
-                    var camera = GameObject.Find("CenterEyeAnchor");
-                    if (camera != null)
-                    {
-                        camera.SetActive(false);
-                    }
+                    var applicationScene = SceneManager.CreateScene("ApplicationInstance" + index);
 
-                    var newScene = SceneManager.CreateScene("ApplicationInstance" + index);
+                    SceneManager.MergeScenes(scene, applicationScene);
+                    SceneManager.MergeScenes(project, applicationScene);
 
-                    SceneManager.MergeScenes(scene, newScene);
-                    SceneManager.MergeScenes(project, newScene);
+                    applicationScenes.Add(applicationScene);
 
-                    GetCamera(index).scene = newScene;
+                    GetDefaultCamera(index).scene = applicationScene;
 
                     if (index != isSceneMerged.Length - 1)
                     {
                         LoadApplicationScene(ApplicationSceneName, index + 1);
+                    }
+
+                    var cameraGO = GameObject.Find("CenterEyeAnchor");
+                    if (cameraGO != null)
+                    {
+                        var camera = cameraGO.GetComponent<Camera>();
+
+                        if (camera == null)
+                        {
+                            throw new Exception("EditorTestApplication.Update(): GameObject 'CenterEyeAnchor' does not have a Camera component!");
+                        }
+                        else
+                        { 
+                            //cameraGO.SetActive(false);
+
+                            cameraGO.name = "*" + camera.name; // So it is not found anymore next time.
+                            camera.rect = WindowPlacements[_viewLayout][index];
+                            camera.scene = applicationScene;
+                        }
                     }
                 }
                 break;
             }
         }
 
+        //RotateCameras();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void RotateDefaultCameras()
+    {
         for (int i = 0; i < 4; ++i)
         {
-            GetCamera(i).transform.Rotate(Vector3.up, 0.01f);
-            GetCamera(i).transform.RotateAroundLocal(Vector3.left, 0.01f);
+            var t = GetDefaultCamera(i).transform;
+            t.Rotate(Vector3.up, 0.01f);
+            t.RotateAroundLocal(Vector3.left, 0.01f);
         }
     }
 
@@ -175,18 +253,34 @@ public class EditorTestApplication : MonoBehaviour
         },
     };
 
-    void SetViewLayout(int viewLayoutID)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="viewLayout"></param>
+    void SetViewLayout(int viewLayout)
     {
+        if (_viewLayout == viewLayout)
+        {
+            return;
+        }
+
+        _viewLayout = viewLayout;
+
         for (int i = 0; i < 4; ++i)
         {
-            GetCamera(i).rect = WindowPlacements[viewLayoutID][i];
+            GetDefaultCamera(i).rect = WindowPlacements[viewLayout][i];
         }
     }
 
-    Camera GetCamera(int i)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="i"></param>
+    /// <returns></returns>
+    private Camera GetDefaultCamera(int i)
     {
-        // Setup the i'th camera to render only its corresponding tested application instance.
-        var cameraGO = GameObject.Find("Main Camera (" + i + ")");
+        // Setup the i'th default camera to render only its corresponding tested application instance.
+        var cameraGO = GameObject.Find("DefaultCamera (" + i + ")");
 
         return cameraGO.GetComponent<Camera>() as Camera;
     }
