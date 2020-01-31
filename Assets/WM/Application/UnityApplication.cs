@@ -61,6 +61,16 @@ namespace WM.Application
         /// </summary>
         private bool enableDebugGFX = false;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        protected Vector3 m_centerEyeAnchorPrev = new Vector3();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected int frame = 0;
+
         #region Network
 
         //! The current network mode.
@@ -858,6 +868,10 @@ namespace WM.Application
 
         #endregion Player Management
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="activeMenu"></param>
         private void SetActiveMenu(GameObject activeMenu)
         {
             ActiveMenu = activeMenu;
@@ -867,10 +881,6 @@ namespace WM.Application
                 menu.SetActive(menu == activeMenu);
             }
         }
-
-        protected Vector3 m_centerEyeAnchorPrev = new Vector3();
-
-        protected int frame = 0;
 
         #region
         
