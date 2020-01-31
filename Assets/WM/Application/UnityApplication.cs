@@ -750,6 +750,10 @@ namespace WM.Application
 
         #endregion Public API
 
+        /// <summary>
+        /// Process the given message (that came in via the network).
+        /// </summary>
+        /// <param name="message">The message to process.</param>
         void IMessageProcessor.Process(object message)
         {
             // If it's a command, queue it.
@@ -896,7 +900,7 @@ namespace WM.Application
         }
 
         /// <summary>
-        /// 
+        /// To be implemented by concrete application types.
         /// </summary>
         abstract protected void DoUpdateNetwork();
 
@@ -997,7 +1001,7 @@ namespace WM.Application
         //! Updates the location of the controllers.
         //  When running in VR -> NOOP.
         //  When running in editor -> anchors the controllers at a fixed offset in front of the center eye.
-        void UpdateControllersLocation()
+        private void UpdateControllersLocation()
         {
             if (!UnityEngine.Application.isEditor)
             {
@@ -1027,7 +1031,7 @@ namespace WM.Application
         }
 
         //! Translates the tracking space wby the given offset vector.
-        void TranslateTrackingSpace(Vector3 offset)
+        private void TranslateTrackingSpace(Vector3 offset)
         {
             m_ovrCameraRig.transform.position = m_ovrCameraRig.transform.position + offset;
         }
