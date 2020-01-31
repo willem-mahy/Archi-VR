@@ -139,15 +139,15 @@ public class EditorTestApplication : MonoBehaviour
     // Update is called once per frame
     void TryFinalizeApplicationSceneLoading()
     {
-        for (int index = 0; index < isSceneMerged.Length; ++index)
+        for (int applicationInstanceIndex = 0; applicationInstanceIndex < isSceneMerged.Length; ++applicationInstanceIndex)
         {
-            if (!isSceneMerged[index])
+            if (!isSceneMerged[applicationInstanceIndex])
             {
                 var scene = SceneManager.GetSceneByName(ApplicationSceneName);
                 var project = SceneManager.GetSceneByName("ProjectKS047");
                 if (scene.isLoaded && project.isLoaded)
                 {
-                    isSceneMerged[index] = true;
+                    isSceneMerged[applicationInstanceIndex] = true;
 
                     // First get the UnityApplication from the loaded application scene.
                     UnityApplication applicationInstance = null;
@@ -167,13 +167,14 @@ public class EditorTestApplication : MonoBehaviour
                     }
 
                     // Only enable input on the first application instance.
-                    applicationInstance.EnableInput = (index == 0);
+                    applicationInstance.ID = applicationInstanceIndex;
+                    applicationInstance.EnableInput = (applicationInstanceIndex == 0);
                     
                     _applicationInstances.Add(applicationInstance);
                     
                     _activeApplicationInstanceIndex = 0;
 
-                    var applicationScene = SceneManager.CreateScene("ApplicationInstance" + index);
+                    var applicationScene = SceneManager.CreateScene("ApplicationInstance" + applicationInstanceIndex);
 
                     SceneManager.MergeScenes(scene, applicationScene);
                     SceneManager.MergeScenes(project, applicationScene);
@@ -192,18 +193,18 @@ public class EditorTestApplication : MonoBehaviour
                         else
                         { 
                             cameraGO.name = "*" + camera.name; // So it is not found anymore next time.
-                            camera.rect = WindowPlacements[_viewLayout][index];
+                            camera.rect = WindowPlacements[_viewLayout][applicationInstanceIndex];
                             camera.scene = applicationScene;
 
                             //GetDefaultCamera(index).scene = applicationScene;
-                            GetDefaultCameraGO(index).SetActive(false);
+                            GetDefaultCameraGO(applicationInstanceIndex).SetActive(false);
                         }
                     }
 
                     // Start loading the next application instance (if there is one)
-                    if (index != isSceneMerged.Length - 1)
+                    if (applicationInstanceIndex != isSceneMerged.Length - 1)
                     {
-                        LoadApplicationScene(ApplicationSceneName, index + 1);
+                        LoadApplicationScene(ApplicationSceneName, applicationInstanceIndex + 1);
                     }
                 }
                 break;
