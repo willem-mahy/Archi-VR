@@ -11,7 +11,9 @@ public class EditorTestApplication : MonoBehaviour
 
     private const string ApplicationSceneName = "ArchiVR";
 
-    // Start is called before the first frame update
+    /// <summary>
+    /// Start is called before the first frame update.
+    /// </summary>
     void Start()
     {
         HideDefaultScenes();
@@ -22,6 +24,14 @@ public class EditorTestApplication : MonoBehaviour
 
         // Load first scene.
         LoadApplicationScene(ApplicationSceneName, 0);        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        TryFinalizeApplicationSceneLoading();
+
+        //RotateCameras();
     }
 
     /// <summary>
@@ -91,6 +101,158 @@ public class EditorTestApplication : MonoBehaviour
         SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
     }
 
+    // Update is called once per frame
+    void TryFinalizeApplicationSceneLoading()
+    {
+        for (int index = 0; index < isSceneMerged.Length; ++index)
+        {
+            if (!isSceneMerged[index])
+            {
+                var scene = SceneManager.GetSceneByName(ApplicationSceneName);
+                var project = SceneManager.GetSceneByName("ProjectKS047");
+                if (scene.isLoaded && project.isLoaded)
+                {
+                    isSceneMerged[index] = true;
+
+                    // First get the UnityApplication from the loaded application scene.
+                    WM.Application.UnityApplication applicationInstance = null;
+                    foreach (var go in scene.GetRootGameObjects())
+                    {
+                        applicationInstance = GetFirstComponentOfType<WM.Application.UnityApplication>(go);
+
+                        if (applicationInstance != null)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (applicationInstance == null)
+                    {
+                        throw new Exception("EditorTestApplication.TryFinalizeApplicationSceneLoading(): Loaded application scene does not contain a GameObject with a UnityApplication component!");
+                    }
+
+                    // Only enable input on the first application instance.
+                    applicationInstance.EnableInput = (index == 0);
+
+                    var applicationScene = SceneManager.CreateScene("ApplicationInstance" + index);
+
+                    SceneManager.MergeScenes(scene, applicationScene);
+                    SceneManager.MergeScenes(project, applicationScene);
+
+                    applicationScenes.Add(applicationScene);
+
+                    var cameraGO = GameObject.Find("CenterEyeAnchor");
+                    if (cameraGO != null)
+                    {
+                        var camera = cameraGO.GetComponent<Camera>();
+
+                        if (camera == null)
+                        {
+                            throw new Exception("EditorTestApplication.TryFinalizeApplicationSceneLoading(): GameObject 'CenterEyeAnchor' does not have a Camera component!");
+                        }
+                        else
+                        { 
+                            cameraGO.name = "*" + camera.name; // So it is not found anymore next time.
+                            camera.rect = WindowPlacements[_viewLayout][index];
+                            camera.scene = applicationScene;
+
+                            //GetDefaultCamera(index).scene = applicationScene;
+                            GetDefaultCameraGO(index).SetActive(false);
+                        }
+                    }
+
+                    // Start loading the next application instance (if there is one)
+                    if (index != isSceneMerged.Length - 1)
+                    {
+                        LoadApplicationScene(ApplicationSceneName, index + 1);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    T GetFirstComponentOfType<T>(GameObject go)
+    {
+        // If you contain it yourself, return the component.
+        var c = go.GetComponent<T>();
+
+        if (c != null)
+        {
+            return c; // Found in self :-)
+        }
+
+        // Else recurse into subtree.
+        for (int i = 0; i < go.transform.childCount; ++i)
+        {
+            var childGO = go.transform.GetChild(i).gameObject;
+
+            c = GetFirstComponentOfType<T>(childGO);
+
+            if (c != null)
+            {
+                return c; // Found in subtree :-)
+            }
+        }
+
+        // Not found :-(
+        return default(T);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void RotateDefaultCameras()
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            var t = GetDefaultCamera(i).transform;
+            t.Rotate(Vector3.up, 0.01f);
+            t.RotateAroundLocal(Vector3.left, 0.01f);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="viewLayout"></param>
+    void SetViewLayout(int viewLayout)
+    {
+        if (_viewLayout == viewLayout)
+        {
+            return;
+        }
+
+        _viewLayout = viewLayout;
+
+        for (int i = 0; i < 4; ++i)
+        {
+            GetDefaultCamera(i).rect = WindowPlacements[viewLayout][i];
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="i"></param>
+    /// <returns></returns>
+    private GameObject GetDefaultCameraGO(int i)
+    {
+        return GameObject.Find("DefaultCamera (" + i + ")");
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="i"></param>
+    /// <returns></returns>
+    private Camera GetDefaultCamera(int i)
+    {
+        return GetDefaultCameraGO(i).GetComponent<Camera>() as Camera;
+    }
+
+    #region Variables
+
     /// <summary>
     /// The application preview scenes.
     /// </summary>
@@ -110,72 +272,6 @@ public class EditorTestApplication : MonoBehaviour
     /// 
     /// </summary>
     bool[] isSceneMerged = { false, false, false, false };
-
-    // Update is called once per frame
-    void Update()
-    {
-        for (int index = 0; index < isSceneMerged.Length; ++index)
-        {
-            if (!isSceneMerged[index])
-            {
-                var scene = SceneManager.GetSceneByName(ApplicationSceneName);
-                var project = SceneManager.GetSceneByName("ProjectKS047");
-                if (scene.isLoaded && project.isLoaded)
-                {
-                    isSceneMerged[index] = true;
-
-                    var applicationScene = SceneManager.CreateScene("ApplicationInstance" + index);
-
-                    SceneManager.MergeScenes(scene, applicationScene);
-                    SceneManager.MergeScenes(project, applicationScene);
-
-                    applicationScenes.Add(applicationScene);
-
-                    GetDefaultCamera(index).scene = applicationScene;
-
-                    if (index != isSceneMerged.Length - 1)
-                    {
-                        LoadApplicationScene(ApplicationSceneName, index + 1);
-                    }
-
-                    var cameraGO = GameObject.Find("CenterEyeAnchor");
-                    if (cameraGO != null)
-                    {
-                        var camera = cameraGO.GetComponent<Camera>();
-
-                        if (camera == null)
-                        {
-                            throw new Exception("EditorTestApplication.Update(): GameObject 'CenterEyeAnchor' does not have a Camera component!");
-                        }
-                        else
-                        { 
-                            //cameraGO.SetActive(false);
-
-                            cameraGO.name = "*" + camera.name; // So it is not found anymore next time.
-                            camera.rect = WindowPlacements[_viewLayout][index];
-                            camera.scene = applicationScene;
-                        }
-                    }
-                }
-                break;
-            }
-        }
-
-        //RotateCameras();
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    private void RotateDefaultCameras()
-    {
-        for (int i = 0; i < 4; ++i)
-        {
-            var t = GetDefaultCamera(i).transform;
-            t.Rotate(Vector3.up, 0.01f);
-            t.RotateAroundLocal(Vector3.left, 0.01f);
-        }
-    }
 
     static Rect[][] WindowPlacements =
     {
@@ -253,35 +349,5 @@ public class EditorTestApplication : MonoBehaviour
         },
     };
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="viewLayout"></param>
-    void SetViewLayout(int viewLayout)
-    {
-        if (_viewLayout == viewLayout)
-        {
-            return;
-        }
-
-        _viewLayout = viewLayout;
-
-        for (int i = 0; i < 4; ++i)
-        {
-            GetDefaultCamera(i).rect = WindowPlacements[viewLayout][i];
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="i"></param>
-    /// <returns></returns>
-    private Camera GetDefaultCamera(int i)
-    {
-        // Setup the i'th default camera to render only its corresponding tested application instance.
-        var cameraGO = GameObject.Find("DefaultCamera (" + i + ")");
-
-        return cameraGO.GetComponent<Camera>() as Camera;
-    }
+    #endregion Variables
 }

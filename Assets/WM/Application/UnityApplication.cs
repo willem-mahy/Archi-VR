@@ -131,7 +131,7 @@ namespace WM.Application
             Default,
             Teleporting
         };
-                
+
         // The generic list of application states.
         protected List<ApplicationState> m_applicationStates = new List<ApplicationState>();
 
@@ -386,137 +386,20 @@ namespace WM.Application
 
         #endregion Variables
 
-        void IMessageProcessor.Process(object message)
-        {
-            // If it's a command, queue it.
-            if (message is ICommand command)
-            {
-                QueueCommand(command);
-            }
-        }
-
-        #region Player Management
+        #region Public API
 
         /// <summary>
         /// 
         /// </summary>
-        public Player Player
+        public bool EnableInput
         {
             get;
-        } = new Player();
-
-        #region Player Name
-
-        /// <summary>
-        /// Sets the name of a remote player.
-        /// </summary>
-        /// <param name="name"></param>
-        public void SetPlayerName(
-            Guid playerID,
-            string playerName)
-        {
-            WM.Logger.Debug("SetPlayerName(" + playerID + ", " + name + ")");
-
-            // Targeted player should be known by the application!
-            Debug.Assert(Players.ContainsKey(playerID));
-
-            lock (Players)
-            {
-                if (Players.ContainsKey(playerID))
-                {
-                    var player = Players[playerID];
-                    player.Name = playerName;
-                }
-            }
+            set;
         }
 
         /// <summary>
-        /// Sets the name of the local player.
+        /// 
         /// </summary>
-        /// <param name="name"></param>
-        public void SetPlayerName(string name)
-        {
-            WM.Logger.Debug("SetPlayerName(" + name + ")");
-
-            Player.Name = name;
-
-            if (Client.Connected)
-            {
-                Client.SendCommand(new SetPlayerNameCommand(Player.ID, Player.Name));
-            }
-        }
-
-        #endregion Player Name
-
-        #region Player Avatar
-
-        /// <summary>
-        /// Sets the avatar for the local player.
-        /// </summary>
-        /// <param name="avatarID"></param>
-        public void SetPlayerAvatar(int avatarIndex)
-        {
-            WM.Logger.Debug("SetAvatar(" + avatarIndex + ")");
-
-            var avatarID = GetAvatarID(avatarIndex);
-            SetPlayerAvatar(avatarID);
-        }
-
-        /// <summary>
-        /// Sets the avatar for the local player.
-        /// </summary>
-        /// <param name="avatarID"></param>
-        public void SetPlayerAvatar(Guid avatarID)
-        {
-            WM.Logger.Debug("SetAvatar(" + avatarID.ToString() + ")");
-
-            if (NetworkMode == NetworkMode.Standalone)
-            {
-                WM.Logger.Warning("Network mode should not be 'Standalone'!");
-                return;
-            }
-
-            Player.AvatarID = avatarID;
-
-            if (Client.Connected)
-            {
-                Client.SendCommand(new SetPlayerAvatarCommand(Player.ID, avatarID));
-            }
-        }
-
-        #endregion Player Avatar
-
-        #endregion Player Management
-
-        #region GameObject overrides
-
-        public void OnEnable()
-        {
-            #region Automatically get build version
-
-            // Get from assembly meta info.
-            var assemblyVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-
-            var buildDate = new DateTime(2000, 1, 1)     // baseline is 01/01/2000
-            .AddDays(assemblyVersion.Build)             // build is number of days after baseline
-            .AddSeconds(assemblyVersion.Revision * 2);    // revision is half the number of seconds into the day
-
-            //Console.WriteLine("Major   : {0}", assemblyVersion.Major);
-            //Console.WriteLine("Minor   : {0}", assemblyVersion.Minor);
-            //Console.WriteLine("Build   : {0} = {1}", assemblyVersion.Build, buildDate.ToShortDateString());
-            //Console.WriteLine("Revision: {0} = {1}", assemblyVersion.Revision, buildDate.ToLongTimeString());
-            Version = buildDate.ToShortDateString() + " " + buildDate.ToLongTimeString();
-            WM.Logger.Debug("Application version: " + Version);
-
-            #endregion
-        }
-
-        //! Start is called before the first frame update
-        public void Start()
-        {
-            Init();
-        }
-
         public virtual void Init()
         {
             Player.AvatarID = DefaultAvatarID;
@@ -671,115 +554,11 @@ namespace WM.Application
             new InitNetworkCommand(StartupNetworkMode).Execute(this);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public GameObject ActiveMenu { get; private set; }
 
-        private void SetActiveMenu(GameObject activeMenu)
-        {
-            ActiveMenu = activeMenu;
-
-            foreach (var menu in menus)
-            {
-                menu.SetActive(menu == activeMenu);
-            }
-        }
-
-
-        protected Vector3 m_centerEyeAnchorPrev = new Vector3();
-
-        protected int frame = 0;
-
-        /// <summary>
-        /// Update is called once per frame.
-        /// 
-        /// Made 'public' for unit testing.
-        /// </summary>
-        public void Update()
-        {
-            // TODO: WHY THAF is this necessary to make camera work in Editor?
-            var camera = m_centerEyeAnchor.GetComponent<Camera>();
-            if (camera != null)
-            {
-                camera.enabled = false;
-                camera.enabled = true;
-            }
-
-            UpdateControllersLocation();
-
-            if (CanProcessCommands)
-            {
-                lock (commandQueueLock)
-                {
-                    foreach (var command in CommandQueue)
-                    {
-                        command.Execute(this);
-                    }
-                    CommandQueue.Clear();
-                }
-            }
-
-            if (NetworkMode != NetworkMode.Standalone)
-            {
-                UpdateNetwork();
-            }
-
-            if (enableDebugGFX)
-            {
-                var qualityLevel = QualitySettings.GetQualityLevel();
-
-                if (m_controllerInput.m_controllerState.button5Down)
-                {
-                    qualityLevel = UtilIterate.MakeCycle(--qualityLevel, 0, QualitySettings.names.Length);
-                    QualitySettings.SetQualityLevel(qualityLevel);
-                }
-                if (m_controllerInput.m_controllerState.button6Down)
-                {
-                    qualityLevel = UtilIterate.MakeCycle(++qualityLevel, 0, QualitySettings.names.Length);
-                    QualitySettings.SetQualityLevel(qualityLevel);
-                }
-            }
-
-            #region Update controller state.
-
-            m_controllerInput.Update();
-
-            #endregion
-
-            #region Update Button Mapping UI to current controller state.
-
-            if (leftControllerButtonMapping != null)
-            {
-                leftControllerButtonMapping.SetControllerState(m_controllerInput.m_controllerState);
-            }
-
-            if (rightControllerButtonMapping != null)
-            {
-                rightControllerButtonMapping.SetControllerState(m_controllerInput.m_controllerState);
-            }
-
-            #endregion
-
-            #region Toggle HUD menu.
-
-            // HUD menu is toggled using left controller Start button, or F11 button in Editor.
-            bool toggleMenu = m_controllerInput.m_controllerState.buttonStartDown || Input.GetKeyDown(KeyCode.F11);
-
-            if (toggleMenu)
-            {
-                ToggleMenuMode();
-            }
-
-            #endregion
-
-            if (GetActiveApplicationState() != null)
-            {
-                GetActiveApplicationState().Update();
-            }
-        }
-
-        #endregion
-
-        #region
-        
         /// <summary>
         /// 
         /// </summary>
@@ -844,6 +623,258 @@ namespace WM.Application
             }
         }
 
+        #region GameObject overrides
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void OnEnable()
+        {
+            #region Automatically get build version
+
+            // Get from assembly meta info.
+            var assemblyVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+
+            var buildDate = new DateTime(2000, 1, 1)     // baseline is 01/01/2000
+            .AddDays(assemblyVersion.Build)             // build is number of days after baseline
+            .AddSeconds(assemblyVersion.Revision * 2);    // revision is half the number of seconds into the day
+
+            //Console.WriteLine("Major   : {0}", assemblyVersion.Major);
+            //Console.WriteLine("Minor   : {0}", assemblyVersion.Minor);
+            //Console.WriteLine("Build   : {0} = {1}", assemblyVersion.Build, buildDate.ToShortDateString());
+            //Console.WriteLine("Revision: {0} = {1}", assemblyVersion.Revision, buildDate.ToLongTimeString());
+            Version = buildDate.ToShortDateString() + " " + buildDate.ToLongTimeString();
+            WM.Logger.Debug("Application version: " + Version);
+
+            #endregion
+        }
+
+        /// <summary>
+        /// Start is called before the first frame update.
+        /// </summary>
+        public void Start()
+        {
+            Init();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Update()
+        {
+            // TODO: WHY THAF is this necessary to make camera work in Editor?
+            var camera = m_centerEyeAnchor.GetComponent<Camera>();
+            if (camera != null)
+            {
+                camera.enabled = false;
+                camera.enabled = true;
+            }
+
+            UpdateControllersLocation();
+
+            if (CanProcessCommands)
+            {
+                lock (commandQueueLock)
+                {
+                    foreach (var command in CommandQueue)
+                    {
+                        command.Execute(this);
+                    }
+                    CommandQueue.Clear();
+                }
+            }
+
+            if (NetworkMode != NetworkMode.Standalone)
+            {
+                UpdateNetwork();
+            }
+
+            if (enableDebugGFX)
+            {
+                var qualityLevel = QualitySettings.GetQualityLevel();
+
+                if (m_controllerInput.m_controllerState.button5Down)
+                {
+                    qualityLevel = UtilIterate.MakeCycle(--qualityLevel, 0, QualitySettings.names.Length);
+                    QualitySettings.SetQualityLevel(qualityLevel);
+                }
+                if (m_controllerInput.m_controllerState.button6Down)
+                {
+                    qualityLevel = UtilIterate.MakeCycle(++qualityLevel, 0, QualitySettings.names.Length);
+                    QualitySettings.SetQualityLevel(qualityLevel);
+                }
+            }
+
+            #region Update controller state.
+
+            if (EnableInput)
+            {
+                m_controllerInput.Update();
+            }
+
+            #endregion
+
+            #region Update Button Mapping UI to current controller state.
+
+            if (leftControllerButtonMapping != null)
+            {
+                leftControllerButtonMapping.SetControllerState(m_controllerInput.m_controllerState);
+            }
+
+            if (rightControllerButtonMapping != null)
+            {
+                rightControllerButtonMapping.SetControllerState(m_controllerInput.m_controllerState);
+            }
+
+            #endregion
+
+            #region Toggle HUD menu.
+
+            // HUD menu is toggled using left controller Start button, or F11 button in Editor.
+            bool toggleMenu = m_controllerInput.m_controllerState.buttonStartDown || Input.GetKeyDown(KeyCode.F11);
+
+            if (toggleMenu)
+            {
+                ToggleMenuMode();
+            }
+
+            #endregion
+
+            if (GetActiveApplicationState() != null)
+            {
+                GetActiveApplicationState().Update();
+            }
+        }
+
+        #endregion GameObject overrides
+
+        #endregion Public API
+
+        void IMessageProcessor.Process(object message)
+        {
+            // If it's a command, queue it.
+            if (message is ICommand command)
+            {
+                QueueCommand(command);
+            }
+        }
+
+        #region Player Management
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Player Player
+        {
+            get;
+        } = new Player();
+
+        #region Player Name
+
+        /// <summary>
+        /// Sets the name of a remote player.
+        /// </summary>
+        /// <param name="name"></param>
+        public void SetPlayerName(
+            Guid playerID,
+            string playerName)
+        {
+            WM.Logger.Debug("SetPlayerName(" + playerID + ", " + name + ")");
+
+            // Targeted player should be known by the application!
+            Debug.Assert(Players.ContainsKey(playerID));
+
+            lock (Players)
+            {
+                if (Players.ContainsKey(playerID))
+                {
+                    var player = Players[playerID];
+                    player.Name = playerName;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the name of the local player.
+        /// </summary>
+        /// <param name="name"></param>
+        public void SetPlayerName(string name)
+        {
+            WM.Logger.Debug("SetPlayerName(" + name + ")");
+
+            Player.Name = name;
+
+            if (Client.Connected)
+            {
+                Client.SendCommand(new SetPlayerNameCommand(Player.ID, Player.Name));
+            }
+        }
+
+        #endregion Player Name
+
+        #region Player Avatar
+
+        /// <summary>
+        /// Sets the avatar for the local player.
+        /// </summary>
+        /// <param name="avatarID"></param>
+        public void SetPlayerAvatar(int avatarIndex)
+        {
+            WM.Logger.Debug("SetAvatar(" + avatarIndex + ")");
+
+            var avatarID = GetAvatarID(avatarIndex);
+            SetPlayerAvatar(avatarID);
+        }
+
+        /// <summary>
+        /// Sets the avatar for the local player.
+        /// </summary>
+        /// <param name="avatarID"></param>
+        public void SetPlayerAvatar(Guid avatarID)
+        {
+            WM.Logger.Debug("SetAvatar(" + avatarID.ToString() + ")");
+
+            if (NetworkMode == NetworkMode.Standalone)
+            {
+                WM.Logger.Warning("Network mode should not be 'Standalone'!");
+                return;
+            }
+
+            Player.AvatarID = avatarID;
+
+            if (Client.Connected)
+            {
+                Client.SendCommand(new SetPlayerAvatarCommand(Player.ID, avatarID));
+            }
+        }
+
+        #endregion Player Avatar
+
+        #endregion Player Management
+
+        private void SetActiveMenu(GameObject activeMenu)
+        {
+            ActiveMenu = activeMenu;
+
+            foreach (var menu in menus)
+            {
+                menu.SetActive(menu == activeMenu);
+            }
+        }
+
+        protected Vector3 m_centerEyeAnchorPrev = new Vector3();
+
+        protected int frame = 0;
+
+        /// <summary>
+        /// Update is called once per frame.
+        /// 
+        /// Made 'public' for unit testing.
+        /// </summary>
+        
+
+        #region
+        
         /// <summary>
         /// How are we manipulating the tracking space?
         /// - Rotate around local reference and vertical axis
