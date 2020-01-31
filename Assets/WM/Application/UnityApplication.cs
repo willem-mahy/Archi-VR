@@ -658,7 +658,9 @@ namespace WM.Application
         }
 
         /// <summary>
+        /// Update is called once per frame.
         /// 
+        /// Note: Made 'public' for unit testing.
         /// </summary>
         public void Update()
         {
@@ -869,13 +871,6 @@ namespace WM.Application
         protected Vector3 m_centerEyeAnchorPrev = new Vector3();
 
         protected int frame = 0;
-
-        /// <summary>
-        /// Update is called once per frame.
-        /// 
-        /// Made 'public' for unit testing.
-        /// </summary>
-        
 
         #region
         
