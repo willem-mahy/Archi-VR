@@ -34,8 +34,41 @@ public class EditorTestApplication : MonoBehaviour
         TryFinalizeApplicationSceneLoading();
 
         //RotateCameras();
+
+        if (Input.GetKey(KeyCode.Tab))
+        {
+            ActivateNextApplicationInstance();
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    private void ActivateNextApplicationInstance()
+    {
+        int i = UtilIterate.MakeCycle(_activeApplicationInstanceIndex + 1, 0, _applicationInstances.Count);
+
+        ActivateNextApplicationInstance(i);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="applicationInstanceIndex"></param>
+    private void ActivateNextApplicationInstance(int applicationInstanceIndex)
+    {
+        _activeApplicationInstanceIndex = applicationInstanceIndex;
+
+        foreach (var applicationInstance in _applicationInstances)
+        {
+            applicationInstance.EnableInput = false;
+        }
+
+        _applicationInstances[_activeApplicationInstanceIndex].EnableInput = true;
+
+
+
+    }
     /// <summary>
     /// 
     /// </summary>
@@ -120,7 +153,7 @@ public class EditorTestApplication : MonoBehaviour
                     UnityApplication applicationInstance = null;
                     foreach (var go in scene.GetRootGameObjects())
                     {
-                        applicationInstance = UtilUnity.GetFirstComponentOfType<WM.Application.UnityApplication>(go);
+                        applicationInstance = UtilUnity.GetFirstComponentOfType<UnityApplication>(go);
 
                         if (applicationInstance != null)
                         {
@@ -135,6 +168,10 @@ public class EditorTestApplication : MonoBehaviour
 
                     // Only enable input on the first application instance.
                     applicationInstance.EnableInput = (index == 0);
+                    
+                    _applicationInstances.Add(applicationInstance);
+                    
+                    _activeApplicationInstanceIndex = 0;
 
                     var applicationScene = SceneManager.CreateScene("ApplicationInstance" + index);
 
@@ -227,6 +264,16 @@ public class EditorTestApplication : MonoBehaviour
     }
 
     #region Variables
+
+    /// <summary>
+    /// The index (into '_applicationInstances') of the active application instance.
+    /// </summary>
+    private int _activeApplicationInstanceIndex = -1;
+
+    /// <summary>
+    /// The list of application instances.
+    /// </summary>
+    private List<UnityApplication> _applicationInstances = new List<UnityApplication>();
 
     /// <summary>
     /// The application preview scenes.
