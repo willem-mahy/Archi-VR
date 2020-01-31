@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using WM;
+using WM.Application;
 
 public class EditorTestApplication : MonoBehaviour
 {
@@ -115,10 +117,10 @@ public class EditorTestApplication : MonoBehaviour
                     isSceneMerged[index] = true;
 
                     // First get the UnityApplication from the loaded application scene.
-                    WM.Application.UnityApplication applicationInstance = null;
+                    UnityApplication applicationInstance = null;
                     foreach (var go in scene.GetRootGameObjects())
                     {
-                        applicationInstance = GetFirstComponentOfType<WM.Application.UnityApplication>(go);
+                        applicationInstance = UtilUnity.GetFirstComponentOfType<WM.Application.UnityApplication>(go);
 
                         if (applicationInstance != null)
                         {
@@ -170,33 +172,6 @@ public class EditorTestApplication : MonoBehaviour
                 break;
             }
         }
-    }
-
-    T GetFirstComponentOfType<T>(GameObject go)
-    {
-        // If you contain it yourself, return the component.
-        var c = go.GetComponent<T>();
-
-        if (c != null)
-        {
-            return c; // Found in self :-)
-        }
-
-        // Else recurse into subtree.
-        for (int i = 0; i < go.transform.childCount; ++i)
-        {
-            var childGO = go.transform.GetChild(i).gameObject;
-
-            c = GetFirstComponentOfType<T>(childGO);
-
-            if (c != null)
-            {
-                return c; // Found in subtree :-)
-            }
-        }
-
-        // Not found :-(
-        return default(T);
     }
 
     /// <summary>

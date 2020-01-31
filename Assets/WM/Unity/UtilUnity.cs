@@ -6,7 +6,12 @@ namespace WM
      */
     public class UtilUnity
     {
-        // Clamps value to range [minValue, maxValue[ by making it cycle, if necessary.
+        /// <summary>
+        /// Tries to find a GameObject with the given name.
+        /// Logs a warning if no such GameObject found.
+        /// </summary>
+        /// <param name="name">The name to search for.</param>
+        /// <returns>The first found GameObject with the given name.</returns>
         public static GameObject TryFindGameObject(string name)
         {
             var go = GameObject.Find(name);
@@ -16,6 +21,40 @@ namespace WM
                 WM.Logger.Warning("GameObject '" + name + "' not found.");
             }
             return go;
+        }
+
+        /// <summary>
+        /// Tries to find the first Component of type 'T' in the given GameObject,
+        /// or any GameObject under it, recursively.
+        /// </summary>
+        /// <typeparam name="T">The type of component to find.</typeparam>
+        /// <param name="go">The root GameObject to search under.</param>
+        /// <returns>The first component found, or 'null' if no such component found.</returns>
+        public static T GetFirstComponentOfType<T>(GameObject go)
+        {
+            // If you contain it yourself, return the component.
+            var c = go.GetComponent<T>();
+
+            if (c != null)
+            {
+                return c; // Found in self :-)
+            }
+
+            // Else recurse into subtree.
+            for (int i = 0; i < go.transform.childCount; ++i)
+            {
+                var childGO = go.transform.GetChild(i).gameObject;
+
+                c = GetFirstComponentOfType<T>(childGO);
+
+                if (c != null)
+                {
+                    return c; // Found in subtree :-)
+                }
+            }
+
+            // Not found :-(
+            return default(T);
         }
     }
 }
