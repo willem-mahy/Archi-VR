@@ -399,6 +399,17 @@ namespace WM.Application
         #region Public API
 
         /// <summary>
+        /// The application ID
+        /// 
+        /// Note: Used while debugging Unity Apps using the WM test application, in order to identify application instances from each other.
+        /// </summary>
+        public int ID
+        {
+            get;
+            set;
+        } = -1;
+
+        /// <summary>
         /// Whether the application should react on user input (KB/Mouse/VR or ART tracking sensors...)
         /// 
         /// Note: Used by the test application, to make only the 'active application instance' react on user input.
