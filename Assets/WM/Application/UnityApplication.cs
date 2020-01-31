@@ -399,13 +399,15 @@ namespace WM.Application
         #region Public API
 
         /// <summary>
+        /// Whether the application should react on user input (KB/Mouse/VR or ART tracking sensors...)
         /// 
+        /// Note: Used by the test application, to make only the 'active application instance' react on user input.
         /// </summary>
         public bool EnableInput
         {
             get;
             set;
-        }
+        } = true;
 
         /// <summary>
         /// 
