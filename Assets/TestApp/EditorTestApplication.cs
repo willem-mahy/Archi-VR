@@ -27,7 +27,7 @@ public class EditorTestApplication : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        TryFinalizeApplicationSceneLoading();
+        TryFinalizeApplicationInstanceInitialisation();
 
         if (Input.GetKey(KeyCode.Tab))
         {
@@ -72,8 +72,13 @@ public class EditorTestApplication : MonoBehaviour
         SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
     }
 
-    // Update is called once per frame
-    void TryFinalizeApplicationSceneLoading()
+    /// <summary>
+    /// If an application instance is being initialized, and its appliction scene is fully loaded,
+    /// performs the post-load operations to finalize the initialization.
+    /// - Get handle to UnityApplication instance
+    /// - ...
+    /// </summary>
+    void TryFinalizeApplicationInstanceInitialisation()
     {
         if (_applicationInstanceBeingInitializedIndex == -1)
         {
