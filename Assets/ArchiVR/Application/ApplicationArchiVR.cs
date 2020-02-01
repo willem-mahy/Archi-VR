@@ -57,7 +57,14 @@ namespace ArchiVR.Application
     {
         #region Variables
 
-        // The typed application states.
+        /// <summary>
+        /// The OVRManger prefab.
+        /// </summary>
+        public GameObject ovrManagerPrefab;
+
+        /// <summary>
+        /// The typed application states.
+        /// </summary>
         public ApplicationStateDefault applicationStateDefault = new ApplicationStateDefault();
         public ApplicationStateTeleporting applicationStateTeleporting = new ApplicationStateTeleporting();
 
@@ -142,6 +149,12 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Init()
         {
+            if (OVRManager.instance == null)
+            {
+                // Instantiate at position (0, 0, 0) and zero rotation.
+                Instantiate(ovrManagerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+            }
+
             // Initialize application modes
             applicationStateTeleporting.TeleportationSystem = this.TeleportationSystem = new TeleportationSystemArchiVR(this);
 
@@ -149,12 +162,6 @@ namespace ArchiVR.Application
             m_applicationStates.Add(applicationStateTeleporting);
             
             base.Init();
-
-            if (OVRManager.instance == null)
-            {
-                var m = GameObject.Find("OVRCameraRig").GetComponent("OvrManager") as OVRManager;
-                m.enabled = true;
-            }
 
             #region Init immersion modes.
 

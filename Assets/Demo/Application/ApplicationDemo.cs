@@ -9,6 +9,9 @@ namespace Demo.Application
     {
         #region Variables
 
+        /// <summary>
+        /// The OVRManger prefab.
+        /// </summary>
         public GameObject ovrManagerPrefab;
 
         // The typed application states.
@@ -26,6 +29,7 @@ namespace Demo.Application
                 // Instantiate at position (0, 0, 0) and zero rotation.
                 Instantiate(ovrManagerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
             }
+
             m_applicationStates.Add(applicationStateDefault);
 
             base.Init();
