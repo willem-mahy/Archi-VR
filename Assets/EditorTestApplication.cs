@@ -19,8 +19,6 @@ public class EditorTestApplication : MonoBehaviour
     /// </summary>
     void Start()
     {
-        HideDefaultScenes();
-
         SetViewLayout(DefaultViewLayout);
 
         //CreateApplicationPreviewScenes();
@@ -67,63 +65,7 @@ public class EditorTestApplication : MonoBehaviour
 
         _applicationInstances[_activeApplicationInstanceIndex].EnableInput = true;
     }
-    /// <summary>
-    /// 
-    /// </summary>
-    private void CreateApplicationPreviewScenes()
-    {
-        for (int i = 0; i < 4; ++i)
-        {
-            // Init The necessary resources for processing i'th tested application instance.
-
-            // Create an application preview scene for it...
-            var applicationPreviewScene = EditorSceneManager.NewPreviewScene();
-            applicationPreviewScene.name = "ApplicationPreview (" + i + ")";
-            applicationPreviewScenes.Add(applicationPreviewScene);
-
-            //LoadDefaultApplicationScene(i);
-
-            // Setup the i'th camera to render only its corresponding tested application instance.
-            var camera = GetDefaultCamera(i);
-
-            camera.scene = applicationPreviewScene;
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    private void HideDefaultScenes()
-    {
-        for (int i = 0; i < 4; ++i)
-        {
-            var defaultSceneGO = GameObject.Find("DefaultScene (" + i + ")");
-
-            if (defaultSceneGO == null)
-            {
-                throw new System.Exception("EditorTestApplication.HideDefaultScenes(): DefaultScene (" + i + ") not found!");
-            }
-
-            defaultSceneGO.SetActive(false);
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="applicationInstanceIndex"></param>
-    private void LoadDefaultApplicationSceneIntoPreviewScene(int applicationInstanceIndex)
-    {
-        var applicationScene = GameObject.Find("ApplicationScene (" + applicationInstanceIndex + ")");
-
-        if (applicationScene == null)
-        {
-            throw new Exception("EditorTestApplication.LoadApplicationSceneIntoPreviewScene(): ApplicationScene (" + applicationInstanceIndex + ") not found!");
-        }
-
-        EditorSceneManager.MoveGameObjectToScene(applicationScene, applicationPreviewScenes[applicationInstanceIndex]);
-    }
-
+    
     /// <summary>
     /// 
     /// </summary>
@@ -221,19 +163,6 @@ public class EditorTestApplication : MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-    private void RotateDefaultCameras()
-    {
-        for (int i = 0; i < 4; ++i)
-        {
-            var t = GetDefaultCamera(i).transform;
-            t.Rotate(Vector3.up, 0.01f);
-            t.RotateAroundLocal(Vector3.left, 0.01f);
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
     /// <param name="viewLayout"></param>
     void SetViewLayout(int viewLayout)
     {
@@ -281,11 +210,6 @@ public class EditorTestApplication : MonoBehaviour
     /// The list of application instances.
     /// </summary>
     private List<UnityApplication> _applicationInstances = new List<UnityApplication>();
-
-    /// <summary>
-    /// The application preview scenes.
-    /// </summary>
-    private List<Scene> applicationPreviewScenes = new List<Scene>();
 
     /// <summary>
     /// The application scenes.
