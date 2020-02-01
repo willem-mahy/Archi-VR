@@ -56,5 +56,35 @@ namespace WM
             // Not found :-(
             return default(T);
         }
+
+        /// <summary>
+        /// Tries to find the first GameObject with given name in the scene hierarchy starting at the given root GameObject.
+        /// </summary>
+        /// <param name="go">The root GameObject to search under.</param>
+        /// <param name="name">The name to search for.</param>
+        /// <returns>The first GameObject found, or 'null' if none found.</returns>
+        public static GameObject FindGameObject(GameObject go, string name)
+        {
+            if (go.name == name)
+            {
+                return go;
+            }
+
+            // Else recurse into subtree.
+            for (int i = 0; i < go.transform.childCount; ++i)
+            {
+                var childGO = go.transform.GetChild(i).gameObject;
+
+                var r = FindGameObject(childGO, name);
+                
+                if (r != null)
+                {
+                    return r;
+                }
+            }
+
+            // Not found :-(
+            return null;
+        }
     }
 }
