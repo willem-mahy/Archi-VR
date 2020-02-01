@@ -29,8 +29,6 @@ public class EditorTestApplication : MonoBehaviour
     {
         TryFinalizeApplicationSceneLoading();
 
-        //RotateCameras();
-
         if (Input.GetKey(KeyCode.Tab))
         {
             ActivateNextApplicationInstance();
