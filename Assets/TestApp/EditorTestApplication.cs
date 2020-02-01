@@ -76,7 +76,8 @@ public class EditorTestApplication : MonoBehaviour
     /// If an application instance is being initialized, and its appliction scene is fully loaded,
     /// performs the post-load operations to finalize the initialization.
     /// - Get handle to UnityApplication instance
-    /// - ...
+    /// - Push the viewlayout to the application camera.
+    /// - Start initialization of the next application instance.
     /// </summary>
     void TryFinalizeApplicationInstanceInitialisation()
     {
