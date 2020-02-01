@@ -444,7 +444,14 @@ namespace ArchiVR.Application
                     yield return null;
                 }
 
-                SceneManager.MergeScenes(SceneManager.GetSceneByName(newProjectName), this.gameObject.scene);
+                var projectScene = SceneManager.GetSceneByName(newProjectName);
+
+                foreach (var go in projectScene.GetRootGameObjects())
+                {
+                    go.transform.position += OffsetPerID;
+                }
+
+                SceneManager.MergeScenes(projectScene, this.gameObject.scene);
 
                 // Update active project index to point to newly activated project.
                 ActiveProjectIndex = TeleportCommand.ProjectIndex;

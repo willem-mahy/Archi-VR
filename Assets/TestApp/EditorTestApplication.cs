@@ -134,6 +134,11 @@ public class EditorTestApplication : MonoBehaviour
                     
         _activeApplicationInstanceIndex = 0;
 
+        foreach (var go in applicationScene.GetRootGameObjects())
+        {
+            go.transform.position += applicationInstance.OffsetPerID;
+        }
+
         applicationScenes.Add(applicationScene);
 
         var cameraGO = GameObject.Find("CenterEyeAnchor");

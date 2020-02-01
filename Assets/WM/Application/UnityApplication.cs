@@ -399,6 +399,14 @@ namespace WM.Application
 
         #region Public API
 
+        public Vector3 OffsetPerID
+        {
+            get
+            {
+                return Vector3.right * 10000 * ID;
+            }
+        }
+
         /// <summary>
         /// The application ID
         /// 
