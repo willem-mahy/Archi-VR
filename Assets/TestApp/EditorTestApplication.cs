@@ -153,7 +153,8 @@ public class EditorTestApplication : MonoBehaviour
         }
             
         camera.rect = WindowPlacements[_viewLayout][_applicationInstanceBeingInitializedIndex];
-        camera.scene = applicationScene;
+
+        //camera.scene = applicationScene; // Only works with preview scenes :-(
 
         // Disable the default camera.
         GetDefaultCameraGO(_applicationInstanceBeingInitializedIndex).SetActive(false);
