@@ -137,12 +137,13 @@ public class EditorTestApplication : MonoBehaviour
         applicationScenes.Add(applicationScene);
 
         var cameraGO = GameObject.Find("CenterEyeAnchor");
+        
         if (cameraGO == null)
         {
             throw new Exception(tag + "GameObject 'CenterEyeAnchor' not found in application scene!");
         }
 
-        cameraGO.name = "*" + cameraGO.name; // So it is not found anymore next time.
+        cameraGO.name = cameraGO.name + postFix; // So it is not found anymore next time.
 
         var camera = cameraGO.GetComponent<Camera>();
 
