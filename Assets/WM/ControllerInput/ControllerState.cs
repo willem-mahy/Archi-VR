@@ -45,6 +45,7 @@ namespace WM
         public bool button7Down = false;
         public bool button8Down = false;
         public bool buttonStartDown = false;
+        public bool buttonOculusDown = false;
         public bool buttonThumbstickPDown = false;
         public bool buttonThumbstickSDown = false;
 
@@ -247,23 +248,32 @@ namespace WM
             rThumbStick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
         }
 
-        //! Updates the controller state using Unity API (keyboard and mouse) while running in editor.
+        /// <summary>
+        /// Updates the state of a simulated controller button, from the state of a mapped KB button.
+        /// </summary>
+        /// <param name="kc"></param>
+        /// <param name="buttonDown"></param>
+        /// <param name="buttonPressed"></param>
+        private static void UpdateButtonState(
+            KeyCode kc,
+            ref bool buttonDown, ref bool buttonPressed)
+        {
+            if (Input.GetKeyDown(kc)) buttonDown = true;
+            if (Input.GetKey(kc)) buttonPressed = true;
+        }
+
+        /// <summary>
+        /// Updates the controller state using Unity API (keyboard and mouse) while running in editor.
+        /// </summary>
         public void Update_Editor()
         {
             // Left controller
-            if (Input.GetKey(KeyCode.F1)) button3Pressed = true;
-            if (Input.GetKey(KeyCode.F2)) button4Pressed = true;
-           
-            if (Input.GetKeyDown(KeyCode.F)) button5Down = true;
-            if (Input.GetKey(KeyCode.F)) button5Pressed = true;
-
-            if (Input.GetKeyDown(KeyCode.R)) button7Down = true;
-            if (Input.GetKey(KeyCode.R)) button7Pressed = true;
-
-            if (Input.GetKey(KeyCode.F11)) buttonStartPressed = true;
-
-            if (Input.GetKeyDown(KeyCode.A)) lThumbstickDown = true;
-            if (Input.GetKey(KeyCode.A)) lThumbstickPressed = true;
+            UpdateButtonState(KeyCode.F1, ref button3Down, ref button3Pressed);
+            UpdateButtonState(KeyCode.F2, ref button4Down, ref button4Pressed);
+            UpdateButtonState(KeyCode.F, ref button5Down, ref button5Pressed);
+            UpdateButtonState(KeyCode.R, ref button7Down, ref button7Pressed);
+            UpdateButtonState(KeyCode.F11, ref buttonStartDown, ref buttonStartPressed);
+            UpdateButtonState(KeyCode.A, ref lThumbstickDown, ref lThumbstickPressed);
 
             if (Input.GetKey(KeyCode.Q)) lThumbStick.x -= 1;
             if (Input.GetKey(KeyCode.D)) lThumbStick.x += 1;
@@ -271,11 +281,9 @@ namespace WM
             if (Input.GetKey(KeyCode.Z)) lThumbStick.y += 1;
 
             // Right controller
-            if (Input.GetKey(KeyCode.F3)) button1Pressed = true;
-            if (Input.GetKey(KeyCode.F4)) button2Pressed = true;
-
-            if (Input.GetKey(KeyCode.F12)) buttonOculusPressed = true;
-
+            UpdateButtonState(KeyCode.F3, ref button1Down, ref button1Pressed);
+            UpdateButtonState(KeyCode.F4, ref button2Down, ref button2Pressed);
+            UpdateButtonState(KeyCode.F12, ref buttonOculusDown, ref buttonOculusPressed);
             if (Input.GetMouseButtonDown(1)) button6Down = true;
             if (Input.GetMouseButton(1)) button6Pressed = true;
             if (Input.GetMouseButtonDown(0)) button8Down = true;
@@ -286,8 +294,7 @@ namespace WM
             if (Input.GetKey(KeyCode.DownArrow)) rThumbStick.y -= 1;
             if (Input.GetKey(KeyCode.UpArrow)) rThumbStick.y += 1;
 
-            if (Input.GetKeyDown(KeyCode.Plus)) rThumbstickDown = true;
-            if (Input.GetKey(KeyCode.Plus)) rThumbstickPressed = true; 
+            UpdateButtonState(KeyCode.Plus, ref rThumbstickDown, ref rThumbstickPressed); 
             
             if (Input.GetMouseButtonDown(2)) rThumbstickDown = true;
             if (Input.GetMouseButton(2)) rThumbstickPressed = true;
