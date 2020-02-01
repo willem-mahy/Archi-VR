@@ -29,7 +29,7 @@ public class EditorTestApplication : MonoBehaviour
     {
         TryFinalizeApplicationInstanceInitialisation();
 
-        if (Input.GetKey(KeyCode.Tab))
+        if (Input.GetKeyDown(KeyCode.Tab))
         {
             ActivateNextApplicationInstance();
         }
