@@ -36,5 +36,11 @@ namespace Demo.Application
 
             SetActiveApplicationState(UnityApplication.ApplicationStates.Default);
         }
+
+        protected override void OnEnableInputChanged()
+        {
+            m_ovrCameraRig.GetComponent<OVRCameraRig>().enabled = EnableInput;
+            m_ovrCameraRig.GetComponent<OVRHeadsetEmulator>().enabled = EnableInput;
+        }
     };
 }

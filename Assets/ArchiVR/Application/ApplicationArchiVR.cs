@@ -798,6 +798,12 @@ namespace ArchiVR.Application
             ((ClientArchiVR)Client).UpdateAvatarStatesFromUdp();
         }
 
+        protected override void OnEnableInputChanged()
+        {
+            m_ovrCameraRig.GetComponent<OVRCameraRig>().enabled = EnableInput;
+            m_ovrCameraRig.GetComponent<OVRHeadsetEmulator>().enabled = EnableInput;
+        }
+
         #endregion
     };
 }

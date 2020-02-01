@@ -410,6 +410,8 @@ namespace WM.Application
             set;
         } = -1;
 
+        private bool _enableInput = true;
+
         /// <summary>
         /// Whether the application should react on user input (KB/Mouse/VR or ART tracking sensors...)
         /// 
@@ -417,9 +419,18 @@ namespace WM.Application
         /// </summary>
         public bool EnableInput
         {
-            get;
-            set;
-        } = true;
+            get
+            {
+                return _enableInput;
+            }
+            set
+            {
+                _enableInput = value;
+                OnEnableInputChanged();
+            }
+        }
+
+        abstract protected void OnEnableInputChanged();
 
         /// <summary>
         /// 
