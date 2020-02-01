@@ -366,7 +366,7 @@ namespace ArchiVR.Application
         public bool ToggleActivePOI()
         {
             // Active project is toggled using X/Y button, F1/F2 keys.
-            bool activatePrev = m_controllerInput.m_controllerState.button1Down || Input.GetKeyDown(KeyCode.F3);
+            bool activatePrev = m_controllerInput.m_controllerState.button1Down;
 
             if (activatePrev)
             {
@@ -374,7 +374,7 @@ namespace ArchiVR.Application
                 return true;
             }
 
-            bool activateNext = m_controllerInput.m_controllerState.button2Down || Input.GetKeyDown(KeyCode.F4);
+            bool activateNext = m_controllerInput.m_controllerState.button2Down;
 
             if (activateNext)
             {
