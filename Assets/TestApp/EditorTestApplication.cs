@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using WM;
@@ -11,8 +10,8 @@ public class EditorTestApplication : MonoBehaviour
     private int DefaultViewLayout = 8;
 
     private const string ApplicationSceneName =
-        //"Application_ArchiVR";
-        "Application_Demo";
+        "Application_ArchiVR";
+        //"Application_Demo";
 
     /// <summary>
     /// Start is called before the first frame update.
