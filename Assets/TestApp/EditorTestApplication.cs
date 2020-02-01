@@ -20,8 +20,6 @@ public class EditorTestApplication : MonoBehaviour
     {
         SetViewLayout(DefaultViewLayout);
 
-        //CreateApplicationPreviewScenes();
-
         // Load first scene.
         LoadApplicationScene(ApplicationSceneName, 0);        
     }
