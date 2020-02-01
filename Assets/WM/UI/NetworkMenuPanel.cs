@@ -36,7 +36,8 @@ namespace WM.UI
         {
             #region Get references to GameObjects.
 
-            Application = UtilUnity.TryFindGameObject("Application").GetComponent<UnityApplication>();
+            var applicationGO = UtilUnity.TryFindGameObject("Application");
+            Application = applicationGO.GetComponent<UnityApplication>();
 
             #endregion
 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using WM.Command;
 using WM.Net;
 using WM.UI;
@@ -426,7 +427,7 @@ namespace WM.Application
         public virtual void Init()
         {
             Player.AvatarID = DefaultAvatarID;
-            Player.ClientID = Client.ID;
+            Player.ClientID = Client == null ? new Guid() : Client.ID;
 
             #region Get handles to game objects
 
@@ -910,17 +911,10 @@ namespace WM.Application
         };
 
         /// <summary>
-        /// 
-        /// </summary>
-        protected virtual void UpdateNetwork()
-        {
-            DoUpdateNetwork();
-        }
-
-        /// <summary>
         /// To be implemented by concrete application types.
         /// </summary>
-        abstract protected void DoUpdateNetwork();
+        virtual protected void UpdateNetwork()
+        { }
 
         /// <summary>
         /// 

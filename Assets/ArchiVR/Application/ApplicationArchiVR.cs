@@ -150,9 +150,15 @@ namespace ArchiVR.Application
             
             base.Init();
 
+            if (OVRManager.instance == null)
+            {
+                var m = GameObject.Find("OVRCameraRig").GetComponent("OvrManager") as OVRManager;
+                m.enabled = true;
+            }
+
             #region Init immersion modes.
 
-            m_immersionModes.Add(ImmersionModeWalkthrough);
+                m_immersionModes.Add(ImmersionModeWalkthrough);
             m_immersionModes.Add(ImmersionModeMaquette);
 
             foreach (var immersionMode in m_immersionModes)
@@ -168,24 +174,6 @@ namespace ArchiVR.Application
             SetActiveImmersionMode(DefaultImmersionModeIndex);
 
             SetActiveProject(0);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        protected override void UpdateNetwork()
-        {
-            if (((m_centerEyeAnchor.transform.position - m_centerEyeAnchorPrev).magnitude > 0.01f) || (frame++ % 10 == 0))
-            {
-                ((ClientArchiVR)Client).SendAvatarStateToUdp(
-                    m_centerEyeAnchor,
-                    m_leftHandAnchor,
-                    m_rightHandAnchor);
-                m_centerEyeAnchorPrev = m_centerEyeAnchor.transform.position;
-            }
-
-            // Update player states, with the avatar states received from the server via UDP.
-            ((ClientArchiVR)Client).UpdateAvatarStatesFromUdp();
         }
 
         #region Immersion mode
@@ -441,13 +429,15 @@ namespace ArchiVR.Application
 
                 WM.Logger.Debug("Loading project '" + newProjectName + "'");
 
-                AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(newProjectName, LoadSceneMode.Additive);
+                var asyncLoad = SceneManager.LoadSceneAsync(newProjectName, LoadSceneMode.Additive);
 
                 // Wait until asynchronous loading the new project finishes.
                 while (!asyncLoad.isDone)
                 {
                     yield return null;
                 }
+
+                SceneManager.MergeScenes(SceneManager.GetSceneByName(newProjectName), this.gameObject.scene);
 
                 // Update active project index to point to newly activated project.
                 ActiveProjectIndex = TeleportCommand.ProjectIndex;
@@ -784,9 +774,9 @@ namespace ArchiVR.Application
         /// <summary>
         /// 
         /// </summary>
-        protected override void DoUpdateNetwork()
+        protected override void UpdateNetwork()
         {
-            WM.Logger.Debug(name + ".DoUpdateNetwork()");
+            WM.Logger.Debug(name + ".UpdateNetwork()");
 
             if (((m_centerEyeAnchor.transform.position - m_centerEyeAnchorPrev).magnitude > 0.01f) || (frame++ % 10 == 0))
             {
