@@ -88,18 +88,27 @@ public class EditorTestApplication : MonoBehaviour
 
         var tag = "EditorTestApplication.TryFinalizeApplicationSceneLoading(" + _applicationInstanceBeingInitializedIndex + ")";
 
-        var applicationScene = SceneManager.GetSceneByName(ApplicationSceneName);
+        var applicationSceneOrig = SceneManager.GetSceneByName(ApplicationSceneName);
 
-        if (applicationScene == null)
+        if (applicationSceneOrig == null)
         {
             return; // Application scene not loaded yet.
         }
-        
-        if (!applicationScene.isLoaded)
+
+        if (!applicationSceneOrig.isLoaded)
         {
             return; // Application scene not loaded yet.
         }
-        
+
+        var postFix = "(" + _applicationInstanceBeingInitializedIndex + ")";
+
+        // Since renaming a saved scene is not allowed, we merge the loaded application scene into a uniquely named new scene(applicationScene).
+        // The originally loaded scene (applicationSceneOrig) will be destroyed automatically by merging it into the final, uniquely named, application scene.
+        var uniqueApplicationSceneName = applicationSceneOrig.name + postFix;
+
+        var applicationScene = SceneManager.CreateScene(uniqueApplicationSceneName);
+        SceneManager.MergeScenes(applicationSceneOrig, applicationScene);
+
         // First get the UnityApplication from the loaded application scene.
         UnityApplication applicationInstance = null;
         foreach (var go in applicationScene.GetRootGameObjects())
