@@ -440,6 +440,11 @@ namespace WM.Application
             Player.AvatarID = DefaultAvatarID;
             Player.ClientID = Client == null ? new Guid() : Client.ID;
 
+            if (Client != null)
+            {
+                Client.MessageProcessor = this;
+            }
+
             #region Get handles to game objects
 
             if (m_ovrCameraRig == null)
