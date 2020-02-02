@@ -8,6 +8,7 @@ using ArchiVR.Command;
 using ArchiVR.Net;
 using WM.Application;
 using WM.Command;
+using System;
 
 [assembly: System.Reflection.AssemblyVersion("1.0.*")]
 
@@ -183,9 +184,29 @@ namespace ArchiVR.Application
 
             GatherProjects();
 
+            RegisterAvatars();
+            
             SetActiveImmersionMode(DefaultImmersionModeIndex);
 
             SetActiveProject(0);
+        }
+
+        private static Guid avatarMarioID       = new Guid("{760AB06A-8A58-42AF-BF40-E42CC5E3DD98}");
+        private static Guid avatarWillSmithID   = new Guid("{35871844-B6DD-4AEC-B205-71C811D5960E}");
+        private static Guid avatarTuxID         = new Guid("{854CC70A-1F01-49DC-8CFF-35FFF0CB6D38}");
+        private static Guid avatarIronManID     = new Guid("{5B3C96EB-C854-49AE-BACC-3145CDF743AF}");
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void RegisterAvatars()
+        {
+            AvatarFactory.Register(avatarMarioID, UtilUnity.TryFindGameObject(gameObject.scene, "Avatar Mario"));
+            AvatarFactory.Register(avatarWillSmithID, UtilUnity.TryFindGameObject(gameObject.scene, "Avatar WillSmith"));
+            AvatarFactory.Register(avatarTuxID, UtilUnity.TryFindGameObject(gameObject.scene, "Avatar TUX"));
+            AvatarFactory.Register(avatarIronManID, UtilUnity.TryFindGameObject(gameObject.scene, "Avatar IronMan"));
+
+            DefaultAvatarID = avatarMarioID;
         }
 
         #region Immersion mode
