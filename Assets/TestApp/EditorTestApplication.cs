@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using WM;
@@ -174,6 +175,8 @@ public class EditorTestApplication : MonoBehaviour
         {
             // We just finalized initialization of the last application instance.
             _applicationInstanceBeingInitializedIndex = -1;
+
+            //FailedExperiment_RenderOnlyAssociatedApplicationSceneForEachViewUsingCameraDelegates();
         }
     }
 
@@ -215,6 +218,78 @@ public class EditorTestApplication : MonoBehaviour
     {
         return GetDefaultCameraGO(i).GetComponent<Camera>() as Camera;
     }
+
+    //#region FailedExperiment_RenderOnlyAssociatedApplicationSceneForEachViewUsingCameraDelegates
+
+    ///// <summary>
+    ///// 
+    ///// </summary>
+    //private void FailedExperiment_RenderOnlyAssociatedApplicationSceneForEachViewUsingCameraDelegates()
+    //{
+    //    Camera.onPreCull = this.MyPreCull;
+    //    //Camera.onPreRender = this.MyPreRender;
+    //    Camera.onPostRender = this.MyPostRender;
+    //}
+
+    ///// <summary>
+    ///// 
+    ///// </summary>
+    ///// <param name="cam"></param>
+    //public void MyPreCull(Camera cam)
+    //{
+    //    Debug.Log("PreCull " + gameObject.name + " from camera " + cam.gameObject.name);
+
+    //    foreach (var scene in applicationScenes)
+    //    {
+    //        var enable = (scene == cam.gameObject.scene);
+
+    //        foreach (var go in scene.GetRootGameObjects())
+    //        {
+    //            if (go.activeSelf != enable)
+    //                go.SetActive(enable);
+    //        }
+    //    }
+    //}
+
+    ///// <summary>
+    ///// 
+    ///// </summary>
+    ///// <param name="cam"></param>
+    //public void MyPreRender(Camera cam)
+    //{
+    //    Debug.Log("PreRender " + gameObject.name + " from camera " + cam.gameObject.name);
+
+    //    foreach (var scene in applicationScenes)
+    //    {
+    //        var enable = (scene == cam.gameObject.scene);
+
+    //        foreach (var go in scene.GetRootGameObjects())
+    //        {
+    //            if (go.activeSelf != enable)
+    //                go.SetActive(enable);
+    //        }
+    //    }
+    //}
+
+    ///// <summary>
+    ///// 
+    ///// </summary>
+    ///// <param name="cam"></param>
+    //public void MyPostRender(Camera cam)
+    //{
+    //    Debug.Log("PostRender " + gameObject.name + " from camera " + cam.gameObject.name);
+
+    //    foreach (var scene in applicationScenes)
+    //    {
+    //        foreach (var go in scene.GetRootGameObjects())
+    //        {
+    //            if (go.activeSelf != true)
+    //                go.SetActive(true);
+    //        }
+    //    }
+    //}
+
+    //#endregion FailedExperiment_RenderOnlyAssociatedApplicationSceneForEachViewUsingCameraDelegates
 
     #region Variables
 
