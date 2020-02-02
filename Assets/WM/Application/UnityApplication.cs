@@ -399,6 +399,13 @@ namespace WM.Application
 
         #region Public API
 
+        /// <summary>
+        /// A large spatial offset, based on the application ID.
+        /// Used as a (temporary?) workaround by the WM TestApp, in order to achieve the following:
+        /// Have only the application scene associated to an appplication instance visible in that application instance's camera.
+        /// (The scene content of other application instances will be culled away because it is dislocated by this large spatial offset.)
+        /// To be removed as soon as we can do proper per-camera culling of scenes or parts-of-scenes.
+        /// </summary>
         public Vector3 OffsetPerID
         {
             get
@@ -438,6 +445,11 @@ namespace WM.Application
             }
         }
 
+        /// <summary>
+        /// To be implemented by concrete UnityApplication implementations.
+        /// Called whenever EnableInput has changed.
+        /// All actions necessary to reactivate/deactivate all sorts of user input need to be performed here.
+        /// </summary>
         abstract protected void OnEnableInputChanged();
 
         /// <summary>

@@ -805,6 +805,9 @@ namespace ArchiVR.Application
             ((ClientArchiVR)Client).UpdateAvatarStatesFromUdp();
         }
 
+        /// <summary>
+        /// <see cref="UnityApplication.OnEnableInputChanged()"/> implementation.
+        /// </summary>
         protected override void OnEnableInputChanged()
         {
             m_ovrCameraRig.GetComponent<OVRCameraRig>().enabled = EnableInput;

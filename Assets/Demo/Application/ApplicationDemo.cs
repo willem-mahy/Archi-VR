@@ -37,6 +37,9 @@ namespace Demo.Application
             SetActiveApplicationState(UnityApplication.ApplicationStates.Default);
         }
 
+        /// <summary>
+        /// <see cref="UnityApplication.OnEnableInputChanged()"/> implementation.
+        /// </summary>
         protected override void OnEnableInputChanged()
         {
             m_ovrCameraRig.GetComponent<OVRCameraRig>().enabled = EnableInput;
