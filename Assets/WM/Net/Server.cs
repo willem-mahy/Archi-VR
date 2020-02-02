@@ -16,18 +16,48 @@ namespace WM.Net
     [Serializable]
     public class ServerInfo
     {
+        #region Fields
+
+        /// <summary>
+        /// 
+        /// </summary>
         public string IP;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int TcpPort;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int UdpPort;
 
+        #endregion Fields
+
+        #region Constructors
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ServerInfo()
+        {
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="IP"></param>
+        /// <param name="tcpPort"></param>
+        /// <param name="udpPort"></param>
         public ServerInfo(String IP, int tcpPort, int udpPort)
         {
             this.IP = IP;
             TcpPort = tcpPort;
             UdpPort = udpPort;
         }
+
+        #endregion Constructors
     }
 
     /// <summary>
@@ -266,7 +296,7 @@ namespace WM.Net
             {
                 foreach (var clientConnection in clientConnections)
                 {
-                    info += "- IP: " + clientConnection.RemoteIP + "\n";
+                    info += "- IP: " + clientConnection.RemoteIP + ":" + clientConnection.RemotePortTCP + "\n";
                 }
             }
             return info;

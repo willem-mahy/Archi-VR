@@ -14,6 +14,9 @@ namespace WM.Application
         /// </summary>
         private Dictionary<Guid, GameObject> prefabs = new Dictionary<Guid, GameObject>();
 
+        /// <summary>
+        /// <see cref="IGameObjectFactory.Create(Guid, Vector3, Quaternion)"/> implementation.
+        /// </summary>
         public GameObject Create(
             Guid key,
             Vector3 position,
@@ -35,6 +38,9 @@ namespace WM.Application
                     rotation);
         }
 
+        /// <summary>
+        /// <see cref="IGameObjectRegistry.Register(Guid, GameObject)"/> implementation.
+        /// </summary>
         public void Register(
             Guid key,
             GameObject gameObject)
@@ -50,6 +56,15 @@ namespace WM.Application
             }
 
             prefabs[key] = gameObject;
+        }
+
+        /// <summary>
+        /// TODO: add to one of the implemented interfaces?  Hich one then?
+        /// </summary>
+        /// <returns></returns>
+        public List<Guid> GetRegisteredIDs()
+        {
+            return new List<Guid>(prefabs.Keys);
         }
     }
 }

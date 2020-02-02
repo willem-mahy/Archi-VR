@@ -1,5 +1,6 @@
 ﻿using ArchiVR.Command;
 using UnityEngine;
+using WM;
 using WM.Application;
 using WM.Net;
 
@@ -44,7 +45,10 @@ namespace ArchiVR
 
             if (m_maquettePreviewContext == null)
             {
-                m_maquettePreviewContext = GameObject.Find("MaquettePreviewContext");
+                m_maquettePreviewContext =
+                    GameObject.Find("MaquettePreviewContext");
+                    // TODO: make into:
+                    //UtilUnity.TryFindGameObject(gameObject.scene, "MaquettePreviewContext");
             }
 
             if (m_maquettePreviewContext)
@@ -294,7 +298,10 @@ namespace ArchiVR
             activeProject.transform.localScale = scale * Vector3.one;
 
             // Locate around anchor.
-            var modelAnchor = GameObject.Find("ModelAnchor");
+            var modelAnchor =
+                GameObject.Find("ModelAnchor");
+                // TODO: make into:
+                //UtilUnity.TryFindGameObject(gameObject.scene, "ModelAnchor");
 
             if (modelAnchor != null)
             {

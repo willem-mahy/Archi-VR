@@ -59,7 +59,14 @@ namespace WM.UI
                     break;
             }
 
-            IPValueText.text = NetUtil.GetLocalIPAddress().ToString();
+            if (Application.NetworkMode == NetworkMode.Server)
+            {
+                IPValueText.text = NetUtil.GetLocalIPAddress().ToString() + Application.Server.TcpPort;
+            }
+            else
+            {
+                IPValueText.text = NetUtil.GetLocalIPAddress().ToString();
+            }
 
             synchronizingUI = false;
 
@@ -80,24 +87,24 @@ namespace WM.UI
 
             synchronizingUI = false;
 
-            #region Temporary keyboard shortcuts to aid in debugging until control trigger can be emulated in editor mode.
+            //#region Temporary keyboard shortcuts to aid in debugging until control trigger can be emulated in editor mode.
 
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                StandaloneToggleOnValueChanged(true);
-            }
+            //if (Input.GetKeyDown(KeyCode.Alpha1))
+            //{
+            //    StandaloneToggleOnValueChanged(true);
+            //}
 
-            if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                ServerToggleOnValueChanged(true);
-            }
+            //if (Input.GetKeyDown(KeyCode.Alpha2))
+            //{
+            //    ServerToggleOnValueChanged(true);
+            //}
 
-            if (Input.GetKeyDown(KeyCode.Alpha3))
-            {
-                ClientToggleOnValueChanged(true);
-            }
+            //if (Input.GetKeyDown(KeyCode.Alpha3))
+            //{
+            //    ClientToggleOnValueChanged(true);
+            //}
 
-            #endregion
+            //#endregion
         }
 
         void OnEnable()

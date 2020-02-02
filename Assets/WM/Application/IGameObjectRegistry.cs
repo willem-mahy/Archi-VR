@@ -8,6 +8,11 @@ namespace WM.Application
     /// </summary>
     interface IGameObjectRegistry
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <param name="gameObject"></param>
         void Register(
             Guid guid,
             GameObject gameObject);

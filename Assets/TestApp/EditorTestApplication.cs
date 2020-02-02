@@ -1,5 +1,7 @@
-﻿using System;
+﻿using ArchiVR.Application;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -180,16 +182,37 @@ public class EditorTestApplication : MonoBehaviour
 
             //FailedExperiment_RenderOnlyAssociatedApplicationSceneForEachViewUsingCameraDelegates();
 
-            foreach (var application in _applicationInstances)
-            {
-                application.QueueCommand(new SetMenuModeCommand(UnityApplication.MenuMode.Network));
-            }
-
-            _applicationInstances[0].QueueCommand(new InitNetworkCommand(NetworkMode.Server));
-            _applicationInstances[1].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
-            _applicationInstances[2].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
-            _applicationInstances[3].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
+            new Thread(() => PerformStartupLogic()).Start();
         }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void PerformStartupLogic()
+    {
+        foreach (var application in _applicationInstances)
+        {
+            application.QueueCommand(new SetMenuModeCommand(UnityApplication.MenuMode.Network));
+        }
+
+        _applicationInstances[0].QueueCommand(new InitNetworkCommand(NetworkMode.Server));
+        Thread.Sleep(1000);
+        _applicationInstances[1].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
+        Thread.Sleep(1000);
+        _applicationInstances[2].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
+        Thread.Sleep(1000);
+        _applicationInstances[3].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
+
+        _applicationInstances[0].SetPlayerName(/*QueueCommand(new SetPlayerNameCommand(_applicationInstances[0].Player.ID, */"Server");
+        _applicationInstances[1].SetPlayerName(/*QueueCommand(new SetPlayerNameCommand(_applicationInstances[1].Player.ID, */"Client 1");
+        _applicationInstances[2].SetPlayerName(/*QueueCommand(new SetPlayerNameCommand(_applicationInstances[2].Player.ID, */"Client 2");
+        _applicationInstances[3].SetPlayerName(/*QueueCommand(new SetPlayerNameCommand(_applicationInstances[3].Player.ID, */"Client 3");
+
+        _applicationInstances[0].SetPlayerAvatar(/*QueueCommand(new SetPlayerAvatarCommand(_applicationInstances[0].Player.ID, */ApplicationArchiVR.AvatarMarioID);
+        _applicationInstances[1].SetPlayerAvatar(/*QueueCommand(new SetPlayerAvatarCommand(_applicationInstances[1].Player.ID, */ApplicationArchiVR.AvatarTuxID);
+        _applicationInstances[2].SetPlayerAvatar(/*QueueCommand(new SetPlayerAvatarCommand(_applicationInstances[2].Player.ID, */ApplicationArchiVR.AvatarWillSmithID);
+        _applicationInstances[3].SetPlayerAvatar(/*QueueCommand(new SetPlayerAvatarCommand(_applicationInstances[3].Player.ID, */ApplicationArchiVR.AvatarIronManID);
     }
 
     /// <summary>

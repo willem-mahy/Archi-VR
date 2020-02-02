@@ -8,6 +8,13 @@ namespace WM.Application
     /// </summary>
     interface IGameObjectFactory
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <param name="position"></param>
+        /// <param name="rotation"></param>
+        /// <returns></returns>
         GameObject Create(
             Guid guid,
             Vector3 position,

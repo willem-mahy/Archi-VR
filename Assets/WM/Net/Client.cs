@@ -729,7 +729,7 @@ namespace WM.Net
 
             Debug.Assert(State == ClientState.Connecting);
 
-            if (ServerInfo == null)
+            if ((ServerInfo == null) || (ServerInfo.IP == "")) // TODO: why is ServerInfo default-initialized when running ArchiVR from Unity Editor???
             {
                 ServerInfo = GetServerInfoFromUdpBroadcast();
             }

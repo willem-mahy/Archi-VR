@@ -1144,7 +1144,7 @@ namespace WM.Application
                 HudMenu.gameObject.SetActive(menuMode != MenuMode.None);
             }
         }
-        
+
         #endregion
 
         #region Avatar management
@@ -1156,7 +1156,9 @@ namespace WM.Application
         /// <returns></returns>
         public Guid GetAvatarID(int avatarIndex)
         {
-            return DefaultAvatarID; // FIXME: TODO: Convert avatar index to avatar ID Guid!
+            var avatarIDs = AvatarFactory.GetRegisteredIDs();
+
+            return avatarIDs[avatarIndex];
         }
 
         /// <summary>
