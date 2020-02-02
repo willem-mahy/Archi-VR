@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace WM
 {
@@ -16,11 +17,37 @@ namespace WM
         {
             var go = GameObject.Find(name);
 
-            if (!go)
+            if (go == null)
             {
                 WM.Logger.Warning("GameObject '" + name + "' not found.");
             }
             return go;
+        }
+
+        /// <summary>
+        /// Tries to find a GameObject with the given name in the given scene.
+        /// Logs a warning if no such GameObject found.
+        /// </summary>
+        /// <param name="scenee">The scene to search in.</param>
+        /// <param name="name">The name to search for.</param>
+        /// <returns>The first found GameObject with the given name.</returns>
+        public static GameObject TryFindGameObject(
+            Scene scene,
+            string name)
+        {
+            foreach (var go in scene.GetRootGameObjects())
+            {
+                var result = FindGameObject(go, name);
+
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
+            WM.Logger.Warning("GameObject '" + name + "' not found in scene '" + scene.name + "'.");
+            
+            return null;
         }
 
         /// <summary>
