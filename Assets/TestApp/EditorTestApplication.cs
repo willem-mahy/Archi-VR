@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using WM;
 using WM.Application;
+using WM.Command;
+using WM.Net;
 
 public class EditorTestApplication : MonoBehaviour
 {
@@ -178,10 +180,15 @@ public class EditorTestApplication : MonoBehaviour
 
             //FailedExperiment_RenderOnlyAssociatedApplicationSceneForEachViewUsingCameraDelegates();
 
-            foreach (var application in this._applicationInstances)
+            foreach (var application in _applicationInstances)
             {
-                application.QueueCommand(new WM.Command.SetMenuModeCommand(UnityApplication.MenuMode.Network));
+                application.QueueCommand(new SetMenuModeCommand(UnityApplication.MenuMode.Network));
             }
+
+            _applicationInstances[0].QueueCommand(new InitNetworkCommand(NetworkMode.Server));
+            _applicationInstances[1].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
+            _applicationInstances[2].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
+            _applicationInstances[3].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
         }
     }
 
