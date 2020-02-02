@@ -63,6 +63,11 @@ namespace ArchiVR.Application
         public GameObject ovrManagerPrefab;
 
         /// <summary>
+        /// 
+        /// </summary>
+        public GameObject EventSystem;
+
+        /// <summary>
         /// The typed application states.
         /// </summary>
         public ApplicationStateDefault applicationStateDefault = new ApplicationStateDefault();
@@ -812,6 +817,7 @@ namespace ArchiVR.Application
         {
             m_ovrCameraRig.GetComponent<OVRCameraRig>().enabled = EnableInput;
             m_ovrCameraRig.GetComponent<OVRHeadsetEmulator>().enabled = EnableInput;
+            EventSystem.SetActive(EnableInput);
         }
 
         #endregion
