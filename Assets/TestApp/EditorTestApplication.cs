@@ -177,6 +177,11 @@ public class EditorTestApplication : MonoBehaviour
             _applicationInstanceBeingInitializedIndex = -1;
 
             //FailedExperiment_RenderOnlyAssociatedApplicationSceneForEachViewUsingCameraDelegates();
+
+            foreach (var application in this._applicationInstances)
+            {
+                application.QueueCommand(new WM.Command.SetMenuModeCommand(UnityApplication.MenuMode.Network));
+            }
         }
     }
 
