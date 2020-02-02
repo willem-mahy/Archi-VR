@@ -900,12 +900,6 @@ namespace WM.Application
         {
             WM.Logger.Debug("SetAvatar(" + avatarID.ToString() + ")");
 
-            if (NetworkMode == NetworkMode.Standalone)
-            {
-                WM.Logger.Warning("Network mode should not be 'Standalone'!");
-                return;
-            }
-
             Player.AvatarID = avatarID;
 
             if (Client.Connected)
@@ -1164,6 +1158,25 @@ namespace WM.Application
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="avatarID"></param>
+        /// <returns></returns>
+        public int GetAvatarIndex(Guid avatarID)
+        {
+            var avatarIDs = AvatarFactory.GetRegisteredIDs();
+
+            for (int i = 0; i < avatarIDs.Count; ++i)
+            {
+                if (avatarIDs[i].Equals(avatarID))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public PrefabGameObjectFactory AvatarFactory = new PrefabGameObjectFactory();
 
         /// <summary>
@@ -1209,7 +1222,7 @@ namespace WM.Application
         /// <summary>
         /// 
         /// </summary>
-        public Guid DefaultAvatarID
+        abstract public Guid DefaultAvatarID
         {
             get;
             set;

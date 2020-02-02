@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using WM;
@@ -197,22 +196,26 @@ public class EditorTestApplication : MonoBehaviour
         }
 
         _applicationInstances[0].QueueCommand(new InitNetworkCommand(NetworkMode.Server));
-        Thread.Sleep(1000);
+        Thread.Sleep(500); // (*)
         _applicationInstances[1].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
-        Thread.Sleep(1000);
+        Thread.Sleep(500); // (*)
         _applicationInstances[2].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
-        Thread.Sleep(1000);
+        Thread.Sleep(500); // (*)
         _applicationInstances[3].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
 
-        _applicationInstances[0].SetPlayerName(/*QueueCommand(new SetPlayerNameCommand(_applicationInstances[0].Player.ID, */"Server");
-        _applicationInstances[1].SetPlayerName(/*QueueCommand(new SetPlayerNameCommand(_applicationInstances[1].Player.ID, */"Client 1");
-        _applicationInstances[2].SetPlayerName(/*QueueCommand(new SetPlayerNameCommand(_applicationInstances[2].Player.ID, */"Client 2");
-        _applicationInstances[3].SetPlayerName(/*QueueCommand(new SetPlayerNameCommand(_applicationInstances[3].Player.ID, */"Client 3");
+        // TODO:
+        // Design defect: we can only have one Client connecting at a given time!
+        // This is why we need the above sleeps. (*)
 
-        _applicationInstances[0].SetPlayerAvatar(/*QueueCommand(new SetPlayerAvatarCommand(_applicationInstances[0].Player.ID, */ApplicationArchiVR.AvatarMarioID);
-        _applicationInstances[1].SetPlayerAvatar(/*QueueCommand(new SetPlayerAvatarCommand(_applicationInstances[1].Player.ID, */ApplicationArchiVR.AvatarTuxID);
-        _applicationInstances[2].SetPlayerAvatar(/*QueueCommand(new SetPlayerAvatarCommand(_applicationInstances[2].Player.ID, */ApplicationArchiVR.AvatarWillSmithID);
-        _applicationInstances[3].SetPlayerAvatar(/*QueueCommand(new SetPlayerAvatarCommand(_applicationInstances[3].Player.ID, */ApplicationArchiVR.AvatarIronManID);
+        _applicationInstances[0].SetPlayerName("Server");
+        _applicationInstances[1].SetPlayerName("Client 1");
+        _applicationInstances[2].SetPlayerName("Client 2");
+        _applicationInstances[3].SetPlayerName("Client 3");
+
+        _applicationInstances[0].SetPlayerAvatar(ApplicationArchiVR.AvatarMarioID);
+        _applicationInstances[1].SetPlayerAvatar(ApplicationArchiVR.AvatarTuxID);
+        _applicationInstances[2].SetPlayerAvatar(ApplicationArchiVR.AvatarWillSmithID);
+        _applicationInstances[3].SetPlayerAvatar(ApplicationArchiVR.AvatarIronManID);
     }
 
     /// <summary>

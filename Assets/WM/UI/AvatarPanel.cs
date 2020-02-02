@@ -27,9 +27,11 @@ public class AvatarPanel : MonoBehaviour
 
         var options = new List<Dropdown.OptionData>();
 
-        foreach (var avatar in Application.avatarPrefabs)
+        foreach (var avatarID in Application.AvatarFactory.GetRegisteredIDs())
         {
-            options.Add(new Dropdown.OptionData(avatar.name));
+            var avatar = Application.AvatarFactory.Create(avatarID, new Vector3(), new Quaternion()); // TODO: Design defect: we should not be forced to create avatar instances just to get their names!
+            var avatarName = avatar.name.Replace("(Clone)", ""); // En plus, it is super-ugly that we need to remove the 'Clone' suffix here!!!
+            options.Add(new Dropdown.OptionData(avatarName));
         }
 
         AvatarDropdown.options = options;
@@ -44,7 +46,7 @@ public class AvatarPanel : MonoBehaviour
     {
         synchronizingUI = true;
 
-         AvatarDropdown.value = Application.AvatarIndex;
+        AvatarDropdown.value = Application.GetAvatarIndex(Application.Player.AvatarID);
 
         synchronizingUI = false;
 

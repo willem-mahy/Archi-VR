@@ -191,6 +191,15 @@ namespace ArchiVR.Application
             SetActiveProject(0);
         }
 
+        /// <summary>
+        /// <see cref="UnityApplication.DefaultAvatarID"/> implementation.
+        /// </summary>
+        public override Guid DefaultAvatarID
+        {
+            get;
+            set;
+        } = AvatarMarioID;
+
         public static readonly Guid AvatarMarioID       = new Guid("{760AB06A-8A58-42AF-BF40-E42CC5E3DD98}");
         public static readonly Guid AvatarWillSmithID   = new Guid("{35871844-B6DD-4AEC-B205-71C811D5960E}");
         public static readonly Guid AvatarTuxID         = new Guid("{854CC70A-1F01-49DC-8CFF-35FFF0CB6D38}");
@@ -205,8 +214,6 @@ namespace ArchiVR.Application
             AvatarFactory.Register(AvatarWillSmithID, UtilUnity.TryFindGameObject(gameObject.scene, "Avatar WillSmith"));
             AvatarFactory.Register(AvatarTuxID, UtilUnity.TryFindGameObject(gameObject.scene, "Avatar TUX"));
             AvatarFactory.Register(AvatarIronManID, UtilUnity.TryFindGameObject(gameObject.scene, "Avatar IronMan"));
-
-            DefaultAvatarID = AvatarMarioID;
         }
 
         #region Immersion mode

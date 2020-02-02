@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using WM.Application;
 
 [assembly: System.Reflection.AssemblyVersion("1.0.*")]
@@ -36,6 +37,15 @@ namespace Demo.Application
 
             SetActiveApplicationState(UnityApplication.ApplicationStates.Default);
         }
+
+        /// <summary>
+        /// <see cref="UnityApplication.DefaultAvatarID"/> implementation.
+        /// </summary>
+        public override Guid DefaultAvatarID
+        {
+            get;
+            set;
+        } // TODO? = new Guid(...) ???
 
         /// <summary>
         /// <see cref="UnityApplication.OnEnableInputChanged()"/> implementation.
