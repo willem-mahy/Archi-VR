@@ -15,6 +15,9 @@ namespace ArchiVR.Command
         [XmlElement("ImmersionMode")]
         public int ImmersionModeIndex { get; set; }
 
+        /// <summary>
+        /// <see cref="ICommand.Execute(UnityApplication)"/> implementation.
+        /// </summary>
         public void Execute(UnityApplication application)
         {
             WM.Logger.Debug("SetImmersionModeCommand.Execute()");

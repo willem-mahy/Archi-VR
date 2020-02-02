@@ -16,6 +16,9 @@ namespace WM.Command
         [XmlElement("POIName")]
         public string POIName { get; set; } = "";
 
+        /// <summary>
+        /// <see cref="ICommand.Execute(UnityApplication)"/> implementation.
+        /// </summary>
         public void Execute(UnityApplication application)
         {
             WM.Logger.Debug("TeleportCommand.Execute()");

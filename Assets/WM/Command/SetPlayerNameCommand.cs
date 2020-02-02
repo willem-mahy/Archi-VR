@@ -45,7 +45,6 @@ namespace WM.Command
         /// <summary>
         /// <see cref="ICommand.Execute(UnityApplication)"/> implementation.
         /// </summary>
-        /// <param name="application"></param>
         public void Execute(UnityApplication application)
         {
             WM.Logger.Debug("SetPlayerNameCommand.Execute()");

@@ -17,9 +17,17 @@ namespace ArchiVR.Command
         [XmlElement("RotationOffset")]
         public float RotationOffset { get; set; }
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public SetModelLocationCommand()
         { }
 
+        /// <summary>
+        /// Parametrized constructor.
+        /// </summary>
+        /// <param name="positionOffset"></param>
+        /// <param name="rotationOffset"></param>
         public SetModelLocationCommand(
             float positionOffset,
             float rotationOffset)
@@ -28,6 +36,9 @@ namespace ArchiVR.Command
             RotationOffset = rotationOffset;
         }
 
+        /// <summary>
+        /// <see cref="ICommand.Execute(UnityApplication)"/> implementation.
+        /// </summary>
         public void Execute(UnityApplication application)
         {
             WM.Logger.Debug("SetModelLocationCommand.Execute()");
