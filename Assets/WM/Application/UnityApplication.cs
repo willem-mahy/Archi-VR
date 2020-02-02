@@ -1091,7 +1091,7 @@ namespace WM.Application
         /// <summary>
         /// Activates the next menu mode.
         /// </summary>
-        void ToggleMenuMode()
+        public void ToggleMenuMode()
         {
             var newMenuMode = (MenuMode)UtilIterate.MakeCycle((int)menuMode + 1, 0, menus.Count);
 
@@ -1102,7 +1102,7 @@ namespace WM.Application
         /// 
         /// </summary>
         /// <param name="newMenuMode"></param>
-        void SetMenuMode(MenuMode newMenuMode)
+        public void SetMenuMode(MenuMode newMenuMode)
         {
             if (menuMode == MenuMode.None)
             {
