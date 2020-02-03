@@ -51,14 +51,14 @@ public class EditorTestApplication : MonoBehaviour
     {
         int i = UtilIterate.MakeCycle(_activeApplicationInstanceIndex + 1, 0, _applicationInstances.Count);
 
-        ActivateNextApplicationInstance(i);
+        ActivateApplicationInstance(i);
     }
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="applicationInstanceIndex"></param>
-    private void ActivateNextApplicationInstance(int applicationInstanceIndex)
+    private void ActivateApplicationInstance(int applicationInstanceIndex)
     {
         _activeApplicationInstanceIndex = applicationInstanceIndex;
 
@@ -68,8 +68,50 @@ public class EditorTestApplication : MonoBehaviour
         }
 
         _applicationInstances[_activeApplicationInstanceIndex].EnableInput = true;
+
+        AttachBorderToView(_activeApplicationInstanceIndex);
     }
-    
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="viewIndex"></param>
+    private void AttachBorderToView(int viewIndex)
+    {
+        var camera = GetApplicationCamera(viewIndex);
+
+        var canvas = GameObject.Find("ActiveViewBorderCanvas").GetComponent<Canvas>();
+
+        canvas.worldCamera = camera;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="applicationInstanceIndex"></param>
+    /// <returns></returns>
+    private Camera GetApplicationCamera(int applicationInstanceIndex)
+    {
+        var tag = "GetApplicationCamera(" + applicationInstanceIndex + ")";
+
+        var cameraName = "CenterEyeAnchor(" + applicationInstanceIndex + ")";
+        var cameraGO = UtilUnity.TryFindGameObject(cameraName);
+
+        if (cameraGO == null)
+        {
+            throw new Exception(tag + "GameObject '" + cameraName + "' not found!");
+        }
+
+        var camera = cameraGO.GetComponent<Camera>();
+
+        if (camera == null)
+        {
+            throw new Exception(tag + "GameObject '" + cameraName + "' does not contain a 'Camera' component!");
+        }
+
+        return camera;
+    }
+
     /// <summary>
     /// If an application instance is being initialized, and its appliction scene is fully loaded,
     /// performs the post-load operations to finalize the initialization.
@@ -80,6 +122,8 @@ public class EditorTestApplication : MonoBehaviour
     private IEnumerator InitializeApplicationInstances()
     {
         var tag = "EditorTestApplication.InitializeApplicationInstances()";
+
+        _activeApplicationInstanceIndex = 0;
 
         for (int applicationInstanceBeingInitializedIndex = 0; applicationInstanceBeingInitializedIndex < DefaultNumApplicationInstances; ++applicationInstanceBeingInitializedIndex)
         {
@@ -138,8 +182,6 @@ public class EditorTestApplication : MonoBehaviour
 
             _applicationInstances.Add(applicationInstance);
 
-            _activeApplicationInstanceIndex = 0;
-
             foreach (var go in applicationScene.GetRootGameObjects())
             {
                 go.transform.position += applicationInstance.OffsetPerID;
@@ -165,7 +207,10 @@ public class EditorTestApplication : MonoBehaviour
 
             camera.rect = WindowPlacements[_viewLayout][applicationInstanceBeingInitializedIndex];
 
-            //camera.scene = applicationScene; // Only works with preview scenes :-(
+            if (applicationInstanceBeingInitializedIndex == _activeApplicationInstanceIndex)
+            {
+                AttachBorderToView(applicationInstanceBeingInitializedIndex);
+            }
 
             // Disable the default camera.
             GetDefaultCameraGO(applicationInstanceBeingInitializedIndex).SetActive(false);
