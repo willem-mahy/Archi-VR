@@ -910,16 +910,7 @@ namespace WM.Net
 
                 throw new Exception("Client.ProcessMessage: MessageProcessor is null");
             }
-
-            // It is an application-specific logic message, so delegate to the application-specific Client logic.
-            DoProcessMessage(message);
         }
-
-        /// <summary>
-        /// To be implemented by application-specific Client implementations.
-        /// </summary>
-        /// <param name="obj"></param>
-        abstract protected void DoProcessMessage(object obj);
         
         #endregion Non-public API
     }
