@@ -1,5 +1,6 @@
 ﻿using ArchiVR.Application;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -183,14 +184,14 @@ public class EditorTestApplication : MonoBehaviour
 
             //FailedExperiment_RenderOnlyAssociatedApplicationSceneForEachViewUsingCameraDelegates();
 
-            new Thread(() => PerformStartupLogic()).Start();
+            StartCoroutine(PerformStartupLogic());
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    private void PerformStartupLogic()
+    private IEnumerator PerformStartupLogic()
     {
         string[] playerNames =
         {
@@ -224,15 +225,24 @@ public class EditorTestApplication : MonoBehaviour
 
         _applicationInstances[0].QueueCommand(new InitNetworkCommand(NetworkMode.Server));
 
+        while (_applicationInstances[0].Server.State != Server.ServerState.Running)
+        {
+            yield return null;
+        }
+
         for (int i = 1; i < _applicationInstances.Count; ++i)
         {
-            Thread.Sleep(1000); // (*)
             _applicationInstances[i].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
+
+            while (_applicationInstances[i].Client.State != Client.ClientState.Connected) // (*)
+            {
+                yield return null;
+            }
         }
 
         // TODO:
         // Design defect: we can only have one Client connecting at a given time!
-        // This is why we need the above sleeps. (*)
+        // This is why we need the above waits. (*)
 
         //for (int i = 0; i < _applicationInstances.Count; ++i)
         //{
