@@ -12,6 +12,7 @@ using WM.Net;
 public class EditorTestApplication : MonoBehaviour
 {
     private int DefaultViewLayout = 8;
+    private int DefaultNumApplicationInstances = 4;
 
     private const string ApplicationSceneName =
         "Application_ArchiVR";
@@ -169,10 +170,11 @@ public class EditorTestApplication : MonoBehaviour
         GetDefaultCameraGO(_applicationInstanceBeingInitializedIndex).SetActive(false);
 
         // Start initialization of the next appliction instance, if there is one left.
-        if (_applicationInstanceBeingInitializedIndex < 3) // If it was not the last application instance...
+        var nextApplicationInstanceIndex = _applicationInstanceBeingInitializedIndex + 1;
+        if (nextApplicationInstanceIndex < DefaultNumApplicationInstances) // If it was not the last application instance...
         {
             // Start loading the next application instance.
-            LoadApplicationScene(ApplicationSceneName, _applicationInstanceBeingInitializedIndex + 1);
+            LoadApplicationScene(ApplicationSceneName, nextApplicationInstanceIndex);
         }
         else
         {
@@ -190,32 +192,52 @@ public class EditorTestApplication : MonoBehaviour
     /// </summary>
     private void PerformStartupLogic()
     {
+        string[] playerNames =
+        {
+            "Server",
+            "Client 1",
+            "Client 2",
+            "Client 3"
+        };
+
+        Guid[] playerAvatars =
+        {
+            ApplicationArchiVR.AvatarMarioID,
+            ApplicationArchiVR.AvatarTuxID,
+            ApplicationArchiVR.AvatarWillSmithID,
+            ApplicationArchiVR.AvatarIronManID
+        };
+
         foreach (var application in _applicationInstances)
         {
             application.QueueCommand(new SetMenuModeCommand(UnityApplication.MenuMode.Network));
         }
 
+        for (int i = 0; i < _applicationInstances.Count; ++i)
+        {
+            var ai = _applicationInstances[i];
+            ai.SetPlayerName(playerNames[i]);
+            ai.SetPlayerAvatar(playerAvatars[i]);
+        }
+
         _applicationInstances[0].QueueCommand(new InitNetworkCommand(NetworkMode.Server));
-        Thread.Sleep(500); // (*)
-        _applicationInstances[1].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
-        Thread.Sleep(500); // (*)
-        _applicationInstances[2].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
-        Thread.Sleep(500); // (*)
-        _applicationInstances[3].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
+
+        for (int i = 1; i < _applicationInstances.Count; ++i)
+        {
+            Thread.Sleep(1000); // (*)
+            _applicationInstances[i].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
+        }
 
         // TODO:
         // Design defect: we can only have one Client connecting at a given time!
         // This is why we need the above sleeps. (*)
 
-        _applicationInstances[0].SetPlayerName("Server");
-        _applicationInstances[1].SetPlayerName("Client 1");
-        _applicationInstances[2].SetPlayerName("Client 2");
-        _applicationInstances[3].SetPlayerName("Client 3");
-
-        _applicationInstances[0].SetPlayerAvatar(ApplicationArchiVR.AvatarMarioID);
-        _applicationInstances[1].SetPlayerAvatar(ApplicationArchiVR.AvatarTuxID);
-        _applicationInstances[2].SetPlayerAvatar(ApplicationArchiVR.AvatarWillSmithID);
-        _applicationInstances[3].SetPlayerAvatar(ApplicationArchiVR.AvatarIronManID);
+        //for (int i = 0; i < _applicationInstances.Count; ++i)
+        //{
+        //    var ai = _applicationInstances[i];
+        //    ai.SetPlayerName(playerNames[i]);
+        //    ai.SetPlayerAvatar(playerAvatars[i]);
+        //}
     }
 
     /// <summary>
