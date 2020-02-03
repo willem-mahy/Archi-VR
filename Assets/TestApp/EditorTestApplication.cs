@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using WM;
@@ -15,6 +14,8 @@ public class EditorTestApplication : MonoBehaviour
     private int DefaultViewLayout = 8;
     private int DefaultNumApplicationInstances = 4;
 
+    private bool _applicationInstancesInitialized = false;
+
     private const string ApplicationSceneName =
         "Application_ArchiVR";
         //"Application_Demo";
@@ -26,14 +27,16 @@ public class EditorTestApplication : MonoBehaviour
     {
         SetViewLayout(DefaultViewLayout);
 
-        // Load first scene.
-        LoadApplicationScene(ApplicationSceneName, 0);        
+        StartCoroutine(InitializeApplicationInstances());        
     }
 
     // Update is called once per frame
     void Update()
     {
-        TryFinalizeApplicationInstanceInitialisation();
+        if (!_applicationInstancesInitialized)
+        {
+            return;
+        }
 
         if (Input.GetKeyDown(KeyCode.Tab))
         {
@@ -68,124 +71,108 @@ public class EditorTestApplication : MonoBehaviour
     }
     
     /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="sceneName"></param>
-    /// <param name="applicationInstanceIndex"></param>
-    private void LoadApplicationScene(string sceneName, int applicationInstanceIndex)
-    {
-        _applicationInstanceBeingInitializedIndex = applicationInstanceIndex;
-        SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-    }
-
-    /// <summary>
     /// If an application instance is being initialized, and its appliction scene is fully loaded,
     /// performs the post-load operations to finalize the initialization.
     /// - Get handle to UnityApplication instance
     /// - Push the viewlayout to the application camera.
     /// - Start initialization of the next application instance.
     /// </summary>
-    void TryFinalizeApplicationInstanceInitialisation()
+    private IEnumerator InitializeApplicationInstances()
     {
-        if (_applicationInstanceBeingInitializedIndex == -1)
+        var tag = "EditorTestApplication.InitializeApplicationInstances()";
+
+        for (int applicationInstanceBeingInitializedIndex = 0; applicationInstanceBeingInitializedIndex < DefaultNumApplicationInstances; ++applicationInstanceBeingInitializedIndex)
         {
-            return; // Nothing to do.
-        }
+            var loadApplicationSceneOperation = SceneManager.LoadSceneAsync(ApplicationSceneName, LoadSceneMode.Additive);
 
-        var tag = "EditorTestApplication.TryFinalizeApplicationSceneLoading(" + _applicationInstanceBeingInitializedIndex + ")";
-
-        var applicationSceneOrig = SceneManager.GetSceneByName(ApplicationSceneName);
-
-        if (applicationSceneOrig == null)
-        {
-            return; // Application scene not loaded yet.
-        }
-
-        if (!applicationSceneOrig.isLoaded)
-        {
-            return; // Application scene not loaded yet.
-        }
-
-        var postFix = "(" + _applicationInstanceBeingInitializedIndex + ")";
-
-        // Since renaming a saved scene is not allowed, we merge the loaded application scene into a uniquely named new scene(applicationScene).
-        // The originally loaded scene (applicationSceneOrig) will be destroyed automatically by merging it into the final, uniquely named, application scene.
-        var uniqueApplicationSceneName = applicationSceneOrig.name + postFix;
-
-        var applicationScene = SceneManager.CreateScene(uniqueApplicationSceneName);
-        SceneManager.MergeScenes(applicationSceneOrig, applicationScene);
-
-        // First get the UnityApplication from the loaded application scene.
-        UnityApplication applicationInstance = null;
-        foreach (var go in applicationScene.GetRootGameObjects())
-        {
-            applicationInstance = UtilUnity.GetFirstComponentOfType<UnityApplication>(go);
-
-            if (applicationInstance != null)
+            while (!loadApplicationSceneOperation.isDone)
             {
-                break;
+                yield return null;
             }
+
+            var applicationSceneOrig = SceneManager.GetSceneByName(ApplicationSceneName);
+
+            while (applicationSceneOrig == null)
+            {
+                yield return null; // Application scene not loaded yet.
+                applicationSceneOrig = SceneManager.GetSceneByName(ApplicationSceneName);
+            }
+
+            while (!applicationSceneOrig.isLoaded)
+            {
+                yield return null; // Application scene not loaded yet.
+            }
+
+            var postFix = "(" + applicationInstanceBeingInitializedIndex + ")";
+
+            // Since renaming a saved scene is not allowed,
+            // we merge the loaded application scene into a uniquely named new scene(applicationScene).
+            //
+            // The originally loaded scene (applicationSceneOrig) will be destroyed automatically
+            // by merging it into the final, uniquely named, application scene.
+            var uniqueApplicationSceneName = applicationSceneOrig.name + postFix;
+
+            var applicationScene = SceneManager.CreateScene(uniqueApplicationSceneName);
+            SceneManager.MergeScenes(applicationSceneOrig, applicationScene);
+
+            // First get the UnityApplication from the loaded application scene.
+            UnityApplication applicationInstance = null;
+            foreach (var go in applicationScene.GetRootGameObjects())
+            {
+                applicationInstance = UtilUnity.GetFirstComponentOfType<UnityApplication>(go);
+
+                if (applicationInstance != null)
+                {
+                    break;
+                }
+            }
+
+            if (applicationInstance == null)
+            {
+                throw new Exception(tag + "Loaded application scene does not contain a GameObject with a UnityApplication component!");
+            }
+
+            // Only enable input on the first application instance.
+            applicationInstance.ID = applicationInstanceBeingInitializedIndex;
+            applicationInstance.EnableInput = (applicationInstanceBeingInitializedIndex == 0);
+
+            _applicationInstances.Add(applicationInstance);
+
+            _activeApplicationInstanceIndex = 0;
+
+            foreach (var go in applicationScene.GetRootGameObjects())
+            {
+                go.transform.position += applicationInstance.OffsetPerID;
+            }
+
+            applicationScenes.Add(applicationScene);
+
+            var cameraGO = GameObject.Find("CenterEyeAnchor");
+
+            if (cameraGO == null)
+            {
+                throw new Exception(tag + "GameObject 'CenterEyeAnchor' not found in application scene!");
+            }
+
+            cameraGO.name = cameraGO.name + postFix; // So it is not found anymore next time.
+
+            var camera = cameraGO.GetComponent<Camera>();
+
+            if (camera == null)
+            {
+                throw new Exception(tag + "GameObject 'CenterEyeAnchor' does not have a Camera component!");
+            }
+
+            camera.rect = WindowPlacements[_viewLayout][applicationInstanceBeingInitializedIndex];
+
+            //camera.scene = applicationScene; // Only works with preview scenes :-(
+
+            // Disable the default camera.
+            GetDefaultCameraGO(applicationInstanceBeingInitializedIndex).SetActive(false);
         }
 
-        if (applicationInstance == null)
-        {
-            throw new Exception(tag + "Loaded application scene does not contain a GameObject with a UnityApplication component!");
-        }
-
-        // Only enable input on the first application instance.
-        applicationInstance.ID = _applicationInstanceBeingInitializedIndex;
-        applicationInstance.EnableInput = (_applicationInstanceBeingInitializedIndex == 0);
-                    
-        _applicationInstances.Add(applicationInstance);
-                    
-        _activeApplicationInstanceIndex = 0;
-
-        foreach (var go in applicationScene.GetRootGameObjects())
-        {
-            go.transform.position += applicationInstance.OffsetPerID;
-        }
-
-        applicationScenes.Add(applicationScene);
-
-        var cameraGO = GameObject.Find("CenterEyeAnchor");
-        
-        if (cameraGO == null)
-        {
-            throw new Exception(tag + "GameObject 'CenterEyeAnchor' not found in application scene!");
-        }
-
-        cameraGO.name = cameraGO.name + postFix; // So it is not found anymore next time.
-
-        var camera = cameraGO.GetComponent<Camera>();
-
-        if (camera == null)
-        {
-            throw new Exception(tag + "GameObject 'CenterEyeAnchor' does not have a Camera component!");
-        }
-            
-        camera.rect = WindowPlacements[_viewLayout][_applicationInstanceBeingInitializedIndex];
-
-        //camera.scene = applicationScene; // Only works with preview scenes :-(
-
-        // Disable the default camera.
-        GetDefaultCameraGO(_applicationInstanceBeingInitializedIndex).SetActive(false);
-
-        // Start initialization of the next appliction instance, if there is one left.
-        var nextApplicationInstanceIndex = _applicationInstanceBeingInitializedIndex + 1;
-        if (nextApplicationInstanceIndex < DefaultNumApplicationInstances) // If it was not the last application instance...
-        {
-            // Start loading the next application instance.
-            LoadApplicationScene(ApplicationSceneName, nextApplicationInstanceIndex);
-        }
-        else
-        {
-            // We just finalized initialization of the last application instance.
-            _applicationInstanceBeingInitializedIndex = -1;
-
-            //FailedExperiment_RenderOnlyAssociatedApplicationSceneForEachViewUsingCameraDelegates();
-
-            StartCoroutine(PerformStartupLogic());
-        }
+        // Now that all application scenes have been loaded, perform the startup logic on them.
+        StartCoroutine(PerformStartupLogic());
     }
 
     /// <summary>
@@ -250,6 +237,8 @@ public class EditorTestApplication : MonoBehaviour
         //    ai.SetPlayerName(playerNames[i]);
         //    ai.SetPlayerAvatar(playerAvatars[i]);
         //}
+
+        _applicationInstancesInitialized = true;
     }
 
     /// <summary>
@@ -384,11 +373,6 @@ public class EditorTestApplication : MonoBehaviour
     /// The active view layout.
     /// </summary>
     private int _viewLayout = -1;
-
-    /// <summary>
-    /// The index (into eg. 'applicationScenes', ...) of the application instance being initialized.
-    /// </summary>
-    private int _applicationInstanceBeingInitializedIndex = -1;
 
     static Rect[][] WindowPlacements =
     {
