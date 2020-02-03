@@ -446,6 +446,12 @@ namespace WM.Application
                 }
 
                 _enableInput = value;
+
+                if (!EnableInput)
+                {
+                    m_controllerInput.Reset();
+                }
+
                 OnEnableInputChanged();
             }
         }

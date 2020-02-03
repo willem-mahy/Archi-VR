@@ -2,18 +2,47 @@
 
 namespace WM
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ControllerInput
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public enum InputMode
         {
             Unity = 0,
             OVR
         }
 
+        #region Fields
+
+        /// <summary>
+        /// 
+        /// </summary>
         public InputMode m_inputMode = InputMode.OVR;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public ControllerState m_controllerState = new ControllerState();
 
+        #endregion Fields
+
+        #region Public API
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Reset()
+        {
+            m_controllerState = new ControllerState();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public void Update()
         {
             var controllerState = new ControllerState();
@@ -37,5 +66,7 @@ namespace WM
 
             m_controllerState = controllerState;
         }
+
+        #endregion Public API
     }
 }
