@@ -846,7 +846,30 @@ namespace ArchiVR.Application
             m_ovrCameraRig.GetComponent<OVRCameraRig>().enabled = EnableInput;
             m_ovrCameraRig.GetComponent<OVRHeadsetEmulator>().enabled = EnableInput;
             EventSystem.SetActive(EnableInput);
+
+            if (EnableInput)
+            {
+                // Restore the position/rotation of the camera in OVRManager.
+                if (r != null)
+                {
+                    OVRManager.instance.headPoseRelativeOffsetRotation = r;
+                }
+
+                if (t != null)
+                {
+                    OVRManager.instance.headPoseRelativeOffsetTranslation = t;
+                }
+            }
+            else
+            {
+                // Store the position/rotation of the camera in OVRManager.
+                r = OVRManager.instance.headPoseRelativeOffsetRotation;
+                t = OVRManager.instance.headPoseRelativeOffsetTranslation;
+            }
         }
+
+        Vector3 r;
+        Vector3 t;
 
         #endregion
     };
