@@ -423,7 +423,7 @@ namespace WM.Application
         {
             get;
             set;
-        } = -1;
+        } = 0;
 
         private bool _enableInput = true;
 
