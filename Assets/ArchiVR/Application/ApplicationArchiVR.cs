@@ -847,6 +847,8 @@ namespace ArchiVR.Application
             m_ovrCameraRig.GetComponent<OVRHeadsetEmulator>().enabled = EnableInput;
             EventSystem.SetActive(EnableInput);
 
+            m_centerEyeAnchor.GetComponent<AudioListener>().enabled = EnableInput;
+
             if (EnableInput)
             {
                 // Restore the position/rotation of the camera in OVRManager.
