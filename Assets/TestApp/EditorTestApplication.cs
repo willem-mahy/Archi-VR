@@ -208,10 +208,12 @@ public class EditorTestApplication : MonoBehaviour
             ApplicationArchiVR.AvatarIronManID
         };
 
+        /*
         foreach (var application in _applicationInstances)
         {
             application.QueueCommand(new SetMenuModeCommand(UnityApplication.MenuMode.Network));
         }
+        */
 
         for (int i = 0; i < _applicationInstances.Count; ++i)
         {
