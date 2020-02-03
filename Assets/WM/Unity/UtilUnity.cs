@@ -8,6 +8,23 @@ namespace WM
     public class UtilUnity
     {
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="gameObject"></param>
+        public static void Destroy(GameObject gameObject)
+        {
+            // We need to destroy ojects differently in Edit Mode, otherwise eg. Edit Mode Unit Tests complain.  :-(
+            if (UnityEngine.Application.isEditor)
+            {
+                UnityEngine.Object.DestroyImmediate(gameObject);
+            }
+            else
+            {
+                UnityEngine.Object.Destroy(gameObject);
+            }
+        }
+
+        /// <summary>
         /// Tries to find a GameObject with the given name.
         /// Logs a warning if no such GameObject found.
         /// </summary>
