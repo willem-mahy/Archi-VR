@@ -29,15 +29,7 @@ namespace WM.Command
                 {
                     if (player.Avatar != null)
                     {
-                        // We need to destroy ojects differently in Edit Mode, otherwise Edit Mode Unit Tests complain.  :-(
-                        if (UnityEngine.Application.isEditor)
-                        {
-                            GameObject.DestroyImmediate(player.Avatar.gameObject);
-                        }
-                        else
-                        {
-                            GameObject.Destroy(player.Avatar.gameObject);
-                        }
+                        UtilUnity.Destroy(player.Avatar.gameObject);
                     }
                 }
 

@@ -32,6 +32,9 @@ public class AvatarPanel : MonoBehaviour
             var avatar = Application.AvatarFactory.Create(avatarID, new Vector3(), new Quaternion()); // TODO: Design defect: we should not be forced to create avatar instances just to get their names!
             var avatarName = avatar.name.Replace("(Clone)", ""); // En plus, it is super-ugly that we need to remove the 'Clone' suffix here!!!
             options.Add(new Dropdown.OptionData(avatarName));
+
+            // En plus, it is super-ugly that we need to afterwards remove the temporary avatar instance here!!!            
+            UtilUnity.Destroy(avatar);
         }
 
         AvatarDropdown.options = options;

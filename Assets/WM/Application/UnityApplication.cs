@@ -1237,21 +1237,18 @@ namespace WM.Application
         public void AddPlayer(
             Player player)
         {
-            Debug.Assert(!Players.ContainsKey(player.ID));
-
             WM.Logger.Debug(string.Format(name + ":AddPlayer(Client:{0}, Player:{1}, Name:'{2}')", WM.Net.NetUtil.ShortID(player.ClientID), player.LogID, player.Name));
 
             lock (Players)
             {
-                // TODO first: move avatar instance management (creation, init, destruction) into RemoteUser.Init(avatarIndex, pos, rot)?
-                var avatarGO = InstantiateAvatarPrefab(
-                    DefaultAvatarID,
-                    Vector3.zero,
-                    Quaternion.identity);
-
-                player.Avatar = avatarGO.GetComponent<WM.Net.Avatar>();
+                //Debug.Assert(!Players.ContainsKey(player.ID));
 
                 Players[player.ID] = player;
+
+                if (player.ID != this.Player.ID) // We do not need an avatar for the local player.
+                {   
+                    SetPlayerAvatar(player.ID, player.AvatarID);
+                }                
             }
         }
 
@@ -1278,15 +1275,7 @@ namespace WM.Application
 
                 if (Players.ContainsKey(playerID))
                 {
-                    // We need to destroy ojects defferently in Edit Mode, otherwise Edit Mode Unit Tests complain.  :-(
-                    if (UnityEngine.Application.isEditor)
-                    {
-                        DestroyImmediate(Players[playerID].Avatar.gameObject);
-                    }
-                    else
-                    {
-                        Destroy(Players[playerID].Avatar.gameObject);
-                    }
+                    UtilUnity.Destroy(Players[playerID].Avatar.gameObject);
 
                     Players.Remove(playerID);
                 }
@@ -1351,23 +1340,34 @@ namespace WM.Application
                     return;
                 }
 
+                // Get a handle to the old avatar (if any).
                 var oldAvatar = player.Avatar;
 
-                var avatar = InstantiateAvatarPrefab(
-                    avatarID,
-                    oldAvatar.transform.position,
-                    oldAvatar.transform.rotation);
-
-                player.Avatar = avatar.GetComponent<WM.Net.Avatar>();
-                player.AvatarID = avatarID;
+                var position = new Vector3();
+                var rotation = new Quaternion();
 
                 if (oldAvatar != null)
                 {
-                    // We need to destroy ojects defferently in Edit Mode, otherwise Edit Mode Unit Tests complain.  :-(
-                    if (UnityEngine.Application.isEditor)
-                        DestroyImmediate(oldAvatar.gameObject);
-                    else
-                        Destroy(oldAvatar.gameObject);
+                    position = oldAvatar.transform.position;
+                    rotation = oldAvatar.transform.rotation;
+                }
+
+                // Instanciate the new avatar at the location of the old avatar.
+                var avatarGO = InstantiateAvatarPrefab(
+                    avatarID,
+                    position,
+                    rotation);
+                avatarGO.name = "Player(" + player.ID + ") Avatar";
+                SceneManager.MoveGameObjectToScene(avatarGO, gameObject.scene);
+                avatarGO.SetActive(true);
+
+                player.Avatar = avatarGO.GetComponent<WM.Net.Avatar>();
+                player.AvatarID = avatarID;
+
+                // Destroy the old avatar (if any).
+                if (oldAvatar != null)
+                {
+                    UtilUnity.Destroy(oldAvatar.gameObject);
                 }
             }
         }
