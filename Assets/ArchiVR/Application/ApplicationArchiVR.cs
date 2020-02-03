@@ -200,10 +200,10 @@ namespace ArchiVR.Application
             set;
         } = AvatarMarioID;
 
-        public static readonly Guid AvatarMarioID       = new Guid("{760AB06A-8A58-42AF-BF40-E42CC5E3DD98}");
-        public static readonly Guid AvatarWillSmithID   = new Guid("{35871844-B6DD-4AEC-B205-71C811D5960E}");
-        public static readonly Guid AvatarTuxID         = new Guid("{854CC70A-1F01-49DC-8CFF-35FFF0CB6D38}");
-        public static readonly Guid AvatarIronManID     = new Guid("{5B3C96EB-C854-49AE-BACC-3145CDF743AF}");
+        public static readonly Guid AvatarMarioID       = new Guid("{160AB06A-8A58-42AF-BF40-E42CC5E3DD98}");
+        public static readonly Guid AvatarWillSmithID   = new Guid("{25871844-B6DD-4AEC-B205-71C811D5960E}");
+        public static readonly Guid AvatarTuxID         = new Guid("{354CC70A-1F01-49DC-8CFF-35FFF0CB6D38}");
+        public static readonly Guid AvatarIronManID     = new Guid("{4B3C96EB-C854-49AE-BACC-3145CDF743AF}");
 
         /// <summary>
         /// 
