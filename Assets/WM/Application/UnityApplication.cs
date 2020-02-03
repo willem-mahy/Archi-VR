@@ -1250,10 +1250,7 @@ namespace WM.Application
 
                 Players[player.ID] = player;
 
-                if (player.ID != this.Player.ID) // We do not need an avatar for the local player.
-                {   
-                    SetPlayerAvatar(player.ID, player.AvatarID);
-                }                
+                SetPlayerAvatar(player.ID, player.AvatarID);
             }
         }
 
@@ -1334,6 +1331,11 @@ namespace WM.Application
 
             // Targeted player should be known by the application!
             Debug.Assert(Players.ContainsKey(playerID));
+
+            if (playerID == Player.ID)
+            {
+                return; // We do not need/use/have an avatar for the local player.
+            }
 
             lock (Players)
             {
