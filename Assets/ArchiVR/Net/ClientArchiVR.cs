@@ -60,58 +60,6 @@ namespace ArchiVR.Net
         }
 
         /// <summary>
-        /// <see cref="Client"/> implementation.
-        /// </summary>
-        /// <param name="obj"></param>
-        override protected void DoProcessMessage(object obj)
-        {
-            // FIXME: This is a NOOP currently -> Remove?
-
-            //if (obj is ICommand command)
-            //{
-            //    application.QueueCommand(command);
-            //}
-            /*
-            else if (obj is TeleportCommand teleportCommand)
-            {
-                application.QueueCommand(teleportCommand);
-            }
-            else if (obj is SetImmersionModeCommand setImmersionModeCommand)
-            {
-                application.QueueCommand(setImmersionModeCommand);
-            }
-            else if (obj is ConnectClientCommand connectClientCommand)
-            {
-                application.QueueCommand(connectClientCommand);
-            }
-            else if (obj is DisconnectClientCommand disconnectClientCommand)
-            {
-                application.QueueCommand(disconnectClientCommand);
-            }
-            else if (obj is SetPlayerNameCommand setPlayerNameCommand)
-            {
-                application.QueueCommand(setPlayerNameCommand);
-            }
-            else if (obj is SetPlayerAvatarCommand setClientAvatarCommand)
-            {
-                application.QueueCommand(setClientAvatarCommand);
-            }
-            else if (obj is SetModelLocationCommand setModelLocationCommand)
-            {
-                application.QueueCommand(setModelLocationCommand);
-            }
-            else if (obj is ServerShutdownCommand serverShutdownCommand)
-            {
-                application.QueueCommand(serverShutdownCommand);
-            }
-            else if (obj is AddPlayerCommand addPlayerCommand)
-            {
-                application.QueueCommand(addPlayerCommand);
-            }
-            */
-        }
-
-        /// <summary>
         /// 
         /// </summary>
         /// <param name="avatarHead"></param>
