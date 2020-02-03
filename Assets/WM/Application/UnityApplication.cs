@@ -440,6 +440,11 @@ namespace WM.Application
             }
             set
             {
+                if (_enableInput == value)
+                {
+                    return;
+                }
+
                 _enableInput = value;
                 OnEnableInputChanged();
             }
