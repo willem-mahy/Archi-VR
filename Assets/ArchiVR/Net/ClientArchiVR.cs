@@ -79,13 +79,13 @@ namespace ArchiVR.Net
                 var avatarState = new AvatarState();
                 avatarState.PlayerID = application.Player.ID;
                 
-                avatarState.HeadPosition = avatarHead.transform.position;
+                avatarState.HeadPosition = avatarHead.transform.position - application.OffsetPerID;
                 avatarState.HeadRotation = avatarHead.transform.rotation;
 
-                avatarState.LHandPosition = avatarLHand.transform.position;
+                avatarState.LHandPosition = avatarLHand.transform.position - application.OffsetPerID;
                 avatarState.LHandRotation = avatarLHand.transform.rotation;
 
-                avatarState.RHandPosition = avatarRHand.transform.position;
+                avatarState.RHandPosition = avatarRHand.transform.position - application.OffsetPerID;
                 avatarState.RHandRotation = avatarRHand.transform.rotation;
 
                 SendMessageUdp(avatarState);
@@ -138,6 +138,11 @@ namespace ArchiVR.Net
                         {
                             var avatar = application.Players[clientID].Avatar;
                             var avatarState = receivedAvatarStates[clientID];
+
+                            avatarState.HeadPosition = avatarState.HeadPosition + application.OffsetPerID;
+                            avatarState.LHandPosition = avatarState.LHandPosition + application.OffsetPerID;
+                            avatarState.RHandPosition = avatarState.RHandPosition + application.OffsetPerID;
+
                             avatar.SetState(avatarState);                            
                         }
                         else
