@@ -59,12 +59,38 @@ namespace WM.Application
         }
 
         /// <summary>
-        /// TODO: add to one of the implemented interfaces?  Hich one then?
+        /// TODO: add to one of the implemented interfaces?  Which one then?
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetRegisteredGameObjectNames()
+        {
+            var names = new List<string>();
+            foreach (var id in prefabs.Keys)
+            {
+                names.Add(prefabs[id].name);
+            }
+            return names;
+        }
+
+        /// <summary>
+        /// TODO: add to one of the implemented interfaces?  Which one then?
         /// </summary>
         /// <returns></returns>
         public List<Guid> GetRegisteredIDs()
         {
             return new List<Guid>(prefabs.Keys);
+        }
+
+        /// <summary>
+        /// TODO: add to one of the implemented interfaces?  Which one then?
+        /// </summary>
+        /// <returns></returns>
+        public int NumRegistered
+        {
+            get
+            {
+                return this.prefabs.Count;
+            }
         }
     }
 }

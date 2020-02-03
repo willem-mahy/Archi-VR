@@ -109,12 +109,6 @@ namespace WM.Application
 
         #region Game objects
 
-        /// <summary>
-        /// The list of avatar Prefabs.
-        /// Drag Prefabs into this field in the Inspector.
-        /// </summary>
-        public List<GameObject> avatarPrefabs = new List<GameObject>();
-
         public Animator m_fadeAnimator;
 
         public HUDMenu HudMenu;
@@ -1206,24 +1200,6 @@ namespace WM.Application
                     avatarID,
                     position,
                     rotation);
-        }
-
-        /// <summary>
-        /// Instantiates all available avatar prefabs.
-        /// </summary>
-        void InstanciateAllAvatarPrefabs()
-        {
-            float x = -3;
-
-            foreach (var avatarPrefab in avatarPrefabs)
-            {
-                Instantiate(
-                    avatarPrefab,
-                    new Vector3(x, 0, 0),
-                    Quaternion.identity);
-
-                x += 2;
-            }
         }
 
         #endregion
