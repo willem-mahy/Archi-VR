@@ -87,8 +87,8 @@ public class AvatarPanel : MonoBehaviour
             return;
         }
 
-        var newAvatarIndex = Application.AvatarIndex - 1;
-        UtilIterate.MakeCycle(newAvatarIndex, 0, Application.avatarPrefabs.Count);
+        var newAvatarIndex = Application.GetAvatarIndex(Application.Player.AvatarID) - 1;
+        newAvatarIndex = UtilIterate.MakeCycle(newAvatarIndex, 0, Application.avatarPrefabs.Count);
         Application.SetPlayerAvatar(newAvatarIndex);
         AvatarDropdown.value = newAvatarIndex;
     }
@@ -100,8 +100,8 @@ public class AvatarPanel : MonoBehaviour
             return;
         }
 
-        var newAvatarIndex = Application.AvatarIndex + 1;
-        UtilIterate.MakeCycle(newAvatarIndex, 0, Application.avatarPrefabs.Count);
+        var newAvatarIndex = Application.GetAvatarIndex(Application.Player.AvatarID) + 1;
+        newAvatarIndex = UtilIterate.MakeCycle(newAvatarIndex, 0, Application.avatarPrefabs.Count);
         Application.SetPlayerAvatar(newAvatarIndex);
         AvatarDropdown.value = newAvatarIndex;
     }
