@@ -13,7 +13,7 @@ public class DebugLogMenu : MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
-    int MaxNumLines = 30;
+    int MaxNumLines = 35;
 
     /// <summary>
     /// 
