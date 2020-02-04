@@ -15,8 +15,8 @@ Setup instructions:
 6. Make sure the prefabs are set correctly. Select the OVRPlayerController object in the scene:
 a) Local Avatar Prefab should be set to the LocalAvatar (OvrAvatar) prefab found at Assets > Oculus > Avatar > Content > Prefabs.
 b) Remote Avatar Prefab should be set to the RemoteAvatar (OvrAvatar) prefab found at Assets > Oculus > Avatar > Content > Prefabs.
-c) From Assets/Oculus/Avatar/Samples/SocialStarter/Assets/Materials, drag Help to the OVRPlayerController’s Rift Material property.
-d) From Assets/Oculus/Avatar/Samples/SocialStarter/Assets/Materials, drag GearHelp to the OVRPlayerController’s Gear Material property.
+c) From Assets/Third-party/Oculus/Avatar/Samples/SocialStarter/Assets/Materials, drag Help to the OVRPlayerController’s Rift Material property.
+d) From Assets/Third-party/Oculus/Avatar/Samples/SocialStarter/Assets/Materials, drag GearHelp to the OVRPlayerController’s Gear Material property.
 
 
 How to use:

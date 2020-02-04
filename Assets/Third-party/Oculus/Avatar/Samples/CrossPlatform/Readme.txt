@@ -6,7 +6,7 @@ Setup instructions:
 1 - Install Steam and SteamVR
 2 - Create a new Unity Project
 3 - Import the Oculus Integration from the Unity Asset Store.
-4 - Open the CrossPlatform scene (in Assets/Oculus/Avatar/Samples/CrossPlatform)
+4 - Open the CrossPlatform scene (in Assets/Third-party/Oculus/Avatar/Samples/CrossPlatform)
 5 - Use the Oculus Dashboard (https://dashboard.oculus.com/) to create a placeholder Rift app and copy the App ID
 6 - Paste the App ID in Unity under Oculus Avatars > Edit Configuration > Oculus Rift App Id
 7 - Enable OpenVR:
