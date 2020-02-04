@@ -54,6 +54,10 @@ namespace ArchiVR.Application
         }
     }
 
+
+    /// <summary>
+    /// The ArchiVR application.
+    /// </summary>
     public class ApplicationArchiVR : UnityApplication
     {
         #region Variables
