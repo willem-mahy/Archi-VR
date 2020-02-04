@@ -178,7 +178,7 @@ namespace ArchiVR.Application
 
             #region Init immersion modes.
 
-                m_immersionModes.Add(ImmersionModeWalkthrough);
+            m_immersionModes.Add(ImmersionModeWalkthrough);
             m_immersionModes.Add(ImmersionModeMaquette);
 
             foreach (var immersionMode in m_immersionModes)
