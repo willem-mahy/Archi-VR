@@ -1259,7 +1259,14 @@ namespace WM.Application
 
                 if (Players.ContainsKey(playerID))
                 {
-                    UtilUnity.Destroy(Players[playerID].Avatar.gameObject);
+                    if (playerID != Player.ID)
+                    {
+                        UtilUnity.Destroy(Players[playerID].Avatar.gameObject);
+                    }
+                    else
+                    {
+                        Debug.Assert(Players[playerID].Avatar == null);
+                    }
 
                     Players.Remove(playerID);
                 }
