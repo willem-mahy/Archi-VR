@@ -107,7 +107,7 @@ namespace ArchiVR
                 var rotTrackingSpace = Application.m_ovrCameraRig.transform.rotation.eulerAngles;
                 var rotEye = Application.m_centerEyeCanvas.transform.parent.rotation.eulerAngles;
 
-                Application.m_ovrCameraRig.transform.position = activePOI.transform.position + Application.OffsetPerID;
+                Application.m_ovrCameraRig.transform.position = activePOI.transform.position;
 
                 var rot = activePOI.transform.rotation.eulerAngles;
                 rot.y = rot.y + (rotTrackingSpace.y - rotEye.y);

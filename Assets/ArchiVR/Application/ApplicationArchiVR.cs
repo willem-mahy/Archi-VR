@@ -712,12 +712,22 @@ namespace ArchiVR.Application
         {
             get
             {
-                if (ActiveProjectIndex == -1)
+                if (!_projectScene.HasValue)
                 {
                     return null;
                 }
 
-                return UtilUnity.TryFindGameObject("Project");
+                foreach (var go in _projectScene.Value.GetRootGameObjects())
+                {
+                    var project = UtilUnity.FindGameObject(go, "Project");
+
+                    if (project!= null)
+                    {
+                        return project;
+                    }
+                }
+
+                throw new Exception("Project loaded, but project scene does not contain a 'Project' GameObject!");
             }
         }
 
