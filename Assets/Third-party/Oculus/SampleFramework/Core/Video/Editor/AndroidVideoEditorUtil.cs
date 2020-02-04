@@ -6,15 +6,15 @@ using System.IO;
 
 public class AndroidVideoEditorUtil
 {
-    private static readonly string videoPlayerFileName = "Assets/Oculus/SampleFramework/Core/Video/Plugins/Android/java/com/oculus/videoplayer/NativeVideoPlayer.java";
+    private static readonly string videoPlayerFileName = "Assets/Third-party/Oculus/SampleFramework/Core/Video/Plugins/Android/java/com/oculus/videoplayer/NativeVideoPlayer.java";
     private static readonly string disabledPlayerFileName = videoPlayerFileName + ".DISABLED";
 
 #if !UNITY_2018_2_OR_NEWER
-	private static readonly string gradleSourceSetPath = "$projectDir/../../Assets/Oculus/SampleFramework/Core/Video/Plugins/Android/java";
+	private static readonly string gradleSourceSetPath = "$projectDir/../../Assets/Third-party/Oculus/SampleFramework/Core/Video/Plugins/Android/java";
 #endif
 
-    private static readonly string audio360PluginPath = "Assets/Oculus/SampleFramework/Core/Video/Plugins/Android/Audio360/audio360.aar";
-    private static readonly string audio360Exo29PluginPath = "Assets/Oculus/SampleFramework/Core/Video/Plugins/Android/Audio360/audio360-exo29.aar";
+    private static readonly string audio360PluginPath = "Assets/Third-party/Oculus/SampleFramework/Core/Video/Plugins/Android/Audio360/audio360.aar";
+    private static readonly string audio360Exo29PluginPath = "Assets/Third-party/Oculus/SampleFramework/Core/Video/Plugins/Android/Audio360/audio360-exo29.aar";
 
     private static readonly string gradleTemplatePath = "Assets/Plugins/Android/mainTemplate.gradle";
     private static readonly string disabledGradleTemplatePath = gradleTemplatePath + ".DISABLED";
