@@ -150,12 +150,19 @@ namespace ArchiVR.Application
 
         #endregion
 
+        private static bool _UnitTestModeEnabled = true;
+
+        public static void SetUnitTestModeEnabled(bool state)
+        {
+            _UnitTestModeEnabled = state;
+        }
+
         /// <summary>
         /// Initialize all necessary stuff before the first frame update.
         /// </summary>
         public override void Init()
         {
-            if (OVRManager.instance == null)
+            if (!_UnitTestModeEnabled && (OVRManager.instance == null))
             {
                 // Instantiate at position (0, 0, 0) and zero rotation.
                 Instantiate(ovrManagerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
@@ -184,7 +191,10 @@ namespace ArchiVR.Application
 
             GatherProjects();
 
-            RegisterAvatars();
+            if (!_UnitTestModeEnabled)
+            {
+                RegisterAvatars();
+            }
             
             SetActiveImmersionMode(DefaultImmersionModeIndex);
 

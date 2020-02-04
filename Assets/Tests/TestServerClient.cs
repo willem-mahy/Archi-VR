@@ -37,6 +37,8 @@ namespace Tests
         private ApplicationArchiVR CreateApplication(string name)
         {
             Log.Header("Create application '" + name + "'");
+            
+            ApplicationArchiVR.SetUnitTestModeEnabled(true);
 
             // Create an application instance that will act as server.
             var applicationGO = new GameObject();
