@@ -1,14 +1,34 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using WM;
+using WM.Application;
 
+/// <summary>
+/// Menu that shows general information about the software and the system on which it is running.
+/// </summary>
 public class InfoMenu : MonoBehaviour
 {
     #region Variables
 
-    //public ApplicationArchiVR ApplicationArchiVR;
+    /// <summary>
+    /// The application.
+    /// </summary>
+    public UnityApplication Application;
 
-    public Text VersionText;
+    /// <summary>
+    /// The UI Text to display the application version.
+    /// </summary>
+    public Text ApplicationVersionText;
+
+    /// <summary>
+    /// The UI Text to display the application version.
+    /// </summary>
+    public Text ApplicationNameText;
+
+    /// <summary>
+    /// The UI Text to display the system's IP.
+    /// </summary>
+    public Text SystemIPText;
 
     #endregion
 
@@ -19,27 +39,60 @@ public class InfoMenu : MonoBehaviour
     {
         #region Get references to GameObjects.
 
-        //ApplicationArchiVR = UtilUnity.TryFindGameObject("Application").GetComponent<ApplicationArchiVR>();
+        if (Application == null)
+        {
+            Application = UtilUnity.TryFindGameObject(gameObject.scene, "Application").GetComponent<UnityApplication>();
+        }
 
         #endregion
 
         #region Get references to UI components.
 
-        if (VersionText == null)
+        if (ApplicationNameText == null)
         {
-            var versionTextGO = UtilUnity.TryFindGameObject("InfoMenu_VersionValueText");
+            var applicationNameGO = UtilUnity.TryFindGameObject("InfoMenu_Application_NameValueText");
 
-            if (versionTextGO != null)
+            if (applicationNameGO != null)
             {
-                VersionText = versionTextGO.GetComponent<Text>();
+                ApplicationNameText = applicationNameGO.GetComponent<Text>();
+            }
+        }
+
+        if (ApplicationVersionText == null)
+        {
+            var applicationVersionGO = UtilUnity.TryFindGameObject("InfoMenu_Application_VersionValueText");
+
+            if (applicationVersionGO != null)
+            {
+                ApplicationVersionText = applicationVersionGO.GetComponent<Text>();
+            }
+        }
+
+        if (SystemIPText == null)
+        {
+            var systemIPGO = UtilUnity.TryFindGameObject("InfoMenu_System_IPValueText");
+
+            if (systemIPGO != null)
+            {
+                SystemIPText = systemIPGO.GetComponent<Text>();
             }
         }
 
         #endregion
 
-        if (VersionText != null)
+        if (ApplicationNameText != null)
         {
-            VersionText.text = "TODO: Factor out ApplicationArchiVR"; // ApplicationArchiVR.Version;
+            ApplicationNameText.text = (Application == null) ? "NA" : Application.Name;
+        }
+
+        if (ApplicationVersionText != null)
+        {
+            ApplicationVersionText.text = (Application == null) ? "NA" : Application.Version;
+        }
+
+        if (SystemIPText != null)
+        {
+            SystemIPText.text = WM.Net.NetUtil.GetLocalIPAddress().ToString();
         }
     }
 
