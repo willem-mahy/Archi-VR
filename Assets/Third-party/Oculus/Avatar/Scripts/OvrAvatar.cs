@@ -700,7 +700,7 @@ public class OvrAvatar : MonoBehaviour
                 {
                     BuildRenderComponents();
                 }
-                catch (Exception e)
+                catch (Exception /*e*/)
                 {
                     assetsFinishedLoading = true;
                     throw; // rethrow the original exception to preserve callstack
