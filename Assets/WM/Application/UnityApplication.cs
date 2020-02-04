@@ -55,6 +55,14 @@ namespace WM.Application
         /// <summary>
         /// The application version.
         /// </summary>
+        abstract public string Name
+        {
+            get;
+        }
+
+        /// <summary>
+        /// The application version.
+        /// </summary>
         public string Version = "";
 
         /// <summary>

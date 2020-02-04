@@ -17,8 +17,19 @@ namespace Demo.Application
 
         // The typed application states.
         public ApplicationStateDefault applicationStateDefault = new ApplicationStateDefault();
-        
+
         #endregion
+
+        /// <summary>
+        /// <see cref="UnityApplication.Name"/> implementation.
+        /// </summary>
+        public override string Name
+        {
+            get
+            {
+                return "Demo";
+            }
+        }
 
         /// <summary>
         /// Initialize all necessary stuff before the first frame update.

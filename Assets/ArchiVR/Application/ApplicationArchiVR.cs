@@ -818,6 +818,17 @@ namespace ArchiVR.Application
             }
         }
 
+        /// <summary>
+        /// <see cref="UnityApplication.Name"/> implementation.
+        /// </summary>
+        public override string Name
+        {
+            get
+            {
+                return "Archi-VR";
+            }
+        }
+
         int GetPOIIndex(string poiName)
         {
             int poiIndex = 0;
