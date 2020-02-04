@@ -101,13 +101,7 @@ public class OVRControllerHelper : MonoBehaviour
 				break;
 		}
 
-        if (Application.isEditor)
-        {
-            // WM: Force controller type Quest while in editor mode
-            activeControllerType = ControllerType.QuestAndRiftS;
-        }
-
-        Debug.LogFormat("OVRControllerHelp: Active controller type: {0} for product {1}", activeControllerType, OVRPlugin.productName);
+		Debug.LogFormat("OVRControllerHelp: Active controller type: {0} for product {1}", activeControllerType, OVRPlugin.productName);
 		if ((activeControllerType != ControllerType.GearVR) && (activeControllerType != ControllerType.Go))
 		{
 			if (m_controller == OVRInput.Controller.LTrackedRemote)
@@ -135,12 +129,6 @@ public class OVRControllerHelper : MonoBehaviour
 	void Update()
 	{
 		bool controllerConnected = OVRInput.IsControllerConnected(m_controller);
-
-        if (Application.isEditor)
-        {
-            // WM: Force controller to be connected while in editor mode
-            controllerConnected = true;
-        }
 
 		if ((controllerConnected != m_prevControllerConnected) || !m_prevControllerConnectedCached)
 		{

@@ -18,18 +18,18 @@ namespace OculusSampleFramework
     public class DistanceGrabberSample : MonoBehaviour
     {
 
-        bool museSpherecast = false;
+        bool useSpherecast = false;
         bool allowGrabThroughWalls = false;
 
         public bool UseSpherecast
         {
-            get { return museSpherecast; }
+            get { return useSpherecast; }
             set
             {
-                museSpherecast = value;
+                useSpherecast = value;
                 for (int i = 0; i < m_grabbers.Length; ++i)
                 {
-                    m_grabbers[i].UseSpherecast = museSpherecast;
+                    m_grabbers[i].UseSpherecast = useSpherecast;
                 }
             }
         }
@@ -54,7 +54,7 @@ namespace OculusSampleFramework
         void Start()
         {
             DebugUIBuilder.instance.AddLabel("Distance Grab Sample");
-            DebugUIBuilder.instance.AddToggle("Use Spherecasting", ToggleSphereCasting, museSpherecast);
+            DebugUIBuilder.instance.AddToggle("Use Spherecasting", ToggleSphereCasting, useSpherecast);
             DebugUIBuilder.instance.AddToggle("Grab Through Walls", ToggleGrabThroughWalls, allowGrabThroughWalls);
             DebugUIBuilder.instance.Show();
         }

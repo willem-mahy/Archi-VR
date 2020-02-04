@@ -48,9 +48,6 @@ public class DebugUIBuilder : MonoBehaviour
   [SerializeField]
   private Transform[] targetContentPanels = null;
 
-  [SerializeField]
-  private bool manuallyResizeContentPanels;
-
   private bool[] reEnable;
 
   [SerializeField]
