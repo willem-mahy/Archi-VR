@@ -447,27 +447,33 @@ namespace ArchiVR.Application
 
             if (ActiveProjectIndex != TeleportCommand.ProjectIndex) // If project changed...
             {
-                // Needs to be cached before activating the new project.
-                var oldProjectName = ActiveProjectName;
-
                 // First unload the current project
-                if (oldProjectName != null)
+                if (_projectScene != null)
                 {
-                    WM.Logger.Debug("Unloading project '" + oldProjectName + "'");
+                    WM.Logger.Debug("Unloading project sccene '" + _projectScene.Value.name + "'");
 
-                    AsyncOperation asyncUnload = SceneManager.UnloadSceneAsync(oldProjectName);
+                    var asyncUnload = SceneManager.UnloadSceneAsync(_projectScene.Value.name);
 
                     // Wait until asynchronous unloading the old project finishes.
                     while (!asyncUnload.isDone)
                     {
                         yield return null;
                     }
+
+                    _projectScene = null;
                 }
 
                 // Then load the new projct
                 var newProjectName = GetProjectName(TeleportCommand.ProjectIndex);
 
                 WM.Logger.Debug("Loading project '" + newProjectName + "'");
+
+                while (LoadingProject)
+                {
+                    yield return null;
+                }
+
+                LoadingProject = true;
 
                 var asyncLoad = SceneManager.LoadSceneAsync(newProjectName, LoadSceneMode.Additive);
 
@@ -477,14 +483,22 @@ namespace ArchiVR.Application
                     yield return null;
                 }
 
+                // Load the new project scene
                 var projectScene = SceneManager.GetSceneByName(newProjectName);
 
-                foreach (var go in projectScene.GetRootGameObjects())
+                // To support running multiple ArchiVR application instances in the same parent application (eg. WM TestApp)...
+                
+                // ... 1) Give the project scene an application instance-specific name.
+                _projectScene = SceneManager.CreateScene(GetApplicationInstanceSpecificProjectName(newProjectName));
+                SceneManager.MergeScenes(projectScene, _projectScene.Value);
+
+                LoadingProject = false;
+
+                // ... 2) Add spatial offset to project scene content
+                foreach (var go in _projectScene.Value.GetRootGameObjects())
                 {
                     go.transform.position += OffsetPerID;
                 }
-
-                SceneManager.MergeScenes(projectScene, this.gameObject.scene);
 
                 // Update active project index to point to newly activated project.
                 ActiveProjectIndex = TeleportCommand.ProjectIndex;
@@ -509,6 +523,32 @@ namespace ArchiVR.Application
             {
                 m_fadeAnimator.SetTrigger("FadeIn");
             }
+        }
+
+        /// <summary>
+        /// This flag is set by ArchiVR application instances while loading a new project.
+        /// It is also checked by ArchiVR application instances when they start loading a new project:
+        /// - if the flag is set, this means another project is loading the same project already.
+        /// - since the same project scene cannot be loaded concurrently, any application that wants to start loading
+        /// a project scene waits for the flag to be unset again.
+        /// - This locking mechanism is not thread-safe.  It does it need to be thread-safe, since all scene loading happens on the same (Main) thread.
+        /// </summary>
+        static bool LoadingProject = false;
+
+        /// <summary>
+        /// The currently loaded project scene.
+        /// 'null' if no project scene loaded.
+        /// </summary>
+        Scene? _projectScene = null;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="projectName"></param>
+        /// <returns></returns>
+        private string GetApplicationInstanceSpecificProjectName(string projectName)
+        {
+            return "ArchiVR(" + ID + ") " + projectName;
         }
 
         #endregion
@@ -809,7 +849,19 @@ namespace ArchiVR.Application
 
             // Gather all POI in the current active project.
             var modelTransform = activeProject.transform.Find("Model");
+
+            if (modelTransform == null)
+            {
+                throw new Exception("Active project does not contain a child named 'Model'.");
+            }
+
             var layers = modelTransform.Find("Layers");
+
+            if (modelTransform == null)
+            {
+                throw new Exception("Active project's 'Model' does not contain a child named 'Layers'.");
+            }
+
             foreach (Transform layerTransform in layers.transform)
             {
                 var layer = layerTransform.gameObject;
