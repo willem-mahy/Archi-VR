@@ -373,7 +373,7 @@ namespace ArchiVR.Application
         public bool ToggleActiveProject()
         {
             // Active project is toggled using X/Y button, F1/F2 keys.
-            bool activatePrevProject = m_controllerInput.m_controllerState.button3Down || Input.GetKeyDown(KeyCode.F1);
+            bool activatePrevProject = m_controllerInput.m_controllerState.button3Down;
 
             if (activatePrevProject)
             {
@@ -381,7 +381,7 @@ namespace ArchiVR.Application
                 return true;
             }
 
-            bool activateNextProject = m_controllerInput.m_controllerState.button4Down || Input.GetKeyDown(KeyCode.F2);
+            bool activateNextProject = m_controllerInput.m_controllerState.button4Down;
 
             if (activateNextProject)
             {
