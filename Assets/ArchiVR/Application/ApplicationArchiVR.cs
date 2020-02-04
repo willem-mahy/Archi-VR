@@ -150,7 +150,7 @@ namespace ArchiVR.Application
 
         #endregion
 
-        private static bool _UnitTestModeEnabled = true;
+        private static bool _UnitTestModeEnabled = false;
 
         public static void SetUnitTestModeEnabled(bool state)
         {
