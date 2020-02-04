@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace WM
+﻿namespace WM
 {
     /// <summary>
     /// 
@@ -49,7 +47,7 @@ namespace WM
 
             if (UnityEngine.Application.isEditor)
             {
-                controllerState.Update_Editor();
+                controllerState.Update_Editor(m_controllerState);
             }
             else
             {

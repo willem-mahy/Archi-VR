@@ -22,7 +22,7 @@ namespace WM
 
         #endregion
 
-        #region Variables
+        #region Fields
 
         public string[] joystickNames = null;
 
@@ -107,9 +107,13 @@ namespace WM
 
         public bool rThumbstickPressed = false;
 
-        #endregion
+        #endregion Fields
 
-        //! Updates the controller state using the Unity API.
+        #region Public API
+
+        /// <summary>
+        /// Updates the controller state using the Unity API.
+        /// </summary>
         public void Update_Unity()
         {
             // Get the names of the currently connected joystick devices.          
@@ -145,7 +149,10 @@ namespace WM
             rightControllerActive = joystickNames.Length == 2 && joystickNames[1] == "";
         }
 
-        //! Updates the controller state using the OVRInput API.
+        /// <summary>
+        /// Updates the controller state using the OVRInput API.
+        /// </summary>
+        /// <param name="prevState"></param>
         public void Update_OVR(ControllerState prevState)
         {
             var activeController = OVRInput.GetActiveController();
@@ -232,15 +239,7 @@ namespace WM
                 buttonThumbstickPDown = (!prevState.buttonThumbstickPDown && !prevState.lThumbstickPressed) && buttonThumbstickPPressed;
                 buttonThumbstickSDown = (!prevState.buttonThumbstickSDown && !prevState.rThumbstickPressed) && buttonThumbstickPPressed;
 
-                lThumbstickDirectionUpDown = (!prevState.lThumbstickDirectionUpDown && !prevState.lThumbstickDirectionUpPressed) && lThumbstickDirectionUpPressed;
-                lThumbstickDirectionDownDown = (!prevState.lThumbstickDirectionDownDown && !prevState.lThumbstickDirectionDownPressed) && lThumbstickDirectionDownPressed;
-                lThumbstickDirectionLeftDown = (!prevState.lThumbstickDirectionLeftDown && !prevState.lThumbstickDirectionLeftPressed) && lThumbstickDirectionLeftPressed;
-                lThumbstickDirectionRightDown = (!prevState.lThumbstickDirectionRightDown && !prevState.lThumbstickDirectionRightPressed) && lThumbstickDirectionRightPressed;
-
-                rThumbstickDirectionUpDown = (!prevState.rThumbstickDirectionUpDown && !prevState.rThumbstickDirectionUpPressed) && rThumbstickDirectionUpPressed;
-                rThumbstickDirectionDownDown = (!prevState.rThumbstickDirectionDownDown && !prevState.rThumbstickDirectionDownPressed) && rThumbstickDirectionDownPressed;
-                rThumbstickDirectionLeftDown = (!prevState.rThumbstickDirectionLeftDown && !prevState.rThumbstickDirectionLeftPressed) && rThumbstickDirectionLeftPressed;
-                rThumbstickDirectionRightDown = (!prevState.rThumbstickDirectionRightDown && !prevState.rThumbstickDirectionRightPressed) && rThumbstickDirectionRightPressed;
+                UpdateThumbStickDirectionDownStates(prevState);
             }
 
             // Get thumbstick positions. (X/Y range of -1.0f to 1.0f)
@@ -249,23 +248,9 @@ namespace WM
         }
 
         /// <summary>
-        /// Updates the state of a simulated controller button, from the state of a mapped KB button.
-        /// </summary>
-        /// <param name="kc"></param>
-        /// <param name="buttonDown"></param>
-        /// <param name="buttonPressed"></param>
-        private static void UpdateButtonState(
-            KeyCode kc,
-            ref bool buttonDown, ref bool buttonPressed)
-        {
-            if (Input.GetKeyDown(kc)) buttonDown = true;
-            if (Input.GetKey(kc)) buttonPressed = true;
-        }
-
-        /// <summary>
         /// Updates the controller state using Unity API (keyboard and mouse) while running in editor.
         /// </summary>
-        public void Update_Editor()
+        public void Update_Editor(ControllerState prevState)
         {
             // Left controller
             UpdateButtonState(KeyCode.F1, ref button3Down, ref button3Pressed);
@@ -298,6 +283,56 @@ namespace WM
             
             if (Input.GetMouseButtonDown(2)) rThumbstickDown = true;
             if (Input.GetMouseButton(2)) rThumbstickPressed = true;
+
+            lThumbstickDirectionUpPressed       = lThumbStick.y > 0.5;
+            lThumbstickDirectionDownPressed     = lThumbStick.y < -0.5;
+            lThumbstickDirectionLeftPressed     = lThumbStick.x < -0.5;
+            lThumbstickDirectionRightPressed    = lThumbStick.x > 0.5;
+
+            rThumbstickDirectionUpPressed       = rThumbStick.y > 0.5;
+            rThumbstickDirectionDownPressed     = rThumbStick.y < -0.5;
+            rThumbstickDirectionLeftPressed     = rThumbStick.x < -0.5;
+            rThumbstickDirectionRightPressed    = rThumbStick.x > 0.5;
+
+            UpdateThumbStickDirectionDownStates(prevState);
         }
+
+        #endregion Public API
+
+        #region Private API
+
+        /// <summary>
+        /// Updates the state of a simulated controller button, from the state of a mapped KB button.
+        /// </summary>
+        /// <param name="kc"></param>
+        /// <param name="buttonDown"></param>
+        /// <param name="buttonPressed"></param>
+        private static void UpdateButtonState(
+            KeyCode kc,
+            ref bool buttonDown,
+            ref bool buttonPressed)
+        {
+            if (Input.GetKeyDown(kc)) buttonDown = true;
+            if (Input.GetKey(kc)) buttonPressed = true;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="prevState"></param>
+        private void UpdateThumbStickDirectionDownStates(ControllerState prevState)
+        {
+            lThumbstickDirectionUpDown = (!prevState.lThumbstickDirectionUpDown && !prevState.lThumbstickDirectionUpPressed) && lThumbstickDirectionUpPressed;
+            lThumbstickDirectionDownDown = (!prevState.lThumbstickDirectionDownDown && !prevState.lThumbstickDirectionDownPressed) && lThumbstickDirectionDownPressed;
+            lThumbstickDirectionLeftDown = (!prevState.lThumbstickDirectionLeftDown && !prevState.lThumbstickDirectionLeftPressed) && lThumbstickDirectionLeftPressed;
+            lThumbstickDirectionRightDown = (!prevState.lThumbstickDirectionRightDown && !prevState.lThumbstickDirectionRightPressed) && lThumbstickDirectionRightPressed;
+
+            rThumbstickDirectionUpDown = (!prevState.rThumbstickDirectionUpDown && !prevState.rThumbstickDirectionUpPressed) && rThumbstickDirectionUpPressed;
+            rThumbstickDirectionDownDown = (!prevState.rThumbstickDirectionDownDown && !prevState.rThumbstickDirectionDownPressed) && rThumbstickDirectionDownPressed;
+            rThumbstickDirectionLeftDown = (!prevState.rThumbstickDirectionLeftDown && !prevState.rThumbstickDirectionLeftPressed) && rThumbstickDirectionLeftPressed;
+            rThumbstickDirectionRightDown = (!prevState.rThumbstickDirectionRightDown && !prevState.rThumbstickDirectionRightPressed) && rThumbstickDirectionRightPressed;
+        }
+
+        #endregion Private API
     }
 }

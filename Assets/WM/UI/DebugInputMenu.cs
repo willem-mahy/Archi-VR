@@ -45,16 +45,10 @@ namespace WM.UI
             {
                 text += "\nInput mode: " + (controllerInput.m_inputMode == ControllerInput.InputMode.Unity ? "Unity" : "OVR");
                 text += "\n";
-                //text += "\nRemote connection: L=" + (lRemoteConnected ? "OK" : "NA") + " R=" + (rRemoteConnected ? "OK" : "NA");
                 text += "\nTouch controllers:" + (controllerState.lTouchConnected ? "L " : "") + " " + (controllerState.rTouchConnected ? " R" : "") +
                         "(Active Controller: " + (controllerState.activeController == OVRInput.Controller.LTouch ? " L" : "") + (controllerState.activeController == OVRInput.Controller.RTouch ? " R" : "") + ")";
                 text += "\n";
-                text += "\nThumbstick: L(" + controllerState.lThumbStick.x + ", " + controllerState.lThumbStick.y + ") R(" + controllerState.rThumbStick.x + ", " + controllerState.rThumbStick.y + ")";
-                text += "\nL thumbstick:";
-                text += "\n Left: " + GetButtonStateText(controllerState.lThumbstickDirectionLeftDown, controllerState.lThumbstickDirectionLeftPressed);
-                text += "\n Right: " + GetButtonStateText(controllerState.lThumbstickDirectionRightDown, controllerState.lThumbstickDirectionRightPressed);
-                text += "\n Up: " + GetButtonStateText(controllerState.lThumbstickDirectionUpDown, controllerState.lThumbstickDirectionUpPressed);
-                text += "\n Down: " + GetButtonStateText(controllerState.lThumbstickDirectionDownDown, controllerState.lThumbstickDirectionDownPressed);
+                
 
                 if (controllerInput.m_inputMode == ControllerInput.InputMode.Unity)
                 {
@@ -85,20 +79,44 @@ namespace WM.UI
             }
             HeaderText.text = text;
 
-            text  = "\nButton 1 = " + GetButtonStateText(controllerState.button1Down, controllerState.button1Pressed);
+            text = "";
+            text += "\nThumbstick:";
+            text += "\n\tAxes: " + GetThumbStickAxesStateText(controllerState.lThumbStick);
+            text += "\n\tLeft: " + GetButtonStateText(controllerState.lThumbstickDirectionLeftDown, controllerState.lThumbstickDirectionLeftPressed);
+            text += "\n\tRight: " + GetButtonStateText(controllerState.lThumbstickDirectionRightDown, controllerState.lThumbstickDirectionRightPressed);
+            text += "\n\tUp: " + GetButtonStateText(controllerState.lThumbstickDirectionUpDown, controllerState.lThumbstickDirectionUpPressed);
+            text += "\n\tDown: " + GetButtonStateText(controllerState.lThumbstickDirectionDownDown, controllerState.lThumbstickDirectionDownPressed);
+            text += "\nButton 1 = " + GetButtonStateText(controllerState.button1Down, controllerState.button1Pressed);
             text += "\nButton 2 = " + GetButtonStateText(controllerState.button2Down, controllerState.button2Pressed);
             text += "\nButton 3 = " + GetButtonStateText(controllerState.button3Down, controllerState.button3Pressed);
             text += "\nButton 4 = " + GetButtonStateText(controllerState.button4Down, controllerState.button4Pressed);
             text += "\nButton Start = " + GetButtonStateText(controllerState.buttonStartDown, controllerState.buttonStartPressed);
             LControllerText.text = text;
 
-            text  = "\nButton 5 = " + GetButtonStateText(controllerState.button5Down, controllerState.button5Pressed);
+            text = "";
+            text += "\nThumbstick:";
+            text += "\n\tAxes: " + GetThumbStickAxesStateText(controllerState.rThumbStick);
+            text += "\n\tLeft: " + GetButtonStateText(controllerState.rThumbstickDirectionLeftDown, controllerState.rThumbstickDirectionLeftPressed);
+            text += "\n\tRight: " + GetButtonStateText(controllerState.rThumbstickDirectionRightDown, controllerState.rThumbstickDirectionRightPressed);
+            text += "\n\tUp: " + GetButtonStateText(controllerState.rThumbstickDirectionUpDown, controllerState.rThumbstickDirectionUpPressed);
+            text += "\n\tDown: " + GetButtonStateText(controllerState.rThumbstickDirectionDownDown, controllerState.rThumbstickDirectionDownPressed);
+            text += "\nButton 5 = " + GetButtonStateText(controllerState.button5Down, controllerState.button5Pressed);
             text += "\nButton 6 = " + GetButtonStateText(controllerState.button6Down, controllerState.button6Pressed);
             text += "\nButton 7 = " + GetButtonStateText(controllerState.button7Down, controllerState.button7Pressed);
             text += "\nButton 8 = " + GetButtonStateText(controllerState.button8Down, controllerState.button8Pressed);            
             text += "\nButton Oculus = " + GetButtonStateText(controllerState.buttonOculusDown, controllerState.buttonOculusPressed);
 
             RControllerText.text = text;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="thumbstickAxes"></param>
+        /// <returns></returns>
+        private static string GetThumbStickAxesStateText(Vector2 thumbstickAxes)
+        {
+            return "(" + thumbstickAxes.x + ", " + thumbstickAxes.y + ")";
         }
 
         /// <summary>
