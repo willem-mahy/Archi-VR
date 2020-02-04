@@ -23,7 +23,10 @@ public class GraphicsMenu : MonoBehaviour
     {
         #region Get references to GameObjects.
 
-        Application = UtilUnity.TryFindGameObject("Application").GetComponent<UnityApplication>();
+        if (Application == null)
+        {
+            Application = UtilUnity.TryFindGameObject(gameObject.scene, "Application").GetComponent<UnityApplication>();
+        }
 
         #endregion
 
@@ -31,7 +34,7 @@ public class GraphicsMenu : MonoBehaviour
 
         if (QualityDropdown == null)
         {
-            var qualityDropdownGO = UtilUnity.TryFindGameObject("GraphicsMenu_QualityDropdown");
+            var qualityDropdownGO = UtilUnity.TryFindGameObject(gameObject.scene, "GraphicsMenu_QualityDropdown");
 
             if (qualityDropdownGO != null)
             {
@@ -79,6 +82,9 @@ public class GraphicsMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     void OnEnable()
     {
         if (QualityDropdown != null)
@@ -116,6 +122,10 @@ public class GraphicsMenu : MonoBehaviour
 
     #region FPS
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="value"></param>
     public void ShowFPSToggleOnValueChanged(bool value)
     {
         if (Application)

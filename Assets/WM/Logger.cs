@@ -9,6 +9,24 @@ namespace WM
         public static bool Enabled = false;
 
         /// <summary>
+        /// Enables/Disables the logger.
+        /// </summary>
+        /// <param name="state"></param>
+        public static void SetEnabled(bool state)
+        {
+            Enabled = state;
+        }
+
+        /// <summary>
+        /// Clears the log.
+        /// </summary>
+        /// <param name="text"></param>
+        public static void Clear()
+        {
+            s_log.Clear();
+        }
+
+        /// <summary>
         /// Logs a debug message.
         /// </summary>
         /// <param name="text"></param>
