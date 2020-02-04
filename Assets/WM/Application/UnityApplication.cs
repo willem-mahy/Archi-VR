@@ -1100,7 +1100,8 @@ namespace WM.Application
         /// </summary>
         public void ToggleMenuMode()
         {
-            var newMenuMode = (MenuMode)UtilIterate.MakeCycle((int)menuMode + 1, 0, menus.Count);
+            var numMenuModes = menus.Count + 1; // Take into account mode 0: None!
+            var newMenuMode = (MenuMode)UtilIterate.MakeCycle((int)menuMode + 1, 0, numMenuModes);
 
             SetMenuMode(newMenuMode);
         }
