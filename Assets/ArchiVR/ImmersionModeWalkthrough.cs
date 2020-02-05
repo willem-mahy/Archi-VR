@@ -3,12 +3,19 @@ using WM.Application;
 
 namespace ArchiVR
 {
+    /// <summary>
+    /// In this immersion mode, the user can walk around in the real-scale model.
+    /// The user can jump between a list of Points-Of-Interest, predefined in the project.
+    /// </summary>
     public class ImmersionModeWalkthrough : ImmersionMode
     {
         #region variables        
 
         #endregion
 
+        /// <summary>
+        /// <see cref="ImmersionMode.Enter()"/> implementation.
+        /// </summary>
         public override void Enter()
         {
             WM.Logger.Debug("ImmersionModeWalkthrough.Enter()");
@@ -21,6 +28,9 @@ namespace ArchiVR
             Application.UnhideAllModelLayers();
         }
 
+        /// <summary>
+        /// <see cref="ImmersionMode.Exit()"/> implementation.
+        /// </summary>
         public override void Exit()
         {
             WM.Logger.Debug("ImmersionModeWalkthrough.Exit()");
@@ -32,6 +42,9 @@ namespace ArchiVR
             OVRManager.boundary.SetVisible(false);
         }
 
+        /// <summary>
+        /// <see cref="ImmersionMode.Update()"/> implementation.
+        /// </summary>
         public override void Update()
         {
             //WM.Logger.Debug("ImmersionModeWalkthrough.Update()");
@@ -68,6 +81,9 @@ namespace ArchiVR
             Application.UpdateTrackingSpace();
         }
 
+        /// <summary>
+        /// <see cref="ImmersionMode.Update()"/> implementation.
+        /// </summary>
         public override void UpdateModelLocationAndScale()
         {
             WM.Logger.Debug("ImmersionModeWalkthrough.UpdateModelLocationAndScale()");
@@ -79,11 +95,14 @@ namespace ArchiVR
                 return;
             }
 
-            activeProject.transform.position = Vector3.zero;
+            activeProject.transform.position = Application.OffsetPerID;
             activeProject.transform.rotation = Quaternion.identity;
             activeProject.transform.localScale = Vector3.one;
         }
 
+        /// <summary>
+        /// <see cref="ImmersionMode.UpdateTrackingSpacePosition()"/> implementation.
+        /// </summary>
         public override void UpdateTrackingSpacePosition()
         {
             WM.Logger.Debug("ImmersionModeWalkthrough.UpdateTrackingSpacePosition()");
@@ -112,6 +131,9 @@ namespace ArchiVR
             }
         }
 
+        /// <summary>
+        /// <see cref="ImmersionMode.InitButtonMappingUI()"/> implementation.
+        /// </summary>
         public override void InitButtonMappingUI()
         {
             WM.Logger.Debug("ImmersionModeWalkthrough.InitButtonMappingUI()");

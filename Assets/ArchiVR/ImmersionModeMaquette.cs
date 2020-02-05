@@ -7,7 +7,29 @@ using WM.Net;
 namespace ArchiVR
 {
     /// <summary>
+    /// In this immersion mode, the user can walk around the model,
+    /// which is visualized at a 1/25 scale (The usual scale for construction model maquettes).
+    /// The user can pick parts of the model with his right hand, to hide them.
+    /// To unhide the entire model, the user can pick into empty space.
     /// 
+    /// The Maquette can also be manipulated:
+    /// 
+    /// 1) rotated in the horizontal plane, around its anchor point.
+    ///     - Using the left thumb Left/Right directions.
+    ///     - The anchor point is predefined in the project and usually located in the middle of the construction model.
+    /// 2) translated up or down along the vertical axis.
+    ///     - Using the left thumb stick Up/Down directions.
+    ///     - Translation is limited to a sensible range of [0, 2] meter height offset.
+    ///     
+    /// The user can perform any number of manipulations (rotation and/or translation)
+    /// in sequence.
+    /// However, the user can only perform one of manipulation at a given time.
+    /// i.e. the user can either be rotating or translating the model, but not both concurrently.
+    /// This is by design:
+    /// We first  started off supporting concurrent translation and rotation,
+    /// but it turned out very hard to position the model correctly.
+    /// (because of unwanted rotations/translations being triggered
+    /// by small accidental offsets on the other thumbstick axis).
     /// </summary>
     public class ImmersionModeMaquette : ImmersionMode
     {
@@ -350,7 +372,7 @@ namespace ArchiVR
         }
 
         /// <summary>
-        /// 
+        /// <see cref="ImmersionMode.UpdateTrackingSpacePosition()"/> implementation.
         /// </summary>
         public override void UpdateTrackingSpacePosition()
         {
@@ -364,6 +386,9 @@ namespace ArchiVR
             }
         }
 
+        /// <summary>
+        /// <see cref="ImmersionMode.InitButtonMappingUI()"/> implementation.
+        /// </summary>
         public override void InitButtonMappingUI()
         {
             WM.Logger.Debug("ImmersionModeMaquette.InitButtonMappingUI()");
