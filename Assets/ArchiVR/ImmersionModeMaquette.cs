@@ -298,14 +298,13 @@ namespace ArchiVR
             activeProject.transform.localScale = scale * Vector3.one;
 
             // Locate around anchor.
-            var modelAnchor =
-                GameObject.Find("ModelAnchor");
-                // TODO: make into:
-                //UtilUnity.TryFindGameObject(gameObject.scene, "ModelAnchor");
+            var modelAnchor = UtilUnity.TryFindGameObject(Application.gameObject.scene, "ModelAnchor");
+
+            activeProject.transform.position = Application.OffsetPerID;
 
             if (modelAnchor != null)
             {
-                activeProject.transform.localPosition = -scale * modelAnchor.transform.localPosition;
+                activeProject.transform.position-= scale * (modelAnchor.transform.localPosition - Application.OffsetPerID);
             }
 
             // Add height offset.
@@ -313,7 +312,8 @@ namespace ArchiVR
             pos.y = 1 + m_maquetteOffset;
             activeProject.transform.position = pos;
 
-            activeProject.transform.RotateAround(Vector3.zero, Vector3.up, m_maquetteRotation);
+            // Rotate it.
+            activeProject.transform.RotateAround(Application.OffsetPerID, Vector3.up, m_maquetteRotation);
         }
 
         public override void UpdateTrackingSpacePosition()

@@ -637,7 +637,7 @@ namespace WM.Application
         /// </summary>
         public void ResetTrackingSpacePosition()
         {
-            m_ovrCameraRig.transform.position = new Vector3();
+            m_ovrCameraRig.transform.position = new Vector3() + OffsetPerID;
             m_ovrCameraRig.transform.rotation = new Quaternion();
         }
 
