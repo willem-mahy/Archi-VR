@@ -223,7 +223,17 @@ public class OVRCameraRig : MonoBehaviour
 			}
 		}
 
-		if (updateHandAnchors)
+        // <WM>
+
+        // Do not update hand anchors in when running in Unity Editor (we set them on a fixed offset from the head in those cases.)
+        // <see cref="UnityApplication.UpdateControllersLocation(...)>
+        if (Application.isEditor)
+        {
+            updateHandAnchors = false;
+        }
+        //</WM>
+
+        if (updateHandAnchors)
 		{
 			//Need this for controller offset because if we're on OpenVR, we want to set the local poses as specified by Unity, but if we're not, OVRInput local position is the right anchor
 			if (OVRManager.loadedXRDevice == OVRManager.XRDevice.OpenVR)
