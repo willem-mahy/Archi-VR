@@ -6,6 +6,9 @@ using WM.Net;
 
 namespace ArchiVR
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class ImmersionModeMaquette : ImmersionMode
     {
         #region variables
@@ -39,6 +42,9 @@ namespace ArchiVR
 
         #endregion
 
+        /// <summary>
+        /// <see cref="ImmersionMode.Init()"/> implementation.
+        /// </summary>
         public override void Init()
         {
             WM.Logger.Debug("ImmersionModeMaquette.Init()");
@@ -55,6 +61,9 @@ namespace ArchiVR
                 m_maquettePreviewContext.SetActive(false);
         }
 
+        /// <summary>
+        /// <see cref="ImmersionMode.Enter()"/> implementation.
+        /// </summary>
         public override void Enter()
         {
             WM.Logger.Debug("ImmersionModeMaquette.Enter()");
@@ -73,12 +82,17 @@ namespace ArchiVR
             maquetteManipulationMode = MaquetteManipulationMode.None;
         }
 
+        /// <summary>
+        /// <see cref="ImmersionMode.Exit()"/> implementation.
+        /// </summary>
         public override void Exit()
         {
             WM.Logger.Debug("ImmersionModeMaquette.Exit()");
 
             if (m_maquettePreviewContext)
+            {
                 m_maquettePreviewContext.SetActive(false);
+            }
 
             // Restore default moving up/down.
             Application.m_flySpeedUpDown = UnityApplication.DefaultFlySpeedUpDown;
@@ -86,6 +100,9 @@ namespace ArchiVR
             Application.RPickRay.gameObject.SetActive(false);
         }
 
+        /// <summary>
+        /// <see cref="ImmersionMode.Update()"/> implementation.
+        /// </summary>
         public override void Update()
         {
             //WM.Logger.Debug("ImmersionModeMaquette.Update()");
@@ -212,6 +229,11 @@ namespace ArchiVR
             #endregion
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="positionOffset"></param>
+        /// <param name="rotationOffset"></param>
         public void SetModelLocation(
             float positionOffset,
             float rotationOffset)
@@ -221,6 +243,14 @@ namespace ArchiVR
             UpdateModelLocationAndScale();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="layer"></param>
+        /// <param name="pickRay"></param>
+        /// <param name="gameObject"></param>
+        /// <param name="pickedLayer"></param>
+        /// <param name="minHitDistance"></param>
         private void PickRecursively(
             GameObject layer,
             Ray pickRay,
@@ -281,6 +311,9 @@ namespace ArchiVR
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public override void UpdateModelLocationAndScale()
         {
             //Logger.Debug("ImmersionModeMaquette.UpdateModelLocationAndScale()");
@@ -316,6 +349,9 @@ namespace ArchiVR
             activeProject.transform.RotateAround(Application.OffsetPerID, Vector3.up, m_maquetteRotation);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public override void UpdateTrackingSpacePosition()
         {
             WM.Logger.Debug("ImmersionModeMaquette.UpdateTrackingSpacePosition()");
