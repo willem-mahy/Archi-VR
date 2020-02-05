@@ -22,12 +22,9 @@ namespace ArchiVR.Command
         {
             WM.Logger.Debug("SetImmersionModeCommand.Execute()");
 
-            //if (application.RunAsServer)
-            //{
-            //    return;
-            //}
+            var applicationArchiVR = application as ApplicationArchiVR;
 
-            ((ApplicationArchiVR)application).SetActiveImmersionMode(ImmersionModeIndex);
+            applicationArchiVR.SetActiveImmersionMode(ImmersionModeIndex);
         }
     }
 }

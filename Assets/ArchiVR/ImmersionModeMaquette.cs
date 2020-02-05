@@ -50,8 +50,15 @@ namespace ArchiVR
         // The rotational offset angle around the up vector.
         private float m_maquetteRotation = 0;
 
-        // The layer currently being picked.
+        /// <summary>
+        /// The layer currently being picked.
+        /// </summary>
         private GameObject pickedLayer;
+
+        /// <summary>
+        /// The index of the layer currently being picked.
+        /// </summary>
+        private int pickedLayerIndex = -1;
 
         enum MaquetteManipulationMode
         {
@@ -139,16 +146,28 @@ namespace ArchiVR
                 return;
             }
 
-            // Toggle model layer visibility using picking.
-            if (Application.m_controllerInput.m_controllerState.button8Down)
+            // Clients cannot toggle model layer visibility!
+            if (Application.NetworkMode != WM.Net.NetworkMode.Client)
             {
-                if (pickedLayer != null)
+                // Toggle model layer visibility using picking.
+                if (Application.m_controllerInput.m_controllerState.button8Down)
                 {
-                    pickedLayer.SetActive(!pickedLayer.activeSelf);
-                }
-                else
-                {
-                    Application.UnhideAllModelLayers();
+                    if (pickedLayer != null)
+                    {
+                        Application.SetModelLayerVisible(pickedLayerIndex, !pickedLayer.activeSelf);
+                        //pickedLayer.SetActive(!pickedLayer.activeSelf);
+                    }
+                    else
+                    {
+                        int layerIndex = 0;
+                        foreach (var layer in Application.GetModelLayers())
+                        {
+                            Application.SetModelLayerVisible(layerIndex, true);
+                            ++layerIndex;
+                        }
+
+                        //Application.UnhideAllModelLayers();
+                    }
                 }
             }
 
@@ -234,7 +253,7 @@ namespace ArchiVR
                 float minHitDistance = float.NaN;
 
                 pickedLayer = null;
-
+                
                 foreach (var layer in Application.GetModelLayers())
                 {
                     PickRecursively(
@@ -243,6 +262,25 @@ namespace ArchiVR
                         layer,
                         ref pickedLayer,
                         ref minHitDistance);
+                }
+
+                if (pickedLayer == null)
+                {
+                    pickedLayerIndex = -1;
+                }
+                else
+                {
+                    int layerIndex = 0;
+                    foreach (var layer in Application.GetModelLayers())
+                    {
+                        if (pickedLayer == layer)
+                        {
+                            pickedLayerIndex = layerIndex;
+                            break;
+                        }
+                        ++layerIndex;
+                    }
+                    Debug.Assert(pickedLayerIndex != -1);
                 }
 
                 Application.RPickRay.HitDistance = minHitDistance;

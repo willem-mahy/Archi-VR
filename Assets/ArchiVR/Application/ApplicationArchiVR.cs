@@ -569,7 +569,9 @@ namespace ArchiVR.Application
 
         #region
 
-        //!
+        /// <summary>
+        /// 
+        /// </summary>
         void UpdateTrackingSpacePosition()
         {
             if (ActiveImmersionMode == null)
@@ -578,7 +580,9 @@ namespace ArchiVR.Application
             ActiveImmersionMode.UpdateTrackingSpacePosition();
         }
 
-        //!
+        /// <summary>
+        /// 
+        /// </summary>
         void UpdateModelLocationAndScale()
         {
             if (ActiveImmersionMode == null)
@@ -591,7 +595,9 @@ namespace ArchiVR.Application
 
         #region Immersion mode management
 
-        //!
+        /// <summary>
+        /// 
+        /// </summary>
         void ToggleImmersionModeIfNetworkModeAllows()
         {
             var c = new SetImmersionModeCommand();
@@ -612,7 +618,10 @@ namespace ArchiVR.Application
             }
         }
 
-        //! TODO: Investigate whether to rename/factor out...
+        /// <summary>
+        /// TODO: Investigate whether to rename/factor out...
+        /// </summary>
+        /// <returns></returns>
         public bool ToggleImmersionModeIfInputAndNetworkModeAllows()
         {
             // Immersion mode is toggled using I key, Left index trigger.
@@ -627,7 +636,10 @@ namespace ArchiVR.Application
             return false;
         }
 
-        //! Activates an immersion mode, by index.
+        /// <summary>
+        /// Activates an immersion mode, by index.
+        /// </summary>
+        /// <param name="immersionModeIndex"></param>
         public void SetActiveImmersionMode(int immersionModeIndex)
         {
             if (immersionModeIndex == ActiveImmersionModeIndex)
@@ -657,6 +669,22 @@ namespace ArchiVR.Application
         }
 
         #endregion
+
+        public void SetModelLayerVisible(
+            int layerIndex,
+            bool visible)
+        {
+            var command = new SetModelLayerVisibilityCommand(layerIndex, visible);
+
+            if (NetworkMode == NetworkMode.Server)
+            {
+                Server.BroadcastCommand(command);
+            }
+            else
+            {
+                command.Execute(this);
+            }
+        }
 
         #region Project management
 
