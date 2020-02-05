@@ -5,15 +5,7 @@ namespace ArchiVR
 {
     public class ImmersionModeWalkthrough : ImmersionMode
     {
-        #region variables
-
-        // TODO: remove below: I think we can just manimpulate  trackingspace to align model with play space...
-
-        //#region Model location (ued to align with play space)
-
-        //float m_modelRotation = 0;
-
-        //Vector3 m_modelTranslation = new Vector3();
+        #region variables        
 
         #endregion
 
