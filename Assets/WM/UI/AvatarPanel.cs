@@ -19,7 +19,7 @@ public class AvatarPanel : MonoBehaviour
 
         #region Get references to GameObjects.
 
-        Application = UtilUnity.TryFindGameObject(gameObject.scene, "Application").GetComponent<UnityApplication>();
+        Application = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application").GetComponent<UnityApplication>();
 
         #endregion
 

@@ -41,7 +41,7 @@ public class InfoMenu : MonoBehaviour
 
         if (Application == null)
         {
-            Application = UtilUnity.TryFindGameObject(gameObject.scene, "Application").GetComponent<UnityApplication>();
+            Application = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application").GetComponent<UnityApplication>();
         }
 
         #endregion

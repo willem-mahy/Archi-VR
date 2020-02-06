@@ -217,10 +217,10 @@ namespace ArchiVR.Application
         /// </summary>
         private void RegisterAvatars()
         {
-            AvatarFactory.Register(AvatarMarioID, UtilUnity.TryFindGameObject(gameObject.scene, "Avatar Mario"));
-            AvatarFactory.Register(AvatarWillSmithID, UtilUnity.TryFindGameObject(gameObject.scene, "Avatar WillSmith"));
-            AvatarFactory.Register(AvatarTuxID, UtilUnity.TryFindGameObject(gameObject.scene, "Avatar TUX"));
-            AvatarFactory.Register(AvatarIronManID, UtilUnity.TryFindGameObject(gameObject.scene, "Avatar IronMan"));
+            AvatarFactory.Register(AvatarMarioID, UtilUnity.FindGameObjectElseError(gameObject.scene, "Avatar Mario"));
+            AvatarFactory.Register(AvatarWillSmithID, UtilUnity.FindGameObjectElseError(gameObject.scene, "Avatar WillSmith"));
+            AvatarFactory.Register(AvatarTuxID, UtilUnity.FindGameObjectElseError(gameObject.scene, "Avatar TUX"));
+            AvatarFactory.Register(AvatarIronManID, UtilUnity.FindGameObjectElseError(gameObject.scene, "Avatar IronMan"));
         }
 
         #region Immersion mode

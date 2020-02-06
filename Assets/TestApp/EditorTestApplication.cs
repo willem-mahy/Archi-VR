@@ -27,6 +27,8 @@ public class EditorTestApplication : MonoBehaviour
     {
         SetViewLayout(DefaultViewLayout);
 
+        UnityApplication.EnableLoggerAtStartup = true;
+
         StartCoroutine(InitializeApplicationInstances());        
     }
 

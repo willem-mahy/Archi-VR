@@ -80,7 +80,7 @@ namespace ArchiVR
 
             if (m_maquettePreviewContext == null)
             {
-                m_maquettePreviewContext = UtilUnity.TryFindGameObject(Application.gameObject.scene, "MaquettePreviewContext");
+                m_maquettePreviewContext = UtilUnity.FindGameObjectElseError(Application.gameObject.scene, "MaquettePreviewContext");
             }
 
             if (m_maquettePreviewContext)
@@ -389,14 +389,19 @@ namespace ArchiVR
             activeProject.transform.rotation = Quaternion.identity;
             activeProject.transform.localScale = scale * Vector3.one;
 
-            // Locate around anchor.
-            var modelAnchor = UtilUnity.TryFindGameObject(Application.gameObject.scene, "ModelAnchor");
-
             activeProject.transform.position = Application.OffsetPerID;
 
-            if (modelAnchor != null)
+            // Locate around anchor.
             {
-                activeProject.transform.position-= scale * (modelAnchor.transform.localPosition - Application.OffsetPerID);
+                var modelAnchor = UtilUnity.FindGameObjectElseWarn(
+                    Application.gameObject.scene,
+                    "ModelAnchor",
+                    Application.Logger);
+
+                if (modelAnchor != null)
+                {
+                    activeProject.transform.position -= scale * (modelAnchor.transform.localPosition - Application.OffsetPerID);
+                }
             }
 
             // Add height offset.

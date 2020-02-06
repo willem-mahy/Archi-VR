@@ -38,7 +38,7 @@ namespace WM.UI
 
             if (Application == null)
             {
-                var applicationGO = UtilUnity.TryFindGameObject(gameObject.scene, "Application");
+                var applicationGO = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application");
                 Application = applicationGO.GetComponent<UnityApplication>();
             }
 

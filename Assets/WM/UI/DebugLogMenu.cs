@@ -37,7 +37,7 @@ public class DebugLogMenu : MonoBehaviour
 
         if (Application == null)
         {
-            Application = UtilUnity.TryFindGameObject(gameObject.scene, "Application").GetComponent<UnityApplication>();
+            Application = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application").GetComponent<UnityApplication>();
         }
 
         #endregion
@@ -46,17 +46,17 @@ public class DebugLogMenu : MonoBehaviour
 
         if (Text == null)
         {
-            Text = UtilUnity.TryFindGameObject(gameObject.scene, "DebugLogMenu_LogText").GetComponent<Text>();
+            Text = UtilUnity.FindGameObjectElseError(gameObject.scene, "DebugLogMenu_LogText").GetComponent<Text>();
         }
 
         if (_clearButton == null)
         {
-            _clearButton = UtilUnity.TryFindGameObject(gameObject.scene, "DebugLogMenu_ClearButton").GetComponent<Button>();
+            _clearButton = UtilUnity.FindGameObjectElseError(gameObject.scene, "DebugLogMenu_ClearButton").GetComponent<Button>();
         }
 
         if (_enableToggle == null)
         {
-            _enableToggle = UtilUnity.TryFindGameObject(gameObject.scene, "DebugLogMenu_EnableToggle").GetComponent<Toggle>();
+            _enableToggle = UtilUnity.FindGameObjectElseError(gameObject.scene, "DebugLogMenu_EnableToggle").GetComponent<Toggle>();
         }
 
         #endregion

@@ -39,6 +39,8 @@ namespace WM.Application
     {
         #region Variables
 
+        public static bool EnableLoggerAtStartup = false;
+
         #region UnitTestModeEnabled
 
         /// <summary>
@@ -487,14 +489,19 @@ namespace WM.Application
         /// </summary>
         public virtual void Init()
         {
-            Server.Log = Logger;
-            Client.Log = Logger;
+            Logger.Enabled = EnableLoggerAtStartup;
 
             Player.AvatarID = DefaultAvatarID;
             Player.ClientID = Client == null ? new Guid() : Client.ID;
 
+            if (Server != null)
+            {
+                Server.Log = Logger;
+            }
+
             if (Client != null)
             {
+                Client.Log = Logger;
                 Client.MessageProcessor = this;
             }
 

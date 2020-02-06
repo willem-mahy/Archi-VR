@@ -19,11 +19,6 @@ namespace WM.Net
         #region Fields
 
         /// <summary>
-        /// The log.  Injected during construction.
-        /// </summary>
-        private readonly Logger _log;
-
-        /// <summary>
         /// The IP address at which the server is running.
         /// </summary>
         public string IP;

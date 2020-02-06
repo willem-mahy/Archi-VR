@@ -45,12 +45,54 @@ namespace WM
 
         /// <summary>
         /// Tries to find a GameObject with the given name in the given scene.
-        /// Logs a warning if no such GameObject found.
+        /// Throws an exception if no such GameObject found.
         /// </summary>
-        /// <param name="scenee">The scene to search in.</param>
+        /// <param name="scene">The scene to search in.</param>
         /// <param name="name">The name to search for.</param>
         /// <returns>The first found GameObject with the given name.</returns>
-        public static GameObject TryFindGameObject(
+        public static GameObject FindGameObjectElseError(
+            Scene scene,
+            string name)
+        {
+            var go = FindGameObject(scene, name);
+
+            if (go == null)
+            {
+                throw new Exception("GameObject '" + name + "' not found in scene '" + scene.name + "'.");
+            }
+
+            return go;
+        }
+
+        /// <summary>
+        /// Tries to find a GameObject with the given name in the given scene.
+        /// Logs a warning if no such GameObject found.
+        /// </summary>
+        /// <param name="scene">The scene to search in.</param>
+        /// <param name="name">The name to search for.</param>
+        /// <returns>The first found GameObject with the given name, or 'null' if no such GameObject found.</returns>
+        public static GameObject FindGameObjectElseWarn(
+            Scene scene,
+            string name,
+            WM.Logger log)
+        {
+            var go = FindGameObject(scene, name);
+
+            if (go == null)
+            {
+                log.Warning("GameObject '" + name + "' not found in scene '" + scene.name + "'.");
+            }
+
+            return go;
+        }
+
+        /// <summary>
+        /// Tries to find a GameObject with the given name in the given scene.
+        /// </summary>
+        /// <param name="scene">The scene to search in.</param>
+        /// <param name="name">The name to search for.</param>
+        /// <returns>The first found GameObject with the given name, or 'null' if no such GameObject found.</returns>
+        public static GameObject FindGameObject(
             Scene scene,
             string name)
         {
@@ -64,7 +106,7 @@ namespace WM
                 }
             }
 
-            throw new Exception("GameObject '" + name + "' not found in scene '" + scene.name + "'.");
+            return null;
         }
 
         /// <summary>

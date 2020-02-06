@@ -25,7 +25,7 @@ public class GraphicsMenu : MonoBehaviour
 
         if (Application == null)
         {
-            Application = UtilUnity.TryFindGameObject(gameObject.scene, "Application").GetComponent<UnityApplication>();
+            Application = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application").GetComponent<UnityApplication>();
         }
 
         #endregion
@@ -34,7 +34,7 @@ public class GraphicsMenu : MonoBehaviour
 
         if (QualityDropdown == null)
         {
-            var qualityDropdownGO = UtilUnity.TryFindGameObject(gameObject.scene, "GraphicsMenu_QualityDropdown");
+            var qualityDropdownGO = UtilUnity.FindGameObjectElseError(gameObject.scene, "GraphicsMenu_QualityDropdown");
 
             if (qualityDropdownGO != null)
             {
