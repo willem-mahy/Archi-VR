@@ -237,6 +237,7 @@ namespace WM.Application
         public enum MenuMode
         {
             None = 0,
+            Player,
             Network,
             Graphics,
             Info,
@@ -254,6 +255,7 @@ namespace WM.Application
         GameObject debugLogMenuPanel = null;
         GameObject debugInputMenuPanel = null;
         GameObject graphicsMenuPanel = null;
+        GameObject playerMenuPanel = null; 
         GameObject networkMenuPanel = null;
         GameObject infoMenuPanel = null;
 
@@ -555,7 +557,7 @@ namespace WM.Application
 
                 if (debugInputMenuPanel == null)
                 {
-                    debugInputMenuPanel = UtilUnity.TryFindGameObject("DebugInputMenuPanel");
+                    debugInputMenuPanel = UtilUnity.FindGameObject(gameObject.scene, "DebugInputMenuPanel");
                 }
 
                 if (debugInputMenuPanel != null)
@@ -565,7 +567,7 @@ namespace WM.Application
 
                 if (debugLogMenuPanel == null)
                 {
-                    debugLogMenuPanel = UtilUnity.TryFindGameObject("DebugLogMenuPanel");
+                    debugLogMenuPanel = UtilUnity.FindGameObject(gameObject.scene, "DebugLogMenuPanel");
                 }
 
                 if (debugLogMenuPanel != null)
@@ -575,7 +577,7 @@ namespace WM.Application
 
                 if (graphicsMenuPanel == null)
                 {
-                    graphicsMenuPanel = UtilUnity.TryFindGameObject("GraphicsMenuPanel");
+                    graphicsMenuPanel = UtilUnity.FindGameObject(gameObject.scene, "GraphicsMenuPanel");
                 }
 
                 if (graphicsMenuPanel != null)
@@ -583,9 +585,19 @@ namespace WM.Application
                     menus.Add(graphicsMenuPanel);
                 }
 
+                if (playerMenuPanel == null)
+                {
+                    playerMenuPanel = UtilUnity.FindGameObject(gameObject.scene, "PlayerMenuPanel");
+                }
+
+                if (playerMenuPanel != null)
+                {
+                    menus.Add(playerMenuPanel);
+                }
+
                 if (networkMenuPanel == null)
                 {
-                    networkMenuPanel = UtilUnity.TryFindGameObject("NetworkMenuPanel");
+                    networkMenuPanel = UtilUnity.FindGameObject(gameObject.scene, "NetworkMenuPanel");
                 }
 
                 if (networkMenuPanel != null)
@@ -595,7 +607,7 @@ namespace WM.Application
 
                 if (infoMenuPanel == null)
                 {
-                    infoMenuPanel = UtilUnity.TryFindGameObject("InfoMenuPanel");
+                    infoMenuPanel = UtilUnity.FindGameObject(gameObject.scene, "InfoMenuPanel");
                 }
 
                 if (infoMenuPanel != null)
@@ -607,7 +619,7 @@ namespace WM.Application
 
                 if (FpsPanelHUD == null)
                 {
-                    FpsPanelHUD = UtilUnity.TryFindGameObject("FPSPanel");
+                    FpsPanelHUD = UtilUnity.FindGameObject(gameObject.scene, "FPSPanel");
                 }
 
                 if (FpsPanelHUD != null)
@@ -621,7 +633,7 @@ namespace WM.Application
             // Pick ray.
             if (!UnitTestModeEnabled)
             {
-                var LPickRayGameObject = UtilUnity.TryFindGameObject("L PickRay");
+                var LPickRayGameObject = UtilUnity.FindGameObject(gameObject.scene, "L PickRay");
 
                 if (LPickRayGameObject != null)
                 {
@@ -629,16 +641,16 @@ namespace WM.Application
                 }
             }
 
-            m_leftControllerCanvas = UtilUnity.TryFindGameObject("LeftControllerCanvas");
-            m_leftControllerPanel = UtilUnity.TryFindGameObject("LeftControllerPanel");
-            m_leftControllerText = UtilUnity.TryFindGameObject("LeftControllerText").GetComponent<UnityEngine.UI.Text>();
+            m_leftControllerCanvas = UtilUnity.FindGameObject(gameObject.scene, "LeftControllerCanvas");
+            m_leftControllerPanel = UtilUnity.FindGameObject(gameObject.scene, "LeftControllerPanel");
+            m_leftControllerText = UtilUnity.FindGameObject(gameObject.scene, "LeftControllerText").GetComponent<UnityEngine.UI.Text>();
 
             // Right controller.
 
             // Pick ray.
             if (!UnitTestModeEnabled)
             {
-                var RPickRayGameObject = UtilUnity.TryFindGameObject("R PickRay");
+                var RPickRayGameObject = UtilUnity.FindGameObject(gameObject.scene, "R PickRay");
 
                 if (RPickRayGameObject != null)
                 {
@@ -646,9 +658,9 @@ namespace WM.Application
                 }
             }
 
-            m_rightControllerCanvas = UtilUnity.TryFindGameObject("RightControllerCanvas");
-            m_rightControllerPanel = UtilUnity.TryFindGameObject("RightControllerPanel");
-            m_rightControllerText = UtilUnity.TryFindGameObject("RightControllerText").GetComponent<UnityEngine.UI.Text>();
+            m_rightControllerCanvas = UtilUnity.FindGameObject(gameObject.scene, "RightControllerCanvas");
+            m_rightControllerPanel = UtilUnity.FindGameObject(gameObject.scene, "RightControllerPanel");
+            m_rightControllerText = UtilUnity.FindGameObject(gameObject.scene, "RightControllerText").GetComponent<UnityEngine.UI.Text>();
 
             #endregion
 
