@@ -238,6 +238,9 @@ public class OvrAvatar : MonoBehaviour
 
     void OnDestroy()
     {
+        // WM: just to make compiler happy...
+        renderPartCount = (renderPartCount + 1) - 1;
+
         if (sdkAvatar != IntPtr.Zero)
         {
             CAPI.ovrAvatar_Destroy(sdkAvatar);

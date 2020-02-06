@@ -71,6 +71,9 @@ public class OvrAvatarSDKManager : MonoBehaviour
                     _instance.textureCopyManager = manager.AddComponent<OvrAvatarTextureCopyManager>();
                     _instance.initialized = _instance.Initialize();
                 }
+
+                // WM: just o make the compiler happy...
+                _instance.debugContext = (_instance.debugContext == ovrAvatarDebugContext.None ? ovrAvatarDebugContext.None : _instance.debugContext);
             }
             return _instance.initialized ? _instance : null;
         }
