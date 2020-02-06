@@ -102,13 +102,19 @@ namespace WM.Application
 
         #region Network
 
-        //! The current network mode.
+        /// <summary>
+        /// The current network mode.
+        /// </summary>
         public NetworkMode NetworkMode = NetworkMode.Standalone; // TODO: make private...
 
-        // The multiplayer server.
+        /// <summary>
+        /// The networking server.
+        /// </summary>
         public Server Server;
 
-        // The multiplayer client.
+        /// <summary>
+        /// The networking client.
+        /// </summary>
         public Client Client;
 
         public int AvatarIndex
