@@ -60,7 +60,7 @@ namespace Tests
 
             var clientGO = new GameObject();
             var client = clientGO.AddComponent(typeof(ClientArchiVR)) as ClientArchiVR;
-            client.application = application;
+            client.applicationArchiVR = application;
             client.MessageProcessor = application;
             application.Client = client;
 

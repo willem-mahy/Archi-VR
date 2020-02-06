@@ -15,16 +15,12 @@ namespace ArchiVR.Net
     {
         #region Variables
 
-        public ApplicationArchiVR application;
+        /// <summary>
+        /// The ArchiVR application.
+        /// </summary>
+        public ApplicationArchiVR applicationArchiVR; // TODO: Design defect: this should be 'private' but because of unit testing we cannot make it so!
 
         #endregion
-
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public ClientArchiVR()
-        {
-        }
 
         /// <summary>
         /// <see cref="Client"/> implementation.
@@ -32,7 +28,7 @@ namespace ArchiVR.Net
         override protected void OnConnect()
         {
             // Notify other Clients about existence of your own player.
-            var addPlayerCommand = new AddPlayerCommand(application.Player);
+            var addPlayerCommand = new AddPlayerCommand(applicationArchiVR.Player);
             SendCommand(addPlayerCommand);
         }
 
@@ -44,16 +40,16 @@ namespace ArchiVR.Net
             var callLogTag = LogID + ".OnDisconnect()";
             _log.Debug(callLogTag);
 
-            lock (application.Players)
+            lock (applicationArchiVR.Players)
             {
-                if (application.Players.Count > 0)
+                if (applicationArchiVR.Players.Count > 0)
                 {
-                    var remotePlayerIDs = new Guid[application.Players.Keys.Count];
-                    application.Players.Keys.CopyTo(remotePlayerIDs, 0);
+                    var remotePlayerIDs = new Guid[applicationArchiVR.Players.Keys.Count];
+                    applicationArchiVR.Players.Keys.CopyTo(remotePlayerIDs, 0);
 
                     foreach (var playerID in remotePlayerIDs)
                     {
-                        application.RemovePlayer(playerID);
+                        applicationArchiVR.RemovePlayer(playerID);
                     }
                 }
             }
@@ -77,15 +73,15 @@ namespace ArchiVR.Net
             try
             {
                 var avatarState = new AvatarState();
-                avatarState.PlayerID = application.Player.ID;
+                avatarState.PlayerID = applicationArchiVR.Player.ID;
                 
-                avatarState.HeadPosition = avatarHead.transform.position - application.OffsetPerID;
+                avatarState.HeadPosition = avatarHead.transform.position - applicationArchiVR.OffsetPerID;
                 avatarState.HeadRotation = avatarHead.transform.rotation;
 
-                avatarState.LHandPosition = avatarLHand.transform.position - application.OffsetPerID;
+                avatarState.LHandPosition = avatarLHand.transform.position - applicationArchiVR.OffsetPerID;
                 avatarState.LHandRotation = avatarLHand.transform.rotation;
 
-                avatarState.RHandPosition = avatarRHand.transform.position - application.OffsetPerID;
+                avatarState.RHandPosition = avatarRHand.transform.position - applicationArchiVR.OffsetPerID;
                 avatarState.RHandRotation = avatarRHand.transform.rotation;
 
                 SendMessageUdp(avatarState);
@@ -129,19 +125,19 @@ namespace ArchiVR.Net
                 }
 
                 // Update avatars with received avatar states.
-                lock (application.Players)
+                lock (applicationArchiVR.Players)
                 {
                     // Apply the most recent states.
                     foreach (var clientID in receivedAvatarStates.Keys)
                     {
-                        if (application.Players.ContainsKey(clientID))
+                        if (applicationArchiVR.Players.ContainsKey(clientID))
                         {
-                            var avatar = application.Players[clientID].Avatar;
+                            var avatar = applicationArchiVR.Players[clientID].Avatar;
                             var avatarState = receivedAvatarStates[clientID];
 
-                            avatarState.HeadPosition = avatarState.HeadPosition + application.OffsetPerID;
-                            avatarState.LHandPosition = avatarState.LHandPosition + application.OffsetPerID;
-                            avatarState.RHandPosition = avatarState.RHandPosition + application.OffsetPerID;
+                            avatarState.HeadPosition = avatarState.HeadPosition + applicationArchiVR.OffsetPerID;
+                            avatarState.LHandPosition = avatarState.LHandPosition + applicationArchiVR.OffsetPerID;
+                            avatarState.RHandPosition = avatarState.RHandPosition + applicationArchiVR.OffsetPerID;
 
                             avatar.SetState(avatarState);                            
                         }
