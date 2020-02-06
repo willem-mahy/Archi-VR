@@ -250,6 +250,8 @@ namespace WM.Net
                     }
 
                     RemoveStaleServerInfos();
+
+                    Thread.Sleep(100);
                 }
             }
 
