@@ -80,14 +80,13 @@ namespace ArchiVR
 
             if (m_maquettePreviewContext == null)
             {
-                m_maquettePreviewContext =
-                    GameObject.Find("MaquettePreviewContext");
-                    // TODO: make into:
-                    //UtilUnity.TryFindGameObject(gameObject.scene, "MaquettePreviewContext");
+                m_maquettePreviewContext = UtilUnity.TryFindGameObject(Application.gameObject.scene, "MaquettePreviewContext");
             }
 
             if (m_maquettePreviewContext)
+            {
                 m_maquettePreviewContext.SetActive(false);
+            }
         }
 
         /// <summary>
