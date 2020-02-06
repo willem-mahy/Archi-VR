@@ -55,7 +55,7 @@ namespace Tests
             // Create the server for the server application.
             var serverGO = new GameObject();
             var server = applicationGO.AddComponent(typeof(ServerArchiVR)) as ServerArchiVR;
-            server.application = application;
+            server.applicationArchiVR = application;
             application.Server = server;
 
             var clientGO = new GameObject();

@@ -44,6 +44,24 @@ public class EditorTestApplication : MonoBehaviour
         {
             ActivateNextApplicationInstance();
         }
+        
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            // Initialize the player for each client in such a way that it can see the other clients.
+            for (int i = 0; i < _applicationInstances.Count; ++i)
+            {
+                var playerGO = _applicationInstances[i].m_ovrCameraRig;
+
+                // Rotate
+                playerGO.transform.RotateAround(
+                    playerGO.transform.position,
+                    Vector3.up,
+                    i * 360.0f / _applicationInstances.Count);
+
+                // Move back
+                playerGO.transform.position-= playerGO.transform.forward;
+            }
+        }
     }
 
     /// <summary>
@@ -268,22 +286,11 @@ public class EditorTestApplication : MonoBehaviour
         {
             _applicationInstances[i].QueueCommand(new InitNetworkCommand(NetworkMode.Client));
 
-            while (_applicationInstances[i].Client.State != Client.ClientState.Connected) // (*)
+            while (_applicationInstances[i].Client.State != Client.ClientState.Connected)
             {
                 yield return null;
             }
         }
-
-        // TODO:
-        // Design defect: we can only have one Client connecting at a given time!
-        // This is why we need the above waits. (*)
-
-        //for (int i = 0; i < _applicationInstances.Count; ++i)
-        //{
-        //    var ai = _applicationInstances[i];
-        //    ai.SetPlayerName(playerNames[i]);
-        //    ai.SetPlayerAvatar(playerAvatars[i]);
-        //}
 
         _applicationInstancesInitialized = true;
     }

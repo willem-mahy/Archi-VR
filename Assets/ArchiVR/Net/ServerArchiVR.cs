@@ -12,7 +12,10 @@ namespace ArchiVR.Net
     {
         #region Variables        
 
-        public ApplicationArchiVR application = null;
+        /// <summary>
+        /// The ArchiVR application.
+        /// </summary>
+        public ApplicationArchiVR applicationArchiVR; // TODO: Design defect: this should be 'private' but because of unit testing we cannot make it so!
 
         #endregion
 
@@ -24,10 +27,10 @@ namespace ArchiVR.Net
             // Now the client is connected, initialize it to the server's application state.
 
             // A) Make the new Client know about existing Players.
-            lock (application.Players)
+            lock (applicationArchiVR.Players)
             {
                 // For each existing player, ...
-                foreach (var player in application.Players.Values)
+                foreach (var player in applicationArchiVR.Players.Values)
                 {
                     //... except players hostd  by the new client ...
                     if (player.ClientID != newClientConnection.ClientID)
@@ -43,14 +46,14 @@ namespace ArchiVR.Net
             {
                 // ...correct project/POI: spawn at the current Project and POI.
                 var teleportCommand = new TeleportCommand();
-                teleportCommand.ProjectIndex = application.ActiveProjectIndex;
-                teleportCommand.POIName = application.ActivePOIName;
+                teleportCommand.ProjectIndex = applicationArchiVR.ActiveProjectIndex;
+                teleportCommand.POIName = applicationArchiVR.ActivePOIName;
 
                 SendCommand(teleportCommand, newClientConnection);
 
                 // ...the same immersion mode.
                 var setImmersionModeCommand = new SetImmersionModeCommand();
-                setImmersionModeCommand.ImmersionModeIndex = application.ActiveImmersionModeIndex;
+                setImmersionModeCommand.ImmersionModeIndex = applicationArchiVR.ActiveImmersionModeIndex;
 
                 SendCommand(setImmersionModeCommand, newClientConnection);
             }
