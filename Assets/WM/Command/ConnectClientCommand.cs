@@ -44,7 +44,7 @@ namespace WM.Command
         /// </summary>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("ConnectClientCommand.Execute()");
+            application.Logger.Debug("ConnectClientCommand.Execute()");
         }
     }
 }

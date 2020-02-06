@@ -37,19 +37,6 @@ namespace Tests
         }
     }
 
-    class Log
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="caption"></param>
-        public static void Header(string caption)
-        {
-            WM.Logger.Debug("");
-            WM.Logger.Debug("=======[" + caption + "]===============================");
-        }
-    }
-
     public class TestUtil
     {     
         [Test]

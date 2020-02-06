@@ -44,7 +44,7 @@ namespace WM.Command
         /// </summary>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("AddPlayerCommand.Execute()");
+            application.Logger.Debug("AddPlayerCommand.Execute()");
 
             application.AddPlayer(Player);
         }

@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System.Net.Sockets;
 using System.Threading;
+using WM;
 using WM.Net;
 
 namespace Tests
@@ -13,6 +14,8 @@ namespace Tests
         [Test]
         public void TestUDPSendReceive_ConnectAndSend()
         {
+            var log = new Logger();
+
             var ip = "127.0.0.1";
             var receiverPort = 8880;
             var sender1Port = 8881;
@@ -29,17 +32,17 @@ namespace Tests
             #region Setup
 
             var receiverUdpClient = new UdpClient(receiverPort);
-            var receiver = new UDPReceive(receiverUdpClient);
+            var receiver = new UDPReceive(receiverUdpClient, log);
             receiver.Init();
 
             var sender1UdpClient = new UdpClient(sender1Port);
-            var sender1 = new UDPSend(sender1UdpClient);
+            var sender1 = new UDPSend(sender1UdpClient, log);
             sender1.remoteIP = ip;
             sender1.remotePort = receiverPort; 
             sender1.Init();
 
             var sender2UdpClient = new UdpClient(sender2Port);
-            var sender2 = new UDPSend(sender2UdpClient);
+            var sender2 = new UDPSend(sender2UdpClient, log);
             sender2.remoteIP = ip;
             sender2.remotePort = receiverPort;
             sender2.Init();

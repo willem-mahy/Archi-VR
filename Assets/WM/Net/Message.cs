@@ -43,8 +43,7 @@ namespace WM
                 }
                 catch (Exception e)
                 {
-                    WM.Logger.Error("GetObjectFromMessageXML: Failed to parse object from message XML '" + messageXML + "'");
-                    throw e;
+                    throw new Exception("GetObjectFromMessageXML: Failed to parse object from message XML '" + messageXML + "' Exception: " + e.Message);
                 }
             }
 

@@ -21,7 +21,7 @@ namespace WM.Command
         /// </summary>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("ServerShutdownCommand.Execute()");
+            application.Logger.Debug("ServerShutdownCommand.Execute()");
 
             lock (application.Players)
             {

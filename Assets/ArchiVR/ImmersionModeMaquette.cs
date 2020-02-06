@@ -76,7 +76,7 @@ namespace ArchiVR
         /// </summary>
         public override void Init()
         {
-            WM.Logger.Debug("ImmersionModeMaquette.Init()");
+            Application.Logger.Debug("ImmersionModeMaquette.Init()");
 
             if (m_maquettePreviewContext == null)
             {
@@ -95,7 +95,7 @@ namespace ArchiVR
         /// </summary>
         public override void Enter()
         {
-            WM.Logger.Debug("ImmersionModeMaquette.Enter()");
+            Application.Logger.Debug("ImmersionModeMaquette.Enter()");
 
             InitButtonMappingUI();
 
@@ -116,7 +116,7 @@ namespace ArchiVR
         /// </summary>
         public override void Exit()
         {
-            WM.Logger.Debug("ImmersionModeMaquette.Exit()");
+            Application.Logger.Debug("ImmersionModeMaquette.Exit()");
 
             if (m_maquettePreviewContext)
             {
@@ -414,7 +414,7 @@ namespace ArchiVR
         /// </summary>
         public override void UpdateTrackingSpacePosition()
         {
-            WM.Logger.Debug("ImmersionModeMaquette.UpdateTrackingSpacePosition()");
+            Application.Logger.Debug("ImmersionModeMaquette.UpdateTrackingSpacePosition()");
 
             Application.ResetTrackingSpacePosition(); // Center around model.
 
@@ -429,7 +429,7 @@ namespace ArchiVR
         /// </summary>
         public override void InitButtonMappingUI()
         {
-            WM.Logger.Debug("ImmersionModeMaquette.InitButtonMappingUI()");
+            Application.Logger.Debug("ImmersionModeMaquette.InitButtonMappingUI()");
 
             var isEditor = UnityEngine.Application.isEditor;
 

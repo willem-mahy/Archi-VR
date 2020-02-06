@@ -536,7 +536,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 1883290546}
+  m_Material: {fileID: 1793017478}
   m_Color: {r: 1, g: 1, b: 1, a: 0.392}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
@@ -586,7 +586,6 @@ GameObject:
   - component: {fileID: 1105328753}
   - component: {fileID: 1105328752}
   - component: {fileID: 1105328751}
-  - component: {fileID: 1105328754}
   m_Layer: 0
   m_Name: ActiveViewBorderCanvas
   m_TagString: Untagged
@@ -674,20 +673,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &1105328754
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1105328749}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1d0a82c7b075b6c4fb08d073827ffbc8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  comparison: 8
-  apply: 0
 --- !u!1 &1157323630
 GameObject:
   m_ObjectHideFlags: 0
@@ -771,7 +756,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!21 &1883290546
+--- !u!21 &1793017478
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0

@@ -47,7 +47,7 @@ namespace WM.Command
         /// </summary>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("SetPlayerNameCommand.Execute()");
+            application.Logger.Debug("SetPlayerNameCommand.Execute()");
 
             application.SetPlayerName(PlayerID, PlayerName);
         }

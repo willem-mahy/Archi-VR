@@ -17,13 +17,6 @@ namespace ArchiVR.Net
         #endregion
 
         /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public ServerArchiVR()
-        {
-        }
-
-        /// <summary>
         /// <see cref="Server.OnClientConnected(ClientConnection)"/> implementation.
         /// </summary>        
         override protected void OnClientConnected(ClientConnection newClientConnection)
@@ -71,7 +64,7 @@ namespace ArchiVR.Net
             ClientConnection clientConnection,
             object obj)
         {
-            WM.Logger.Debug(string.Format("ServerArchiVR.ProcessMessage: {0}", obj.ToString()));
+            _log.Debug(string.Format("ServerArchiVR.ProcessMessage: {0}", obj.ToString()));
             BroadcastData(messageXML); // TODO: Implement a way to figure out wheter to propagate or broadcast messages here.
         }
     }

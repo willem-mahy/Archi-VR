@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 [ExecuteInEditMode]
@@ -23,16 +24,13 @@ public class RenderOnTop : MonoBehaviour
 
     private void Apply()
     {
-        //WM.Logger.Debug("RenderOnTop.Apply()");
-
         apply = false;
         
         var graphic = GetComponent<Graphic>();
 
         if (graphic == null)
         {
-            WM.Logger.Warning("RenderOnTop: '" + gameObject.name + "' contains no graphic component!");
-            return;
+            throw new Exception("RenderOnTop: '" + gameObject.name + "' contains no graphic component!");
         }
 
         // Get a handle to the existing material from the graphic.

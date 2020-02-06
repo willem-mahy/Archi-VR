@@ -46,7 +46,7 @@ namespace ArchiVR.Command
         /// </summary>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("SetModelLayerVisibilityCommand.Execute()");
+            application.Logger.Debug("SetModelLayerVisibilityCommand.Execute()");
 
             var applicationArchiVR = application as ApplicationArchiVR;
 

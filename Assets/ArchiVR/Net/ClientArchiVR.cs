@@ -42,7 +42,7 @@ namespace ArchiVR.Net
         override protected void OnDisconnect()
         {
             var callLogTag = LogID + ".OnDisconnect()";
-            WM.Logger.Debug(callLogTag);
+            _log.Debug(callLogTag);
 
             lock (application.Players)
             {
@@ -72,7 +72,7 @@ namespace ArchiVR.Net
         {
             var logCallTag = LogID + ".SendAvatarStateToUdp()";
 
-            WM.Logger.Debug(logCallTag);
+            _log.Debug(logCallTag);
 
             try
             {
@@ -92,7 +92,7 @@ namespace ArchiVR.Net
             }
             catch (Exception e)
             {
-                WM.Logger.Error(logCallTag + ": Exception:" + e.Message);
+                _log.Error(logCallTag + ": Exception:" + e.Message);
             }
         }
 
@@ -103,7 +103,7 @@ namespace ArchiVR.Net
         {
             var logCallTag = LogID + ".UpdateAvatarStatesFromUdp()";
 
-            WM.Logger.Debug(logCallTag);
+            _log.Debug(logCallTag);
 
             try
             {
@@ -123,7 +123,7 @@ namespace ArchiVR.Net
                 {
                     var avatarState = (AvatarState)(obj);
 
-                    WM.Logger.Debug(logCallTag + ": Received avatar state for player[" + avatarState.PlayerID + "].");
+                    _log.Debug(logCallTag + ": Received avatar state for player[" + avatarState.PlayerID + "].");
 
                     receivedAvatarStates[avatarState.PlayerID] = avatarState;
                 }
@@ -147,14 +147,14 @@ namespace ArchiVR.Net
                         }
                         else
                         {
-                            WM.Logger.Warning(logCallTag + ".UpdateAvatarStatesFromUDP(): Received avatar state for non-existing avatar! (" + clientID + ")");
+                            _log.Warning(logCallTag + ".UpdateAvatarStatesFromUDP(): Received avatar state for non-existing avatar! (" + clientID + ")");
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                 WM.Logger.Error(logCallTag + ": Exception:" + e.Message);
+                 _log.Error(logCallTag + ": Exception:" + e.Message);
             }
         }
     }

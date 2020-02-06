@@ -60,22 +60,24 @@ public class DebugLogMenu : MonoBehaviour
         }
 
         #endregion
-
-        if (_enableToggle != null)
-        {
-            _enableToggle.isOn = WM.Logger.Enabled;
-        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (_enableToggle != null)
+        {
+            _enableToggle.SetIsOnWithoutNotify(Application.Logger.Enabled);
+        }
+
         if (Text != null)
         {
             var text = "";
 
-            var numLinesInLogger = WM.Logger.s_log.Count;
-            int numLinesToDisplay = System.Math.Min(numLinesInLogger, MaxNumLines);
+            var log = Application.Logger;
+
+            var numLinesInLog = log.Count;
+            int numLinesToDisplay = System.Math.Min(numLinesInLog, MaxNumLines);
 
             for (var lineIndex = 0; lineIndex < numLinesToDisplay; ++lineIndex)
             {
@@ -84,7 +86,7 @@ public class DebugLogMenu : MonoBehaviour
                     text += "\n";
                 }
 
-                text += WM.Logger.s_log[numLinesInLogger - (lineIndex + 1)];
+                text += log[numLinesInLog - (lineIndex + 1)];
             }
 
             Text.text = text;
@@ -108,7 +110,7 @@ public class DebugLogMenu : MonoBehaviour
     /// <param name="value"></param>
     public void EnableLoggerToggleOnValueChanged(bool value)
     {
-        WM.Logger.SetEnabled(value);
+        Application.Logger.Enabled = value;
     }
 
     /// <summary>
@@ -116,6 +118,6 @@ public class DebugLogMenu : MonoBehaviour
     /// </summary>
     public void ClearLogOnCLick()
     {
-        WM.Logger.Clear();
+        Application.Logger.Clear();
     }
 }

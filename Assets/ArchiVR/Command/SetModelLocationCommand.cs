@@ -41,7 +41,7 @@ namespace ArchiVR.Command
         /// </summary>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("SetModelLocationCommand.Execute()");
+            application.Logger.Debug("SetModelLocationCommand.Execute()");
 
             var immersionModeMaquette = ((ApplicationArchiVR)application).ImmersionModeMaquette;
 

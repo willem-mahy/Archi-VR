@@ -18,7 +18,7 @@ namespace ArchiVR
         /// </summary>
         public override void Enter()
         {
-            WM.Logger.Debug("ImmersionModeWalkthrough.Enter()");
+            Application.Logger.Debug("ImmersionModeWalkthrough.Enter()");
 
             InitButtonMappingUI();
 
@@ -33,7 +33,7 @@ namespace ArchiVR
         /// </summary>
         public override void Exit()
         {
-            WM.Logger.Debug("ImmersionModeWalkthrough.Exit()");
+            Application.Logger.Debug("ImmersionModeWalkthrough.Exit()");
 
             // Restore default moving up/down.
             Application.m_flySpeedUpDown = UnityApplication.DefaultFlySpeedUpDown;
@@ -86,7 +86,7 @@ namespace ArchiVR
         /// </summary>
         public override void UpdateModelLocationAndScale()
         {
-            WM.Logger.Debug("ImmersionModeWalkthrough.UpdateModelLocationAndScale()");
+            Application.Logger.Debug("ImmersionModeWalkthrough.UpdateModelLocationAndScale()");
 
             var activeProject = Application.ActiveProject;
 
@@ -105,7 +105,7 @@ namespace ArchiVR
         /// </summary>
         public override void UpdateTrackingSpacePosition()
         {
-            WM.Logger.Debug("ImmersionModeWalkthrough.UpdateTrackingSpacePosition()");
+            Application.Logger.Debug("ImmersionModeWalkthrough.UpdateTrackingSpacePosition()");
 
             var activePOI = Application.ActivePOI;
 
@@ -136,7 +136,7 @@ namespace ArchiVR
         /// </summary>
         public override void InitButtonMappingUI()
         {
-            WM.Logger.Debug("ImmersionModeWalkthrough.InitButtonMappingUI()");
+            Application.Logger.Debug("ImmersionModeWalkthrough.InitButtonMappingUI()");
 
             var isEditor = UnityEngine.Application.isEditor;
 

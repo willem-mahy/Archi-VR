@@ -12,12 +12,12 @@ namespace ArchiVR.Application
 
             public override void Init()
             {
-                WM.Logger.Debug("ApplicationStateTeleporting.Init()");
+                m_application.Logger.Debug("ApplicationStateTeleporting.Init()");
             }
 
             public override void Enter()
             {
-                WM.Logger.Debug("ApplicationStateTeleporting.Enter()");
+                m_application.Logger.Debug("ApplicationStateTeleporting.Enter()");
 
                 //m_application.m_leftHandAnchor.SetActive(false); // TODO? Hide only button labels?
                 //m_application.m_rightHandAnchor.SetActive(false);
@@ -40,20 +40,20 @@ namespace ArchiVR.Application
 
                 if (needFadeOut)
                 {
-                    WM.Logger.Debug("Fading out...");
+                    m_application.Logger.Debug("Fading out...");
                     m_application.m_fadeAnimator.ResetTrigger("FadeIn");
                     m_application.m_fadeAnimator.SetTrigger("FadeOut");
                 }
                 else
                 {
-                    WM.Logger.Debug("No need to fade out.");
+                    m_application.Logger.Debug("No need to fade out.");
                     OnTeleportFadeOutComplete();
                 }
             }
 
             public override void Exit()
             {
-                WM.Logger.Debug("ApplicationStateTeleporting.Exit()");
+                m_application.Logger.Debug("ApplicationStateTeleporting.Exit()");
 
                 //m_application.m_leftHandAnchor.SetActive(true);
                 //m_application.m_rightHandAnchor.SetActive(true);
@@ -74,17 +74,17 @@ namespace ArchiVR.Application
 
             public override void Update()
             {
-                //WM.Logger.Debug("ApplicationStateTeleporting.Update()");
+                //m_application.Logger.Debug("ApplicationStateTeleporting.Update()");
             }
 
             public override void UpdateModelLocationAndScale()
             {
-                WM.Logger.Debug("ApplicationStateTeleporting.UpdateModelLocationAndScale()");
+                m_application.Logger.Debug("ApplicationStateTeleporting.UpdateModelLocationAndScale()");
             }
 
             public override void UpdateTrackingSpacePosition()
             {
-                WM.Logger.Debug("ApplicationStateTeleporting.UpdateTrackingSpacePosition()");
+                m_application.Logger.Debug("ApplicationStateTeleporting.UpdateTrackingSpacePosition()");
             }
 
             void InitButtonMappingUI()
@@ -93,7 +93,7 @@ namespace ArchiVR.Application
 
             public override void OnTeleportFadeOutComplete()
             {
-                WM.Logger.Debug("ApplicationStateTeleporting.OnTeleportFadeOutComplete()");
+                m_application.Logger.Debug("ApplicationStateTeleporting.OnTeleportFadeOutComplete()");
 
                 var application = (ApplicationArchiVR)m_application;
 
@@ -107,9 +107,9 @@ namespace ArchiVR.Application
 
             public override void OnTeleportFadeInComplete()
             {
-                WM.Logger.Debug("ApplicationStateTeleporting.OnTeleportFadeInComplete()");
+                m_application.Logger.Debug("ApplicationStateTeleporting.OnTeleportFadeInComplete()");
 
                 m_application.SetActiveApplicationState(UnityApplication.ApplicationStates.Default);
             }
         }
-} // namespace WM
+} // namespace ArchiVR.Application

@@ -19,7 +19,7 @@ namespace WM.Command
         /// </summary>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("SetMenuModeCommand.Execute()");
+            application.Logger.Debug("SetMenuModeCommand.Execute()");
 
             application.SetMenuMode(_mode);
         }

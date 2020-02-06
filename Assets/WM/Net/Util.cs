@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 
 namespace WM.Net
@@ -15,17 +16,20 @@ namespace WM.Net
         }
 
         /// <summary>
-        /// 
+        /// Gets all IP adresses for the given host entry, as a list of strings.
         /// </summary>
-        /// <param name=""></param>
-        public static void PrintAllIPAdresses(IPHostEntry hostEntry)
+        /// <param name="hostEntry"></param>
+        /// <returns></returns>
+        public static List<string> GetAllIPAdressesAsString(IPHostEntry hostEntry)
         {
-            WM.Logger.Debug("Host IP addresses:");
+            var r = new List<string>();
 
             foreach (var ipAddress in hostEntry.AddressList)
             {
-                WM.Logger.Debug("    - " + ipAddress);
+                r.Add(ipAddress.ToString());
             }
+
+            return r;
         }
 
         /// <summary>
@@ -39,8 +43,6 @@ namespace WM.Net
 
             // Get host entry from host name.
             var hostEntry = Dns.GetHostEntry(hostName);
-
-            PrintAllIPAdresses(hostEntry);
 
             foreach (var ip in hostEntry.AddressList)
             {

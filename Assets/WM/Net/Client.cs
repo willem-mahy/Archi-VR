@@ -43,6 +43,26 @@ namespace WM.Net
         #region Variables
 
         /// <summary>
+        /// The log.
+        /// </summary>
+        protected Logger _log;
+
+        /// <summary>
+        /// Gets the log.
+        /// </summary>
+        public Logger Log
+        {
+            set
+            {
+                _log = value;
+            }
+            protected get
+            {
+                return _log;
+            }
+        }
+
+        /// <summary>
         /// The unique client ID.
         /// </summary>
         public Guid ID
@@ -215,6 +235,16 @@ namespace WM.Net
 
         #endregion Variables
 
+        #region Public API
+
+        /// <summary>
+        /// Sets the log.
+        /// </summary>
+        public void SetLog(Logger log)
+        {
+            _log = log;
+        }
+
         /// <summary>
         /// Starts initializing the connection to the Server.
         /// 
@@ -222,7 +252,7 @@ namespace WM.Net
         /// </summary>
         public void Connect()
         {
-            WM.Logger.Debug(LogID + ".Connect()");
+            _log.Debug(LogID + ".Connect()");
 
             lock (stateLock)
             {
@@ -250,7 +280,7 @@ namespace WM.Net
         /// </summary>
         public void Disconnect()
         {
-            WM.Logger.Debug(LogID + ".Disconnect()");
+            _log.Debug(LogID + ".Disconnect()");
 
             lock (stateLock)
             {
@@ -267,7 +297,7 @@ namespace WM.Net
                         throw new Exception("Disconnect() can not be called on Client while it is Connecting.");
                 }
 
-                WM.Logger.Debug(LogID + "] disconnecting...");
+                _log.Debug(LogID + "] disconnecting...");
 
                 Shutdown();
 
@@ -276,6 +306,8 @@ namespace WM.Net
                 State = ClientState.Disconnected;
             }
         }
+
+        #endregion Public API
 
         /// <summary>
         /// 
@@ -304,7 +336,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                WM.Logger.Error("Client.SendDataUdp(): Exception:" + e.Message);
+                _log.Error("Client.SendDataUdp(): Exception:" + e.Message);
             }
         }
 
@@ -316,11 +348,11 @@ namespace WM.Net
         {
             var logCallTag = LogID + ".SendMessageUdp()";
 
-            WM.Logger.Debug(logCallTag);
+            _log.Debug(logCallTag);
 
             if (udpSend == null)
             {
-                WM.Logger.Warning(logCallTag + ": Not connected yet!");
+                _log.Warning(logCallTag + ": Not connected yet!");
                 return; // Not connected yet...
             }
 
@@ -330,7 +362,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                WM.Logger.Error(logCallTag + ": Exception:" + e.Message);
+                _log.Error(logCallTag + ": Exception:" + e.Message);
             }
         }
 
@@ -340,7 +372,7 @@ namespace WM.Net
         /// <param name="command"></param>
         public void SendCommand(ICommand command)
         {
-            WM.Logger.Debug(LogID + ":SendCommand(" + command.ToString() + ")");
+            _log.Debug(LogID + ":SendCommand(" + command.ToString() + ")");
 
             try
             {
@@ -350,7 +382,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                 WM.Logger.Error(LogID + ".SendCommand(): Exception:" + e.Message);
+                 _log.Error(LogID + ".SendCommand(): Exception:" + e.Message);
             }
         }
 
@@ -360,8 +392,8 @@ namespace WM.Net
         /// <param name="data"></param>
         public void SendData(String data)
         {
-            //WM.Logger.Debug(LogID + ":SendData(" + data + ")");
-            WM.Logger.Debug(LogID + ":SendData()");
+            //_log.Debug(LogID + ":SendData(" + data + ")");
+            _log.Debug(LogID + ":SendData()");
 
             try
             {
@@ -381,7 +413,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                 WM.Logger.Error(LogID + ".SendData(): Exception:" + e.Message);
+                 _log.Error(LogID + ".SendData(): Exception:" + e.Message);
             }
         }
 
@@ -392,7 +424,7 @@ namespace WM.Net
         {
             var logCallTag = LogID + ".GetReceivedMessagesUdp()";
 
-            WM.Logger.Debug(logCallTag);
+            _log.Debug(logCallTag);
 
             if (udpReceive == null)
             {
@@ -407,7 +439,7 @@ namespace WM.Net
                 {
                     if (udpReceive.allReceivedUDPPackets.Keys.Count > 1)
                     {
-                        WM.Logger.Warning(logCallTag + ": More than one receive buffer!?!");
+                        _log.Warning(logCallTag + ": More than one receive buffer!?!");
                         udpReceive.allReceivedUDPPackets.Clear();
                         return null;
                     }
@@ -479,7 +511,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                WM.Logger.Error(logCallTag + ": Exception:" + e.Message);
+                _log.Error(logCallTag + ": Exception:" + e.Message);
                 return null;
             }
         }
@@ -491,7 +523,7 @@ namespace WM.Net
         /// </summary>
         private void Shutdown()
         {
-            WM.Logger.Debug(LogID + ".Shutdown()");
+            _log.Debug(LogID + ".Shutdown()");
 
             // First make sure the receiving thread is stopped.
             if (thread != null)
@@ -551,7 +583,7 @@ namespace WM.Net
             int pollClientDisconnectAcknoledgeMessageNumRetries = 3,
             int pollClientDisconnectAcknoledgeMessageInterval = 200)
         {
-            WM.Logger.Debug(LogID + ".InformServerAboutDisconnection()");
+            _log.Debug(LogID + ".InformServerAboutDisconnection()");
 
             try
             {
@@ -559,7 +591,7 @@ namespace WM.Net
             }
             catch (Exception /*e*/)
             {
-                WM.Logger.Debug(LogID + ".InformServerAboutDisconnection(): Sending DisconnectClientCommand failed.");
+                _log.Debug(LogID + ".InformServerAboutDisconnection(): Sending DisconnectClientCommand failed.");
                 return;
             }
 
@@ -575,7 +607,7 @@ namespace WM.Net
 
                     if (obj is ClientDisconnectAcknoledgeMessage)
                     {
-                        WM.Logger.Debug(LogID + ".InformServerAboutDisconnection(): DisconnectAcknoledged from Server received after " + i + " polls.");
+                        _log.Debug(LogID + ".InformServerAboutDisconnection(): DisconnectAcknoledged from Server received after " + i + " polls.");
                         return;
                     }
                 }
@@ -597,7 +629,7 @@ namespace WM.Net
             
             Action = "Listening for servers";
 
-            WM.Logger.Debug(string.Format(callLogID + ": Listening on UDP port {0}.", Server.UdpBroadcastRemotePort));
+            _log.Debug(string.Format(callLogID + ": Listening on UDP port {0}.", Server.UdpBroadcastRemotePort));
 
             var discoveryUdpClient = new UdpClient(Server.UdpBroadcastRemotePort);
 
@@ -620,7 +652,7 @@ namespace WM.Net
                     if (obj is ServerInfo serverInfo)
                     {
                         var serverIP = discoveryUdpRemoteEndPoint.Address.ToString();
-                        WM.Logger.Debug(string.Format(callLogID + ": Received ServerInfo('IP:{0}': TCP:{1}, UDP:{2})", serverIP, serverInfo.TcpPort, serverInfo.UdpPort));
+                        _log.Debug(string.Format(callLogID + ": Received ServerInfo('IP:{0}': TCP:{1}, UDP:{2})", serverIP, serverInfo.TcpPort, serverInfo.UdpPort));
 
                         discoveryUdpClient.Close();
 
@@ -628,12 +660,12 @@ namespace WM.Net
                     }
                     else
                     {
-                        WM.Logger.Warning(string.Format(callLogID + ": Received unexpected message '{0}' on server broadcast listener UDP client!", receivedText));
+                        _log.Warning(string.Format(callLogID + ": Received unexpected message '{0}' on server broadcast listener UDP client!", receivedText));
                     }
                 }
                 catch (Exception e)
                 {
-                    WM.Logger.Warning(callLogID + ": Exception: " + e.ToString());
+                    _log.Warning(callLogID + ": Exception: " + e.ToString());
                 }
             }
 
@@ -692,7 +724,7 @@ namespace WM.Net
                     dataFromServer = dataFromServer.Substring(firstMessageBegin);
 
                     // Should this even happen in a normal use case? -> Let's log it to find out...
-                    WM.Logger.Warning(LogID + ".ReceiveTcpMessagesFromServer: Removing useless data buffer begin '" + dataFromServer.Substring(0, firstMessageBegin) + "'");
+                    _log.Warning(LogID + ".ReceiveTcpMessagesFromServer: Removing useless data buffer begin '" + dataFromServer.Substring(0, firstMessageBegin) + "'");
                 }
 
                 // Get the position of the first 'Message End' tag in the data buffer.
@@ -752,24 +784,24 @@ namespace WM.Net
                         var clientInfo = new ClientInfo(ID, udpReceivePort);
                         var clientInfoMessage = WM.Net.Message.EncodeObjectAsXml(clientInfo);
 
-                        WM.Logger.Debug(callLogTag + ": Send ClientInfo");
+                        _log.Debug(callLogTag + ": Send ClientInfo");
                         SendData(clientInfoMessage);
 
                         // Initialize UDP socket from server.
                         {
-                            udpReceive = new UDPReceive(udpClient);
+                            udpReceive = new UDPReceive(udpClient, Log);
                             udpReceive.Init();
                         }
 
                         // Initialize UDP socket to server.
                         {
-                            udpSend = new UDPSend(udpClient);
+                            udpSend = new UDPSend(udpClient, _log);
                             udpSend.remoteIP = ServerInfo.IP;
                             udpSend.remotePort = ServerInfo.UdpPort;
                             udpSend.Init();
                         }
 
-                        WM.Logger.Debug(callLogTag + ": Waiting for 'Connection Complete' from server");
+                        _log.Debug(callLogTag + ": Waiting for 'Connection Complete' from server");
                         while (!tcpServerStream.DataAvailable)
                         {
                         }
@@ -782,11 +814,11 @@ namespace WM.Net
 
                         if (textFromServer != "Connection Complete")
                         {
-                            WM.Logger.Error(callLogTag + ": Received '" + textFromServer + "' instead of 'Connection Complete'");
+                            _log.Error(callLogTag + ": Received '" + textFromServer + "' instead of 'Connection Complete'");
                         }
                         else
                         {
-                            WM.Logger.Debug(callLogTag + ": Received 'Connection Complete' from Server");
+                            _log.Debug(callLogTag + ": Received 'Connection Complete' from Server");
                         }
 
                         OnConnect();
@@ -854,7 +886,7 @@ namespace WM.Net
             var callLogTag = LogID + ".TryConnectToServer()";
 
             String serverInfoTag = "ServerInfo=(IP:" + serverInfo.IP + ", TCP:" + serverInfo.TcpPort + ", UDP:" + serverInfo.UdpPort + "), timeout:" + ConnectTimeout + "ms";
-            WM.Logger.Debug(callLogTag + ": " + serverInfoTag);
+            _log.Debug(callLogTag + ": " + serverInfoTag);
 
             Action = "Trying to connect to " + serverInfoTag;
 
@@ -869,19 +901,19 @@ namespace WM.Net
                 if (connectionAttempt.IsCompleted)
                 {
                     this.tcpClient = tcpClient;
-                    WM.Logger.Debug(callLogTag + ": TcpClient connected!");
+                    _log.Debug(callLogTag + ": TcpClient connected!");
                     return true;
                 }
                 else
                 {
                     tcpClient.Close();
-                    WM.Logger.Warning(callLogTag + ": TcpClient failed to connect!");
+                    _log.Warning(callLogTag + ": TcpClient failed to connect!");
                     return false;
                 }
             }
             catch (Exception e)
             {
-                WM.Logger.Error(callLogTag + ": Exception: " + e.Message + ": " + e.InnerException);
+                _log.Error(callLogTag + ": Exception: " + e.Message + ": " + e.InnerException);
                 return false;
             }
         }

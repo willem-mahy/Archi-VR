@@ -5,10 +5,18 @@ using System.Text;
 
 namespace WM.Net
 {
-    /*
-     */
+    /// <summary>
+    /// 
+    /// </summary>
     public class UDPSend
     {
+        #region Fields
+
+        /// <summary>
+        /// The log.  Injected during construction.
+        /// </summary>
+        private readonly Logger _log;
+
         /// <summary>
         /// 
         /// </summary>
@@ -34,13 +42,18 @@ namespace WM.Net
         /// </summary>
         UdpClient udpClient;
 
+        #endregion Fields
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="udpClient"></param>
-        public UDPSend(UdpClient udpClient)
+        public UDPSend(
+            UdpClient udpClient,
+            Logger log)
         {
             this.udpClient = udpClient;
+            _log = log;
         }
 
         public void Init()
@@ -49,7 +62,7 @@ namespace WM.Net
 
             remoteEndPoint = new IPEndPoint(IPAddress.Parse(remoteIP), remotePort);
 
-            WM.Logger.Debug(logCallTag + ": UDPSend running. (Target: " + remoteIP + ":" + remotePort + ")");
+            _log.Debug(logCallTag + ": UDPSend running. (Target: " + remoteIP + ":" + remotePort + ")");
         }
 
         /// <summary>
@@ -60,7 +73,7 @@ namespace WM.Net
         {
             var logCallTag = "UDPSend.SendString()";
 
-            WM.Logger.Debug(logCallTag);
+            _log.Debug(logCallTag);
 
             if (remoteEndPoint == null)
             {
@@ -76,7 +89,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                WM.Logger.Error(logCallTag + ": Exception: " + e.ToString());
+                _log.Error(logCallTag + ": Exception: " + e.ToString());
             }
         }
 
@@ -88,7 +101,7 @@ namespace WM.Net
         {
             var logCallTag = "UDPSend.Send()";
 
-            WM.Logger.Debug(logCallTag);
+            _log.Debug(logCallTag);
 
             if (remoteEndPoint == null)
             {
@@ -102,7 +115,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                WM.Logger.Error(logCallTag + ": Exception: " + e.ToString());
+                _log.Error(logCallTag + ": Exception: " + e.ToString());
             }
         }
     }

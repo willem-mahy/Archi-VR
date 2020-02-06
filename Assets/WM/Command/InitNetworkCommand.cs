@@ -29,7 +29,7 @@ namespace WM.Command
         /// <param name="application"></param>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("InitNetworkCommand.Execute(): NetworkMode = " + NetworkMode);
+            application.Logger.Debug("InitNetworkCommand.Execute(): NetworkMode = " + NetworkMode);
 
             if (application.NetworkMode == NetworkMode)
             {

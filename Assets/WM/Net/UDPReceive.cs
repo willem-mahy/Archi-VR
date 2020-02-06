@@ -14,16 +14,6 @@ namespace WM.Net
         #region Variables
 
         /// <summary>
-        /// Receiving Thread
-        /// </summary>
-        private Thread receiveThread;
-
-        /// <summary>
-        /// UdpClient object
-        /// </summary>
-        private UdpClient udpClient;
-
-        /// <summary>
         /// 
         /// </summary>
         public string lastReceivedUDPPacket = "";
@@ -33,14 +23,47 @@ namespace WM.Net
         /// 
         /// Clean up this from time to time!
         /// </summary>
+
         public Dictionary<string, string> allReceivedUDPPackets = new Dictionary<string, string>();
+        
+        /// <summary>
+        /// The log.  Injected during construction.
+        /// </summary>
+        private readonly Logger _log;
+
+        /// <summary>
+        /// Receiving Thread
+        /// </summary>
+        private Thread _receiveThread;
+
+        /// <summary>
+        /// UdpClient object
+        /// </summary>
+        private UdpClient _udpClient;
 
         /// <summary>
         /// 
         /// </summary>
-        private CancellationTokenSource shutdownTokenSource = new CancellationTokenSource();
+        private CancellationTokenSource _shutdownTokenSource = new CancellationTokenSource();
 
         #endregion
+
+        #region Construction
+
+        /// <summary>
+        /// Parametrized constructor.
+        /// </summary>
+        /// <param name="udpClient">The UDP client.</param>
+        /// <param name="log">The log.</param>
+        public UDPReceive(
+            UdpClient udpClient,
+            Logger log)
+        {
+            this._udpClient = udpClient;
+            _log = log;
+        }
+
+        #endregion Construction
 
         /// <summary>
         /// 
@@ -56,30 +79,21 @@ namespace WM.Net
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="udpClient"></param>
-        public UDPReceive(UdpClient udpClient)
-        {
-            this.udpClient = udpClient;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public void Init()
         {
-            WM.Logger.Debug("UDPReceive.Init()");
+            _log.Debug("UDPReceive.Init()");
 
-            if (shutdownTokenSource != null)
+            if (_shutdownTokenSource != null)
             {
-                shutdownTokenSource.Dispose();
+                _shutdownTokenSource.Dispose();
             }
-            shutdownTokenSource = new CancellationTokenSource();
+            _shutdownTokenSource = new CancellationTokenSource();
 
-            receiveThread = new Thread(new ThreadStart(ReceiveData));
-            receiveThread.IsBackground = true;
-            receiveThread.Start();
+            _receiveThread = new Thread(new ThreadStart(ReceiveData));
+            _receiveThread.IsBackground = true;
+            _receiveThread.Start();
 
-            WM.Logger.Debug("UDPReceive.Init() End");
+            _log.Debug("UDPReceive.Init() End");
         }
 
         /// <summary>
@@ -87,18 +101,18 @@ namespace WM.Net
         /// </summary>
         public void Shutdown()
         {
-            WM.Logger.Debug("UDPReceive.Shutdown()");
+            _log.Debug("UDPReceive.Shutdown()");
 
-            shutdownTokenSource.Cancel();
+            _shutdownTokenSource.Cancel();
 
-            if (receiveThread != null)
+            if (_receiveThread != null)
             {
-                receiveThread.Join();
+                _receiveThread.Join();
 
-                receiveThread = null;
+                _receiveThread = null;
             }
 
-            WM.Logger.Debug("UDPReceive.Shutdown() End");
+            _log.Debug("UDPReceive.Shutdown() End");
         }
 
         /// <summary>
@@ -111,11 +125,11 @@ namespace WM.Net
                 try
                 {
                     // Receive bytes from any client.                        
-                    var task = udpClient.ReceiveAsync();
+                    var task = _udpClient.ReceiveAsync();
 
                     try
                     {
-                        task.Wait(shutdownTokenSource.Token);
+                        task.Wait(_shutdownTokenSource.Token);
                     }
                     catch (OperationCanceledException /*e*/)
                     {
@@ -150,7 +164,7 @@ namespace WM.Net
                 }
                 catch (Exception e)
                 {
-                    WM.Logger.Error("UDPReceive.ReceiveData(): Exception: " + e.ToString());
+                    _log.Error("UDPReceive.ReceiveData(): Exception: " + e.ToString());
                 }
             }
         }

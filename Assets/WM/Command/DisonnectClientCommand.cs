@@ -34,7 +34,7 @@ namespace WM.Command
         /// </summary>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("DisconnectClientCommand.Execute()");
+            application.Logger.Debug("DisconnectClientCommand.Execute()");
 
             application.RemovePlayersByClient(ClientID);
         }

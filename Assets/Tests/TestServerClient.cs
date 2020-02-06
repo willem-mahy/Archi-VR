@@ -36,16 +36,17 @@ namespace Tests
         /// <returns></returns>
         private ApplicationArchiVR CreateApplication(string name)
         {
-            Log.Header("Create application '" + name + "'");
-            
-            ApplicationArchiVR.SetUnitTestModeEnabled(true);
+            ApplicationArchiVR.UnitTestModeEnabled = true;
 
             // Create an application instance that will act as server.
             var applicationGO = new GameObject();
             applicationGO.name = name;
             var application = applicationGO.AddComponent(typeof(ApplicationArchiVR)) as ApplicationArchiVR;
 
+            application.Logger.Header("Create application '" + name + "'");
+
             application.DefaultAvatarID = DefaultAvatarID;
+            
 
             application.AvatarFactory.Register(DefaultAvatarID, MockFactory.CreateAvatarGameObject("DefaultAvatar"));
             application.AvatarFactory.Register(Avatar2ID, MockFactory.CreateAvatarGameObject("Avatar1"));
@@ -98,7 +99,7 @@ namespace Tests
 
         private void StopServer()
         {
-            Log.Header("Stop Server");
+            applicationServer.Logger.Header("Stop Server");
 
             // Make server application initialize network mode from 'Server' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);
@@ -127,7 +128,7 @@ namespace Tests
         [Test]
         public void Test_ArchiVR_Multiplay_NominalWorkflow_Full_2Clients()
         {
-            WM.Logger.Enabled = false;
+            var log = new WM.Logger();
 
             #region Setup
 
@@ -144,6 +145,12 @@ namespace Tests
             applications.Add(applicationClient2);
 
             #endregion
+
+            // Disable logging.
+            foreach (var application in applications)
+            {
+                application.Logger.Enabled = false;
+            }
 
             #region Check initial application state
 
@@ -165,11 +172,15 @@ namespace Tests
 
             #endregion Check initial application state
 
-            WM.Logger.Enabled = true;
+            // Enable logging.
+            foreach (var application in applications)
+            {
+                application.Logger.Enabled = true;
+            }
 
             #region Start Server.
 
-            Log.Header("Start Server");
+            applications[0].Logger.Header("Start Server");
 
             // WHEN the ServerApplication is initialized to 'Server' network mode...
             {
@@ -204,7 +215,7 @@ namespace Tests
 
             #region Connect Client1
 
-            Log.Header("Connect Client1");
+            applicationClient1.Logger.Header("Connect Client1");
 
             // WHEN the Client1 application is initialized to 'Client' network mode...
             {
@@ -237,7 +248,7 @@ namespace Tests
 
             #region Connect Client2
 
-            Log.Header("Connect Client2");
+            applicationClient2.Logger.Header("Connect Client2");
 
             // WHEN the Client2 application is initialized to 'Client' network mode...
             {
@@ -270,7 +281,7 @@ namespace Tests
 
             #region Change server Avatar
 
-            Log.Header("Set Server avatar to Avatar1");
+            applicationServer.Logger.Header("Set Server avatar to Avatar1");
             applicationServer.SetPlayerAvatar(Avatar1ID);
             
             UpdateApplications(); // Make queued commands execute.
@@ -292,7 +303,7 @@ namespace Tests
 
             #region Change server player name
 
-            Log.Header("Change Server player name");
+            applicationServer.Logger.Header("Change Server player name");
             applicationServer.SetPlayerName("New Server player");
 
             UpdateApplications(); // Make queued commands execute.
@@ -321,7 +332,7 @@ namespace Tests
 
             #region Change Client1 player name
 
-            Log.Header("Change Server player name");
+            applicationClient1.Logger.Header("Change Server player name");
             applicationClient1.SetPlayerName("New Client1 player");
 
             UpdateApplications(); // Make queued commands execute.
@@ -391,7 +402,7 @@ namespace Tests
 
             #region Disconnect Client2
 
-            Log.Header("Disconnect Client2");
+            applicationClient2.Logger.Header("Disconnect Client2");
 
             // Make client1 application initialize network mode from 'Client' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Client, applicationClient2.NetworkMode);
@@ -416,7 +427,7 @@ namespace Tests
 
             #region Disconnect Client1
 
-            Log.Header("Disconnect Client1");
+            applicationClient1.Logger.Header("Disconnect Client1");
 
             // Make client1 application initialize network mode from 'Client' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Client, applicationClient1.NetworkMode);
@@ -486,13 +497,16 @@ namespace Tests
 
             #endregion Check initial application state
 
-            WM.Logger.Enabled = true;
+            foreach (var application in applications)
+            {
+                application.Logger.Enabled = true;
+            }
 
             #region Init network (Server + 2 Clients)
 
             #region Start Server.
 
-            Log.Header("Start Server");
+            applicationServer.Logger.Header("Start Server");
 
             // WHEN the ServerApplication is initialized to 'Server' network mode...
             {
@@ -525,7 +539,7 @@ namespace Tests
 
             #region Connect Client1
 
-            Log.Header("Connect Client1");
+            applicationClient1.Logger.Header("Connect Client1");
 
             // WHEN the Client1 application is initialized to 'Client' network mode...
             {
@@ -558,7 +572,7 @@ namespace Tests
 
             #region Connect Client2
 
-            Log.Header("Connect Client2");
+            applicationClient2.Logger.Header("Connect Client2");
 
             // WHEN the Client2 application is initialized to 'Client' network mode...
             {
@@ -598,7 +612,7 @@ namespace Tests
 
             #region Restart Server.
 
-            Log.Header("Restart Server");
+            applicationServer.Logger.Header("Restart Server");
 
             // WHEN the ServerApplication is initialized to 'Server' network mode...
             {
@@ -631,7 +645,7 @@ namespace Tests
 
             #region Connect Client1
 
-            Log.Header("Connect Client1");
+            applicationClient1.Logger.Header("Connect Client1");
 
             // The server will run at different ports after restart, so clear the stale ServerInfo cached in the Client.
             applicationClient1.Client.ServerInfo = null;
@@ -667,7 +681,7 @@ namespace Tests
 
             #region Connect Client2
 
-            Log.Header("Connect Client2");
+            applicationClient2.Logger.Header("Connect Client2");
 
             // The server will run at different ports after restart, so clear the stale ServerInfo cached in the Client.
             applicationClient2.Client.ServerInfo = null;
@@ -707,7 +721,7 @@ namespace Tests
 
             #region Disconnect Client2
 
-            Log.Header("Disconnect Client2");
+            applicationClient2.Logger.Header("Disconnect Client2");
 
             // Make client1 application initialize network mode from 'Client' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Client, applicationClient2.NetworkMode);
@@ -732,7 +746,7 @@ namespace Tests
 
             #region Disconnect Client1
 
-            Log.Header("Disconnect Client1");
+            applicationClient1.Logger.Header("Disconnect Client1");
 
             // Make client1 application initialize network mode from 'Client' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Client, applicationClient1.NetworkMode);
@@ -757,7 +771,7 @@ namespace Tests
 
             #region Stop Server
 
-            Log.Header("Stop Server");
+            applicationServer.Logger.Header("Stop Server");
 
             // Make server application initialize network mode from 'Server' to 'Standalone'.
             Assert.AreEqual(NetworkMode.Server, applicationServer.NetworkMode);

@@ -27,9 +27,11 @@ namespace Tests
         [Test]
         public void MessageSerializeDeserialize()
         {
+            var log = new WM.Logger();
+
             var udpClient = new UdpClient();
 
-            var udpSend = new WM.Net.UDPSend(udpClient);
+            var udpSend = new WM.Net.UDPSend(udpClient, log);
             udpSend.remoteIP = "127.0.0.1";
             udpSend.remotePort = 8890;
             udpSend.Init();
@@ -55,11 +57,11 @@ namespace Tests
 
                 var end = DateTime.Now;
 
-                WM.Logger.Enabled = true;
+                log.Enabled = true;
 
-                WM.Logger.Debug("Sending " + numIterations + " times an XML Message encoded AvatarState took " + (end - start).TotalMilliseconds);
+                log.Debug("Sending " + numIterations + " times an XML Message encoded AvatarState took " + (end - start).TotalMilliseconds);
                 
-                WM.Logger.Enabled = false;
+                log.Enabled = false;
             }
 
             {
@@ -81,11 +83,11 @@ namespace Tests
 
                 var end = DateTime.Now;
 
-                WM.Logger.Enabled = true;
+                log.Enabled = true;
 
-                WM.Logger.Debug("Sending " + numIterations + " times a Binary encoded AvatarState took " + (end - start).TotalMilliseconds);
+                log.Debug("Sending " + numIterations + " times a Binary encoded AvatarState took " + (end - start).TotalMilliseconds);
 
-                WM.Logger.Enabled = false;
+                log.Enabled = false;
             }
         }
     }

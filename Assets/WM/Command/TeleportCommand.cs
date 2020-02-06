@@ -21,7 +21,7 @@ namespace WM.Command
         /// </summary>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("TeleportCommand.Execute()");
+            application.Logger.Debug("TeleportCommand.Execute()");
 
             application.TeleportationSystem.Teleport(this);
         }

@@ -17,7 +17,7 @@ namespace WM.Command
         /// </summary>
         public void Execute(UnityApplication application)
         {
-            WM.Logger.Debug("ToggleMenuModeCommand.Execute()");
+            application.Logger.Debug("ToggleMenuModeCommand.Execute()");
 
             application.ToggleMenuMode();
         }

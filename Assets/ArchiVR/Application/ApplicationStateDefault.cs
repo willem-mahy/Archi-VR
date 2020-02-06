@@ -10,12 +10,12 @@ namespace ArchiVR.Application
 
         public override void Init()
         {
-            WM.Logger.Debug("ApplicationStateDefault.Init()");
+            m_application.Logger.Debug("ApplicationStateDefault.Init()");
         }
 
         public override void Enter()
         {
-            WM.Logger.Debug("ApplicationStateDefault.Enter()");
+            m_application.Logger.Debug("ApplicationStateDefault.Enter()");
 
             var aim = ((ApplicationArchiVR)m_application).ActiveImmersionMode;
 
@@ -27,12 +27,12 @@ namespace ArchiVR.Application
 
         public override void Exit()
         {
-            WM.Logger.Debug("ApplicationStateDefault.Exit()");
+            m_application.Logger.Debug("ApplicationStateDefault.Exit()");
         }
 
         public override void Update()
         {
-            //Logger.Debug("ApplicationStateDefault.Update()");
+            //m_application.Logger.Debug("ApplicationStateDefault.Update()");
 
             var aim = ((ApplicationArchiVR)m_application).ActiveImmersionMode;
 
@@ -44,7 +44,7 @@ namespace ArchiVR.Application
 
         public override void UpdateModelLocationAndScale()
         {
-            WM.Logger.Debug("ApplicationStateDefault.UpdateModelLocationAndScale()");
+            m_application.Logger.Debug("ApplicationStateDefault.UpdateModelLocationAndScale()");
 
             var aim = ((ApplicationArchiVR)m_application).ActiveImmersionMode;
 
@@ -56,7 +56,7 @@ namespace ArchiVR.Application
 
         public override void UpdateTrackingSpacePosition()
         {
-            WM.Logger.Debug("ApplicationStateDefault.UpdateTrackingSpacePosition()");
+            m_application.Logger.Debug("ApplicationStateDefault.UpdateTrackingSpacePosition()");
 
             var aim = ((ApplicationArchiVR)m_application).ActiveImmersionMode;
 
@@ -68,7 +68,7 @@ namespace ArchiVR.Application
 
         void InitButtonMappingUI()
         {
-            WM.Logger.Debug("ApplicationStateDefault.InitButtonMappingUI()");
+            m_application.Logger.Debug("ApplicationStateDefault.InitButtonMappingUI()");
 
             var aim = ((ApplicationArchiVR)m_application).ActiveImmersionMode;
 
@@ -86,4 +86,4 @@ namespace ArchiVR.Application
         {
         }
     }
-} // namespace ArchiVR
+} // namespace ArchiVR.Application

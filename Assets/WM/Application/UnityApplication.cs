@@ -39,6 +39,24 @@ namespace WM.Application
     {
         #region Variables
 
+        #region UnitTestModeEnabled
+
+        /// <summary>
+        /// In unit test mode, some resources (eg menus, OVRManager,...) will not be initialized.
+        /// </summary>
+        public static bool UnitTestModeEnabled
+        {
+            get;
+            set;
+        } = false;
+
+        #endregion UnitTestModeEnabled
+
+        /// <summary>
+        /// The logger.
+        /// </summary>
+        public readonly Logger Logger = new Logger();
+
         #region Startup options
 
         //! The startup network mode. (Default: Standalone)
@@ -276,7 +294,7 @@ namespace WM.Application
         /// </summary>
         private void UpdateSelectionVisualizerVisibility()
         {
-            WM.Logger.Debug("UpdateSelectionVisualizerVisibility() -> " + HasSelectionTargets());
+            Logger.Debug("UpdateSelectionVisualizerVisibility() -> " + HasSelectionTargets());
 
             if (SelectionVisualizer == null)
             {
@@ -301,7 +319,7 @@ namespace WM.Application
         /// <param name="selectionTarget"></param>
         public void AddSelectionTarget(GameObject selectionTarget)
         {
-            //WM.Logger.Warning("AddSelectionTarget(" + selectionTarget.name + ")");
+            //Logger.Warning("AddSelectionTarget(" + selectionTarget.name + ")");
 
             selectionTargets.Add(selectionTarget);
 
@@ -314,7 +332,7 @@ namespace WM.Application
         /// <param name="selectionTarget"></param>
         public void RemoveSelectionTarget(GameObject selectionTarget)
         {
-            //WM.Logger.Warning("RemoveSelectionTarget(" + selectionTarget.name + ")");
+            //Logger.Warning("RemoveSelectionTarget(" + selectionTarget.name + ")");
 
             selectionTargets.Remove(selectionTarget);
 
@@ -362,14 +380,13 @@ namespace WM.Application
         public TeleportCommand TeleportCommand { get; set; } // TODO: find a better place for this (TeleportationSystemBase perhaps?)
 
         /// <summary>
-        /// 
+        /// To be implemented by concrete applications, in order to prevent command processing when needed.
         /// </summary>
         protected bool CanProcessCommands
         {
             get
             {
                 bool canProcessCommands = true; // We can always process commands.
-                //bool canProcessCommands = (TeleportCommand == null);  // We cannot process commands while teleporting...
 
                 return canProcessCommands;
             }
@@ -470,6 +487,9 @@ namespace WM.Application
         /// </summary>
         public virtual void Init()
         {
+            Server.Log = Logger;
+            Client.Log = Logger;
+
             Player.AvatarID = DefaultAvatarID;
             Player.ClientID = Client == null ? new Guid() : Client.ID;
 
@@ -480,86 +500,106 @@ namespace WM.Application
 
             #region Get handles to game objects
 
+            #region Get handles to OVRGameraRig game objects
+
             if (m_ovrCameraRig == null)
+            {
                 m_ovrCameraRig = UtilUnity.TryFindGameObject("OVRCameraRig");
+            }
 
             if (m_centerEyeAnchor == null)
+            {
                 m_centerEyeAnchor = UtilUnity.TryFindGameObject("CenterEyeAnchor");
+            }
 
             if (m_leftHandAnchor == null)
+            {
                 m_leftHandAnchor = UtilUnity.TryFindGameObject("LeftHandAnchor");
+            }
 
             if (m_rightHandAnchor == null)
+            {
                 m_rightHandAnchor = UtilUnity.TryFindGameObject("RightHandAnchor");
+            }
+
+            #endregion Get handles to OVRGameraRig objects
 
             if (m_centerEyeCanvas == null)
             {
                 m_centerEyeCanvas = UtilUnity.TryFindGameObject("CenterEyeCanvas");
             }
 
-            if (debugInputMenuPanel == null)
+            if (!UnitTestModeEnabled)
             {
-                debugInputMenuPanel = UtilUnity.TryFindGameObject("DebugInputMenuPanel");
-            }
+                #region Get handles to Menu game objects
 
-            if (debugInputMenuPanel != null)
-            {
-                menus.Add(debugInputMenuPanel);
-            }
+                if (debugInputMenuPanel == null)
+                {
+                    debugInputMenuPanel = UtilUnity.TryFindGameObject("DebugInputMenuPanel");
+                }
 
-            if (debugLogMenuPanel == null)
-            {
-                debugLogMenuPanel = UtilUnity.TryFindGameObject("DebugLogMenuPanel");
-            }
+                if (debugInputMenuPanel != null)
+                {
+                    menus.Add(debugInputMenuPanel);
+                }
 
-            if (debugLogMenuPanel != null)
-            {
-                menus.Add(debugLogMenuPanel);
-            }
+                if (debugLogMenuPanel == null)
+                {
+                    debugLogMenuPanel = UtilUnity.TryFindGameObject("DebugLogMenuPanel");
+                }
 
-            if (graphicsMenuPanel == null)
-            {
-                graphicsMenuPanel = UtilUnity.TryFindGameObject("GraphicsMenuPanel");
-            }
+                if (debugLogMenuPanel != null)
+                {
+                    menus.Add(debugLogMenuPanel);
+                }
 
-            if (graphicsMenuPanel != null)
-            {
-                menus.Add(graphicsMenuPanel);
-            }
+                if (graphicsMenuPanel == null)
+                {
+                    graphicsMenuPanel = UtilUnity.TryFindGameObject("GraphicsMenuPanel");
+                }
 
-            if (networkMenuPanel == null)
-            {
-                networkMenuPanel = UtilUnity.TryFindGameObject("NetworkMenuPanel");
-            }
+                if (graphicsMenuPanel != null)
+                {
+                    menus.Add(graphicsMenuPanel);
+                }
 
-            if (networkMenuPanel != null)
-            {
-                menus.Add(networkMenuPanel);
-            }
+                if (networkMenuPanel == null)
+                {
+                    networkMenuPanel = UtilUnity.TryFindGameObject("NetworkMenuPanel");
+                }
 
-            if (infoMenuPanel == null)
-            {
-                infoMenuPanel = UtilUnity.TryFindGameObject("InfoMenuPanel");
-            }
+                if (networkMenuPanel != null)
+                {
+                    menus.Add(networkMenuPanel);
+                }
 
-            if (infoMenuPanel != null)
-            {
-                menus.Add(infoMenuPanel);
-            }
+                if (infoMenuPanel == null)
+                {
+                    infoMenuPanel = UtilUnity.TryFindGameObject("InfoMenuPanel");
+                }
 
-            // Get reference to FPS panel.
-            if (FpsPanelHUD == null)
-            {
-                FpsPanelHUD = UtilUnity.TryFindGameObject("FPSPanel");
-            }
-            if (FpsPanelHUD != null)
-            {
-                FpsPanelHUD.SetActive(StartupShowFps);
+                if (infoMenuPanel != null)
+                {
+                    menus.Add(infoMenuPanel);
+                }
+
+                #endregion Get handles to Menu game objects
+
+                if (FpsPanelHUD == null)
+                {
+                    FpsPanelHUD = UtilUnity.TryFindGameObject("FPSPanel");
+                }
+
+                if (FpsPanelHUD != null)
+                {
+                    FpsPanelHUD.SetActive(StartupShowFps);
+                }
             }
 
             // Left controller.
 
             // Pick ray.
+            if (!UnitTestModeEnabled)
             {
                 var LPickRayGameObject = UtilUnity.TryFindGameObject("L PickRay");
 
@@ -576,6 +616,7 @@ namespace WM.Application
             // Right controller.
 
             // Pick ray.
+            if (!UnitTestModeEnabled)
             {
                 var RPickRayGameObject = UtilUnity.TryFindGameObject("R PickRay");
 
@@ -717,7 +758,7 @@ namespace WM.Application
             //Console.WriteLine("Build   : {0} = {1}", assemblyVersion.Build, buildDate.ToShortDateString());
             //Console.WriteLine("Revision: {0} = {1}", assemblyVersion.Revision, buildDate.ToLongTimeString());
             Version = buildDate.ToShortDateString() + " " + buildDate.ToLongTimeString();
-            WM.Logger.Debug("Application version: " + Version);
+            Logger.Debug("Application version: " + Version);
 
             #endregion
         }
@@ -858,7 +899,7 @@ namespace WM.Application
             Guid playerID,
             string playerName)
         {
-            WM.Logger.Debug("SetPlayerName(" + playerID + ", " + name + ")");
+            Logger.Debug("SetPlayerName(" + playerID + ", " + name + ")");
 
             // Targeted player should be known by the application!
             Debug.Assert(Players.ContainsKey(playerID));
@@ -879,7 +920,7 @@ namespace WM.Application
         /// <param name="name"></param>
         public void SetPlayerName(string name)
         {
-            WM.Logger.Debug("SetPlayerName(" + name + ")");
+            Logger.Debug("SetPlayerName(" + name + ")");
 
             Player.Name = name;
 
@@ -899,7 +940,7 @@ namespace WM.Application
         /// <param name="avatarID"></param>
         public void SetPlayerAvatar(int avatarIndex)
         {
-            WM.Logger.Debug("SetAvatar(" + avatarIndex + ")");
+            Logger.Debug("SetAvatar(" + avatarIndex + ")");
 
             var avatarID = GetAvatarID(avatarIndex);
             SetPlayerAvatar(avatarID);
@@ -911,7 +952,7 @@ namespace WM.Application
         /// <param name="avatarID"></param>
         public void SetPlayerAvatar(Guid avatarID)
         {
-            WM.Logger.Debug("SetAvatar(" + avatarID.ToString() + ")");
+            Logger.Debug("SetAvatar(" + avatarID.ToString() + ")");
 
             Player.AvatarID = avatarID;
 
@@ -1143,7 +1184,7 @@ namespace WM.Application
                     SetActiveMenu(null);
                     break;
                 default:
-                    WM.Logger.Warning("ApplicationArchiVR.ToggleMenuMode(): Unsupported menu mode: " + menuMode.ToString());
+                    Logger.Warning("ApplicationArchiVR.ToggleMenuMode(): Unsupported menu mode: " + menuMode.ToString());
                     break;
             }
 
@@ -1233,7 +1274,7 @@ namespace WM.Application
         public void AddPlayer(
             Player player)
         {
-            WM.Logger.Debug(string.Format(name + ":AddPlayer(Client:{0}, Player:{1}, Name:'{2}')", WM.Net.NetUtil.ShortID(player.ClientID), player.LogID, player.Name));
+            Logger.Debug(string.Format(name + ":AddPlayer(Client:{0}, Player:{1}, Name:'{2}')", WM.Net.NetUtil.ShortID(player.ClientID), player.LogID, player.Name));
 
             lock (Players)
             {
@@ -1264,7 +1305,7 @@ namespace WM.Application
             {
                 Debug.Assert(Players.ContainsKey(playerID));
                 
-                WM.Logger.Debug(string.Format(name + ":RemovePlayer(Player:{0})", Net.NetUtil.ShortID(playerID)));
+                Logger.Debug(string.Format(name + ":RemovePlayer(Player:{0})", Net.NetUtil.ShortID(playerID)));
 
                 if (Players.ContainsKey(playerID))
                 {
@@ -1281,7 +1322,7 @@ namespace WM.Application
                 }
                 else
                 {
-                    WM.Logger.Debug(string.Format(name + ":RemovePlayer(Player:{0}): Player '{1}' not found!", Net.NetUtil.ShortID(playerID), playerID));
+                    Logger.Debug(string.Format(name + ":RemovePlayer(Player:{0}): Player '{1}' not found!", Net.NetUtil.ShortID(playerID), playerID));
                 }
             }
         }
@@ -1294,7 +1335,7 @@ namespace WM.Application
             Guid clientID)
         {
             var callLogTag = name + ":RemovePlayersByClient(Client:" + WM.Net.NetUtil.ShortID(clientID) + ")";
-            WM.Logger.Debug(callLogTag);
+            Logger.Debug(callLogTag);
 
             lock (Players)
             {
@@ -1325,7 +1366,7 @@ namespace WM.Application
             Guid avatarID)
         {
             var callLogTag = name + ":SetPlayerAvatar(Player:" + WM.Net.NetUtil.ShortID(playerID) + ", " + WM.Net.NetUtil.ShortID(avatarID) + ")";
-            WM.Logger.Debug(callLogTag);
+            Logger.Debug(callLogTag);
 
             // Targeted player should be known by the application!
             Debug.Assert(Players.ContainsKey(playerID));
@@ -1341,7 +1382,7 @@ namespace WM.Application
 
                 if (player == null)
                 {
-                    WM.Logger.Warning(callLogTag + ": Player '" + playerID + "' not found!");
+                    Logger.Warning(callLogTag + ": Player '" + playerID + "' not found!");
                     return;
                 }
 

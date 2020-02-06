@@ -154,19 +154,12 @@ namespace ArchiVR.Application
 
         #endregion
 
-        private static bool _UnitTestModeEnabled = false;
-
-        public static void SetUnitTestModeEnabled(bool state)
-        {
-            _UnitTestModeEnabled = state;
-        }
-
         /// <summary>
         /// Initialize all necessary stuff before the first frame update.
         /// </summary>
         public override void Init()
         {
-            if (!_UnitTestModeEnabled && (OVRManager.instance == null))
+            if (!UnitTestModeEnabled && (OVRManager.instance == null))
             {
                 // Instantiate at position (0, 0, 0) and zero rotation.
                 Instantiate(ovrManagerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
@@ -195,7 +188,7 @@ namespace ArchiVR.Application
 
             GatherProjects();
 
-            if (!_UnitTestModeEnabled)
+            if (!UnitTestModeEnabled)
             {
                 RegisterAvatars();
             }
@@ -310,7 +303,7 @@ namespace ArchiVR.Application
 
         public void OnTeleportFadeOutComplete()
         {
-            WM.Logger.Debug("ApplicationArchiVR::OnTeleportFadeInComplete()");
+            Logger.Debug("ApplicationArchiVR::OnTeleportFadeInComplete()");
 
             m_fadeAnimator.ResetTrigger("FadeOut");
 
@@ -323,7 +316,7 @@ namespace ArchiVR.Application
 
         public void OnTeleportFadeInComplete()
         {
-            WM.Logger.Debug("ApplicationArchiVR::OnTeleportFadeInComplete()");
+            Logger.Debug("ApplicationArchiVR::OnTeleportFadeInComplete()");
 
             m_fadeAnimator.ResetTrigger("FadeIn");
             
@@ -451,11 +444,11 @@ namespace ArchiVR.Application
         /// <returns></returns>
         public IEnumerator Teleport()
         {
-            WM.Logger.Debug("ApplicationArchiVR::Teleport()");
+            Logger.Debug("ApplicationArchiVR::Teleport()");
 
             if (TeleportCommand == null)
             {
-                WM.Logger.Warning("ApplicationArchiVR::Teleport(): TeleportCommand == null!");
+                Logger.Warning("ApplicationArchiVR::Teleport(): TeleportCommand == null!");
                 yield break;
             }
 
@@ -464,7 +457,7 @@ namespace ArchiVR.Application
                 // First unload the current project
                 if (_projectScene != null)
                 {
-                    WM.Logger.Debug("Unloading project sccene '" + _projectScene.Value.name + "'");
+                    Logger.Debug("Unloading project sccene '" + _projectScene.Value.name + "'");
 
                     var asyncUnload = SceneManager.UnloadSceneAsync(_projectScene.Value.name);
 
@@ -480,7 +473,7 @@ namespace ArchiVR.Application
                 // Then load the new projct
                 var newProjectName = GetProjectName(TeleportCommand.ProjectIndex);
 
-                WM.Logger.Debug("Loading project '" + newProjectName + "'");
+                Logger.Debug("Loading project '" + newProjectName + "'");
 
                 while (LoadingProject)
                 {
@@ -938,7 +931,7 @@ namespace ArchiVR.Application
         /// </summary>
         protected override void UpdateNetwork()
         {
-            WM.Logger.Debug(name + ".UpdateNetwork()");
+            Logger.Debug(name + ".UpdateNetwork()");
 
             if (((m_centerEyeAnchor.transform.position - m_centerEyeAnchorPrev).magnitude > 0.01f) || (frame++ % 10 == 0))
             {

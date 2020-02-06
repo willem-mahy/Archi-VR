@@ -10,17 +10,17 @@ namespace Demo.Application
 
         public override void Init()
         {
-            WM.Logger.Debug("ApplicationStateDefault.Init()");
+            m_application.Logger.Debug("ApplicationStateDefault.Init()");
         }
 
         public override void Enter()
         {
-            WM.Logger.Debug("ApplicationStateDefault.Enter()");
+            m_application.Logger.Debug("ApplicationStateDefault.Enter()");
         }
 
         public override void Exit()
         {
-            WM.Logger.Debug("ApplicationStateDefault.Exit()");
+            m_application.Logger.Debug("ApplicationStateDefault.Exit()");
         }
 
         public override void Update()

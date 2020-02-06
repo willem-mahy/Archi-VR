@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace WM
@@ -26,7 +27,7 @@ namespace WM
 
         /// <summary>
         /// Tries to find a GameObject with the given name.
-        /// Logs a warning if no such GameObject found.
+        /// Throws an exception if no such GameObject found.
         /// </summary>
         /// <param name="name">The name to search for.</param>
         /// <returns>The first found GameObject with the given name.</returns>
@@ -36,8 +37,9 @@ namespace WM
 
             if (go == null)
             {
-                WM.Logger.Warning("GameObject '" + name + "' not found.");
+                throw new Exception("GameObject '" + name + "' not found.");
             }
+
             return go;
         }
 
@@ -62,9 +64,7 @@ namespace WM
                 }
             }
 
-            WM.Logger.Warning("GameObject '" + name + "' not found in scene '" + scene.name + "'.");
-            
-            return null;
+            throw new Exception("GameObject '" + name + "' not found in scene '" + scene.name + "'.");
         }
 
         /// <summary>
