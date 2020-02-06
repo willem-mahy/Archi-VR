@@ -14,7 +14,7 @@ namespace WM.Net
     /// Used to send Server information to Clients over TCP upon connection initialization.
     /// </summary>
     [Serializable]
-    public class ServerInfo
+    public class ServerInfo : IEquatable<ServerInfo>
     {
         #region Fields
 
@@ -58,6 +58,44 @@ namespace WM.Net
         }
 
         #endregion Constructors
+
+        #region public API
+
+        override public int GetHashCode()
+        {
+            return (IP + "-" + TcpPort + "-" + UdpPort).GetHashCode();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="serverInfo"></param>
+        /// <returns></returns>
+        override public bool Equals(object o)
+        {
+            var si = o as ServerInfo;
+
+            if (o == null)
+            {
+                return false;
+            }
+
+            return this.Equals(si);
+        }
+
+        /// <summary>
+        /// <see cref="IEquatable<ServerInfo>.Equals(ServerInfo)"/> implementation.
+        /// </summary>
+        /// <param name="serverInfo"></param>
+        /// <returns></returns>
+        public bool Equals(ServerInfo serverInfo)
+        {
+            return IP == serverInfo.IP
+                && TcpPort == serverInfo.TcpPort
+                && UdpPort == serverInfo.UdpPort;
+        }
+
+        #endregion public API
     }
 
     /// <summary>
@@ -484,7 +522,7 @@ namespace WM.Net
         /// Returns a string representing the internal server state.
         /// To be used for displaying in the UI.
         /// </summary>
-        public String Status
+        public String StateText
         {
             get
             {
