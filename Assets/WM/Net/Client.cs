@@ -202,7 +202,7 @@ namespace WM.Net
         /// <summary>
         /// 
         /// </summary>
-        public string Status
+        public string StateText
         {
             get
             {

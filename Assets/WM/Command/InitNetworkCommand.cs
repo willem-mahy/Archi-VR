@@ -50,6 +50,11 @@ namespace WM.Command
                         application.Server.Shutdown();
                     }
                     break;
+                case NetworkMode.Standalone:
+                    {
+                        application.ServerDiscovery.Stop();
+                    }
+                    break;
             }
 
             // Initialize for new network mode.
@@ -80,6 +85,7 @@ namespace WM.Command
                 case NetworkMode.Standalone:
                     {
                         // Init no network
+                        application.ServerDiscovery.Start();
                     }
                     break;
             }

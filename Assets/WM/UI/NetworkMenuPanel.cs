@@ -6,6 +6,9 @@ using WM.Net;
 
 namespace WM.UI
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class NetworkMenuPanel : MonoBehaviour
     {
         #region Variables
@@ -31,7 +34,11 @@ namespace WM.UI
 
         #endregion
 
-        // Start is called before the first frame update
+        #region Public API
+
+        /// <summary>
+        /// Start is called before the first frame update
+        /// </summary>
         void Start()
         {
             #region Get references to GameObjects.
@@ -59,63 +66,74 @@ namespace WM.UI
                     break;
             }
 
-            if (Application.NetworkMode == NetworkMode.Server)
-            {
-                IPValueText.text = NetUtil.GetLocalIPAddress().ToString() + Application.Server.TcpPort;
-            }
-            else
-            {
-                IPValueText.text = NetUtil.GetLocalIPAddress().ToString();
-            }
+            UpdateOwnIP();
 
             synchronizingUI = false;
 
             UpdateUIToNetworkModeSelection(Application.NetworkMode); // If startup mode is Standalone, the UI is not updated accordingly, so force that explicitely here...
         }
 
-        // Update is called once per frame
-        void Update()        
+        /// <summary>
+        /// Update is called once per frame
+        /// </summary>
+        void Update()
         {
             synchronizingUI = true;
+
+            UpdateOwnIP();
             
             if (Application.NetworkMode == NetworkMode.Server)
             {
-                ServerStatusValueText.text = Application.Server.Status;
+                ServerStatusValueText.text = Application.Server.StateText;
             }
 
             UpdateUIToNetworkModeSelection(Application.NetworkMode);
 
             synchronizingUI = false;
-
-            //#region Temporary keyboard shortcuts to aid in debugging until control trigger can be emulated in editor mode.
-
-            //if (Input.GetKeyDown(KeyCode.Alpha1))
-            //{
-            //    StandaloneToggleOnValueChanged(true);
-            //}
-
-            //if (Input.GetKeyDown(KeyCode.Alpha2))
-            //{
-            //    ServerToggleOnValueChanged(true);
-            //}
-
-            //if (Input.GetKeyDown(KeyCode.Alpha3))
-            //{
-            //    ClientToggleOnValueChanged(true);
-            //}
-
-            //#endregion
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         void OnEnable()
         {
+            // When this menu is avtivated...
             if (ServerToggle != null)
             {
-                ServerToggle.Select();
+                ServerToggle.Select(); // ... then put the UI focus on the 'Server' toogle.
             }
         }
 
-        void OnNetworkModeSelection(NetworkMode networkMode)
+        #endregion Public API
+
+        #region Non-public API
+
+        private void UpdateOwnIP()
+        {
+            var ownIP = NetUtil.GetLocalIPAddress().ToString();
+
+            switch (Application.NetworkMode)
+            {
+                case NetworkMode.Server:
+                    {
+                        ownIP += ":" + Application.Server.TcpPort;
+                    }
+                    break;
+                case NetworkMode.Client:
+                    {
+                        ownIP += ":" + Application.Client.TcpPort;
+                    }
+                    break;
+            }
+
+            IPValueText.text = ownIP;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="networkMode"></param>
+        private void OnNetworkModeSelection(NetworkMode networkMode)
         {
             if (synchronizingUI)
             {
@@ -128,17 +146,39 @@ namespace WM.UI
             }
         }
         
-        void UpdateUIToNetworkModeSelection(NetworkMode networkMode)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="networkMode"></param>
+        private void UpdateUIToNetworkModeSelection(NetworkMode networkMode)
         {
             switch (networkMode)
             {
                 case NetworkMode.Standalone:
-                    StandaloneToggle.isOn = true;
-                    
-                    NetworkPanel.SetActive(false);
+                    StandaloneToggle.SetIsOnWithoutNotify(true);
+
+                    ServerPanel.SetActive(true);
+                    ClientPanel.SetActive(false);
+
+                    var serverInfos = Application.ServerDiscovery.GetServerInfos();
+                    if (serverInfos.Count == 0)
+                    {
+                        ClientsValueText.text = "No servers found";
+                    }
+                    else
+                    {
+                        var serversList = "";
+
+                        foreach (var serverInfo in serverInfos)
+                        {
+                            serversList += serverInfo.IP + ":" + serverInfo.TcpPort + "\n";
+                        }
+
+                        ClientsValueText.text = serversList;
+                    }
                     break;
                 case NetworkMode.Server:
-                    ServerToggle.isOn = true;
+                    ServerToggle.SetIsOnWithoutNotify(true);
                     
                     NetworkPanel.SetActive(true);
                     ServerPanel.SetActive(true);
@@ -147,33 +187,52 @@ namespace WM.UI
                     ClientsValueText.text = Application.Server.GetClientInfo();
                     break;
                 case NetworkMode.Client:
-                    ClientToggle.isOn = true;
+                    ClientToggle.SetIsOnWithoutNotify(true);
 
                     NetworkPanel.SetActive(true);
                     ServerPanel.SetActive(false);
                     ClientPanel.SetActive(true);
 
-                    ClientStatusValueText.text = Application.Client.Status;                    
+                    ClientStatusValueText.text = Application.Client.StateText;
+
+                    if (Application.Client.State == Client.ClientState.Connected)
+                    {
+                        ClientStatusValueText.text+= " to " + Application.Client.ServerIP + ":" + Application.Client.ServerInfo.TcpPort;
+                    }
                     break;
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
         public void StandaloneToggleOnValueChanged(bool value)
         {
             if (value)
                 OnNetworkModeSelection(NetworkMode.Standalone);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
         public void ClientToggleOnValueChanged(bool value)
         {
             if (value)
                 OnNetworkModeSelection(NetworkMode.Client);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
         public void ServerToggleOnValueChanged(bool value)
         {
             if (value)
                 OnNetworkModeSelection(NetworkMode.Server);
         }
+
+        #endregion Non-public API
     }
 }
