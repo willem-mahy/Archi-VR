@@ -45,21 +45,21 @@ public class EditorTestApplication : MonoBehaviour
             ActivateNextApplicationInstance();
         }
 
-        if (Input.GetKeyDown(KeyCode.F10))
-        {
-            // Initialize the player for each client in such a way that it can see the other clients.
-            foreach (var applicationInstane in _applicationInstances)
-            {
-                applicationInstane.SetMenuMode(UnityApplication.MenuMode.None);
-            }
-        }
-
         if (Input.GetKeyDown(KeyCode.F9))
         {
-            // Initialize the player for each client in such a way that it can see the other clients.
+            // Set menu mode to 'Network' for all application instances.
             foreach (var applicationInstane in _applicationInstances)
             {
                 applicationInstane.SetMenuMode(UnityApplication.MenuMode.Network);
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.F10))
+        {
+            // Set menu mode to 'None' for all application instances.
+            foreach (var applicationInstane in _applicationInstances)
+            {
+                applicationInstane.SetMenuMode(UnityApplication.MenuMode.None);
             }
         }
 
