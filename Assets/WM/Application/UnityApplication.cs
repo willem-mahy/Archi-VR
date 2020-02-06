@@ -117,6 +117,11 @@ namespace WM.Application
         /// </summary>
         public Client Client;
 
+        /// <summary>
+        /// The networking server discovery.
+        /// </summary>
+        public readonly ServerDiscovery ServerDiscovery = new ServerDiscovery();
+
         public int AvatarIndex
         {
             get
@@ -499,6 +504,8 @@ namespace WM.Application
 
             Player.AvatarID = DefaultAvatarID;
             Player.ClientID = Client == null ? new Guid() : Client.ID;
+
+            ServerDiscovery.SetLog(Logger);
 
             if (Server != null)
             {
