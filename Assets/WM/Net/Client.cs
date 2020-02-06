@@ -274,9 +274,11 @@ namespace WM.Net
             thread.IsBackground = true;
             thread.Start();
         }
-        
+
         /// <summary>
         /// Disconnect the client.
+        /// 
+        /// \pre The Client must be in state 'Connected' for this method to succeed.
         /// </summary>
         public void Disconnect()
         {
@@ -306,19 +308,7 @@ namespace WM.Net
                 State = ClientState.Disconnected;
             }
         }
-
-        #endregion Public API
-
-        /// <summary>
-        /// 
-        /// </summary>
-        abstract protected void OnConnect();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        abstract protected void OnDisconnect();
-
+        
         /// <summary>
         /// Send non-critical data to the server over UDP.
         /// </summary>
@@ -382,7 +372,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                 _log.Error(LogID + ".SendCommand(): Exception:" + e.Message);
+                _log.Error(LogID + ".SendCommand(): Exception:" + e.Message);
             }
         }
 
@@ -413,7 +403,7 @@ namespace WM.Net
             }
             catch (Exception e)
             {
-                 _log.Error(LogID + ".SendData(): Exception:" + e.Message);
+                _log.Error(LogID + ".SendData(): Exception:" + e.Message);
             }
         }
 
@@ -516,10 +506,22 @@ namespace WM.Net
             }
         }
 
+        #endregion Public API
+
         #region Non-public API
 
         /// <summary>
-        /// 
+        /// Callback fired upon finilizing connection.
+        /// </summary>
+        abstract protected void OnConnect();
+
+        /// <summary>
+        /// Callback fired upon finilizing disconnection.
+        /// </summary>
+        abstract protected void OnDisconnect();
+
+        /// <summary>
+        /// Perform internal household chores part of shutting down the client.
         /// </summary>
         private void Shutdown()
         {
