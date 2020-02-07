@@ -308,6 +308,10 @@ namespace WM.Net
         /// </summary>
         protected Logger _log;
 
+        private bool _logBroadCasts = false;
+        //private bool _logReceivedMessageDataTCP = false;
+        //private bool _logReceivedMessageDataUDP = false;
+
         /// <summary>
         /// Gets the log.
         /// </summary>
@@ -738,24 +742,37 @@ namespace WM.Net
             try
             {
                 var broadcastUdpClient = new UdpClient(0);
+
+                var broadcastUdpLocalEndPoint = broadcastUdpClient.Client.LocalEndPoint as IPEndPoint;
                 var broadcastUdpRemoteEndPoint = new IPEndPoint(IPAddress.Broadcast, Server.UdpBroadcastRemotePort);
 
                 var broadcastMessage = WM.Net.Message.EncodeObjectAsXml(new ServerInfo(((IPEndPoint)this.tcpListener.LocalEndpoint).Address.ToString() ,TcpPort, UdpPort));
 
-                var logText = string.Format(callLogTag + ": Starting to UDP broadcast ServerInfo from port {0} to port {1}",
-                                            broadcastUdpRemoteEndPoint.Port,
-                                            UdpBroadcastRemotePort);
+                if (_logBroadCasts)
+                {
+                    var logText = string.Format(callLogTag + ": Starting to UDP broadcast ServerInfo from port {0} to port {1}",
+                                            broadcastUdpLocalEndPoint.Port,
+                                            broadcastUdpRemoteEndPoint.Port);
 
-                _log.Debug(
-                    logText);
+                    _log.Debug(logText);
+                }
 
                 // Encode data to UTF8-encoding.
                 byte[] broadcastMessageData = Encoding.UTF8.GetBytes(broadcastMessage);
 
                 while (State != ServerState.ShuttingDown)
-                {   
-                        // Send udpBroadcastMessageData to any potential clients.
-                        broadcastUdpClient.Send(broadcastMessageData, broadcastMessageData.Length, broadcastUdpRemoteEndPoint);
+                {
+                    if (_logBroadCasts)
+                    {
+                        var logText = string.Format(callLogTag + ": UDP broadcasting ServerInfo from port {0} to port {1}",
+                                            broadcastUdpLocalEndPoint.Port,
+                                            broadcastUdpRemoteEndPoint.Port);
+
+                        _log.Debug(logText);
+                    }
+
+                    // Send udpBroadcastMessageData to any potential clients.
+                    broadcastUdpClient.Send(broadcastMessageData, broadcastMessageData.Length, broadcastUdpRemoteEndPoint);
 
                         Thread.Sleep(500);
                 }
