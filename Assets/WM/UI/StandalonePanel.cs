@@ -5,7 +5,7 @@ using WM.Application;
 namespace WM.UI
 {
     /// <summary>
-    /// 
+    /// The menu that shows the state and options of the 'Standalone' network mode.
     /// </summary>
     public class StandalonePanel : MonoBehaviour
     {
@@ -19,7 +19,9 @@ namespace WM.UI
 
         #endregion Variables
 
-        // Start is called before the first frame update
+        /// <summary>
+        /// Start is called once in the lifetime of this behavior, just before the first frame update.
+        /// </summary>
         void Start()
         {
             #region Get references to GameObjects.
@@ -33,7 +35,9 @@ namespace WM.UI
             #endregion
         }
 
-        // Update is called once per frame
+        /// <summary>
+        /// Update is called once per frame.
+        /// </summary>
         void Update()
         {
             JoinServerButton.enabled = (Application.ServerDiscovery.GetServerInfos().Count > 0);
