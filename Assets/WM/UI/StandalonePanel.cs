@@ -40,6 +40,14 @@ namespace WM.UI
         /// </summary>
         void Update()
         {
+            if (Application != null)
+            {
+                if (Application.ServerDiscovery.State != Net.ServerDiscovery.ServerDiscoveryState.Running)
+                {
+                    Application.ServerDiscovery.Start();
+                }
+            }
+
             JoinServerButton.enabled = (Application.ServerDiscovery.GetServerInfos().Count > 0);
         }
 
@@ -53,6 +61,28 @@ namespace WM.UI
             if (StartServerButton != null)
             {
                 StartServerButton.Select(); // ... then put the UI focus on the 'Server' toogle.
+            }
+
+            if (Application != null)
+            {
+                if (Application.ServerDiscovery.State != Net.ServerDiscovery.ServerDiscoveryState.Running)
+                {
+                    Application.ServerDiscovery.Start();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void OnDisable()
+        {
+            if (Application != null)
+            {
+                if (Application.ServerDiscovery.State == Net.ServerDiscovery.ServerDiscoveryState.Running)
+                {
+                    Application.ServerDiscovery.Stop();
+                }
             }
         }
     }

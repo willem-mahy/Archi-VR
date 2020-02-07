@@ -160,6 +160,17 @@ namespace WM.UI
         /// <param name="networkMode"></param>
         private void OnNetworkModeSelection(NetworkMode networkMode)
         {
+            if (networkMode != NetworkMode.Standalone)
+            {
+                if (Application != null)
+                {
+                    if (Application.ServerDiscovery.State == Net.ServerDiscovery.ServerDiscoveryState.Running)
+                    {
+                        Application.ServerDiscovery.Stop();
+                    }
+                }
+            }
+
             if (Application)
             {
                 Application.QueueCommand(new InitNetworkCommand(networkMode));
