@@ -863,7 +863,9 @@ namespace WM.Net
                                 for (int broadcastClientIndex = 0; broadcastClientIndex < clientConnections.Count; ++broadcastClientIndex)
                                 {
                                     if (clientIndex == broadcastClientIndex)
+                                    {
                                         continue; // don't send own client updates back to self...
+                                    }
 
                                     SendDataToUdp(messageXML, broadcastClientIndex);
                                 }
