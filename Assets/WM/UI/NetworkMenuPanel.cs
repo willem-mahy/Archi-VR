@@ -71,51 +71,60 @@ namespace WM.UI
         /// </summary>
         private void UpdateUI()
         {
-            switch (Application.NetworkMode)
+            if (Application.NetworkInitialized)
             {
-                case NetworkMode.Standalone:
-                    StandalonePanel.SetActive(true);
-                    ServerPanel.SetActive(false);
-                    ClientPanel.SetActive(false);
+                switch (Application.NetworkMode)
+                {
+                    case NetworkMode.Standalone:
+                        StandalonePanel.SetActive(true);
+                        ServerPanel.SetActive(false);
+                        ClientPanel.SetActive(false);
 
-                    var serverInfos = Application.ServerDiscovery.GetServerInfos();
-                    if (serverInfos.Count == 0)
-                    {
-                        ServersValueText.text = "No servers found";
-                    }
-                    else
-                    {
-                        var serversList = "";
-
-                        foreach (var serverInfo in serverInfos)
+                        var serverInfos = Application.ServerDiscovery.GetServerInfos();
+                        if (serverInfos.Count == 0)
                         {
-                            serversList += serverInfo.IP + ":" + serverInfo.TcpPort + "\n";
+                            ServersValueText.text = "No servers found";
                         }
+                        else
+                        {
+                            var serversList = "";
 
-                        ServersValueText.text = serversList;
-                    }
-                    break;
-                case NetworkMode.Server:
-                    StandalonePanel.SetActive(false);
-                    ServerPanel.SetActive(true);
-                    ClientPanel.SetActive(false);
+                            foreach (var serverInfo in serverInfos)
+                            {
+                                serversList += serverInfo.IP + ":" + serverInfo.TcpPort + "\n";
+                            }
 
-                    ServerStatusValueText.text = Application.Server.StateText;
+                            ServersValueText.text = serversList;
+                        }
+                        break;
+                    case NetworkMode.Server:
+                        StandalonePanel.SetActive(false);
+                        ServerPanel.SetActive(true);
+                        ClientPanel.SetActive(false);
 
-                    ClientsValueText.text = Application.Server.GetClientInfo(Application.Client.TcpPort);
-                    break;
-                case NetworkMode.Client:
-                    StandalonePanel.SetActive(false);
-                    ServerPanel.SetActive(false);
-                    ClientPanel.SetActive(true);
+                        ServerStatusValueText.text = Application.Server.StateText;
 
-                    ClientStatusValueText.text = Application.Client.StateText;
+                        ClientsValueText.text = Application.Server.GetClientInfo(Application.Client.TcpPort);
+                        break;
+                    case NetworkMode.Client:
+                        StandalonePanel.SetActive(false);
+                        ServerPanel.SetActive(false);
+                        ClientPanel.SetActive(true);
 
-                    if (Application.Client.State == Client.ClientState.Connected)
-                    {
-                        ClientStatusValueText.text += " to " + Application.Client.ServerIP + ":" + Application.Client.ServerInfo.TcpPort;
-                    }
-                    break;
+                        ClientStatusValueText.text = Application.Client.StateText;
+
+                        if (Application.Client.State == Client.ClientState.Connected)
+                        {
+                            ClientStatusValueText.text += " to " + Application.Client.ServerIP + ":" + Application.Client.ServerInfo.TcpPort;
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                StandalonePanel.SetActive(false);
+                ServerPanel.SetActive(false);
+                ClientPanel.SetActive(false);
             }
 
             UpdateUI_NetworkModeTitle();
@@ -128,19 +137,26 @@ namespace WM.UI
         /// </summary>
         private void UpdateUI_NetworkModeTitle()
         {
-            switch (Application.NetworkMode)
+            if (Application.NetworkInitialized)
             {
-                case NetworkMode.Standalone:
-                    NetworkModeText.text = "Running standalone.";
-                    break;
+                switch (Application.NetworkMode)
+                {
+                    case NetworkMode.Standalone:
+                        NetworkModeText.text = "Running standalone.";
+                        break;
 
-                case NetworkMode.Client:
-                    NetworkModeText.text = "Running client. (TCP port:" + Application.Client.TcpPort + ")";
-                    break;
+                    case NetworkMode.Client:
+                        NetworkModeText.text = "Running client. (TCP port:" + Application.Client.TcpPort + ")";
+                        break;
 
-                case NetworkMode.Server:
-                    NetworkModeText.text = "Running server. (TCP port:" + Application.Server.TcpPort + ")";
-                    break;
+                    case NetworkMode.Server:
+                        NetworkModeText.text = "Running server. (TCP port:" + Application.Server.TcpPort + ")";
+                        break;
+                }
+            }
+            else
+            {
+                NetworkModeText.text = "Not initialized";
             }
         }
 
