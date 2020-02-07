@@ -255,7 +255,7 @@ namespace WM.Application
         GameObject debugLogMenuPanel = null;
         GameObject debugInputMenuPanel = null;
         GameObject graphicsMenuPanel = null;
-        GameObject playerMenuPanel = null; 
+        GameObject playerMenuPanel = null;
         GameObject networkMenuPanel = null;
         GameObject infoMenuPanel = null;
 
