@@ -742,11 +742,6 @@ namespace WM.Net
 
                 var broadcastMessage = WM.Net.Message.EncodeObjectAsXml(new ServerInfo(((IPEndPoint)this.tcpListener.LocalEndpoint).Address.ToString() ,TcpPort, UdpPort));
 
-                //var logText = string.Format(callLogTag + ": Starting to UDP broadcast Message '{0}' from port {1} to port {2}",
-                //                            broadcastMessage,
-                //                            broadcastUdpRemoteEndPoint.Port,
-                //                            UdpBroadcastRemotePort);
-
                 var logText = string.Format(callLogTag + ": Starting to UDP broadcast ServerInfo from port {0} to port {1}",
                                             broadcastUdpRemoteEndPoint.Port,
                                             UdpBroadcastRemotePort);
