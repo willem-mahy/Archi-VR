@@ -362,15 +362,21 @@ namespace WM.Net
         /// <summary>
         /// Get a string with information about connected clients.
         /// </summary>
+        /// <param name="localClientTcpPort">The TCP port of the local client.</param>
         /// <returns></returns>
-        public string GetClientInfo()
+        public string GetClientInfo(int localClientTcpPort)
         {
             string info = "";
             lock (this.clientConnections)
             {
                 foreach (var clientConnection in clientConnections)
                 {
-                    info += "- IP: " + clientConnection.RemoteIP + ":" + clientConnection.RemotePortTCP + "\n";
+                    info += "- IP: " + clientConnection.RemoteIP + ":" + clientConnection.RemotePortTCP;
+                    if (localClientTcpPort == clientConnection.RemotePortTCP)
+                    {
+                        info += " (local)";
+                    }
+                    info += "\n";
                 }
             }
             return info;

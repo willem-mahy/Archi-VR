@@ -95,7 +95,7 @@ namespace WM.UI
 
                     ServerStatusValueText.text = Application.Server.StateText;
 
-                    ClientsValueText.text = Application.Server.GetClientInfo();
+                    ClientsValueText.text = Application.Server.GetClientInfo(Application.Client.TcpPort);
                     break;
                 case NetworkMode.Client:
                     StandalonePanel.SetActive(false);
