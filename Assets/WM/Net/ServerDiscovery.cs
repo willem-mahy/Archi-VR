@@ -36,6 +36,11 @@ namespace WM.Net
         }
 
         /// <summary>
+        /// Whether to log ServerDiscovery communications.
+        /// </summary>
+        private bool _logServerDiscovery = false;
+
+        /// <summary>
         /// The map containing as keys the ServerInfos describing discovered servers.
         /// </summary>
         private Dictionary<ServerInfo, DateTime> _serverInfos = new Dictionary<ServerInfo, DateTime>();
@@ -185,6 +190,8 @@ namespace WM.Net
         {
             _log.Debug("ServerDiscovery.InternalStop()");
 
+            State = ServerDiscoveryState.Stopping;
+
             // Stop the worker thread.
             if (_thread != null)
             {
@@ -206,6 +213,7 @@ namespace WM.Net
             Debug.Assert(State == ServerDiscoveryState.Running);
 
             var discoveryUdpClient = new UdpClient(Server.UdpBroadcastRemotePort);
+            var discoveryUdpClientLocalEndPoint = discoveryUdpClient.Client.LocalEndPoint as IPEndPoint;
 
             // The address from which to receive data.
             // In this case we are interested in data from any IP and any port.
@@ -213,46 +221,54 @@ namespace WM.Net
             
             while (State != ServerDiscoveryState.Stopping)
             {
-                lock (stateLock)
+                if (_logServerDiscovery)
                 {
-                    for (int i = 0; i < 10; ++i)
+                    _log.Debug(string.Format(callLogTag + ": Check for ServerInfos on local port {0}.", discoveryUdpClientLocalEndPoint.Port));
+                }
+
+                for (int i = 0; i < 10; ++i)
+                {
+                    try
                     {
-                        try
+                        if (discoveryUdpClient.Available == 0)
                         {
-                            if (discoveryUdpClient.Available == 0)
-                            {
-                                break;
-                            }
-
-                            // Receive bytes from anyone on local port 'Server.UdpBroadcastRemotePort'.
-                            byte[] data = discoveryUdpClient.Receive(ref discoveryUdpRemoteEndPoint);
-
-                            // Encode received bytes to UTF8- encoding.
-                            string receivedText = Encoding.UTF8.GetString(data);
-
-                            var obj = Message.GetObjectFromMessageXML(receivedText);
-
-                            var serverInfo = obj as ServerInfo;
-
-                            if (serverInfo != null)
-                            {
-                                ProcessServerInfo(serverInfo);
-                            }
-                            else
-                            {
-                                _log.Warning(string.Format(callLogTag + ": Received unexpected message '{0}'!", receivedText));
-                            }
+                            break;
                         }
-                        catch (Exception e)
+
+                        // Receive bytes from anyone on local port 'Server.UdpBroadcastRemotePort'.
+                        byte[] data = discoveryUdpClient.Receive(ref discoveryUdpRemoteEndPoint);
+
+                        // Encode received bytes to UTF8- encoding.
+                        string receivedText = Encoding.UTF8.GetString(data);
+
+                        var obj = Message.GetObjectFromMessageXML(receivedText);
+
+                        var serverInfo = obj as ServerInfo;
+
+                        if (serverInfo != null)
                         {
-                            _log.Warning(callLogTag + ": Exception: " + e.ToString());
+                            if (_logServerDiscovery)
+                            {
+                                _log.Debug(string.Format(callLogTag + ": Received ServerInfo[{0}]", i));
+                                _log.Debug(serverInfo.ToString());
+                            }
+
+                            ProcessServerInfo(serverInfo);
+                        }
+                        else
+                        {
+                            _log.Warning(string.Format(callLogTag + ": Received unexpected message '{0}'!", receivedText));
                         }
                     }
-
-                    RemoveStaleServerInfos();
-
-                    Thread.Sleep(100);
+                    catch (Exception e)
+                    {
+                        _log.Warning(callLogTag + ": Exception: " + e.ToString());
+                    }
                 }
+
+                RemoveStaleServerInfos();
+
+                Thread.Sleep(100);
             }
 
             discoveryUdpClient.Close();
