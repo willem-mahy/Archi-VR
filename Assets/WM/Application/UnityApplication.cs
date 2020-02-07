@@ -103,9 +103,24 @@ namespace WM.Application
         #region Network
 
         /// <summary>
-        /// The current network mode.
+        /// Flags whether the network has been initialized to any mode.
+        /// 'false' at startup, and if initialization into a new network mode has failed.
         /// </summary>
-        public NetworkMode NetworkMode = NetworkMode.Standalone; // TODO: make private...
+        public bool NetworkInitialized
+        {
+            get;
+            private set;
+        } = false;
+
+        /// <summary>
+        /// The current network mode.
+        /// Only valid if <see cref="NetworkInitialized"/> is true.
+        /// </summary>
+        public NetworkMode NetworkMode
+        {
+            get;
+            private set;
+        } = NetworkMode.Standalone;
 
         /// <summary>
         /// The networking server.
@@ -690,6 +705,79 @@ namespace WM.Application
             SetMenuMode(StartupMenuMode);
 
             new InitNetworkCommand(StartupNetworkMode).Execute(this);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="networkMode"></param>
+        public void InitNetworkMode(NetworkMode networkMode)
+        {
+            if (NetworkInitialized) // If the network has never been initialized yet, we do not need to tear down anything.
+            {
+                if (NetworkMode == networkMode)
+                {
+                    return; // NOOP: already running in requested network mode...
+                }
+
+                // Teardown from current network mode.
+                switch (NetworkMode)
+                {
+                    case NetworkMode.Client:
+                        {
+                            Client.Disconnect();
+                        }
+                        break;
+                    case NetworkMode.Server:
+                        {
+                            Client.Disconnect();
+                            Server.Shutdown();
+                        }
+                        break;
+                    case NetworkMode.Standalone:
+                        {
+                            //ServerDiscovery.Stop();
+                        }
+                        break;
+                }
+            }
+
+            NetworkInitialized = false;
+
+            // Initialize for new network mode.
+            switch (networkMode)
+            {
+                case NetworkMode.Server:
+                    {
+                        // Init network server
+                        Server.Init();
+
+                        // Init network client
+                        // Let client connect to own server. (TODO: connect directly, ie without network middle layer.)
+                        Client.ServerInfo = new ServerInfo(
+                            NetUtil.GetLocalIPAddress().ToString(),
+                            Server.TcpPort,
+                            Server.UdpPort);
+
+                        Client.Connect();
+                    }
+                    break;
+                case NetworkMode.Client:
+                    {
+                        // Init network client only
+                        Client.Connect();
+                    }
+                    break;
+                case NetworkMode.Standalone:
+                    {
+                        // Init no network
+                        //ServerDiscovery.Start();
+                    }
+                    break;
+            }
+
+            NetworkInitialized = true;
+            NetworkMode = networkMode;
         }
 
         /// <summary>
