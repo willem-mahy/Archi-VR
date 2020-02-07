@@ -1206,6 +1206,9 @@ namespace WM.Application
                 case MenuMode.Graphics:
                     SetActiveMenu(graphicsMenuPanel);
                     break;
+                case MenuMode.Player:
+                    SetActiveMenu(playerMenuPanel);
+                    break;
                 case MenuMode.Network:
                     SetActiveMenu(networkMenuPanel);
                     break;
