@@ -62,6 +62,13 @@ namespace WM.UI
             UpdateUI();
         }
 
+        #endregion Public API
+
+        #region Non-public API
+
+        /// <summary>
+        /// 
+        /// </summary>
         private void UpdateUI()
         {
             switch (Application.NetworkMode)
@@ -116,10 +123,9 @@ namespace WM.UI
             UpdateUI_IP();
         }
 
-        #endregion Public API
-
-        #region Non-public API
-
+        /// <summary>
+        /// Updates the 'Network mode' UI control to show which network mode is active.
+        /// </summary>
         private void UpdateUI_NetworkModeTitle()
         {
             switch (Application.NetworkMode)
@@ -138,6 +144,9 @@ namespace WM.UI
             }
         }
 
+        /// <summary>
+        /// Updates the 'IP' UI control to show the current IP of the local system.
+        /// </summary>
         private void UpdateUI_IP()
         {
             var ownIP = NetUtil.GetLocalIPAddress().ToString();
@@ -156,8 +165,7 @@ namespace WM.UI
                 Application.QueueCommand(new InitNetworkCommand(networkMode));
             }
         }
-        
-        
+                
         /// <summary>
         /// 
         /// </summary>
