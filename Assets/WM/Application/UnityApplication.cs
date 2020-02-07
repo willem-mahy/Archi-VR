@@ -122,14 +122,6 @@ namespace WM.Application
         /// </summary>
         public readonly ServerDiscovery ServerDiscovery = new ServerDiscovery();
 
-        public int AvatarIndex
-        {
-            get
-            {
-                return 0; // FIXME: TODO: Get Avatar index from Player.AvatarID!
-            }
-        }
-
         /// <summary>
         /// The players from remote connected Clients.
         /// </summary>
