@@ -86,11 +86,6 @@ namespace WM.Application
         public string Version = "";
 
         /// <summary>
-        /// Whether to show the GFX quality level and FPS as HUD UI.
-        /// </summary>
-        private bool enableDebugGFX = false;
-
-        /// <summary>
         /// 
         /// </summary>
         protected Vector3 m_centerEyeAnchorPrev = new Vector3();
@@ -99,6 +94,50 @@ namespace WM.Application
         /// 
         /// </summary>
         protected int frame = 0;
+
+        #region Player names
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected List<string> _playerNames = new List<string>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public IEnumerable<string> PlayerNames
+        {
+            get { return _playerNames; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int NumPlayerNames
+        {
+            get { return _playerNames.Count; }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="nameToFind"></param>
+        /// <returns></returns>
+        public int GetPlayerNameIndex(string nameToFind)
+        {
+            return _playerNames.IndexOf(nameToFind);        
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        public void SetPlayerName(int playerNameIndex)
+        {
+            Player.Name = playerNameIndex == -1 ? "" : _playerNames[playerNameIndex];
+        }
+
+        #endregion Player Names
 
         #region Network
 
@@ -509,9 +548,9 @@ namespace WM.Application
         /// </summary>
         public virtual void Init()
         {
-            Logger.Enabled = EnableLoggerAtStartup;
+            //Logger.Enabled = EnableLoggerAtStartup; // Now gotten from application settings file...
 
-            Player.AvatarID = DefaultAvatarID;
+            //Player.AvatarID = DefaultAvatarID; // Now gotten from application settings file...
             Player.ClientID = Client == null ? new Guid() : Client.ID;
 
             ServerDiscovery.SetLog(Logger);
@@ -629,10 +668,12 @@ namespace WM.Application
                     FpsPanelHUD = UtilUnity.FindGameObject(gameObject.scene, "FPSPanel");
                 }
 
+                /*
                 if (FpsPanelHUD != null)
                 {
                     FpsPanelHUD.SetActive(StartupShowFps);
                 }
+                */
             }
 
             // Left controller.
@@ -915,22 +956,6 @@ namespace WM.Application
             if (NetworkMode != NetworkMode.Standalone)
             {
                 UpdateNetwork();
-            }
-
-            if (enableDebugGFX)
-            {
-                var qualityLevel = QualitySettings.GetQualityLevel();
-
-                if (m_controllerInput.m_controllerState.button5Down)
-                {
-                    qualityLevel = UtilIterate.MakeCycle(--qualityLevel, 0, QualitySettings.names.Length);
-                    QualitySettings.SetQualityLevel(qualityLevel);
-                }
-                if (m_controllerInput.m_controllerState.button6Down)
-                {
-                    qualityLevel = UtilIterate.MakeCycle(++qualityLevel, 0, QualitySettings.names.Length);
-                    QualitySettings.SetQualityLevel(qualityLevel);
-                }
             }
 
             #region Update controller state.

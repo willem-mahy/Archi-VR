@@ -3,6 +3,8 @@ using ArchiVR.Net;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using WM;
@@ -159,6 +161,18 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Init()
         {
+            var settings = LoadSettings();
+
+            Logger.Enabled = settings.LoggingEnabled;
+
+            QualitySettings.SetQualityLevel(settings.GraphicsSettings.QualityLevel);
+            FpsPanelHUD.SetActive(settings.GraphicsSettings.ShowFPS);
+
+            _playerNames = settings.PlayerNames;
+
+            Player.Name = settings.PlayerSettings.name;
+            Player.AvatarID = settings.PlayerSettings.avatarID;
+
             if (!UnitTestModeEnabled && (OVRManager.instance == null))
             {
                 // Instantiate at position (0, 0, 0) and zero rotation.
@@ -196,6 +210,16 @@ namespace ArchiVR.Application
             SetActiveImmersionMode(DefaultImmersionModeIndex);
 
             SetActiveProject(0);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public /*override*/ void OnApplicationQuit()
+        {
+            var settings = GetApplicationSettings();
+
+            SaveSettings(settings);
         }
 
         /// <summary>
@@ -978,8 +1002,113 @@ namespace ArchiVR.Application
             }
         }
 
+        /// <summary>
+        /// Temporary caches the OVRManager headpose rotation while EnableInput is false.
+        /// </summary>
         Vector3 r;
+
+        /// <summary>
+        /// Temporary caches the OVRManager headpose translation while EnableInput is false.
+        /// </summary>
         Vector3 t;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private string SettingsFilePath
+        {
+            get
+            {
+                return Path.Combine(UnityEngine.Application.persistentDataPath, "ApplicationArchiVRSettings.xml");
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private ApplicationArchiVRSettings LoadSettings()
+        {
+            ApplicationArchiVRSettings settings = null;
+
+            if (File.Exists(SettingsFilePath))
+            {
+                try
+                {
+                    var serializer = new XmlSerializer(typeof(ApplicationArchiVRSettings));
+
+                    using (var reader = new StreamReader(SettingsFilePath))
+                    {
+                        //reader.ReadToEnd();
+
+                        settings = serializer.Deserialize(reader) as ApplicationArchiVRSettings;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Warning("Failed to load settings file!" + e.Message);
+                }
+            }
+            else
+            {
+                Logger.Warning("Settings file '" + SettingsFilePath + "' not found.");
+
+                settings = new ApplicationArchiVRSettings();
+
+                settings.PlayerNames.Add("Mr.");
+                settings.PlayerNames.Add("Ms.");
+                settings.PlayerNames.Add("KS");
+
+                settings.PlayerSettings.name = "KS";
+                settings.PlayerSettings.avatarID = AvatarMarioID;
+
+                SaveSettings(settings);
+            }
+
+            return settings;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="settings"></param>
+        private void SaveSettings(ApplicationArchiVRSettings settings)
+        {
+            try
+            {
+                var serializer = new XmlSerializer(typeof(ApplicationArchiVRSettings));
+
+                using (var writer = new StreamWriter(SettingsFilePath))
+                {
+                    serializer.Serialize(writer, settings);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Warning("Failed to save settings file!" + e.Message);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private ApplicationArchiVRSettings GetApplicationSettings()
+        {
+            var settings = new ApplicationArchiVRSettings();
+
+            settings.LoggingEnabled = Logger.Enabled;
+            
+            settings.GraphicsSettings.QualityLevel = QualitySettings.GetQualityLevel();
+            settings.GraphicsSettings.ShowFPS = FpsPanelHUD.activeSelf;
+
+            settings.PlayerNames = _playerNames;
+
+            settings.PlayerSettings.name = Player.Name;
+            settings.PlayerSettings.avatarID = Player.AvatarID;
+
+            return settings;
+        }
 
         #endregion
     };

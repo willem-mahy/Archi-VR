@@ -45,7 +45,7 @@ namespace WM.Application
         {
             get;
             set;
-        } = "Unnamed player";
+        } = "";
 
         /// <summary>
         /// The ID of the avatar to be used for this player.

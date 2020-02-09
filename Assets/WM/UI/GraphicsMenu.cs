@@ -73,12 +73,12 @@ public class GraphicsMenu : MonoBehaviour
 
         if (ShowFpsToggle != null)
         {
-            ShowFpsToggle.isOn = Application.FpsPanelHUD.activeSelf;
+            ShowFpsToggle.SetIsOnWithoutNotify(Application.FpsPanelHUD.activeSelf);
         }
 
         if (QualityDropdown != null)
         {
-            QualityDropdown.value = QualitySettings.GetQualityLevel();
+            QualityDropdown.SetValueWithoutNotify(QualitySettings.GetQualityLevel());
         }
     }
 
@@ -97,24 +97,32 @@ public class GraphicsMenu : MonoBehaviour
 
     #region Quality
 
+    /// <summary>
+    /// 'OnValueChanged' handler for the 'Quality' dropdown.
+    /// </summary>
+    /// <param name="value">The new value of the 'Quality' dropdown.</param>
     public void QualityDropdownOnValueChanged(int value)
     {
         QualitySettings.SetQualityLevel(value);
     }
 
+    /// <summary>
+    /// 'OnClick' handler for the 'Previous quality' button.
+    /// </summary>
     public void PrevQualityOnClick()
     {
         var qualityLevel = QualitySettings.GetQualityLevel();
         qualityLevel = UtilIterate.MakeCycle(--qualityLevel, 0, QualitySettings.names.Length);
-        QualitySettings.SetQualityLevel(qualityLevel);
         QualityDropdown.value = QualitySettings.GetQualityLevel();
     }
 
+    /// <summary>
+    /// 'OnClick' handler for the 'Next quality' button.
+    /// </summary>
     public void NextQualityOnClick()
     {
         var qualityLevel = QualitySettings.GetQualityLevel();
         qualityLevel = UtilIterate.MakeCycle(++qualityLevel, 0, QualitySettings.names.Length);
-        QualitySettings.SetQualityLevel(qualityLevel);
         QualityDropdown.value = QualitySettings.GetQualityLevel();
     }
 
