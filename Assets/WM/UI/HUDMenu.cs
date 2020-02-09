@@ -46,32 +46,6 @@ public class HUDMenu : MonoBehaviour
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    void OnEnable()
-    {
-        //WM.Logger.Warning("HudMenu.OnEnable()");
-
-        if (Application)
-        {
-            Application.AddSelectionTarget(gameObject);
-        }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    void OnDisable()
-    {
-        //WM.Logger.Warning("HudMenu.OnDisable()");
-
-        if (Application)
-        {
-            Application.RemoveSelectionTarget(gameObject);
-        }
-    }
-
-    /// <summary>
     /// Update is called once per frame
     /// </summary>
     void Update()

@@ -345,34 +345,33 @@ namespace WM.Application
         private List<GameObject> selectionTargets = new List<GameObject>();
 
         /// <summary>
-        /// 
+        /// Updates the visibility of the selection visualizer.
         /// </summary>
         private void UpdateSelectionVisualizerVisibility()
         {
-            Logger.Debug("UpdateSelectionVisualizerVisibility() -> " + HasSelectionTargets());
+            Logger.Debug("UpdateSelectionVisualizerVisibility() -> " + HasPickRaySelectionTargets());
 
             if (SelectionVisualizer == null)
             {
                 return;
             }
 
-            SelectionVisualizer.gameObject.SetActive(HasSelectionTargets());
+            SelectionVisualizer.gameObject.SetActive(HasPickRaySelectionTargets());
         }
 
         /// <summary>
-        /// 
+        /// Returns whether there are any targets for pick ray selection.
         /// </summary>
-        /// <returns></returns>
-        private bool HasSelectionTargets()
+        private bool HasPickRaySelectionTargets()
         {
             return selectionTargets.Count != 0;
         }
 
         /// <summary>
-        /// 
+        /// Register the given game object as a target for pick ray selection.
         /// </summary>
         /// <param name="selectionTarget"></param>
-        public void AddSelectionTarget(GameObject selectionTarget)
+        public void AddPickRaySelectionTarget(GameObject selectionTarget)
         {
             //Logger.Warning("AddSelectionTarget(" + selectionTarget.name + ")");
 
@@ -382,10 +381,10 @@ namespace WM.Application
         }
 
         /// <summary>
-        /// 
+        /// Unregister the given game object as a target for pick ray selection.
         /// </summary>
         /// <param name="selectionTarget"></param>
-        public void RemoveSelectionTarget(GameObject selectionTarget)
+        public void RemovePickRaySelectionTarget(GameObject selectionTarget)
         {
             //Logger.Warning("RemoveSelectionTarget(" + selectionTarget.name + ")");
 
@@ -666,6 +665,8 @@ namespace WM.Application
             }
 
             #endregion
+
+            MenuVisible = false;
 
             UpdateSelectionVisualizerVisibility();
 
@@ -1025,9 +1026,9 @@ namespace WM.Application
         #region Menu Management
 
         /// <summary>
-        /// 
+        /// Sets the active menu.
         /// </summary>
-        /// <param name="menuIndex"></param>
+        /// <param name="menuIndex">The index of tha menu to set as the active menu.</param>
         public void SetActiveMenu(int menuIndex)
         {
             if (menuPanel == null)
@@ -1038,6 +1039,9 @@ namespace WM.Application
             menuPanel.Activate(menuIndex);
         }
 
+        /// <summary>
+        /// Whether the menu is visible(true) or not (false).
+        /// </summary>
         public bool MenuVisible
         {
             get
@@ -1069,6 +1073,15 @@ namespace WM.Application
                     {
                         WorldSpaceMenu.UpdateAnchoring(); // Re-anchor the World-Space menu to be in front of cam, when leaving None mode.
                     }
+                }
+                
+                if (MenuVisible)
+                {
+                    AddPickRaySelectionTarget(gameObject);
+                }
+                else
+                {
+                    RemovePickRaySelectionTarget(gameObject);
                 }
             }
         }
