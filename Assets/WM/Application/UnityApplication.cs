@@ -196,7 +196,18 @@ namespace WM.Application
 
         public Animator m_fadeAnimator;
 
+        /// <summary>
+        /// The HUD menu.
+        /// This is a world-space menu that acts as an overlay menu, by making sure it is always located in front of the camera.
+        /// This contains the FPS and Quality panel.
+        /// </summary>
         public HUDMenu HudMenu;
+
+        /// <summary>
+        /// The WorldSpace menu.
+        /// This contains the menus.
+        /// </summary>
+        public HUDMenu WorldSpaceMenu;
 
         public GameObject FpsPanelHUD;
 
@@ -294,7 +305,10 @@ namespace WM.Application
         // The menu mode.
         private MenuMode menuMode = MenuMode.None;
 
-        public GameObject m_centerEyeCanvas = null;
+        public GameObject m_centerEyeCanvas;
+
+        private GameObject menuPanelGO;
+        //public TabPanel menuPanel;
 
         List<GameObject> menus = new List<GameObject>();
 
@@ -587,14 +601,20 @@ namespace WM.Application
 
             if (m_rightHandAnchor == null)
             {
-                m_rightHandAnchor = UtilUnity.TryFindGameObject("RightHandAnchor");
+                m_rightHandAnchor = UtilUnity.FindGameObject(gameObject.scene, "RightHandAnchor");
             }
 
             #endregion Get handles to OVRGameraRig objects
 
             if (m_centerEyeCanvas == null)
             {
-                m_centerEyeCanvas = UtilUnity.TryFindGameObject("CenterEyeCanvas");
+                m_centerEyeCanvas = UtilUnity.FindGameObject(gameObject.scene, "CenterEyeCanvas");
+            }
+
+            if (menuPanelGO == null)
+            {
+                menuPanelGO = UtilUnity.FindGameObject(gameObject.scene, "MenuPanel");
+                //menuPanel = menuPanelGO.GetComponent<TabPanel>();
             }
 
             if (!UnitTestModeEnabled)
@@ -735,13 +755,13 @@ namespace WM.Application
 
             UpdateSelectionVisualizerVisibility();
 
-            if (UnityEngine.Application.isEditor)
-            {
-                if (HudMenu != null)
-                {
-                    HudMenu.AnchorEnabled = true;
-                }
-            }
+            //if (UnityEngine.Application.isEditor)
+            //{
+            //    if (HudMenu != null)
+            //    {
+            //        HudMenu.AnchorEnabled = true;
+            //    }
+            //}
 
             SetMenuMode(StartupMenuMode);
 
@@ -1292,9 +1312,14 @@ namespace WM.Application
         {
             if (menuMode == MenuMode.None)
             {
-                if (HudMenu != null)
+                //if (HudMenu != null)
+                //{
+                //    HudMenu.UpdateAnchoring(); // Re-anchor the HUD menu to be in front of cam, when leaving None mode.
+                //}
+
+                if (WorldSpaceMenu != null)
                 {
-                    HudMenu.UpdateAnchoring(); // Re-anchor the HUD menu to be in front of cam, when leaving None mode.
+                    WorldSpaceMenu.UpdateAnchoring(); // Re-anchor the World-Space menu to be in front of cam, when leaving None mode.
                 }
             }
 
@@ -1328,9 +1353,14 @@ namespace WM.Application
                     break;
             }
 
-            if (HudMenu != null)
+            //if (menuPanel != null)
+            //{
+            //    menuPanel.gameObject.SetActive(menuMode != MenuMode.None);
+            //}
+
+            if (menuPanelGO != null)
             {
-                HudMenu.gameObject.SetActive(menuMode != MenuMode.None);
+                menuPanelGO.SetActive(menuMode != MenuMode.None);
             }
         }
 

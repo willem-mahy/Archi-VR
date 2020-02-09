@@ -4,9 +4,9 @@ using UnityEngine.UI;
 namespace WM.UI
 {
     /// <summary>
-    /// Add this as a component to a UnityEngine.UI.Text object, to make it display the current frames-per-seconds value.
+    /// Add this as a component to a UnityEngine.UI.Text object, to make it display the name of the current Quality setting.
     /// </summary>
-    public class FPSText : MonoBehaviour
+    public class QualityText : MonoBehaviour
     {
         /// <summary>
         /// 
@@ -31,9 +31,10 @@ namespace WM.UI
                 return;
             }
 
-            var fps = (int)(1f / Time.unscaledDeltaTime);
+            var qualityLevel = QualitySettings.GetQualityLevel();
+            var qualityLevelName = QualitySettings.names[qualityLevel];
 
-            text.text = fps.ToString();
+            text.text = "(" + qualityLevelName + ")";
         }
     }
 }

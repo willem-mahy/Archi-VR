@@ -9,7 +9,7 @@ public class HUDMenu : MonoBehaviour
 
     public UnityApplication Application;
 
-    //! WHether anchoring to the eye anchor is enabled.
+    //! Whether anchoring to the eye anchor is enabled.
     public bool AnchorEnabled = false;
 
     //! The eye anchor.
@@ -25,18 +25,29 @@ public class HUDMenu : MonoBehaviour
 
     #region GameObject overrides
 
-    // Start is called before the first frame update
+    /// <summary>
+    /// Start is called before the first frame update
+    /// </summary>
     void Start()
     {
         #region Get references to GameObjects.
 
-        Application = UtilUnity.TryFindGameObject("Application").GetComponent<UnityApplication>();
+        if (Application == null)
+        {
+            Application = UtilUnity.FindGameObject(gameObject.scene, "Application").GetComponent<UnityApplication>();
+        }
 
-        EyeAnchor = UtilUnity.TryFindGameObject("CenterEyeAnchor");
+        if (EyeAnchor == null)
+        {
+            EyeAnchor = UtilUnity.FindGameObject(gameObject.scene, "CenterEyeAnchor");
+        }
 
         #endregion
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     void OnEnable()
     {
         //WM.Logger.Warning("HudMenu.OnEnable()");
@@ -47,6 +58,9 @@ public class HUDMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     void OnDisable()
     {
         //WM.Logger.Warning("HudMenu.OnDisable()");
@@ -57,7 +71,9 @@ public class HUDMenu : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
+    /// <summary>
+    /// Update is called once per frame
+    /// </summary>
     void Update()
     {
         if (AnchorEnabled)
@@ -72,6 +88,9 @@ public class HUDMenu : MonoBehaviour
 
     #endregion
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void UpdateAnchoring()
     {
         if (AnchorEnabled)
