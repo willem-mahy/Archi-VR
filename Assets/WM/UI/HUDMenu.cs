@@ -7,21 +7,33 @@ public class HUDMenu : MonoBehaviour
 {
     #region Variables
 
-    public UnityApplication Application;
+    /// <summary>
+    /// The camera to which this gameobject is anchored.
+    /// This gameobject will update every frame to be at the given translational offset from the anchor camera.
+    /// </summary>
+    public GameObject Anchor { get; set; }
 
-    //! Whether anchoring to the eye anchor is enabled.
-    public bool AnchorEnabled = false;
+    /// <summary>
+    /// Translational offset from the eye anchor.
+    /// X is the wanted distance of the HUD menu irt the anchor camera, along the projection of the anchor camera right direction on the horizontal plane.
+    /// Y is the wanted distance of the HUD menu irt the anchor camera, along the global UP vector.
+    /// Z is the wanted distance of the HUD menu irt the anchor camera, along the projection of the anchor camera forward direction on the horizontal plane.
+    /// </summary>
+    public Vector3 Offset = new Vector3(0.0f, -0.2f, 2.0f);
 
-    //! The eye anchor.
-    public GameObject EyeAnchor { get; set; }
+    /// <summary>
+    /// Rotation.
+    /// </summary>
+    private Vector3 _offset;
 
-    //! Translational offset from the eye anchor.
-    Vector3 offset;
-
-    //! Rotation.
-    Quaternion rot;
+    /// <summary>
+    /// Rotation.
+    /// </summary>
+    private Quaternion _rotation;
 
     #endregion
+
+    #region Public API
 
     #region GameObject overrides
 
@@ -32,14 +44,9 @@ public class HUDMenu : MonoBehaviour
     {
         #region Get references to GameObjects.
 
-        if (Application == null)
+        if (Anchor == null)
         {
-            Application = UtilUnity.FindGameObject(gameObject.scene, "Application").GetComponent<UnityApplication>();
-        }
-
-        if (EyeAnchor == null)
-        {
-            EyeAnchor = UtilUnity.FindGameObject(gameObject.scene, "CenterEyeAnchor");
+            Anchor = UtilUnity.FindGameObject(gameObject.scene, "CenterEyeAnchor");
         }
 
         #endregion
@@ -50,38 +57,59 @@ public class HUDMenu : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (AnchorEnabled)
-        {
-            if (EyeAnchor != null)
-            {
-                gameObject.transform.position = EyeAnchor.transform.position + offset;
-                gameObject.transform.rotation = rot;
-            }
-        }
+        UpdateLocation();
     }
 
-    #endregion
+    #endregion GameObject overrides
+
+    /// <summary>
+    /// Update the effective relative translational offset, and rotation,
+    /// from the current location of the anchor camera.
+    /// </summary>
+    public void UpdateAnchoring()
+    {
+        if (Anchor == null)
+        {
+            return;
+        }
+
+        var offsetX = Anchor.transform.right;
+        offsetX.y = 0;
+        offsetX.Normalize();
+        offsetX *= Offset.x;
+
+        var offsetY = new Vector3(0, Offset.y, 0);
+
+        var offsetZ = Anchor.transform.forward;
+        offsetZ.y = 0;
+        offsetZ.Normalize();
+        offsetZ *= Offset.z;
+
+        _offset = offsetX + offsetY + offsetZ;
+
+        var angle = Math.Atan2(Anchor.transform.forward.x, Anchor.transform.forward.z) * 180.0f / Math.PI;
+        _rotation = Quaternion.AngleAxis((float)angle, Vector3.up);
+
+        UpdateLocation();
+    }
+
+    #endregion Public API
+
+    #region Non-public API
 
     /// <summary>
     /// 
     /// </summary>
-    public void UpdateAnchoring()
+    private void UpdateLocation()
     {
-        if (AnchorEnabled)
+        if (Anchor == null)
         {
-            if (EyeAnchor != null)
-            {
-                offset = EyeAnchor.transform.forward;
-                offset.y = 0;
-                offset.Normalize();
-                offset *= 1.0f;
-
-                var angle = Math.Atan2(EyeAnchor.transform.forward.x, EyeAnchor.transform.forward.z) * 180.0f / Math.PI;
-                rot = Quaternion.AngleAxis((float)angle, Vector3.up);
-
-                gameObject.transform.position = EyeAnchor.transform.position + offset;
-                gameObject.transform.rotation = rot;
-            }
+            return;
         }
+
+        gameObject.transform.position = Anchor.transform.position + _offset;
+        gameObject.transform.rotation = _rotation;
     }
+
+    #endregion Non-public API
 }
