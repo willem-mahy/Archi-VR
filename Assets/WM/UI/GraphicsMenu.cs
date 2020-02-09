@@ -18,7 +18,9 @@ public class GraphicsMenu : MonoBehaviour
 
     #region GameObject overrides
 
-    // Start is called before the first frame update
+    /// <summary>
+    /// Start is called before the first frame update
+    /// </summary>
     void Start()
     {
         #region Get references to GameObjects.
@@ -70,7 +72,13 @@ public class GraphicsMenu : MonoBehaviour
         QualityDropdown.options = qualityOptions;
 
         #endregion
+    }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    private void Update()
+    {
         if (ShowFpsToggle != null)
         {
             ShowFpsToggle.SetIsOnWithoutNotify(Application.FpsPanelHUD.activeSelf);
@@ -111,9 +119,8 @@ public class GraphicsMenu : MonoBehaviour
     /// </summary>
     public void PrevQualityOnClick()
     {
-        var qualityLevel = QualitySettings.GetQualityLevel();
-        qualityLevel = UtilIterate.MakeCycle(--qualityLevel, 0, QualitySettings.names.Length);
-        QualityDropdown.value = QualitySettings.GetQualityLevel();
+        var newQualityLevel = UtilIterate.MakeCycle(QualitySettings.GetQualityLevel() - 1, 0, QualitySettings.names.Length);
+        QualityDropdown.value = newQualityLevel;
     }
 
     /// <summary>
@@ -121,9 +128,8 @@ public class GraphicsMenu : MonoBehaviour
     /// </summary>
     public void NextQualityOnClick()
     {
-        var qualityLevel = QualitySettings.GetQualityLevel();
-        qualityLevel = UtilIterate.MakeCycle(++qualityLevel, 0, QualitySettings.names.Length);
-        QualityDropdown.value = QualitySettings.GetQualityLevel();
+        var newQualityLevel = UtilIterate.MakeCycle(QualitySettings.GetQualityLevel() + 1, 0, QualitySettings.names.Length);
+        QualityDropdown.value = newQualityLevel;
     }
 
     #endregion
