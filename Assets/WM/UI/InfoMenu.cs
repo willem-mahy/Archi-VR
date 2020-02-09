@@ -1,100 +1,102 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using WM;
 using WM.Application;
 
-/// <summary>
-/// Menu that shows general information about the software and the system on which it is running.
-/// </summary>
-public class InfoMenu : MonoBehaviour
+namespace WM.UI
 {
-    #region Variables
-
     /// <summary>
-    /// The application.
+    /// Menu that shows general information about the software and the system on which it is running.
     /// </summary>
-    public UnityApplication Application;
-
-    /// <summary>
-    /// The UI Text to display the application version.
-    /// </summary>
-    public Text ApplicationVersionText;
-
-    /// <summary>
-    /// The UI Text to display the application version.
-    /// </summary>
-    public Text ApplicationNameText;
-
-    /// <summary>
-    /// The UI Text to display the system's IP.
-    /// </summary>
-    public Text SystemIPText;
-
-    #endregion
-
-    #region GameObject overrides
-
-    // Start is called before the first frame update
-    void Start()
+    public class InfoMenu : MonoBehaviour
     {
-        #region Get references to GameObjects.
+        #region Variables
 
-        if (Application == null)
-        {
-            Application = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application").GetComponent<UnityApplication>();
-        }
+        /// <summary>
+        /// The application.
+        /// </summary>
+        public UnityApplication Application;
 
-        #endregion
+        /// <summary>
+        /// The UI Text to display the application version.
+        /// </summary>
+        public Text ApplicationVersionText;
 
-        #region Get references to UI components.
+        /// <summary>
+        /// The UI Text to display the application version.
+        /// </summary>
+        public Text ApplicationNameText;
 
-        if (ApplicationNameText == null)
-        {
-            var applicationNameGO = UtilUnity.TryFindGameObject("InfoMenu_Application_NameValueText");
-
-            if (applicationNameGO != null)
-            {
-                ApplicationNameText = applicationNameGO.GetComponent<Text>();
-            }
-        }
-
-        if (ApplicationVersionText == null)
-        {
-            var applicationVersionGO = UtilUnity.TryFindGameObject("InfoMenu_Application_VersionValueText");
-
-            if (applicationVersionGO != null)
-            {
-                ApplicationVersionText = applicationVersionGO.GetComponent<Text>();
-            }
-        }
-
-        if (SystemIPText == null)
-        {
-            var systemIPGO = UtilUnity.TryFindGameObject("InfoMenu_System_IPValueText");
-
-            if (systemIPGO != null)
-            {
-                SystemIPText = systemIPGO.GetComponent<Text>();
-            }
-        }
+        /// <summary>
+        /// The UI Text to display the system's IP.
+        /// </summary>
+        public Text SystemIPText;
 
         #endregion
 
-        if (ApplicationNameText != null)
+        #region GameObject overrides
+
+        // Start is called before the first frame update
+        void Start()
         {
-            ApplicationNameText.text = (Application == null) ? "NA" : Application.Name;
+            #region Get references to GameObjects.
+
+            if (Application == null)
+            {
+                Application = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application").GetComponent<UnityApplication>();
+            }
+
+            #endregion
+
+            #region Get references to UI components.
+
+            if (ApplicationNameText == null)
+            {
+                var applicationNameGO = UtilUnity.TryFindGameObject("InfoMenu_Application_NameValueText");
+
+                if (applicationNameGO != null)
+                {
+                    ApplicationNameText = applicationNameGO.GetComponent<Text>();
+                }
+            }
+
+            if (ApplicationVersionText == null)
+            {
+                var applicationVersionGO = UtilUnity.TryFindGameObject("InfoMenu_Application_VersionValueText");
+
+                if (applicationVersionGO != null)
+                {
+                    ApplicationVersionText = applicationVersionGO.GetComponent<Text>();
+                }
+            }
+
+            if (SystemIPText == null)
+            {
+                var systemIPGO = UtilUnity.TryFindGameObject("InfoMenu_System_IPValueText");
+
+                if (systemIPGO != null)
+                {
+                    SystemIPText = systemIPGO.GetComponent<Text>();
+                }
+            }
+
+            #endregion
+
+            if (ApplicationNameText != null)
+            {
+                ApplicationNameText.text = (Application == null) ? "NA" : Application.Name;
+            }
+
+            if (ApplicationVersionText != null)
+            {
+                ApplicationVersionText.text = (Application == null) ? "NA" : Application.Version;
+            }
+
+            if (SystemIPText != null)
+            {
+                SystemIPText.text = WM.Net.NetUtil.GetLocalIPAddress().ToString();
+            }
         }
 
-        if (ApplicationVersionText != null)
-        {
-            ApplicationVersionText.text = (Application == null) ? "NA" : Application.Version;
-        }
-
-        if (SystemIPText != null)
-        {
-            SystemIPText.text = WM.Net.NetUtil.GetLocalIPAddress().ToString();
-        }
+        #endregion
     }
-
-    #endregion
-}
+} // namespace WM.UI

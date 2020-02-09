@@ -36,4 +36,4 @@ namespace WM.UI
             text.text = fps.ToString();
         }
     }
-}
+} // namespace WM.UI
