@@ -22,14 +22,21 @@ public class HUDMenu : MonoBehaviour
     public Vector3 Offset = new Vector3(0.0f, -0.2f, 2.0f);
 
     /// <summary>
-    /// Rotation.
+    /// The composed world space translation offset.
     /// </summary>
-    private Vector3 _offset;
+    private Vector3 _worldSpaceTranslationOffset;
+
+    /// <summary>
+    /// The separate components for the world space translation offset.
+    /// </summary>
+    private Vector3 _offsetX = Vector3.zero;
+    private Vector3 _offsetY = Vector3.zero;
+    private Vector3 _offsetZ = Vector3.zero;
 
     /// <summary>
     /// Rotation.
     /// </summary>
-    private Quaternion _rotation;
+    private Quaternion _worldSpaceRotation;
 
     #endregion
 
@@ -63,6 +70,20 @@ public class HUDMenu : MonoBehaviour
     #endregion GameObject overrides
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="y"></param>
+    public void UpdateOffsetY(float y)
+    {
+        float yAdjustment = y - Offset.y;
+
+        Offset= Offset + (yAdjustment * Vector3.up);
+
+        UpdateWorldSpaceTranslationOffsetY();
+        UpdateWorldSpaceTranslationOffset();
+    }
+
+    /// <summary>
     /// Update the effective relative translational offset, and rotation,
     /// from the current location of the anchor camera.
     /// </summary>
@@ -73,22 +94,13 @@ public class HUDMenu : MonoBehaviour
             return;
         }
 
-        var offsetX = Anchor.transform.right;
-        offsetX.y = 0;
-        offsetX.Normalize();
-        offsetX *= Offset.x;
-
-        var offsetY = new Vector3(0, Offset.y, 0);
-
-        var offsetZ = Anchor.transform.forward;
-        offsetZ.y = 0;
-        offsetZ.Normalize();
-        offsetZ *= Offset.z;
-
-        _offset = offsetX + offsetY + offsetZ;
+        UpdateWorldSpaceTranslationOffsetX();
+        UpdateWorldSpaceTranslationOffsetY();
+        UpdateWorldSpaceTranslationOffsetZ();
+        UpdateWorldSpaceTranslationOffset();
 
         var angle = Math.Atan2(Anchor.transform.forward.x, Anchor.transform.forward.z) * 180.0f / Math.PI;
-        _rotation = Quaternion.AngleAxis((float)angle, Vector3.up);
+        _worldSpaceRotation = Quaternion.AngleAxis((float)angle, Vector3.up);
 
         UpdateLocation();
     }
@@ -100,6 +112,44 @@ public class HUDMenu : MonoBehaviour
     /// <summary>
     /// 
     /// </summary>
+    private void UpdateWorldSpaceTranslationOffsetX()
+    {
+        _offsetX = Anchor.transform.right;
+        _offsetX.y = 0;
+        _offsetX.Normalize();
+        _offsetX *= Offset.x;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void UpdateWorldSpaceTranslationOffsetY()
+    {
+        _offsetY = new Vector3(0, Offset.y, 0);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void UpdateWorldSpaceTranslationOffsetZ()
+    {
+        _offsetZ = Anchor.transform.forward;
+        _offsetZ.y = 0;
+        _offsetZ.Normalize();
+        _offsetZ *= Offset.z;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void UpdateWorldSpaceTranslationOffset()
+    {
+        _worldSpaceTranslationOffset = _offsetX + _offsetY + _offsetZ;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     private void UpdateLocation()
     {
         if (Anchor == null)
@@ -107,8 +157,8 @@ public class HUDMenu : MonoBehaviour
             return;
         }
 
-        gameObject.transform.position = Anchor.transform.position + _offset;
-        gameObject.transform.rotation = _rotation;
+        gameObject.transform.position = Anchor.transform.position + _worldSpaceTranslationOffset;
+        gameObject.transform.rotation = _worldSpaceRotation;
     }
 
     #endregion Non-public API
