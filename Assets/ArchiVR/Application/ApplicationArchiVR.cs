@@ -215,11 +215,9 @@ namespace ArchiVR.Application
         /// <summary>
         /// 
         /// </summary>
-        public /*override*/ void OnApplicationQuit()
+        public void OnApplicationQuit() // TODO: verify whether this works when running on quest (it did not seem to- so added a 'SaveApplicationSettings() call to UnityApplication, when hiding the menu...)
         {
-            var settings = GetApplicationSettings();
-
-            SaveSettings(settings);
+            SaveApplicationSettings();
         }
 
         /// <summary>
@@ -1066,6 +1064,16 @@ namespace ArchiVR.Application
             }
 
             return settings;
+        }
+
+        /// <summary>
+        /// <see cref="UnityApplication.SaveApplicationSettings()"/> implementation.
+        /// </summary>
+        public override void SaveApplicationSettings()
+        {
+            var settings = GetApplicationSettings();
+
+            SaveSettings(settings);
         }
 
         /// <summary>

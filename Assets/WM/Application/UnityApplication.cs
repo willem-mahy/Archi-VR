@@ -674,6 +674,13 @@ namespace WM.Application
         }
 
         /// <summary>
+        /// To be implemented by concrete applications.
+        /// </summary>
+        public virtual void SaveApplicationSettings()
+        {   
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="networkMode"></param>
@@ -1082,6 +1089,11 @@ namespace WM.Application
                 else
                 {
                     RemovePickRaySelectionTarget(gameObject);
+                }
+
+                if (!MenuVisible)
+                {
+                    SaveApplicationSettings();
                 }
             }
         }
