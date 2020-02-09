@@ -67,9 +67,6 @@ namespace WM.Application
         //! FPS UI visibility. (Default: false)
         public bool StartupShowFps = false;
 
-        // Menu mode (Default: None)
-        public MenuMode StartupMenuMode = MenuMode.None;
-
         #endregion
 
         /// <summary>
@@ -291,33 +288,16 @@ namespace WM.Application
 
         #region HUD menu
 
-        public enum MenuMode
-        {
-            None = 0,
-            Player,
-            Network,
-            Graphics,
-            Info,
-            DebugLog,
-            DebugInput
-        }
-
-        // The menu mode.
-        private MenuMode menuMode = MenuMode.None;
-
+        /// <summary>
+        /// The canvas attached to the center eye anchor.
+        /// </summary>
         public GameObject m_centerEyeCanvas;
 
-        private GameObject menuPanelGO;
-        //public TabPanel menuPanel;
-
-        List<GameObject> menus = new List<GameObject>();
-
-        GameObject debugLogMenuPanel = null;
-        GameObject debugInputMenuPanel = null;
-        GameObject graphicsMenuPanel = null;
-        GameObject playerMenuPanel = null;
-        GameObject networkMenuPanel = null;
-        GameObject infoMenuPanel = null;
+        /// <summary>
+        /// The TabPanel containing the menus.
+        /// </summary>
+        //private GameObject menuPanelGO;
+        public TabPanel menuPanel;
 
         #endregion
 
@@ -611,89 +591,23 @@ namespace WM.Application
                 m_centerEyeCanvas = UtilUnity.FindGameObject(gameObject.scene, "CenterEyeCanvas");
             }
 
-            if (menuPanelGO == null)
+            //if (menuPanelGO == null)
+            //{
+            //    menuPanelGO = UtilUnity.FindGameObject(gameObject.scene, "MenuPanel");
+            //}
+
+            if (menuPanel == null)
             {
-                menuPanelGO = UtilUnity.FindGameObject(gameObject.scene, "MenuPanel");
-                //menuPanel = menuPanelGO.GetComponent<TabPanel>();
+                var menuPanelGO = UtilUnity.FindGameObject(gameObject.scene, "MenuPanel"); 
+                menuPanel = menuPanelGO.GetComponent<TabPanel>();
             }
 
             if (!UnitTestModeEnabled)
             {
-                #region Get handles to Menu game objects
-
-                if (debugInputMenuPanel == null)
-                {
-                    debugInputMenuPanel = UtilUnity.FindGameObject(gameObject.scene, "DebugInputMenuPanel");
-                }
-
-                if (debugInputMenuPanel != null)
-                {
-                    menus.Add(debugInputMenuPanel);
-                }
-
-                if (debugLogMenuPanel == null)
-                {
-                    debugLogMenuPanel = UtilUnity.FindGameObject(gameObject.scene, "DebugLogMenuPanel");
-                }
-
-                if (debugLogMenuPanel != null)
-                {
-                    menus.Add(debugLogMenuPanel);
-                }
-
-                if (graphicsMenuPanel == null)
-                {
-                    graphicsMenuPanel = UtilUnity.FindGameObject(gameObject.scene, "GraphicsMenuPanel");
-                }
-
-                if (graphicsMenuPanel != null)
-                {
-                    menus.Add(graphicsMenuPanel);
-                }
-
-                if (playerMenuPanel == null)
-                {
-                    playerMenuPanel = UtilUnity.FindGameObject(gameObject.scene, "PlayerMenuPanel");
-                }
-
-                if (playerMenuPanel != null)
-                {
-                    menus.Add(playerMenuPanel);
-                }
-
-                if (networkMenuPanel == null)
-                {
-                    networkMenuPanel = UtilUnity.FindGameObject(gameObject.scene, "NetworkMenuPanel");
-                }
-
-                if (networkMenuPanel != null)
-                {
-                    menus.Add(networkMenuPanel);
-                }
-
-                if (infoMenuPanel == null)
-                {
-                    infoMenuPanel = UtilUnity.FindGameObject(gameObject.scene, "InfoMenuPanel");
-                }
-
-                if (infoMenuPanel != null)
-                {
-                    menus.Add(infoMenuPanel);
-                }
-
-                #endregion Get handles to Menu game objects
-
                 if (FpsPanelHUD == null)
                 {
                     FpsPanelHUD = UtilUnity.FindGameObject(gameObject.scene, "FPSPanel");
                 }
-
-                /*
-                if (FpsPanelHUD != null)
-                {
-                    FpsPanelHUD.SetActive(StartupShowFps);
-                }
-                */
             }
 
             // Left controller.
@@ -754,16 +668,6 @@ namespace WM.Application
             #endregion
 
             UpdateSelectionVisualizerVisibility();
-
-            //if (UnityEngine.Application.isEditor)
-            //{
-            //    if (HudMenu != null)
-            //    {
-            //        HudMenu.AnchorEnabled = true;
-            //    }
-            //}
-
-            SetMenuMode(StartupMenuMode);
 
             new InitNetworkCommand(StartupNetworkMode).Execute(this);
         }
@@ -840,11 +744,6 @@ namespace WM.Application
             NetworkInitialized = true;
             NetworkMode = networkMode;
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public GameObject ActiveMenu { get; private set; }
 
         /// <summary>
         /// 
@@ -1008,7 +907,7 @@ namespace WM.Application
 
             if (toggleMenu)
             {
-                ToggleMenuMode();
+                ToggleMenuVisible();
             }
 
             #endregion
@@ -1123,22 +1022,95 @@ namespace WM.Application
 
         #endregion Player Management
 
+        #region Menu Management
+
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="activeMenu"></param>
-        private void SetActiveMenu(GameObject activeMenu)
+        /// <param name="menuIndex"></param>
+        public void SetActiveMenu(int menuIndex)
         {
-            ActiveMenu = activeMenu;
-
-            foreach (var menu in menus)
+            if (menuPanel == null)
             {
-                menu.SetActive(menu == activeMenu);
+                return;
+            }
+
+            menuPanel.Activate(menuIndex);
+        }
+
+        public bool MenuVisible
+        {
+            get
+            {
+                if (menuPanel == null)
+                {
+                    return false;
+                }
+
+                var go = menuPanel.gameObject;
+
+                return go.activeSelf;
+            }
+            set
+            {
+                if (menuPanel == null)
+                {
+                    return;
+                }
+
+                var go = menuPanel.gameObject;
+
+                go.SetActive(!go.activeSelf);
+
+                if (MenuVisible)
+                {
+                    // Whenever we turn the menu visible, we re-anchor it so it is in view for the user.
+                    if (WorldSpaceMenu != null)
+                    {
+                        WorldSpaceMenu.UpdateAnchoring(); // Re-anchor the World-Space menu to be in front of cam, when leaving None mode.
+                    }
+                }
             }
         }
 
+        /// <summary>
+        /// Toggles menus visible/invisible.
+        /// </summary>
+        public void ToggleMenuVisible()
+        {
+            MenuVisible = !MenuVisible;
+        }
+
+        /// <summary>
+        /// Activates the next menu.
+        /// </summary>
+        public void ActivateNextMenu()
+        {
+            if (menuPanel == null)
+            {
+                return;
+            }
+
+            menuPanel.ActivateNext();
+        }
+
+        /// <summary>
+        /// Activates the previous menu.
+        /// </summary>
+        public void ActivatePreviousMenu()
+        {
+            if (menuPanel == null)
+            {
+                return;
+            }
+            
+            menuPanel.ActivatePrevious();
+        }
+
+        #endregion Menu Management
+
         #region
-        
+
         /// <summary>
         /// How are we manipulating the tracking space?
         /// - Rotate around local reference and vertical axis
@@ -1287,81 +1259,6 @@ namespace WM.Application
         private void TranslateTrackingSpace(Vector3 offset)
         {
             m_ovrCameraRig.transform.position = m_ovrCameraRig.transform.position + offset;
-        }
-
-        #endregion
-
-        #region HUD menu
-
-        /// <summary>
-        /// Activates the next menu mode.
-        /// </summary>
-        public void ToggleMenuMode()
-        {
-            var numMenuModes = menus.Count + 1; // Take into account mode 0: None!
-            var newMenuMode = (MenuMode)UtilIterate.MakeCycle((int)menuMode + 1, 0, numMenuModes);
-
-            SetMenuMode(newMenuMode);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="newMenuMode"></param>
-        public void SetMenuMode(MenuMode newMenuMode)
-        {
-            if (menuMode == MenuMode.None)
-            {
-                //if (HudMenu != null)
-                //{
-                //    HudMenu.UpdateAnchoring(); // Re-anchor the HUD menu to be in front of cam, when leaving None mode.
-                //}
-
-                if (WorldSpaceMenu != null)
-                {
-                    WorldSpaceMenu.UpdateAnchoring(); // Re-anchor the World-Space menu to be in front of cam, when leaving None mode.
-                }
-            }
-
-            menuMode = newMenuMode;
-
-            switch (menuMode)
-            {
-                case MenuMode.DebugInput:
-                    SetActiveMenu(debugInputMenuPanel);
-                    break;
-                case MenuMode.DebugLog:
-                    SetActiveMenu(debugLogMenuPanel);
-                    break;
-                case MenuMode.Graphics:
-                    SetActiveMenu(graphicsMenuPanel);
-                    break;
-                case MenuMode.Player:
-                    SetActiveMenu(playerMenuPanel);
-                    break;
-                case MenuMode.Network:
-                    SetActiveMenu(networkMenuPanel);
-                    break;
-                case MenuMode.Info:
-                    SetActiveMenu(infoMenuPanel);
-                    break;
-                case MenuMode.None:
-                    SetActiveMenu(null);
-                    break;
-                default:
-                    Logger.Warning("ApplicationArchiVR.ToggleMenuMode(): Unsupported menu mode: " + menuMode.ToString());
-                    break;
-            }
-
-            //if (menuPanel != null)
-            //{
-            //    menuPanel.gameObject.SetActive(menuMode != MenuMode.None);
-            //}
-
-            if (menuPanelGO != null)
-            {
-                menuPanelGO.SetActive(menuMode != MenuMode.None);
-            }
         }
 
         #endregion

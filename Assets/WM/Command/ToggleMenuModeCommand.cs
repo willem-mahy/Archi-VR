@@ -19,7 +19,7 @@ namespace WM.Command
         {
             application.Logger.Debug("ToggleMenuModeCommand.Execute()");
 
-            application.ToggleMenuMode();
+            application.ToggleMenuVisible();
         }
     }
 }

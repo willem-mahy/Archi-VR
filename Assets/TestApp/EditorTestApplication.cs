@@ -50,7 +50,8 @@ public class EditorTestApplication : MonoBehaviour
             // Set menu mode to 'Network' for all application instances.
             foreach (var applicationInstane in _applicationInstances)
             {
-                applicationInstane.SetMenuMode(UnityApplication.MenuMode.Network);
+                applicationInstane.SetActiveMenu(0);
+                applicationInstane.MenuVisible = true;
             }
         }
 
@@ -59,7 +60,7 @@ public class EditorTestApplication : MonoBehaviour
             // Set menu mode to 'None' for all application instances.
             foreach (var applicationInstane in _applicationInstances)
             {
-                applicationInstane.SetMenuMode(UnityApplication.MenuMode.None);
+                applicationInstane.MenuVisible = false;
             }
         }
 
@@ -278,13 +279,6 @@ public class EditorTestApplication : MonoBehaviour
             ApplicationArchiVR.AvatarWillSmithID,
             ApplicationArchiVR.AvatarIronManID
         };
-
-        /*
-        foreach (var application in _applicationInstances)
-        {
-            application.QueueCommand(new SetMenuModeCommand(UnityApplication.MenuMode.Network));
-        }
-        */
 
         for (int i = 0; i < _applicationInstances.Count; ++i)
         {
