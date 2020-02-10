@@ -8,6 +8,9 @@ namespace WM.UI
     /// </summary>
     public class ServerPanel : MonoBehaviour
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public Button StopServerButton;
 
         /// <summary>
