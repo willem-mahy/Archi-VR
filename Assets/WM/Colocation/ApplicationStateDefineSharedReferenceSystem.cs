@@ -42,7 +42,10 @@ namespace WM.Colocation
             // Show bounds of tracking system
             // Show visualisation of the position/rotation of the controllers on screen.
 
+            m_application.m_leftControllerText.text =
             m_application.m_rightControllerText.text = "Measure Point 1";
+
+            InitButtonMappingUI();
         }
 
         /// <summary>
@@ -82,23 +85,28 @@ namespace WM.Colocation
 
             if (_measuredPoints_W.Count < 2)
             {
-                if (m_application.m_controllerInput.m_controllerState.button8Down)
+                if (m_application.m_controllerInput.m_controllerState.button7Down)
                 {
-                    MeasurePoint();
-
-                    m_application.m_rightControllerText.text = "Measure Point " + (_measuredPoints_W.Count + 1);
-
-                    if (_measuredPoints_W.Count == 2)
-                    {
-                        ShowReferenceSystem();
-                    }
+                    MeasurePoint(m_application.m_leftHandAnchor.transform);
+                }
+                else if (m_application.m_controllerInput.m_controllerState.button8Down)
+                {
+                    MeasurePoint(m_application.m_rightHandAnchor.transform);
+                }
+                else if (m_application.m_controllerInput.m_controllerState.button5Down || m_application.m_controllerInput.m_controllerState.button6Down)
+                {
+                    ErasePoint();
                 }
             }
             else
             {
-                if (m_application.m_controllerInput.m_controllerState.button8Down)
+                if (m_application.m_controllerInput.m_controllerState.button7Down || m_application.m_controllerInput.m_controllerState.button8Down)
                 {
                     m_application.SetActiveApplicationState(0);
+                }
+                else if (m_application.m_controllerInput.m_controllerState.button5Down || m_application.m_controllerInput.m_controllerState.button6Down)
+                {
+                    ErasePoint();
                 }
             }
         }
@@ -127,16 +135,109 @@ namespace WM.Colocation
         {
         }
 
-        private void MeasurePoint()
+        /// <summary>
+        /// 
+        /// </summary>
+        public void InitButtonMappingUI()
         {
-            var measuredPoint = UnityEngine.GameObject.Instantiate(
-                Resources.Load("WM/Prefab/Geometry/PointWithCaption"),
-                m_application.m_leftHandAnchor.transform.position,
-                Quaternion.identity) as GameObject;
-            
-            _measuredPoints_W.Add(measuredPoint);
+            m_application.Logger.Debug("ApplicationStateDefineSharedReferenceSystem.InitButtonMappingUI()");
+
+            var isEditor = UnityEngine.Application.isEditor;
+
+            // Left controller
+            var leftControllerButtonMapping = m_application.leftControllerButtonMapping;
+
+            if (leftControllerButtonMapping != null)
+            {
+                leftControllerButtonMapping.textLeftIndexTrigger.text = "Measure";
+                leftControllerButtonMapping.textLeftHandTrigger.text = "Erase";
+
+                leftControllerButtonMapping.textButtonStart.text = "";
+
+                leftControllerButtonMapping.textButtonX.text = "";
+                leftControllerButtonMapping.textButtonY.text = "";
+
+                leftControllerButtonMapping.textLeftThumbUp.text = "";
+                leftControllerButtonMapping.textLeftThumbDown.text = "";
+                leftControllerButtonMapping.textLeftThumbLeft.text = "";
+                leftControllerButtonMapping.textLeftThumbRight.text = "";
+            }
+
+            // Right controller
+            var rightControllerButtonMapping = m_application.rightControllerButtonMapping;
+
+            if (rightControllerButtonMapping != null)
+            {
+                rightControllerButtonMapping.textRightIndexTrigger.text = "Measure";
+                rightControllerButtonMapping.textRightHandTrigger.text = "Erase";
+
+                rightControllerButtonMapping.textButtonOculus.text = "Exit";
+
+                rightControllerButtonMapping.textButtonA.text = "";
+                rightControllerButtonMapping.textButtonB.text = "";
+
+                rightControllerButtonMapping.textRightThumbUp.text = (isEditor ? "Beweeg vooruit (ArrowUp)" : "");
+                rightControllerButtonMapping.textRightThumbDown.text = (isEditor ? "Beweeg achteruit (ArrowDown)" : "");
+                rightControllerButtonMapping.textRightThumbLeft.text = (isEditor ? "Beweeg links (ArrowLeft)" : "");
+                rightControllerButtonMapping.textRightThumbRight.text = (isEditor ? "Beweeg rechts (ArrowRight)" : "");
+            }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="t"></param>
+        private void MeasurePoint(Transform t)
+        {
+            if (_measuredPoints_W.Count == 1)
+            {
+                float distanceFromFirstPoint = (t.position - _measuredPoints_W[0].transform.position).magnitude;
+
+                if (distanceFromFirstPoint < 1)
+                {
+                    return; // Do not accept new point: too close to the first point!
+                }
+            }
+
+            var measuredPoint = UnityEngine.GameObject.Instantiate(
+                Resources.Load("WM/Prefab/Geometry/PointWithCaption"),
+                t.position,
+                t.rotation) as GameObject;
+            
+            _measuredPoints_W.Add(measuredPoint);
+
+            m_application.m_leftControllerText.text =
+            m_application.m_rightControllerText.text = "Measure Point " + (_measuredPoints_W.Count + 1);
+
+            if (_measuredPoints_W.Count == 2)
+            {
+                ShowReferenceSystem();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="t"></param>
+        private void ErasePoint()
+        {
+            if (_referenceSystem != null)
+            {
+                UtilUnity.Destroy(_referenceSystem);
+                _referenceSystem = null;
+            }
+
+            if (_measuredPoints_W.Count > 0)
+            {
+                int pointToEraseIndex = _measuredPoints_W.Count - 1;
+                UtilUnity.Destroy(_measuredPoints_W[pointToEraseIndex]);
+                _measuredPoints_W.RemoveAt(pointToEraseIndex);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         private void ShowReferenceSystem()
         {
             var position = (_measuredPoints_W[0].transform.position + _measuredPoints_W[1].transform.position) / 2;
