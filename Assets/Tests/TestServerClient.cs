@@ -48,9 +48,9 @@ namespace Tests
             application.DefaultAvatarID = DefaultAvatarID;
             
 
-            application.AvatarFactory.Register(DefaultAvatarID, MockFactory.CreateAvatarGameObject("DefaultAvatar"));
-            application.AvatarFactory.Register(Avatar2ID, MockFactory.CreateAvatarGameObject("Avatar1"));
-            application.AvatarFactory.Register(Avatar1ID, MockFactory.CreateAvatarGameObject("Avatar2"));
+            application.AvatarFactory.Register(DefaultAvatarID, "DefaultAvatar");
+            application.AvatarFactory.Register(Avatar2ID, "Avatar1");
+            application.AvatarFactory.Register(Avatar1ID, "Avatar2");
 
             // Create the server for the server application.
             var serverGO = new GameObject();

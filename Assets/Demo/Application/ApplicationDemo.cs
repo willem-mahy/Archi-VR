@@ -46,7 +46,7 @@ namespace Demo.Application
 
             base.Init();
 
-            SetActiveApplicationState(UnityApplication.ApplicationStates.Default);
+            SetActiveApplicationState(0);
         }
 
         /// <summary>

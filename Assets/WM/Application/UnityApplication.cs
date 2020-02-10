@@ -222,19 +222,11 @@ namespace WM.Application
 
         #region Application state
 
-        // The application states enumeration. // FIXME: Factor out! UnityApplication should not/cannot have an exhaustive enumeration of possible application states!
-        public enum ApplicationStates : int
-        {
-            None = -1,
-            Default,
-            Teleporting
-        };
-
-        // The generic list of application states.
+        // The list of application states.
         protected List<ApplicationState> m_applicationStates = new List<ApplicationState>();
 
         // The active immersion mode index.
-        private int m_activeApplicationStateIndex = (int)ApplicationStates.None;
+        private int m_activeApplicationStateIndex = -1;
 
         //! Gets the active application state.  Returns null if no state is active.
         public ApplicationState GetActiveApplicationState()
@@ -245,15 +237,19 @@ namespace WM.Application
             return m_applicationStates[m_activeApplicationStateIndex];
         }
 
-        //! Sets the active application state.
-        public ApplicationState SetActiveApplicationState(ApplicationStates applicationState)
+        /// <summary>
+        /// Sets the active application state.
+        /// </summary>
+        /// <param name="applicationState"></param>
+        /// <returns></returns>
+        public ApplicationState SetActiveApplicationState(int applicationStateIndex)
         {
             if (GetActiveApplicationState() != null)
             {
                 GetActiveApplicationState().Exit();
             }
 
-            m_activeApplicationStateIndex = (int)applicationState;
+            m_activeApplicationStateIndex = applicationStateIndex;
 
             if (GetActiveApplicationState() != null)
             {
@@ -1324,7 +1320,7 @@ namespace WM.Application
         /// <summary>
         /// 
         /// </summary>
-        public PrefabGameObjectFactory AvatarFactory = new PrefabGameObjectFactory();
+        public readonly ResourcePrefabGameObjectFactory AvatarFactory = new ResourcePrefabGameObjectFactory();
 
         /// <summary>
         /// Instanciates the avatar prefabe at given index, and returns a reference to the avatar instance.

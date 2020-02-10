@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using WM;
 using WM.Application;
+using WM.Colocation;
 using WM.Command;
 using WM.Net;
 
@@ -47,7 +48,7 @@ namespace ArchiVR.Application
 
             if (Application.m_fadeAnimator != null)
             {
-                Application.SetActiveApplicationState(UnityApplication.ApplicationStates.Teleporting);
+                Application.SetActiveApplicationState(1);
             }
             else
             {
@@ -77,8 +78,9 @@ namespace ArchiVR.Application
         /// <summary>
         /// The typed application states.
         /// </summary>
-        public ApplicationStateDefault applicationStateDefault = new ApplicationStateDefault();
-        public ApplicationStateTeleporting applicationStateTeleporting = new ApplicationStateTeleporting();
+        public readonly ApplicationStateDefault applicationStateDefault = new ApplicationStateDefault();
+        public readonly ApplicationStateTeleporting applicationStateTeleporting = new ApplicationStateTeleporting();
+        public readonly ApplicationStateDefineSharedReferenceSystem ApplicationStateDefineSharedReferenceSystem = new ApplicationStateDefineSharedReferenceSystem();
 
         #region Project
 
@@ -156,6 +158,66 @@ namespace ArchiVR.Application
 
         #endregion
 
+        #region Test
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void TestLoadAvatarPrefabsFromResources()
+        {
+            string[] prefabPaths =
+            {
+                "WM/Prefab/Avatar/Avatar Mario",
+                "WM/Prefab/Avatar/Avatar IronMan",
+                "WM/Prefab/Avatar/Avatar TUX",
+                "WM/Prefab/Avatar/Avatar WillSmith",
+            };
+
+            LoadPrefabsFromResources(prefabPaths);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void TestLoadGeometryPrefabsFromResources()
+        {
+            string[] prefabPaths =
+            {
+                "WM/Prefab/Geometry/PointWithCaption",
+                "WM/Prefab/Geometry/ReferenceSystem6DOF",
+            };
+
+            LoadPrefabsFromResources(prefabPaths);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void LoadPrefabsFromResources(string[] prefabPaths)
+        {
+            for (int i = 0; i < prefabPaths.Length; ++i)
+            {
+                var prefab = Resources.Load(prefabPaths[i]);
+
+                var go = Instantiate(prefab, i * Vector3.forward, Quaternion.identity);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void TestRegisteredAvatars()
+        {
+            var position = Vector3.zero;
+            foreach (var avatarDefinition in AvatarDefinitions)
+            {
+                AvatarFactory.Create(avatarDefinition.ID, position, Quaternion.identity);
+                position += Vector3.forward;
+            }
+        }
+
+        #endregion Test
+
         /// <summary>
         /// Initialize all necessary stuff before the first frame update.
         /// </summary>
@@ -184,6 +246,7 @@ namespace ArchiVR.Application
 
             m_applicationStates.Add(applicationStateDefault);
             m_applicationStates.Add(applicationStateTeleporting);
+            m_applicationStates.Add(ApplicationStateDefineSharedReferenceSystem);
             
             base.Init();
 
@@ -210,6 +273,10 @@ namespace ArchiVR.Application
             SetActiveImmersionMode(DefaultImmersionModeIndex);
 
             SetActiveProject(0);
+
+            //TestLoadAvatarPrefabsFromResources();
+            //TestLoadGeometryPrefabsFromResources();
+            //TestRegisteredAvatars();
         }
 
         /// <summary>
@@ -234,15 +301,47 @@ namespace ArchiVR.Application
         public static readonly Guid AvatarTuxID         = new Guid("{354CC70A-1F01-49DC-8CFF-35FFF0CB6D38}");
         public static readonly Guid AvatarIronManID     = new Guid("{4B3C96EB-C854-49AE-BACC-3145CDF743AF}");
 
+        public class AvatarDefinition
+        {
+            /// <summary>
+            /// 
+            /// </summary>
+            public readonly Guid ID;
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public readonly string ResourcePath;
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="ID"></param>
+            /// <param name="resourcePath"></param>
+            public AvatarDefinition(Guid ID, string resourcePath)
+            {
+                this.ID = ID;
+                this.ResourcePath = resourcePath;
+            }
+        }
+
+        public static readonly AvatarDefinition[] AvatarDefinitions =
+        {
+            new AvatarDefinition(AvatarMarioID, "WM/Prefab/Avatar/Avatar Mario"),
+            new AvatarDefinition(AvatarIronManID, "WM/Prefab/Avatar/Avatar IronMan"),
+            new AvatarDefinition(AvatarTuxID, "WM/Prefab/Avatar/Avatar TUX"),
+            new AvatarDefinition(AvatarWillSmithID, "WM/Prefab/Avatar/Avatar WillSmith"),
+        };
+
         /// <summary>
         /// 
         /// </summary>
         private void RegisterAvatars()
         {
-            AvatarFactory.Register(AvatarMarioID, UtilUnity.FindGameObjectElseError(gameObject.scene, "Avatar Mario"));
-            AvatarFactory.Register(AvatarWillSmithID, UtilUnity.FindGameObjectElseError(gameObject.scene, "Avatar WillSmith"));
-            AvatarFactory.Register(AvatarTuxID, UtilUnity.FindGameObjectElseError(gameObject.scene, "Avatar TUX"));
-            AvatarFactory.Register(AvatarIronManID, UtilUnity.FindGameObjectElseError(gameObject.scene, "Avatar IronMan"));
+            foreach (var avatarDefinition in AvatarDefinitions)
+            {
+                AvatarFactory.Register(avatarDefinition.ID, avatarDefinition.ResourcePath);
+            }
         }
 
         #region Immersion mode

@@ -7,12 +7,12 @@ namespace WM.Application
     /// <summary>
     /// A GameObject Factory that creates GameObjects by instantiating pre-registered GameObjects.
     /// </summary>
-    public class PrefabGameObjectFactory : IGameObjectRegistry, IGameObjectFactory
+    public class ResourcePrefabGameObjectFactory : IResourcePathRegistry, IGameObjectFactory
     {
         /// <summary>
         /// The list of Prefabs to instanciate into GameObjects.
         /// </summary>
-        private Dictionary<Guid, GameObject> prefabs = new Dictionary<Guid, GameObject>();
+        private Dictionary<Guid, string> prefabPaths = new Dictionary<Guid, string>();
 
         /// <summary>
         /// <see cref="IGameObjectFactory.Create(Guid, Vector3, Quaternion)"/> implementation.
@@ -27,15 +27,17 @@ namespace WM.Application
                 throw new Exception("Key cannot be Guid.Empty.");
             }
 
-            if (!prefabs.ContainsKey(key))
+            if (!prefabPaths.ContainsKey(key))
             {
                 throw new Exception("No prefab registered for key (" + key.ToString() + ").");
             }
 
+            var prefab = Resources.Load(prefabPaths[key]);
+
             return UnityEngine.Object.Instantiate(
-                    prefabs[key],
+                    prefab,
                     position,
-                    rotation);
+                    rotation) as GameObject;
         }
 
         /// <summary>
@@ -43,19 +45,24 @@ namespace WM.Application
         /// </summary>
         public void Register(
             Guid key,
-            GameObject gameObject)
+            string resourcePath)
         {
             if (key == Guid.Empty)
             {
                 throw new Exception("Key cannot be Guid.Empty.");
             }
 
-            if (gameObject == null)
+            if (resourcePath == null)
             {
-                throw new Exception("GameObject cannot be null.");
+                throw new Exception("Resource path cannot be null.");
             }
 
-            prefabs[key] = gameObject;
+            if (resourcePath == "")
+            {
+                throw new Exception("Resource path cannot be empty string.");
+            }
+
+            prefabPaths[key] = resourcePath;
         }
 
         /// <summary>
@@ -65,9 +72,10 @@ namespace WM.Application
         public List<string> GetRegisteredGameObjectNames()
         {
             var names = new List<string>();
-            foreach (var id in prefabs.Keys)
+            foreach (var id in prefabPaths.Keys)
             {
-                names.Add(prefabs[id].name);
+                var tokens = prefabPaths[id].Split(' ');
+                names.Add(tokens[tokens.Length - 1]);
             }
             return names;
         }
@@ -78,7 +86,7 @@ namespace WM.Application
         /// <returns></returns>
         public List<Guid> GetRegisteredIDs()
         {
-            return new List<Guid>(prefabs.Keys);
+            return new List<Guid>(prefabPaths.Keys);
         }
 
         /// <summary>
@@ -89,7 +97,7 @@ namespace WM.Application
         {
             get
             {
-                return this.prefabs.Count;
+                return prefabPaths.Count;
             }
         }
     }

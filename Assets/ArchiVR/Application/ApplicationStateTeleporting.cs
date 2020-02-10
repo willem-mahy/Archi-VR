@@ -109,7 +109,7 @@ namespace ArchiVR.Application
             {
                 m_application.Logger.Debug("ApplicationStateTeleporting.OnTeleportFadeInComplete()");
 
-                m_application.SetActiveApplicationState(UnityApplication.ApplicationStates.Default);
+                m_application.SetActiveApplicationState(0);
             }
         }
 } // namespace ArchiVR.Application

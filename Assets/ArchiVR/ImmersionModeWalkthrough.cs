@@ -79,6 +79,11 @@ namespace ArchiVR
             Application.m_rightControllerText.text = Application.ActivePOIName ?? "";
 
             Application.UpdateTrackingSpace();
+
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                Application.SetActiveApplicationState(2);
+            }
         }
 
         /// <summary>

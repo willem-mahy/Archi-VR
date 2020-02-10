@@ -17,4 +17,19 @@ namespace WM.Application
             Guid guid,
             GameObject gameObject);
     }
+
+    /// <summary>
+    /// A registry that holds GameObject products by Guid.
+    /// </summary>
+    interface IResourcePathRegistry
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <param name="resourcePath"></param>
+        void Register(
+            Guid guid,
+            string resourcePath);
+    }
 }
