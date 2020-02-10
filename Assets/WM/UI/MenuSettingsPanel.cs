@@ -45,6 +45,12 @@ namespace WM.UI
             MenuSizeSlider.onValueChanged.AddListener((float value) => { MenuSizeSliderOnValueChange(value); });
 
             MenuHeightSlider.onValueChanged.AddListener((float value) => { MenuHeightSliderOnValueChange(value); });
+
+            if (UnityEngine.Application.isEditor)
+            {
+                MenuSizeSlider.maxValue = 0.005f; 
+                MenuSizeSlider.value = MenuHeightSlider.maxValue;
+            }
         }
 
         /// <summary>
