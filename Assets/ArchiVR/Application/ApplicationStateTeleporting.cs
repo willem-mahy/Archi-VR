@@ -19,6 +19,9 @@ namespace ArchiVR.Application
             {
                 m_application.Logger.Debug("ApplicationStateTeleporting.Enter()");
 
+                m_application.m_leftControllerText.text =
+                m_application.m_rightControllerText.text = "";
+
                 //m_application.m_leftHandAnchor.SetActive(false); // TODO? Hide only button labels?
                 //m_application.m_rightHandAnchor.SetActive(false);
 

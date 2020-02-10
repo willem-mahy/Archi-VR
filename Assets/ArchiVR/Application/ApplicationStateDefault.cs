@@ -17,6 +17,9 @@ namespace ArchiVR.Application
         {
             m_application.Logger.Debug("ApplicationStateDefault.Enter()");
 
+            m_application.m_leftControllerText.text =
+            m_application.m_rightControllerText.text = "";
+
             var aim = ((ApplicationArchiVR)m_application).ActiveImmersionMode;
 
             if (aim != null)
