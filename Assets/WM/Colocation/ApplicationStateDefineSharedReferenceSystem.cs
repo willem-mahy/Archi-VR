@@ -77,9 +77,11 @@ namespace WM.Colocation
         /// </summary>
         public override void Update()
         {
-            m_application.Fly();
-
-            m_application.UpdateTrackingSpace();
+            if (UnityEngine.Application.isEditor)
+            {
+                m_application.Fly();
+                m_application.UpdateTrackingSpace();
+            }
 
             // TODO: Update the position/rotation of the controllers on screen.
 
@@ -240,12 +242,22 @@ namespace WM.Colocation
         /// </summary>
         private void ShowReferenceSystem()
         {
-            var position = (_measuredPoints_W[0].transform.position + _measuredPoints_W[1].transform.position) / 2;
+            var pos0 = _measuredPoints_W[0].transform.position;
+            var pos1 = _measuredPoints_W[1].transform.position;
+
+            var position = (pos0 + pos1) / 2;
+
+            var axis0 = Vector3.up;
+            var axis1 = Vector3.Normalize(pos1 - pos0);
+            var axis2 = Vector3.Cross(axis0, axis1);
+            axis1 = Vector3.Cross(axis2, axis0);
+
+            var rotation = Quaternion.LookRotation(axis1, axis0);
 
             _referenceSystem = UnityEngine.GameObject.Instantiate(
                 Resources.Load("WM/Prefab/Geometry/ReferenceSystem6DOF"),
                 position,
-                Quaternion.identity) as GameObject;
+                rotation) as GameObject;
         }
     }
 } // namespace WM.Colocation
