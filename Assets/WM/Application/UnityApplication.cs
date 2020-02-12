@@ -209,13 +209,19 @@ namespace WM.Application
 
         public GameObject FpsPanelHUD;
 
+        #region OVRCameraRig GameObjects
+
         public GameObject m_ovrCameraRig;
+
+        public GameObject trackingSpace;
 
         public GameObject m_centerEyeAnchor;
 
         public GameObject m_leftHandAnchor;
 
         public GameObject m_rightHandAnchor;
+
+        #endregion OVRCameraRig GameObjects
 
         public OVRPointerVisualizer SelectionVisualizer;
 
@@ -287,13 +293,14 @@ namespace WM.Application
 
         /// <summary>
         /// The canvas attached to the center eye anchor.
+        /// This acts as the container for HUD UI elements.
         /// </summary>
         public GameObject m_centerEyeCanvas;
 
         /// <summary>
         /// The TabPanel containing the menus.
+        /// Resides in the world-scale menu.
         /// </summary>
-        //private GameObject menuPanelGO;
         public TabPanel menuPanel;
 
         #endregion
@@ -558,43 +565,45 @@ namespace WM.Application
 
             #region Get handles to game objects
 
+            var scene = gameObject.scene;
+
             #region Get handles to OVRGameraRig game objects
 
             if (m_ovrCameraRig == null)
             {
-                m_ovrCameraRig = UtilUnity.TryFindGameObject("OVRCameraRig");
+                m_ovrCameraRig = UtilUnity.FindGameObject(scene, "OVRCameraRig");
+            }
+
+            if (trackingSpace == null)
+            {
+                trackingSpace = UtilUnity.FindGameObject(scene, "TrackingSpace");
             }
 
             if (m_centerEyeAnchor == null)
             {
-                m_centerEyeAnchor = UtilUnity.TryFindGameObject("CenterEyeAnchor");
+                m_centerEyeAnchor = UtilUnity.FindGameObject(scene, "CenterEyeAnchor");
             }
 
             if (m_leftHandAnchor == null)
             {
-                m_leftHandAnchor = UtilUnity.TryFindGameObject("LeftHandAnchor");
+                m_leftHandAnchor = UtilUnity.FindGameObject(scene, "LeftHandAnchor");
             }
 
             if (m_rightHandAnchor == null)
             {
-                m_rightHandAnchor = UtilUnity.FindGameObject(gameObject.scene, "RightHandAnchor");
+                m_rightHandAnchor = UtilUnity.FindGameObject(scene, "RightHandAnchor");
             }
 
             #endregion Get handles to OVRGameraRig objects
 
             if (m_centerEyeCanvas == null)
             {
-                m_centerEyeCanvas = UtilUnity.FindGameObject(gameObject.scene, "CenterEyeCanvas");
+                m_centerEyeCanvas = UtilUnity.FindGameObject(scene, "CenterEyeCanvas");
             }
-
-            //if (menuPanelGO == null)
-            //{
-            //    menuPanelGO = UtilUnity.FindGameObject(gameObject.scene, "MenuPanel");
-            //}
 
             if (menuPanel == null)
             {
-                var menuPanelGO = UtilUnity.FindGameObject(gameObject.scene, "MenuPanel"); 
+                var menuPanelGO = UtilUnity.FindGameObject(scene, "MenuPanel"); 
                 menuPanel = menuPanelGO.GetComponent<TabPanel>();
             }
 
@@ -602,7 +611,7 @@ namespace WM.Application
             {
                 if (FpsPanelHUD == null)
                 {
-                    FpsPanelHUD = UtilUnity.FindGameObject(gameObject.scene, "FPSPanel");
+                    FpsPanelHUD = UtilUnity.FindGameObject(scene, "FPSPanel");
                 }
             }
 
@@ -611,7 +620,7 @@ namespace WM.Application
             // Pick ray.
             if (!UnitTestModeEnabled)
             {
-                var LPickRayGameObject = UtilUnity.FindGameObject(gameObject.scene, "L PickRay");
+                var LPickRayGameObject = UtilUnity.FindGameObject(scene, "L PickRay");
 
                 if (LPickRayGameObject != null)
                 {
@@ -619,16 +628,16 @@ namespace WM.Application
                 }
             }
 
-            m_leftControllerCanvas = UtilUnity.FindGameObject(gameObject.scene, "LeftControllerCanvas");
-            m_leftControllerPanel = UtilUnity.FindGameObject(gameObject.scene, "LeftControllerPanel");
-            m_leftControllerText = UtilUnity.FindGameObject(gameObject.scene, "LeftControllerText").GetComponent<UnityEngine.UI.Text>();
+            m_leftControllerCanvas = UtilUnity.FindGameObject(scene, "LeftControllerCanvas");
+            m_leftControllerPanel = UtilUnity.FindGameObject(scene, "LeftControllerPanel");
+            m_leftControllerText = UtilUnity.FindGameObject(scene, "LeftControllerText").GetComponent<UnityEngine.UI.Text>();
 
             // Right controller.
 
             // Pick ray.
             if (!UnitTestModeEnabled)
             {
-                var RPickRayGameObject = UtilUnity.FindGameObject(gameObject.scene, "R PickRay");
+                var RPickRayGameObject = UtilUnity.FindGameObject(scene, "R PickRay");
 
                 if (RPickRayGameObject != null)
                 {
@@ -636,9 +645,9 @@ namespace WM.Application
                 }
             }
 
-            m_rightControllerCanvas = UtilUnity.FindGameObject(gameObject.scene, "RightControllerCanvas");
-            m_rightControllerPanel = UtilUnity.FindGameObject(gameObject.scene, "RightControllerPanel");
-            m_rightControllerText = UtilUnity.FindGameObject(gameObject.scene, "RightControllerText").GetComponent<UnityEngine.UI.Text>();
+            m_rightControllerCanvas = UtilUnity.FindGameObject(scene, "RightControllerCanvas");
+            m_rightControllerPanel = UtilUnity.FindGameObject(scene, "RightControllerPanel");
+            m_rightControllerText = UtilUnity.FindGameObject(scene, "RightControllerText").GetComponent<UnityEngine.UI.Text>();
 
             #endregion
 
@@ -1523,8 +1532,6 @@ namespace WM.Application
         {
             if (_trackingSpaceReferenceSystemGO == null)
             {
-                var trackingSpace = UtilUnity.TryFindGameObject("TrackingSpace") as GameObject;
-
                 _trackingSpaceReferenceSystemGO = UnityEngine.GameObject.Instantiate(
                     Resources.Load("WM/Prefab/Geometry/ReferenceSystem6DOF"),
                     Vector3.zero,
@@ -1582,7 +1589,6 @@ namespace WM.Application
                 sharedReferenceSystem.SetText("TRS");
 
                 // And attach it as a child to the tracking space.
-                var trackingSpace = UtilUnity.TryFindGameObject("TrackingSpace") as GameObject;
                 _sharedReferenceSystemGO.transform.SetParent(trackingSpace.transform, false);
             }
 

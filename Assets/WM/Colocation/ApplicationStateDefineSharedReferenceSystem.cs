@@ -40,12 +40,13 @@ namespace WM.Colocation
             m_application.CreateTrackingSpaceReferenceSystem();
 
             m_application.HudInfoPanel.SetActive(true);
-            m_application.HudInfoText.text = "Measure Point 1";
-
+            
             // Show bounds of tracking system
             // Show visualisation of the position/rotation of the controllers on screen.
 
             InitButtonMappingUI();
+
+            UpdateInfoText();
         }
 
         /// <summary>
@@ -214,18 +215,35 @@ namespace WM.Colocation
                 t.rotation) as GameObject;
 
             var pointWithCaption = measuredPoint.GetComponent<PointWithCaption>();
-            pointWithCaption.SetText("Point " + (_measuredPoints_W.Count + 1));
+
+            var p = t.position;
+            var pointPositionText = string.Format("({0:F3}, {1:F3}, {2:F3})", p.x, p.y, p.z);
+            var pointNumber = _measuredPoints_W.Count + 1;
+            pointWithCaption.SetText(string.Format("Point {0} {1}", pointNumber, pointPositionText));
             
             _measuredPoints_W.Add(measuredPoint);
 
             if (_measuredPoints_W.Count == 2)
             {
-                m_application.HudInfoText.text = "Measuring complete"; 
                 UpdateSharedReferenceSystem();
+            }
+
+            UpdateInfoText();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void UpdateInfoText()
+        {
+            if (_measuredPoints_W.Count == 2)
+            {
+                m_application.HudInfoText.text = "Measuring complete";
             }
             else
             {
-                m_application.HudInfoText.text = "Measure Point " + (_measuredPoints_W.Count + 1);
+                var numberOfPointToMeasure = _measuredPoints_W.Count + 1;
+                m_application.HudInfoText.text = "Measure Point " + numberOfPointToMeasure;
             }
         }
 
@@ -247,6 +265,8 @@ namespace WM.Colocation
                 UtilUnity.Destroy(_measuredPoints_W[pointToEraseIndex]);
                 _measuredPoints_W.RemoveAt(pointToEraseIndex);
             }
+
+            UpdateInfoText();
         }
 
         /// <summary>
