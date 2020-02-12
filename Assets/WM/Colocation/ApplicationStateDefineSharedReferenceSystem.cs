@@ -19,10 +19,9 @@ namespace WM.Colocation
         private List<GameObject> _measuredPoints_W = new List<GameObject>();
 
         /// <summary>
-        /// The reference system.
+        /// The shared reference system.
         /// </summary>
         private GameObject _referenceSystem;
-
 
         /// <summary>
         /// Called once, right after construction.
@@ -38,12 +37,13 @@ namespace WM.Colocation
         {
             OVRManager.boundary.SetVisible(true);
 
-            // Show origin of tracking system
+            m_application.CreateTrackingSpaceReferenceSystem();
+
+            m_application.HudInfoPanel.SetActive(true);
+            m_application.HudInfoText.text = "Measure Point 1";
+
             // Show bounds of tracking system
             // Show visualisation of the position/rotation of the controllers on screen.
-
-            m_application.m_leftControllerText.text =
-            m_application.m_rightControllerText.text = "Measure Point 1";
 
             InitButtonMappingUI();
         }
@@ -55,8 +55,11 @@ namespace WM.Colocation
         {
             OVRManager.boundary.SetVisible(false);
 
-            // Hide origin of tracking system
-            // Hide bounds of tracking system
+            m_application.DestroyTrackingSpaceReferenceSystem();
+
+            m_application.HudInfoPanel.SetActive(false);
+            m_application.HudInfoText.text = "";
+
             // Hide visualisation of the position/rotation of the controllers on screen.
 
             foreach (var point in _measuredPoints_W)
@@ -64,12 +67,6 @@ namespace WM.Colocation
                 UtilUnity.Destroy(point);
             }
             _measuredPoints_W.Clear();
-
-            if (_referenceSystem != null)
-            {
-                UtilUnity.Destroy(_referenceSystem);
-                _referenceSystem = null;
-            }
         }
 
         /// <summary>
@@ -81,6 +78,16 @@ namespace WM.Colocation
             {
                 m_application.Fly();
                 m_application.UpdateTrackingSpace();
+            }
+
+            {
+                var p = m_application.m_leftHandAnchor.transform.localPosition;
+                m_application.m_leftControllerText.text = string.Format("{0:F3}, {1:F3}, {2:F3}", p.x, p.y, p.z);
+            }
+
+            {
+                var p = m_application.m_rightHandAnchor.transform.localPosition;
+                m_application.m_rightControllerText.text = string.Format("{0:F3}, {1:F3}, {2:F3}", p.x, p.y, p.z);
             }
 
             // TODO: Update the position/rotation of the controllers on screen.
@@ -205,15 +212,20 @@ namespace WM.Colocation
                 Resources.Load("WM/Prefab/Geometry/PointWithCaption"),
                 t.position,
                 t.rotation) as GameObject;
+
+            var pointWithCaption = measuredPoint.GetComponent<PointWithCaption>();
+            pointWithCaption.SetText("Point " + (_measuredPoints_W.Count + 1));
             
             _measuredPoints_W.Add(measuredPoint);
 
-            m_application.m_leftControllerText.text =
-            m_application.m_rightControllerText.text = "Measure Point " + (_measuredPoints_W.Count + 1);
-
             if (_measuredPoints_W.Count == 2)
             {
-                ShowReferenceSystem();
+                m_application.HudInfoText.text = "Measuring complete"; 
+                UpdateSharedReferenceSystem();
+            }
+            else
+            {
+                m_application.HudInfoText.text = "Measure Point " + (_measuredPoints_W.Count + 1);
             }
         }
 
@@ -240,13 +252,15 @@ namespace WM.Colocation
         /// <summary>
         /// 
         /// </summary>
-        private void ShowReferenceSystem()
+        private void UpdateSharedReferenceSystem()
         {
+            // Compute position.
             var pos0 = _measuredPoints_W[0].transform.position;
             var pos1 = _measuredPoints_W[1].transform.position;
 
             var position = (pos0 + pos1) / 2;
 
+            // Compute orientation.
             var axis0 = Vector3.up;
             var axis1 = Vector3.Normalize(pos1 - pos0);
             var axis2 = Vector3.Cross(axis0, axis1);
@@ -254,10 +268,17 @@ namespace WM.Colocation
 
             var rotation = Quaternion.LookRotation(axis1, axis0);
 
-            _referenceSystem = UnityEngine.GameObject.Instantiate(
-                Resources.Load("WM/Prefab/Geometry/ReferenceSystem6DOF"),
-                position,
-                rotation) as GameObject;
+            // Create the shared reference system.
+            var sharedReferenceSystem = m_application.CreateSharedReferenceSystem();
+
+            // Put it to the correct location.
+            sharedReferenceSystem.transform.position = position;
+            sharedReferenceSystem.transform.rotation = rotation;
+
+            {
+                var p = sharedReferenceSystem.transform.localPosition;
+                sharedReferenceSystem.GetComponent<ReferenceSystem6DOF>().SetText("SRF " +  string.Format("({0:F3}, {1:F3}, {2:F3})", p.x, p.y, p.z));
+            }
         }
     }
 } // namespace WM.Colocation
