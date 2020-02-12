@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using WM.Command;
 using WM.Net;
 using WM.UI;
@@ -1507,5 +1508,109 @@ namespace WM.Application
         }
 
         #endregion
+
+        #region TrackingSpaceReferenceSystem
+
+        /// <summary>
+        /// The tracking space reference system.
+        /// </summary>
+        private GameObject _trackingSpaceReferenceSystemGO;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public GameObject CreateTrackingSpaceReferenceSystem()
+        {
+            if (_trackingSpaceReferenceSystemGO == null)
+            {
+                var trackingSpace = UtilUnity.TryFindGameObject("TrackingSpace") as GameObject;
+
+                _trackingSpaceReferenceSystemGO = UnityEngine.GameObject.Instantiate(
+                    Resources.Load("WM/Prefab/Geometry/ReferenceSystem6DOF"),
+                    Vector3.zero,
+                    Quaternion.identity) as GameObject;
+                _trackingSpaceReferenceSystemGO.name = "TrackingSpaceReferenceSystem";
+
+                var referenceSystem = _trackingSpaceReferenceSystemGO.GetComponent<ReferenceSystem6DOF>();
+                referenceSystem.SetText("TRS");
+
+                _trackingSpaceReferenceSystemGO.transform.SetParent(trackingSpace.transform, false);
+            }
+
+            return _trackingSpaceReferenceSystemGO;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void DestroyTrackingSpaceReferenceSystem()
+        {
+            if (_trackingSpaceReferenceSystemGO == null)
+            {
+                return;
+            }
+
+            UtilUnity.Destroy(_trackingSpaceReferenceSystemGO);
+            _trackingSpaceReferenceSystemGO = null;
+        }
+
+        #endregion TrackingSpaceReferenceSystem
+
+        #region SharedReferenceSystem
+
+        /// <summary>
+        /// The tracking space reference system.
+        /// </summary>
+        private GameObject _sharedReferenceSystemGO;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public GameObject CreateSharedReferenceSystem()
+        {
+            if (_sharedReferenceSystemGO == null)
+            {
+                // Instantiate shared reference system GameObject.
+                _sharedReferenceSystemGO = UnityEngine.GameObject.Instantiate(
+                    Resources.Load("WM/Prefab/Geometry/ReferenceSystem6DOF"),
+                    Vector3.zero,
+                    Quaternion.identity) as GameObject;
+                _sharedReferenceSystemGO.name = "SharedReferenceSystem";
+
+                // Initialize its caption
+                var sharedReferenceSystem = _sharedReferenceSystemGO.GetComponent<ReferenceSystem6DOF>();
+                sharedReferenceSystem.SetText("TRS");
+
+                // And attach it as a child to the tracking space.
+                var trackingSpace = UtilUnity.TryFindGameObject("TrackingSpace") as GameObject;
+                _sharedReferenceSystemGO.transform.SetParent(trackingSpace.transform, false);
+            }
+
+            return _sharedReferenceSystemGO;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void DestroySharedReferenceSystem()
+        {
+            if (_sharedReferenceSystemGO == null)
+            {
+                return;
+            }
+
+            UtilUnity.Destroy(_sharedReferenceSystemGO);
+            _sharedReferenceSystemGO = null;
+        }
+
+        #endregion SharedReferenceSystem
+
+        #region HUD Info
+
+        public GameObject HudInfoPanel;
+
+        public Text HudInfoText;
+
+        #endregion HUD Info
     }
 }
