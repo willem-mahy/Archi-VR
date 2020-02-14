@@ -36,7 +36,7 @@ namespace ArchiVR
         #region variables
 
         // The surroundings in which the maquette is previewed
-        private GameObject m_maquettePreviewContext = null;
+        private GameObject m_maquettePreviewContext;
 
         // The maquette translational manipulation speed.
         float maquetteMoveSpeed = 1.0f;
