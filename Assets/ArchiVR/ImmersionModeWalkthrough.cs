@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using WM;
 using WM.Application;
 
 namespace ArchiVR
@@ -9,7 +10,12 @@ namespace ArchiVR
     /// </summary>
     public class ImmersionModeWalkthrough : ImmersionMode
     {
-        #region variables        
+        #region variables
+
+        /// <summary>
+        /// A reference system representing the active POI.
+        /// </summary>
+        ReferenceSystem6DOF activePoiReferenceSystem;
 
         #endregion
 
@@ -26,6 +32,11 @@ namespace ArchiVR
             Application.m_flySpeedUpDown = 1.0f;
 
             Application.UnhideAllModelLayers();
+
+            if (activePoiReferenceSystem == null)
+            {
+                activePoiReferenceSystem = Application.CreateReferenceSystem("POI", null);
+            }
         }
 
         /// <summary>
@@ -117,18 +128,51 @@ namespace ArchiVR
             if (activePOI == null)
             {
                 Application.ResetTrackingSpacePosition();
+
+                UnityApplication.SetReferenceSystemLocation(
+                    activePoiReferenceSystem,
+                    Vector3.zero,
+                    Quaternion.identity);
             }
             else
             {
-                var rotTrackingSpace = Application.m_ovrCameraRig.transform.rotation.eulerAngles;
-                var rotEye = Application.m_centerEyeCanvas.transform.parent.rotation.eulerAngles;
-
                 Application.m_ovrCameraRig.transform.position = activePOI.transform.position;
 
-                var rot = activePOI.transform.rotation.eulerAngles;
-                rot.y = rot.y + (rotTrackingSpace.y - rotEye.y);
-                Application.m_ovrCameraRig.transform.rotation = Quaternion.Euler(rot);
+                bool alignEyeToPOI = false;
+
+                if (alignEyeToPOI)
+                {
+                    var rotTrackingSpace = Application.m_ovrCameraRig.transform.rotation.eulerAngles;
+                    var rotEye = Application.m_centerEyeCanvas.transform.parent.rotation.eulerAngles;
+
+                    var rot = activePOI.transform.rotation.eulerAngles;
+
+                    rot.y = rot.y + (rotTrackingSpace.y - rotEye.y);
+                    Application.m_ovrCameraRig.transform.rotation = Quaternion.Euler(rot);
+                }
+                else
+                {
+                    Application.m_ovrCameraRig.transform.rotation = activePOI.transform.rotation;
+                }
+
+                UnityApplication.SetReferenceSystemLocation(
+                    activePoiReferenceSystem,
+                    activePOI.transform.position,
+                    activePOI.transform.rotation);
             }
+
+            // Make sure we are all in the same reference frame.
+            /*
+            {
+                var TrackingSpacePosition = Application.TrackingReferenceSystem.transform.position;
+                var SharedTrackingSpacePosition = Application.SharedReferenceSystem.transform.position;
+                var SharedTrackingSpacePosition = Application.SharedReferenceSystem.transform.position;
+                var SharedTrackingSpaceRotation = Application.SharedReferenceSystem.transform.rotation;
+
+                Application.m_ovrCameraRig.transform.position = SharedTrackingSpacePosition;
+                Application.m_ovrCameraRig.transform.rotation = SharedTrackingSpaceRotation;
+            }
+            */
 
             if (UnityEngine.Application.isEditor)
             {

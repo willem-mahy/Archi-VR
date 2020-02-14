@@ -19,6 +19,9 @@ namespace WM.Colocation
     /// </summary>
     public class ApplicationStateDefineSharedReferenceSystem : ApplicationState
     {
+        private Color32 _newObjectsColor = new Color32(0, 255, 0, 0);
+        private Color32 _defaultObjectsColor = new Color32(255, 255, 255, 255);
+
         /// <summary>
         /// The measured positions for the current SharedReferenceFrame.
         /// These are the positions that were measured in the previous iteration of this procedure.
@@ -47,6 +50,8 @@ namespace WM.Colocation
         /// </summary>
         public override void Enter()
         {
+            OVRManager.instance.AllowRecenter = false;
+
             OVRManager.boundary.SetVisible(true);
 
             // Show current measured points.
@@ -70,6 +75,8 @@ namespace WM.Colocation
         public override void Exit()
         {
             AcceptNewReferenceSystem();
+
+            OVRManager.instance.AllowRecenter = m_application.ColocationEnabled;
 
             OVRManager.boundary.SetVisible(false);
 
@@ -109,7 +116,7 @@ namespace WM.Colocation
                 _points.Add(point);
                 
                 var pointWithCaption = point.GetComponent<PointWithCaption>();
-                pointWithCaption.CaptionColor = new Color32(255,255,255,255);
+                pointWithCaption.CaptionColor = _defaultObjectsColor;
             }
             _newPoints.Clear();
 
@@ -117,14 +124,9 @@ namespace WM.Colocation
             var sharedReferenceSystemGO = m_application.SharedReferenceSystem.gameObject;
             var newSharedReferenceSystemGO = _newSharedReferenceSystem.gameObject;
 
-            // Copy over location.
-            sharedReferenceSystemGO.transform.position = newSharedReferenceSystemGO.transform.position;
-            sharedReferenceSystemGO.transform.rotation = newSharedReferenceSystemGO.transform.rotation;
-            
-            // Update caption.
-            var sharedReferenceSystemLocalPosition = sharedReferenceSystemGO.transform.localPosition;
-            var captionText = string.Format("{0} {1}", sharedReferenceSystemGO.name, UtilUnity.ToString(sharedReferenceSystemLocalPosition));
-            m_application.SharedReferenceSystem.CaptionText = captionText;
+            m_application.SetSharedReferenceSystemLocation(
+                newSharedReferenceSystemGO.transform.position,
+                newSharedReferenceSystemGO.transform.rotation);
 
             // Destroy the new shared reference system.
             UtilUnity.Destroy(newSharedReferenceSystemGO);
@@ -180,12 +182,10 @@ namespace WM.Colocation
             UpdateControllerInfo(m_application.m_leftHandAnchor, m_application.m_leftControllerText);
             UpdateControllerInfo(m_application.m_rightHandAnchor, m_application.m_rightControllerText);
         }
-        
+
         /// <summary>
-        /// 
+        /// Displayed position / rotation of the given hand anchor in the given text.
         /// </summary>
-        /// <param name="handAnchor"></param>
-        /// <param name="controllerInfoText"></param>
         private void UpdateControllerInfo(
            GameObject handAnchor,
            Text controllerInfoText)
@@ -193,6 +193,8 @@ namespace WM.Colocation
             var p = handAnchor.transform.localPosition;
             controllerInfoText.text = string.Format("{0:F3}, {1:F3}, {2:F3}", p.x, p.y, p.z);
         }
+
+        #region TODO: Remove from Application state interface?
 
         /// <summary>
         /// TODO: Comment
@@ -217,6 +219,8 @@ namespace WM.Colocation
         public override void OnTeleportFadeInComplete()
         {
         }
+
+        #endregion TODO: Remove from Application state interface?
 
         /// <summary>
         /// 
@@ -294,7 +298,7 @@ namespace WM.Colocation
             var captionText = string.Format("Point {0} {1}", pointNumber, pointPositionText);
             newPoint.CaptionText = captionText;
 
-            newPoint.CaptionColor = new Color32(0, 255, 0, 255);
+            newPoint.CaptionColor = _newObjectsColor;
 
             _newPoints.Add(newPoint);
 
@@ -351,7 +355,10 @@ namespace WM.Colocation
         {
             // Compute position.
             var pos0 = _newPoints[0].transform.position;
+            pos0.y = m_application.trackingSpace.transform.position.y;
+            
             var pos1 = _newPoints[1].transform.position;
+            pos1.y = m_application.trackingSpace.transform.position.y;
 
             var position = (pos0 + pos1) / 2;
 
@@ -363,14 +370,17 @@ namespace WM.Colocation
 
             var rotation = Quaternion.LookRotation(axis1, axis0);
 
+            //
+            var referenceSystemPrefab = Resources.Load("WM/Prefab/Geometry/ReferenceSystem6DOF");
+
             // Create the new SharedReferenceSystem GameObject.
             var newSharedReferenceSystemGO = UnityEngine.GameObject.Instantiate(
-                    Resources.Load("WM/Prefab/Geometry/ReferenceSystem6DOF"),
+                    referenceSystemPrefab,
                     position,
                     rotation) as GameObject;
 
             _newSharedReferenceSystem = newSharedReferenceSystemGO.GetComponent<ReferenceSystem6DOF>();
-
+            
             // Give it a descriptive name.
             newSharedReferenceSystemGO.name = "New SRF";
 
@@ -381,6 +391,8 @@ namespace WM.Colocation
             var newSharedReferenceSystemLocalPosition = newSharedReferenceSystemGO.transform.localPosition;
             var captionText = string.Format("{0} {1}", newSharedReferenceSystemGO.name, UtilUnity.ToString(newSharedReferenceSystemLocalPosition));
             _newSharedReferenceSystem.CaptionText = captionText;
+
+            _newSharedReferenceSystem.CaptionColor = _newObjectsColor;
         }
     }
 } // namespace WM.Colocation

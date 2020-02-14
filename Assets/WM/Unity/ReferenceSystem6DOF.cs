@@ -26,7 +26,7 @@ namespace WM
         /// <summary>
         /// The caption color.
         /// </summary>
-        public Color32 Color
+        public Color32 CaptionColor
         {
             get
             {

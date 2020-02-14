@@ -171,7 +171,7 @@ namespace WM.UI
 
         #endregion
 
-        #region FPS
+        #region ShowReferenceSystems
 
         /// <summary>
         /// 

@@ -93,6 +93,35 @@ namespace WM.Application
         /// </summary>
         protected int frame = 0;
 
+        #region Colocation
+
+        /// <summary>
+        /// WHether colocation is enabled.
+        /// </summary>
+        private bool _colocationEnabled = true;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool ColocationEnabled
+        {
+            get
+            {
+                return _colocationEnabled;
+            }
+            set
+            {
+                _colocationEnabled = value;
+
+                // When colocation is enabled, recentering the headset must be disabled.
+                OVRManager.instance.AllowRecenter = !_colocationEnabled;
+
+                // TODO? Update tracking space location?
+            }
+        }
+
+        #endregion Colocation
+
         #region Player names
 
         /// <summary>
@@ -123,7 +152,7 @@ namespace WM.Application
         /// <returns></returns>
         public int GetPlayerNameIndex(string nameToFind)
         {
-            return _playerNames.IndexOf(nameToFind);        
+            return _playerNames.IndexOf(nameToFind);
         }
 
         /// <summary>
@@ -333,6 +362,10 @@ namespace WM.Application
         /// This acts as the container for HUD UI elements.
         /// </summary>
         public GameObject m_centerEyeCanvas;
+
+        #endregion HUD menu
+
+        #region World-scale menu
 
         /// <summary>
         /// The TabPanel containing the menus.
@@ -640,7 +673,7 @@ namespace WM.Application
 
             if (menuPanel == null)
             {
-                var menuPanelGO = UtilUnity.FindGameObject(scene, "MenuPanel"); 
+                var menuPanelGO = UtilUnity.FindGameObject(scene, "MenuPanel");
                 menuPanel = menuPanelGO.GetComponent<TabPanel>();
             }
 
@@ -722,7 +755,7 @@ namespace WM.Application
         /// To be implemented by concrete applications.
         /// </summary>
         public virtual void SaveApplicationSettings()
-        {   
+        {
         }
 
         /// <summary>
@@ -1126,7 +1159,7 @@ namespace WM.Application
                         WorldSpaceMenu.UpdateAnchoring(); // Re-anchor the World-Space menu to be in front of cam, when leaving None mode.
                     }
                 }
-                
+
                 if (MenuVisible)
                 {
                     AddPickRaySelectionTarget(gameObject);
@@ -1173,7 +1206,7 @@ namespace WM.Application
             {
                 return;
             }
-            
+
             menuPanel.ActivatePrevious();
         }
 
@@ -1441,7 +1474,7 @@ namespace WM.Application
             lock (Players)
             {
                 Debug.Assert(Players.ContainsKey(playerID));
-                
+
                 Logger.Debug(string.Format(name + ":RemovePlayer(Player:{0})", Net.NetUtil.ShortID(playerID)));
 
                 if (Players.ContainsKey(playerID))
@@ -1463,7 +1496,7 @@ namespace WM.Application
                 }
             }
         }
-        
+
         /// <summary>
         /// Removes the remote Players that are hosted by the Client with given client ID.
         /// </summary>
@@ -1558,7 +1591,44 @@ namespace WM.Application
         #endregion
 
         #region ReferenceSystems
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="rotation"></param>
+        public void SetSharedReferenceSystemLocation(
+            Vector3 position,
+            Quaternion rotation)
+        {
+            SetReferenceSystemLocation(
+                SharedReferenceSystem,
+                position,
+                rotation);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="rotation"></param>
+        public static void SetReferenceSystemLocation(
+            ReferenceSystem6DOF referenceSystem,
+            Vector3 position,
+            Quaternion rotation)
+        {
+            var referenceSystemGO = referenceSystem.gameObject;
+
+            // Copy over location.
+            referenceSystemGO.transform.position = position;
+            referenceSystemGO.transform.rotation = rotation;
+
+            // Update caption.
+            var sharedReferenceSystemLocalPosition = referenceSystemGO.transform.localPosition;
+            var captionText = string.Format("{0} {1}", referenceSystemGO.name, UtilUnity.ToString(sharedReferenceSystemLocalPosition));
+            referenceSystem.CaptionText = captionText;
+        }
+
         /// <summary>
         /// The tracking space reference system.
         /// </summary>
@@ -1574,7 +1644,7 @@ namespace WM.Application
         /// </summary>
         private void CreateReferenceSystems()
         {
-            TrackingReferenceSystem = CreateReferenceSystem("SRF", trackingSpace);
+            TrackingReferenceSystem = CreateReferenceSystem("TRF", trackingSpace);
 
             SharedReferenceSystem = CreateReferenceSystem("SRF", trackingSpace);
 
@@ -1582,10 +1652,11 @@ namespace WM.Application
         }
 
         /// <summary>
-        /// 
+        /// Creates a reference system and adds it to the given parent (if given).
         /// </summary>
-        /// <param name="name"></param>
-        private ReferenceSystem6DOF CreateReferenceSystem(
+        /// <param name="name">The name for the created reference system.</param>
+        /// <param name="parentGO">The parent game object.  Can be null.</param>
+        public ReferenceSystem6DOF CreateReferenceSystem(
             string name,
             GameObject parentGO)
         {
@@ -1606,8 +1677,11 @@ namespace WM.Application
             // Give it a descriptive name.
             referenceSystemGO.name = name;
 
-            // Attach it as a child to the tracking space.
-            referenceSystemGO.transform.SetParent(parentGO.transform, false);
+            if (parentGO != null)
+            {
+                // Attach it as a child to the given parent GameObject
+                referenceSystemGO.transform.SetParent(parentGO.transform, false);
+            }
 
             // Initialize its caption.
             var referenceSystemLocalPosition = referenceSystemGO.transform.localPosition;

@@ -32,6 +32,8 @@ namespace WM.UI
         public Text ServerStatusValueText;
         public Text ClientsValueText;
 
+        public Toggle ColocationToggle;
+
         #endregion
 
         #region Public API
@@ -130,6 +132,11 @@ namespace WM.UI
             UpdateUI_NetworkModeTitle();
 
             UpdateUI_IP();
+
+            if (ColocationToggle != null)
+            {
+                ColocationToggle.SetIsOnWithoutNotify(Application.ColocationEnabled);
+            }
         }
 
         /// <summary>
@@ -224,6 +231,22 @@ namespace WM.UI
         {
             OnNetworkModeSelection(NetworkMode.Standalone);
         }
+
+        #region FPS
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        public void ColocationToggleOnValueChanged(bool value)
+        {
+            if (Application)
+            {
+                Application.ColocationEnabled = value;
+            }
+        }
+
+        #endregion
 
         #endregion Non-public API
     }
