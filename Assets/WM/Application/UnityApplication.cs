@@ -209,6 +209,43 @@ namespace WM.Application
 
         public GameObject FpsPanelHUD;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        private bool _showReferenceSystems = true;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private List<ReferenceSystem6DOF> _referenceSystems = new List<ReferenceSystem6DOF>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool ShowReferenceSystems
+        {
+            get
+            {
+                return _showReferenceSystems;
+            }
+            set
+            {
+                _showReferenceSystems = value;
+                UpdateRefenceSystemsVisibility();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void UpdateRefenceSystemsVisibility()
+        {
+            foreach (var referenceSystem in _referenceSystems)
+            {
+                referenceSystem.gameObject.SetActive(_showReferenceSystems);
+            }
+        }
+
         #region OVRCameraRig GameObjects
 
         public GameObject m_ovrCameraRig;
@@ -661,6 +698,8 @@ namespace WM.Application
             {
                 RPickRay.gameObject.SetActive(false);
             }
+
+            CreateReferenceSystems();
 
             #region Init application states.
 
@@ -1518,98 +1557,71 @@ namespace WM.Application
 
         #endregion
 
-        #region TrackingSpaceReferenceSystem
-
+        #region ReferenceSystems
+        
         /// <summary>
         /// The tracking space reference system.
         /// </summary>
-        private GameObject _trackingSpaceReferenceSystemGO;
+        public ReferenceSystem6DOF TrackingReferenceSystem;
+
+        /// <summary>
+        /// The shared space reference system.
+        /// </summary>
+        public ReferenceSystem6DOF SharedReferenceSystem;
+
+        /// <summary>
+        /// Creates the 'Shared' and 'Tracking' reference systems.
+        /// </summary>
+        private void CreateReferenceSystems()
+        {
+            TrackingReferenceSystem = CreateReferenceSystem("SRF", trackingSpace);
+
+            SharedReferenceSystem = CreateReferenceSystem("SRF", trackingSpace);
+
+            UpdateRefenceSystemsVisibility();
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        public GameObject CreateTrackingSpaceReferenceSystem()
+        /// <param name="name"></param>
+        private ReferenceSystem6DOF CreateReferenceSystem(
+            string name,
+            GameObject parentGO)
         {
-            if (_trackingSpaceReferenceSystemGO == null)
-            {
-                _trackingSpaceReferenceSystemGO = UnityEngine.GameObject.Instantiate(
-                    Resources.Load("WM/Prefab/Geometry/ReferenceSystem6DOF"),
+            // Load the ReferenceSystem6DOF prefab.
+            var referenceSystemPrefab = Resources.Load("WM/Prefab/Geometry/ReferenceSystem6DOF");
+
+            // Create a ReferenceSystem6DOF instance.
+            var referenceSystemGO = UnityEngine.GameObject.Instantiate(
+                    referenceSystemPrefab,
                     Vector3.zero,
                     Quaternion.identity) as GameObject;
-                _trackingSpaceReferenceSystemGO.name = "TrackingSpaceReferenceSystem";
 
-                var referenceSystem = _trackingSpaceReferenceSystemGO.GetComponent<ReferenceSystem6DOF>();
-                referenceSystem.SetText("TRS");
+            // Get a handle to the ReferenceSystem6DOF component.
+            var referenceSystem = referenceSystemGO.GetComponent<ReferenceSystem6DOF>();
 
-                _trackingSpaceReferenceSystemGO.transform.SetParent(trackingSpace.transform, false);
-            }
+            _referenceSystems.Add(referenceSystem);
 
-            return _trackingSpaceReferenceSystemGO;
+            // Give it a descriptive name.
+            referenceSystemGO.name = name;
+
+            // Attach it as a child to the tracking space.
+            referenceSystemGO.transform.SetParent(parentGO.transform, false);
+
+            // Initialize its caption.
+            var referenceSystemLocalPosition = referenceSystemGO.transform.localPosition;
+            var captionText = string.Format("{0} {1}", referenceSystemGO.name, UtilUnity.ToString(referenceSystemLocalPosition));
+            
+            referenceSystem.CaptionText = captionText;
+
+            // Enable or disable reference system depending on ShowReferenceSystems.
+            referenceSystemGO.SetActive(ShowReferenceSystems);
+
+            return referenceSystem;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public void DestroyTrackingSpaceReferenceSystem()
-        {
-            if (_trackingSpaceReferenceSystemGO == null)
-            {
-                return;
-            }
-
-            UtilUnity.Destroy(_trackingSpaceReferenceSystemGO);
-            _trackingSpaceReferenceSystemGO = null;
-        }
-
-        #endregion TrackingSpaceReferenceSystem
-
-        #region SharedReferenceSystem
-
-        /// <summary>
-        /// The tracking space reference system.
-        /// </summary>
-        private GameObject _sharedReferenceSystemGO;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public GameObject CreateSharedReferenceSystem()
-        {
-            if (_sharedReferenceSystemGO == null)
-            {
-                // Instantiate shared reference system GameObject.
-                _sharedReferenceSystemGO = UnityEngine.GameObject.Instantiate(
-                    Resources.Load("WM/Prefab/Geometry/ReferenceSystem6DOF"),
-                    Vector3.zero,
-                    Quaternion.identity) as GameObject;
-                _sharedReferenceSystemGO.name = "SharedReferenceSystem";
-
-                // Initialize its caption
-                var sharedReferenceSystem = _sharedReferenceSystemGO.GetComponent<ReferenceSystem6DOF>();
-                sharedReferenceSystem.SetText("TRS");
-
-                // And attach it as a child to the tracking space.
-                _sharedReferenceSystemGO.transform.SetParent(trackingSpace.transform, false);
-            }
-
-            return _sharedReferenceSystemGO;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void DestroySharedReferenceSystem()
-        {
-            if (_sharedReferenceSystemGO == null)
-            {
-                return;
-            }
-
-            UtilUnity.Destroy(_sharedReferenceSystemGO);
-            _sharedReferenceSystemGO = null;
-        }
-
-        #endregion SharedReferenceSystem
+        #endregion ReferenceSystems
 
         #region HUD Info
 

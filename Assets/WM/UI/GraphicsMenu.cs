@@ -15,6 +15,8 @@ namespace WM.UI
 
         public Toggle ShowFpsToggle;
 
+        public Toggle ShowReferenceSystemsToggle;
+
         #endregion
 
         #region GameObject overrides
@@ -55,6 +57,16 @@ namespace WM.UI
                 }
             }
 
+            if (ShowReferenceSystemsToggle == null)
+            {
+                var showReferenceSystemsToggleGO = UtilUnity.TryFindGameObject("GraphicsMenu_ShowReferenceSystemsToggle");
+
+                if (showReferenceSystemsToggleGO != null)
+                {
+                    ShowReferenceSystemsToggle = showReferenceSystemsToggleGO.GetComponent<Toggle>();
+                }
+            }
+
             #endregion
 
             #region Initialize quality level options in Quality dropdown.
@@ -80,14 +92,19 @@ namespace WM.UI
         /// </summary>
         private void Update()
         {
+            if (QualityDropdown != null)
+            {
+                QualityDropdown.SetValueWithoutNotify(QualitySettings.GetQualityLevel());
+            }
+
             if (ShowFpsToggle != null)
             {
                 ShowFpsToggle.SetIsOnWithoutNotify(Application.FpsPanelHUD.activeSelf);
             }
 
-            if (QualityDropdown != null)
+            if (ShowReferenceSystemsToggle != null)
             {
-                QualityDropdown.SetValueWithoutNotify(QualitySettings.GetQualityLevel());
+                ShowReferenceSystemsToggle.SetIsOnWithoutNotify(Application.ShowReferenceSystems);
             }
         }
 
@@ -149,6 +166,22 @@ namespace WM.UI
                 {
                     Application.FpsPanelHUD.SetActive(value);
                 }
+            }
+        }
+
+        #endregion
+
+        #region FPS
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        public void ShowReferenceSystemsToggleOnValueChanged(bool value)
+        {
+            if (Application)
+            {
+                Application.ShowReferenceSystems = value;
             }
         }
 

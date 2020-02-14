@@ -1,11 +1,17 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using WM.Application;
 
 namespace WM.Colocation
 {
     /// <summary>
     /// Application state in which the user defines the shared reference system to be used for colocation.
+    /// 
+    /// Defining the SharedReferenceSystem is a 3-step progress:
+    /// - Measure first reference point
+    /// - Measure second reference point
+    /// - Review the resulting SharedreferenceSystem.
     /// 
     /// Some profixed acronyms are used in this code, to denote the Reference system in which geometrical data is expressed:
     /// _W : expressed in world space.
@@ -14,14 +20,20 @@ namespace WM.Colocation
     public class ApplicationStateDefineSharedReferenceSystem : ApplicationState
     {
         /// <summary>
-        /// The measured positions.
+        /// The measured positions for the current SharedReferenceFrame.
+        /// These are the positions that were measured in the previous iteration of this procedure.
         /// </summary>
-        private List<GameObject> _measuredPoints_W = new List<GameObject>();
+        private List<PointWithCaption> _points = new List<PointWithCaption>();
 
         /// <summary>
-        /// The shared reference system.
+        /// The positions being measured in this iteration of the procedure.
         /// </summary>
-        private GameObject _referenceSystem;
+        private List<PointWithCaption> _newPoints = new List<PointWithCaption>();
+
+        /// <summary>
+        /// The shared reference system being defined in this procedure.
+        /// </summary>
+        private ReferenceSystem6DOF _newSharedReferenceSystem;
 
         /// <summary>
         /// Called once, right after construction.
@@ -37,13 +49,16 @@ namespace WM.Colocation
         {
             OVRManager.boundary.SetVisible(true);
 
-            m_application.CreateTrackingSpaceReferenceSystem();
+            // Show current measured points.
+            foreach (var point in _points)
+            {
+                point.gameObject.SetActive(true);
+            }
 
             m_application.HudInfoPanel.SetActive(true);
             
             // Show bounds of tracking system
-            // Show visualisation of the position/rotation of the controllers on screen.
-
+            
             InitButtonMappingUI();
 
             UpdateInfoText();
@@ -54,20 +69,66 @@ namespace WM.Colocation
         /// </summary>
         public override void Exit()
         {
-            OVRManager.boundary.SetVisible(false);
+            AcceptNewReferenceSystem();
 
-            m_application.DestroyTrackingSpaceReferenceSystem();
+            OVRManager.boundary.SetVisible(false);
 
             m_application.HudInfoPanel.SetActive(false);
             m_application.HudInfoText.text = "";
 
-            // Hide visualisation of the position/rotation of the controllers on screen.
-
-            foreach (var point in _measuredPoints_W)
+            // Hide current measured points.
+            foreach (var newPoint in _points)
             {
-                UtilUnity.Destroy(point);
+                newPoint.gameObject.SetActive(false);
             }
-            _measuredPoints_W.Clear();
+
+            // Clear new measured points.
+            foreach (var point in _newPoints)
+            {
+                UtilUnity.Destroy(point.gameObject);
+            }
+
+            _newPoints.Clear();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void AcceptNewReferenceSystem()
+        {
+            // Clear current measured points.
+            foreach (var point in _points)
+            {
+                UtilUnity.Destroy(point.gameObject);
+            }
+            _points.Clear();
+
+            // Set the new measured points as current measured points.
+            foreach (var point in _newPoints)
+            {
+                _points.Add(point);
+                
+                var pointWithCaption = point.GetComponent<PointWithCaption>();
+                pointWithCaption.CaptionColor = new Color32(255,255,255,255);
+            }
+            _newPoints.Clear();
+
+            // Set the new SharedReferenceSystem as the current SharedReferenceSystem.
+            var sharedReferenceSystemGO = m_application.SharedReferenceSystem.gameObject;
+            var newSharedReferenceSystemGO = _newSharedReferenceSystem.gameObject;
+
+            // Copy over location.
+            sharedReferenceSystemGO.transform.position = newSharedReferenceSystemGO.transform.position;
+            sharedReferenceSystemGO.transform.rotation = newSharedReferenceSystemGO.transform.rotation;
+            
+            // Update caption.
+            var sharedReferenceSystemLocalPosition = sharedReferenceSystemGO.transform.localPosition;
+            var captionText = string.Format("{0} {1}", sharedReferenceSystemGO.name, UtilUnity.ToString(sharedReferenceSystemLocalPosition));
+            m_application.SharedReferenceSystem.CaptionText = captionText;
+
+            // Destroy the new shared reference system.
+            UtilUnity.Destroy(newSharedReferenceSystemGO);
+            _newSharedReferenceSystem = null;
         }
 
         /// <summary>
@@ -81,19 +142,9 @@ namespace WM.Colocation
                 m_application.UpdateTrackingSpace();
             }
 
-            {
-                var p = m_application.m_leftHandAnchor.transform.localPosition;
-                m_application.m_leftControllerText.text = string.Format("{0:F3}, {1:F3}, {2:F3}", p.x, p.y, p.z);
-            }
+            UpdateControllerInfos();            
 
-            {
-                var p = m_application.m_rightHandAnchor.transform.localPosition;
-                m_application.m_rightControllerText.text = string.Format("{0:F3}, {1:F3}, {2:F3}", p.x, p.y, p.z);
-            }
-
-            // TODO: Update the position/rotation of the controllers on screen.
-
-            if (_measuredPoints_W.Count < 2)
+            if (_newPoints.Count < 2)
             {
                 if (m_application.m_controllerInput.m_controllerState.button7Down)
                 {
@@ -119,6 +170,28 @@ namespace WM.Colocation
                     ErasePoint();
                 }
             }
+        }
+
+        /// <summary>
+        /// Update the displayed position / rotation of the controllers.
+        /// </summary>
+        private void UpdateControllerInfos()
+        {
+            UpdateControllerInfo(m_application.m_leftHandAnchor, m_application.m_leftControllerText);
+            UpdateControllerInfo(m_application.m_rightHandAnchor, m_application.m_rightControllerText);
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="handAnchor"></param>
+        /// <param name="controllerInfoText"></param>
+        private void UpdateControllerInfo(
+           GameObject handAnchor,
+           Text controllerInfoText)
+        {
+            var p = handAnchor.transform.localPosition;
+            controllerInfoText.text = string.Format("{0:F3}, {1:F3}, {2:F3}", p.x, p.y, p.z);
         }
 
         /// <summary>
@@ -199,9 +272,9 @@ namespace WM.Colocation
         /// <param name="t"></param>
         private void MeasurePoint(Transform t)
         {
-            if (_measuredPoints_W.Count == 1)
+            if (_newPoints.Count == 1)
             {
-                float distanceFromFirstPoint = (t.position - _measuredPoints_W[0].transform.position).magnitude;
+                float distanceFromFirstPoint = (t.position - _newPoints[0].transform.position).magnitude;
 
                 if (distanceFromFirstPoint < 1)
                 {
@@ -209,23 +282,25 @@ namespace WM.Colocation
                 }
             }
 
-            var measuredPoint = UnityEngine.GameObject.Instantiate(
+            var newPointGO = UnityEngine.GameObject.Instantiate(
                 Resources.Load("WM/Prefab/Geometry/PointWithCaption"),
                 t.position,
                 t.rotation) as GameObject;
 
-            var pointWithCaption = measuredPoint.GetComponent<PointWithCaption>();
+            var newPoint = newPointGO.GetComponent<PointWithCaption>();
 
-            var p = t.position;
-            var pointPositionText = string.Format("({0:F3}, {1:F3}, {2:F3})", p.x, p.y, p.z);
-            var pointNumber = _measuredPoints_W.Count + 1;
-            pointWithCaption.SetText(string.Format("Point {0} {1}", pointNumber, pointPositionText));
-            
-            _measuredPoints_W.Add(measuredPoint);
+            var pointPositionText = UtilUnity.ToString(t.localPosition);
+            var pointNumber = _newPoints.Count + 1;
+            var captionText = string.Format("Point {0} {1}", pointNumber, pointPositionText);
+            newPoint.CaptionText = captionText;
 
-            if (_measuredPoints_W.Count == 2)
+            newPoint.CaptionColor = new Color32(0, 255, 0, 255);
+
+            _newPoints.Add(newPoint);
+
+            if (_newPoints.Count == 2)
             {
-                UpdateSharedReferenceSystem();
+                CreateNewSharedReferenceSystem();
             }
 
             UpdateInfoText();
@@ -236,13 +311,13 @@ namespace WM.Colocation
         /// </summary>
         private void UpdateInfoText()
         {
-            if (_measuredPoints_W.Count == 2)
+            if (_newPoints.Count == 2)
             {
                 m_application.HudInfoText.text = "Measuring complete";
             }
             else
             {
-                var numberOfPointToMeasure = _measuredPoints_W.Count + 1;
+                var numberOfPointToMeasure = _newPoints.Count + 1;
                 m_application.HudInfoText.text = "Measure Point " + numberOfPointToMeasure;
             }
         }
@@ -253,17 +328,17 @@ namespace WM.Colocation
         /// <param name="t"></param>
         private void ErasePoint()
         {
-            if (_referenceSystem != null)
+            if (_newSharedReferenceSystem != null)
             {
-                UtilUnity.Destroy(_referenceSystem);
-                _referenceSystem = null;
+                UtilUnity.Destroy(_newSharedReferenceSystem.gameObject);
+                _newSharedReferenceSystem = null;
             }
 
-            if (_measuredPoints_W.Count > 0)
+            if (_newPoints.Count > 0)
             {
-                int pointToEraseIndex = _measuredPoints_W.Count - 1;
-                UtilUnity.Destroy(_measuredPoints_W[pointToEraseIndex]);
-                _measuredPoints_W.RemoveAt(pointToEraseIndex);
+                int pointToEraseIndex = _newPoints.Count - 1;
+                UtilUnity.Destroy(_newPoints[pointToEraseIndex].gameObject);
+                _newPoints.RemoveAt(pointToEraseIndex);
             }
 
             UpdateInfoText();
@@ -272,11 +347,11 @@ namespace WM.Colocation
         /// <summary>
         /// 
         /// </summary>
-        private void UpdateSharedReferenceSystem()
+        private void CreateNewSharedReferenceSystem()
         {
             // Compute position.
-            var pos0 = _measuredPoints_W[0].transform.position;
-            var pos1 = _measuredPoints_W[1].transform.position;
+            var pos0 = _newPoints[0].transform.position;
+            var pos1 = _newPoints[1].transform.position;
 
             var position = (pos0 + pos1) / 2;
 
@@ -288,17 +363,24 @@ namespace WM.Colocation
 
             var rotation = Quaternion.LookRotation(axis1, axis0);
 
-            // Create the shared reference system.
-            var sharedReferenceSystem = m_application.CreateSharedReferenceSystem();
+            // Create the new SharedReferenceSystem GameObject.
+            var newSharedReferenceSystemGO = UnityEngine.GameObject.Instantiate(
+                    Resources.Load("WM/Prefab/Geometry/ReferenceSystem6DOF"),
+                    position,
+                    rotation) as GameObject;
 
-            // Put it to the correct location.
-            sharedReferenceSystem.transform.position = position;
-            sharedReferenceSystem.transform.rotation = rotation;
+            _newSharedReferenceSystem = newSharedReferenceSystemGO.GetComponent<ReferenceSystem6DOF>();
 
-            {
-                var p = sharedReferenceSystem.transform.localPosition;
-                sharedReferenceSystem.GetComponent<ReferenceSystem6DOF>().SetText("SRF " +  string.Format("({0:F3}, {1:F3}, {2:F3})", p.x, p.y, p.z));
-            }
+            // Give it a descriptive name.
+            newSharedReferenceSystemGO.name = "New SRF";
+
+            // Attach it as a child to the tracking space.
+            newSharedReferenceSystemGO.transform.SetParent(m_application.trackingSpace.transform, true);
+            
+            // Initialize its caption.
+            var newSharedReferenceSystemLocalPosition = newSharedReferenceSystemGO.transform.localPosition;
+            var captionText = string.Format("{0} {1}", newSharedReferenceSystemGO.name, UtilUnity.ToString(newSharedReferenceSystemLocalPosition));
+            _newSharedReferenceSystem.CaptionText = captionText;
         }
     }
 } // namespace WM.Colocation

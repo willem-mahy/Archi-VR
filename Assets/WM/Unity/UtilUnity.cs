@@ -4,10 +4,19 @@ using UnityEngine.SceneManagement;
 
 namespace WM
 {
-    /* Utility functions for Unity.
-     */
+    /// <summary>
+    /// Unity-related utility functions.
+    /// </summary>
     public class UtilUnity
     {
+        /// <summary>
+        /// Returns a string representation of the given Vector3.
+        /// </summary>
+        public static string ToString(Vector3 v)
+        {
+            return string.Format("({0:F3}, {1:F3}, {2:F3})", v.x, v.y, v.z);
+        }
+
         /// <summary>
         /// 
         /// </summary>
