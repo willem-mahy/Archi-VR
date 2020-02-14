@@ -19,7 +19,7 @@ namespace WM.Colocation
     /// </summary>
     public class ApplicationStateDefineSharedReferenceSystem : ApplicationState
     {
-        private Color32 _newObjectsColor = new Color32(0, 255, 0, 0);
+        private Color32 _newObjectsColor = new Color32(0, 255, 0, 255);
         private Color32 _defaultObjectsColor = new Color32(255, 255, 255, 255);
 
         /// <summary>
