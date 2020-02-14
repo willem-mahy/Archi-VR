@@ -136,47 +136,61 @@ namespace ArchiVR
             }
             else
             {
-                Application.m_ovrCameraRig.transform.position = activePOI.transform.position;
-
-                bool alignEyeToPOI = false;
-
-                if (alignEyeToPOI)
-                {
-                    var rotTrackingSpace = Application.m_ovrCameraRig.transform.rotation.eulerAngles;
-                    var rotEye = Application.m_centerEyeCanvas.transform.parent.rotation.eulerAngles;
-
-                    var rot = activePOI.transform.rotation.eulerAngles;
-
-                    rot.y = rot.y + (rotTrackingSpace.y - rotEye.y);
-                    Application.m_ovrCameraRig.transform.rotation = Quaternion.Euler(rot);
-                }
-                else
-                {
-                    Application.m_ovrCameraRig.transform.rotation = activePOI.transform.rotation;
-                }
-
                 UnityApplication.SetReferenceSystemLocation(
                     activePoiReferenceSystem,
                     activePOI.transform.position,
                     activePOI.transform.rotation);
-            }
 
-            // Make sure we are all in the same reference frame.
-            /*
-            {
-                var TrackingSpacePosition = Application.TrackingReferenceSystem.transform.position;
-                var SharedTrackingSpacePosition = Application.SharedReferenceSystem.transform.position;
-                var SharedTrackingSpacePosition = Application.SharedReferenceSystem.transform.position;
-                var SharedTrackingSpaceRotation = Application.SharedReferenceSystem.transform.rotation;
+                if (Application.ColocationEnabled)
+                {
+                    Application.m_ovrCameraRig.transform.SetPositionAndRotation(
+                            Vector3.zero,
+                            Quaternion.identity);
 
-                Application.m_ovrCameraRig.transform.position = SharedTrackingSpacePosition;
-                Application.m_ovrCameraRig.transform.rotation = SharedTrackingSpaceRotation;
-            }
-            */
+                    var transformTRF = Application.trackingSpace.gameObject.transform;
+                    var transformSRF = Application.SharedReferenceSystem.gameObject.transform;
 
-            if (UnityEngine.Application.isEditor)
-            {
-                Application.m_ovrCameraRig.transform.position = Application.m_ovrCameraRig.transform.position + new Vector3(0, 1.8f, 0);
+                    var matrix_S_T = transformSRF.worldToLocalMatrix * transformTRF.localToWorldMatrix;
+                    //var matrix_T_S = transformTRF.worldToLocalMatrix * transformSRF.localToWorldMatrix;
+                    
+                    //var matrix_T_Si = matrix_S_T.inverse;
+                    //var matrix_S_Ti = matrix_T_S.inverse;
+
+                    var matrix_POI_W = activePOI.transform.localToWorldMatrix;
+
+                    var matrix_result = matrix_POI_W * matrix_S_T;
+
+                    Application.m_ovrCameraRig.transform.FromMatrix(matrix_result);
+                }
+                else
+                {
+                    bool alignEyeToPOI = false;
+
+                    if (alignEyeToPOI)
+                    {
+                        var rotTrackingSpace = Application.m_ovrCameraRig.transform.rotation.eulerAngles;
+                        var rotEye = Application.m_centerEyeCanvas.transform.parent.rotation.eulerAngles;
+
+                        var rot = activePOI.transform.rotation.eulerAngles;
+
+                        rot.y = rot.y + (rotTrackingSpace.y - rotEye.y);
+
+                        Application.m_ovrCameraRig.transform.SetPositionAndRotation(
+                            activePOI.transform.position,
+                            Quaternion.Euler(rot));
+                    }
+                    else
+                    {
+                        Application.m_ovrCameraRig.transform.SetPositionAndRotation(
+                            activePOI.transform.position,
+                            activePOI.transform.rotation);
+                    }
+                }
+
+                if (UnityEngine.Application.isEditor)
+                {
+                    Application.m_ovrCameraRig.transform.position = Application.m_ovrCameraRig.transform.position + new Vector3(0, 1.8f, 0);
+                }
             }
         }
 
