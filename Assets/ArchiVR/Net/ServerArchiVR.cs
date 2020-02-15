@@ -69,6 +69,22 @@ namespace ArchiVR.Net
 
                 SendCommand(setImmersionModeCommand, newClientConnection);
             }
+
+            bool playerForClientReceived = false;
+            while (!playerForClientReceived)
+            {
+                lock (applicationArchiVR.Players)
+                {
+                    foreach (var player in applicationArchiVR.Players.Values)
+                    {
+                        if (player.ClientID == newClientConnection.ClientID)
+                        {
+                            playerForClientReceived = true;
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
