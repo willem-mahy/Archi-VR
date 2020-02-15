@@ -11,8 +11,8 @@ using WM.Net;
 
 public class EditorTestApplication : MonoBehaviour
 {
-    private int DefaultViewLayout = 8;
-    private int DefaultNumApplicationInstances = 4;
+    private int DefaultViewLayout = 1;
+    private int DefaultNumApplicationInstances = 2;
 
     private bool _applicationInstancesInitialized = false;
 
