@@ -230,6 +230,8 @@ namespace ArchiVR.Application
 
             var settings = LoadSettings();
 
+            ColocationEnabled = settings.NetworkSettings.ColocationEnabled;
+
             Logger.Enabled = settings.DebugLogSettings.LoggingEnabled;
 
             QualitySettings.SetQualityLevel(settings.GraphicsSettings.QualityLevel);
