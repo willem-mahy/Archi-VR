@@ -29,13 +29,23 @@ namespace WM.UI
 
         #region Public API
 
-        void Start()
+        void Awake()
         {
             _canvas = gameObject.GetComponent<Canvas>();
 
             _panel = transform.Find("Panel").gameObject;
 
+            if (_panel == null)
+            {
+                Debug.LogError("ControllerButtonUI.Start(): Could not locate 'Panel' in GameObject '" + gameObject.name + "'!");
+            }
+
             _text = _panel.transform.Find("Text").gameObject.GetComponent<Text>();
+
+            if (_text == null)
+            {
+                Debug.LogError("ControllerButtonUI.Start(): Could not locate 'Text' in GameObject '" + gameObject.name + "'!");
+            }
         }
 
         /// <summary>
