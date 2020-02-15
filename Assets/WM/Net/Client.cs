@@ -715,10 +715,10 @@ namespace WM.Net
                 // (since it's unparseable, and thus useless).
                 if (firstMessageBegin > 0)
                 {
-                    dataFromServer = dataFromServer.Substring(firstMessageBegin);
-
                     // Should this even happen in a normal use case? -> Let's log it to find out...
                     _log.Warning(LogID + ".ReceiveTcpMessagesFromServer: Removing useless data buffer begin '" + dataFromServer.Substring(0, firstMessageBegin) + "'");
+
+                    dataFromServer = dataFromServer.Substring(firstMessageBegin);
                 }
 
                 // Get the position of the first 'Message End' tag in the data buffer.
