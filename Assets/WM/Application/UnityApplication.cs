@@ -209,14 +209,6 @@ namespace WM.Application
         /*private*/
         public Dictionary<Guid, Player> Players = new Dictionary<Guid, Player>();
 
-        #region Shared Tracking space
-
-        public bool SharedTrackingSpace = false;
-
-        public GameObject SharedTrackingSpaceReference;
-
-        #endregion
-
         #endregion
 
         #region Game objects
