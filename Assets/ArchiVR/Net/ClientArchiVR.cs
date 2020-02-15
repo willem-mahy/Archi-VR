@@ -27,6 +27,8 @@ namespace ArchiVR.Net
         /// </summary>
         override protected void OnConnect()
         {
+            _log.Warning(string.Format("{0}.OnConnect: Notify server about my player {1}", LogID, applicationArchiVR.Player.LogID));
+
             // Notify other Clients about existence of your own player.
             var addPlayerCommand = new AddPlayerCommand(applicationArchiVR.Player);
             SendCommand(addPlayerCommand);
@@ -128,12 +130,12 @@ namespace ArchiVR.Net
                 lock (applicationArchiVR.Players)
                 {
                     // Apply the most recent states.
-                    foreach (var clientID in receivedAvatarStates.Keys)
+                    foreach (var playerID in receivedAvatarStates.Keys)
                     {
-                        if (applicationArchiVR.Players.ContainsKey(clientID))
+                        if (applicationArchiVR.Players.ContainsKey(playerID))
                         {
-                            var avatar = applicationArchiVR.Players[clientID].Avatar;
-                            var avatarState = receivedAvatarStates[clientID];
+                            var avatar = applicationArchiVR.Players[playerID].Avatar;
+                            var avatarState = receivedAvatarStates[playerID];
 
                             avatarState.HeadPosition = avatarState.HeadPosition + applicationArchiVR.OffsetPerID;
                             avatarState.LHandPosition = avatarState.LHandPosition + applicationArchiVR.OffsetPerID;
@@ -143,7 +145,7 @@ namespace ArchiVR.Net
                         }
                         else
                         {
-                            _log.Warning(logCallTag + ".UpdateAvatarStatesFromUDP(): Received avatar state for non-existing avatar! (" + clientID + ")");
+                            _log.Warning(logCallTag + ".UpdateAvatarStatesFromUDP(): Received state for unknown player! (" + playerID + ")");
                         }
                     }
                 }
