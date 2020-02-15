@@ -46,15 +46,6 @@ namespace WM.UI
         {
             base.Start();
 
-            #region Get references to GameObjects.
-
-            if (Application == null)
-            {
-                Application = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application").GetComponent<UnityApplication>();
-            }
-
-            #endregion
-
             #region Get references to UI components.
 
             if (Text == null)
