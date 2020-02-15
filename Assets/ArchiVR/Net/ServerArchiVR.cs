@@ -24,19 +24,31 @@ namespace ArchiVR.Net
         /// </summary>        
         override protected void OnClientConnected(ClientConnection newClientConnection)
         {
+            _log.Warning(string.Format("ServerArchiVR.OnClientConnected Client[{0}]", newClientConnection.ClientID));
+
             // Now the client is connected, initialize it to the server's application state.
 
             // A) Make the new Client know about existing Players.
             lock (applicationArchiVR.Players)
             {
+                if (applicationArchiVR.Players.Count == 0)
+                {
+                    _log.Warning(string.Format("ServerArchiVR.OnClientConnected Client[{0}]: No pre-existing clients", newClientConnection.ClientID));
+                }
+
                 // For each existing player, ...
                 foreach (var player in applicationArchiVR.Players.Values)
                 {
                     //... except players hosted  by the new client ...
                     if (player.ClientID != newClientConnection.ClientID)
                     {
+                        _log.Warning(string.Format("ServerArchiVR.OnClientConnected Client[{0}]: Notify new client about existing player {1}", newClientConnection.ClientID, player.LogID));
                         // ... send an AddPlayerCommand.
                         SendCommand(new AddPlayerCommand(player), newClientConnection); // This makes the new client initialize a remote user for the existing client.
+                    }
+                    else
+                    {
+                        _log.Warning(string.Format("ServerArchiVR.OnClientConnected Client[{0}]: Do not notify new client about existing player {1} because it is his/hers", newClientConnection.ClientID, player.ID));
                     }
                 }
             }
