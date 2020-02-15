@@ -240,18 +240,18 @@ namespace WM.Colocation
 
             if (leftControllerButtonMapping != null)
             {
-                leftControllerButtonMapping.textLeftIndexTrigger.text = "Measure";
-                leftControllerButtonMapping.textLeftHandTrigger.text = "";
+                leftControllerButtonMapping.IndexTrigger.Text = "Measure";
+                leftControllerButtonMapping.HandTrigger.Text = "";
 
-                leftControllerButtonMapping.textButtonStart.text = "";
+                leftControllerButtonMapping.ButtonStart.Text = "";
 
-                leftControllerButtonMapping.textButtonX.text = "Erase";
-                leftControllerButtonMapping.textButtonY.text = "";
+                leftControllerButtonMapping.ButtonX.Text = "Erase";
+                leftControllerButtonMapping.ButtonY.Text = "";
 
-                leftControllerButtonMapping.textLeftThumbUp.text = "";
-                leftControllerButtonMapping.textLeftThumbDown.text = "";
-                leftControllerButtonMapping.textLeftThumbLeft.text = "";
-                leftControllerButtonMapping.textLeftThumbRight.text = "";
+                leftControllerButtonMapping.ThumbUp.Text = "";
+                leftControllerButtonMapping.ThumbDown.Text = "";
+                leftControllerButtonMapping.ThumbLeft.Text = "";
+                leftControllerButtonMapping.ThumbRight.Text = "";
             }
 
             // Right controller
@@ -259,18 +259,18 @@ namespace WM.Colocation
 
             if (rightControllerButtonMapping != null)
             {
-                rightControllerButtonMapping.textRightIndexTrigger.text = "Measure";
-                rightControllerButtonMapping.textRightHandTrigger.text = "";
+                rightControllerButtonMapping.IndexTrigger.Text = "Measure";
+                rightControllerButtonMapping.HandTrigger.Text = "";
 
-                rightControllerButtonMapping.textButtonOculus.text = "Exit";
+                rightControllerButtonMapping.ButtonOculusStart.Text = "Exit";
 
-                rightControllerButtonMapping.textButtonA.text = "Erase";
-                rightControllerButtonMapping.textButtonB.text = "";
+                rightControllerButtonMapping.ButtonXA.Text = "Erase";
+                rightControllerButtonMapping.ButtonYB.Text = "";
 
-                rightControllerButtonMapping.textRightThumbUp.text = (isEditor ? "Beweeg vooruit (ArrowUp)" : "");
-                rightControllerButtonMapping.textRightThumbDown.text = (isEditor ? "Beweeg achteruit (ArrowDown)" : "");
-                rightControllerButtonMapping.textRightThumbLeft.text = (isEditor ? "Beweeg links (ArrowLeft)" : "");
-                rightControllerButtonMapping.textRightThumbRight.text = (isEditor ? "Beweeg rechts (ArrowRight)" : "");
+                rightControllerButtonMapping.ThumbUp.Text = (isEditor ? "Beweeg vooruit (ArrowUp)" : "");
+                rightControllerButtonMapping.ThumbDown.Text = (isEditor ? "Beweeg achteruit (ArrowDown)" : "");
+                rightControllerButtonMapping.ThumbLeft.Text = (isEditor ? "Beweeg links (ArrowLeft)" : "");
+                rightControllerButtonMapping.ThumbRight.Text = (isEditor ? "Beweeg rechts (ArrowRight)" : "");
             }
         }
 
@@ -288,18 +288,18 @@ namespace WM.Colocation
 
             if (leftControllerButtonMapping != null)
             {
-                leftControllerButtonMapping.textLeftIndexTrigger.text = "Accept";
-                leftControllerButtonMapping.textLeftHandTrigger.text = "";
+                leftControllerButtonMapping.IndexTrigger.Text = "Accept";
+                leftControllerButtonMapping.HandTrigger.Text = "";
 
-                leftControllerButtonMapping.textButtonStart.text = "";
+                leftControllerButtonMapping.ButtonStart.Text = "";
 
-                leftControllerButtonMapping.textButtonX.text = "Erase";
-                leftControllerButtonMapping.textButtonY.text = "";
+                leftControllerButtonMapping.ButtonX.Text = "Erase";
+                leftControllerButtonMapping.ButtonY.Text = "";
 
-                leftControllerButtonMapping.textLeftThumbUp.text = "";
-                leftControllerButtonMapping.textLeftThumbDown.text = "";
-                leftControllerButtonMapping.textLeftThumbLeft.text = "";
-                leftControllerButtonMapping.textLeftThumbRight.text = "";
+                leftControllerButtonMapping.ThumbUp.Text = "";
+                leftControllerButtonMapping.ThumbDown.Text = "";
+                leftControllerButtonMapping.ThumbLeft.Text = "";
+                leftControllerButtonMapping.ThumbRight.Text = "";
             }
 
             // Right controller
@@ -307,18 +307,18 @@ namespace WM.Colocation
 
             if (rightControllerButtonMapping != null)
             {
-                rightControllerButtonMapping.textRightIndexTrigger.text = "Accept";
-                rightControllerButtonMapping.textRightHandTrigger.text = "";
+                rightControllerButtonMapping.IndexTrigger.Text = "Accept";
+                rightControllerButtonMapping.HandTrigger.Text = "";
 
-                rightControllerButtonMapping.textButtonOculus.text = "Exit";
+                rightControllerButtonMapping.ButtonOculusStart.Text = "Exit";
 
-                rightControllerButtonMapping.textButtonA.text = "Erase";
-                rightControllerButtonMapping.textButtonB.text = "";
+                rightControllerButtonMapping.ButtonXA.Text = "Erase";
+                rightControllerButtonMapping.ButtonYB.Text = "";
 
-                rightControllerButtonMapping.textRightThumbUp.text = (isEditor ? "Beweeg vooruit (ArrowUp)" : "");
-                rightControllerButtonMapping.textRightThumbDown.text = (isEditor ? "Beweeg achteruit (ArrowDown)" : "");
-                rightControllerButtonMapping.textRightThumbLeft.text = (isEditor ? "Beweeg links (ArrowLeft)" : "");
-                rightControllerButtonMapping.textRightThumbRight.text = (isEditor ? "Beweeg rechts (ArrowRight)" : "");
+                rightControllerButtonMapping.ThumbUp.Text = (isEditor ? "Beweeg vooruit (ArrowUp)" : "");
+                rightControllerButtonMapping.ThumbDown.Text = (isEditor ? "Beweeg achteruit (ArrowDown)" : "");
+                rightControllerButtonMapping.ThumbLeft.Text = (isEditor ? "Beweeg links (ArrowLeft)" : "");
+                rightControllerButtonMapping.ThumbRight.Text = (isEditor ? "Beweeg rechts (ArrowRight)" : "");
             }
         }
 

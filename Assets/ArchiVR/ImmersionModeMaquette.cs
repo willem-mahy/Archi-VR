@@ -440,36 +440,36 @@ namespace ArchiVR
             // Left controller
             if (Application.leftControllerButtonMapping != null)
             {
-                Application.leftControllerButtonMapping.textLeftHandTrigger.text = "GFX Quality";
+                Application.leftControllerButtonMapping.HandTrigger.Text = "GFX Quality";
 
-                Application.leftControllerButtonMapping.textLeftIndexTrigger.text = "Verander schaal" + (isEditor ? " (?)" : "");
+                Application.leftControllerButtonMapping.IndexTrigger.Text = "Verander schaal" + (isEditor ? " (?)" : "");
 
-                Application.leftControllerButtonMapping.textButtonStart.text = "Toggle menu" + (isEditor ? " (F11)" : "");
+                Application.leftControllerButtonMapping.ButtonStart.Text = "Toggle menu" + (isEditor ? " (F11)" : "");
 
-                Application.leftControllerButtonMapping.textButtonX.text = "Vorig project" + (isEditor ? " (F1)" : "");
-                Application.leftControllerButtonMapping.textButtonY.text = "Volgend project" + (isEditor ? " (F2)" : "");
+                Application.leftControllerButtonMapping.ButtonX.Text = "Vorig project" + (isEditor ? " (F1)" : "");
+                Application.leftControllerButtonMapping.ButtonY.Text = "Volgend project" + (isEditor ? " (F2)" : "");
 
-                Application.leftControllerButtonMapping.textLeftThumbUp.text = "Model omhoog" + (isEditor ? " (Z)" : "");
-                Application.leftControllerButtonMapping.textLeftThumbDown.text = "Model omlaag" + (isEditor ? " (S)" : "");
-                Application.leftControllerButtonMapping.textLeftThumbLeft.text = "Model links" + (isEditor ? " (Q)" : "");
-                Application.leftControllerButtonMapping.textLeftThumbRight.text = "Model rechts" + (isEditor ? " (D)" : "");
+                Application.leftControllerButtonMapping.ThumbUp.Text = "Model omhoog" + (isEditor ? " (Z)" : "");
+                Application.leftControllerButtonMapping.ThumbDown.Text = "Model omlaag" + (isEditor ? " (S)" : "");
+                Application.leftControllerButtonMapping.ThumbLeft.Text = "Model links" + (isEditor ? " (Q)" : "");
+                Application.leftControllerButtonMapping.ThumbRight.Text = "Model rechts" + (isEditor ? " (D)" : "");
             }
 
             // Right controller
             if (Application.rightControllerButtonMapping != null)
             {
-                Application.rightControllerButtonMapping.textRightIndexTrigger.text = "";
-                Application.rightControllerButtonMapping.textRightHandTrigger.text = "";
+                Application.rightControllerButtonMapping.IndexTrigger.Text = "";
+                Application.rightControllerButtonMapping.HandTrigger.Text = "";
 
-                Application.rightControllerButtonMapping.textButtonOculus.text = "Exit";
+                Application.rightControllerButtonMapping.ButtonOculusStart.Text = "Exit";
 
-                Application.rightControllerButtonMapping.textButtonA.text = "";
-                Application.rightControllerButtonMapping.textButtonB.text = "";
+                Application.rightControllerButtonMapping.ButtonXA.Text = "";
+                Application.rightControllerButtonMapping.ButtonYB.Text = "";
 
-                Application.rightControllerButtonMapping.textRightThumbUp.text = "Beweeg vooruit" + (isEditor ? "(ArrowUp)" : "");
-                Application.rightControllerButtonMapping.textRightThumbDown.text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
-                Application.rightControllerButtonMapping.textRightThumbLeft.text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
-                Application.rightControllerButtonMapping.textRightThumbRight.text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
+                Application.rightControllerButtonMapping.ThumbUp.Text = "Beweeg vooruit" + (isEditor ? "(ArrowUp)" : "");
+                Application.rightControllerButtonMapping.ThumbDown.Text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
+                Application.rightControllerButtonMapping.ThumbLeft.Text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
+                Application.rightControllerButtonMapping.ThumbRight.Text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
             }
         }
     }

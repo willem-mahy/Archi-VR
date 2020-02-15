@@ -1,116 +1,151 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
-using WM;
-
-namespace WM
+namespace WM.UI
 {
-    namespace UI
+    /// <summary>
+    /// 
+    /// </summary>
+    public class ButtonMappingUI : MonoBehaviour
     {
-        public class ButtonMappingUI : MonoBehaviour
+        #region Fields
+
+        public enum Side
         {
-            #region Variables
+            Left,
+            Right
+        }
 
-            /*! The size of the 'Dead zone' for thumb sticks.
-             *
-             * As long as the absolute value of a a thumb stick axis
-             * is smaller than this value, the axis button is considered 'not pressed'. 
-             */
-            private readonly float thumbDeadZone = 0.2f;
+        /// <summary>
+        /// 
+        /// </summary>
+        public Side Hand = ButtonMappingUI.Side.Left;
 
-            #region Colors
+        /*! The size of the 'Dead zone' for thumb sticks.
+            *
+            * As long as the absolute value of a a thumb stick axis
+            * is smaller than this value, the axis button is considered 'not pressed'. 
+            */
+        private readonly float thumbDeadZone = 0.2f;
 
-            //! The color for down buttons' labels.
-            public Color DownColor { get; set; } = Color.yellow;
+        #region Colors
 
-            //! The color for up buttons' labels.
-            public Color UpColor { get; set; } = Color.red;
+        //! The color for down buttons' labels.
+        public Color DownColor { get; set; } = Color.yellow;
 
-            //! The color for pressed buttons' labels.
-            public Color PressedColor { get; set; } = Color.green;
+        //! The color for up buttons' labels.
+        public Color UpColor { get; set; } = Color.red;
 
-            //! The color for non-pressed buttons' labels.
-            public Color DefaultColor { get; set; } = Color.black;
+        //! The color for pressed buttons' labels.
+        public Color PressedColor { get; set; } = Color.green;
 
-            #endregion
+        //! The color for non-pressed buttons' labels.
+        public Color DefaultColor { get; set; } = Color.black;
 
-            #region Handles to Button UI Labels
+        #endregion
 
-            // Left Controller
-            public UnityEngine.UI.Text textButtonStart = null;
-            public UnityEngine.UI.Text textButtonX = null;
-            public UnityEngine.UI.Text textButtonY = null;
-            public UnityEngine.UI.Text textLeftHandTrigger = null;
-            public UnityEngine.UI.Text textLeftIndexTrigger = null;
-            public UnityEngine.UI.Text textLeftThumbUp = null;
-            public UnityEngine.UI.Text textLeftThumbDown = null;
-            public UnityEngine.UI.Text textLeftThumbLeft = null;
-            public UnityEngine.UI.Text textLeftThumbRight = null;
+        #region Handles to Button UI components
 
-            // Right controller
-            public UnityEngine.UI.Text textButtonOculus = null;
-            public UnityEngine.UI.Text textButtonA = null;
-            public UnityEngine.UI.Text textButtonB = null;
-            public UnityEngine.UI.Text textRightHandTrigger = null;
-            public UnityEngine.UI.Text textRightIndexTrigger = null;
-            public UnityEngine.UI.Text textRightThumbUp = null;
-            public UnityEngine.UI.Text textRightThumbDown = null;
-            public UnityEngine.UI.Text textRightThumbLeft = null;
-            public UnityEngine.UI.Text textRightThumbRight = null;
+        // The buttons
+        public ControllerButtonUI ButtonOculusStart;
+        public ControllerButtonUI ButtonXA;
+        public ControllerButtonUI ButtonYB;
+        public ControllerButtonUI HandTrigger;
+        public ControllerButtonUI IndexTrigger;
+        public ControllerButtonUI ThumbUp;
+        public ControllerButtonUI ThumbDown;
+        public ControllerButtonUI ThumbLeft;
+        public ControllerButtonUI ThumbRight;
 
-            #endregion
+        #region Aliases for buttons with different names Left <> Righ controller
 
-            #endregion
+        public ControllerButtonUI ButtonStart => ButtonOculusStart;
 
-            //! Updates the button mapping labels to the pressed state of their corresponding button.
-            public void SetControllerState(ControllerState controllerState)
+        public ControllerButtonUI ButtonX => ButtonXA;
+        public ControllerButtonUI ButtonA => ButtonXA;
+
+        public ControllerButtonUI ButtonY => ButtonYB;
+        public ControllerButtonUI ButtonB => ButtonYB;
+
+        #endregion Aliases for buttons with different names Left <> Righ controller
+
+        #endregion Handles to Button UI components
+
+        #endregion Fields
+
+        #region Public API
+
+        #region GameObject overrides
+
+        private void Start()
+        {
+
+        }
+
+        #endregion GameObject overrides
+
+        /// <summary>
+        /// Updates the button mapping labels to the pressed state of their corresponding button.
+        /// </summary>
+        /// <param name="controllerState"></param>
+        public void SetControllerState(ControllerState controllerState)
+        {
+            switch (Hand)
             {
-                #region Left controller
+                case Side.Left:
+                    UpdateState(ButtonXA, controllerState.button1Pressed);
+                    UpdateState(ButtonYB, controllerState.button2Pressed);
 
-                UpdateState(textButtonA, controllerState.button1Pressed);
-                UpdateState(textButtonB, controllerState.button2Pressed);
+                    UpdateState(ButtonStart, controllerState.buttonStartPressed);
 
-                UpdateState(textButtonStart, controllerState.buttonStartPressed);
+                    UpdateState(HandTrigger, controllerState.button5Pressed);
+                    UpdateState(IndexTrigger, controllerState.button7Pressed);
 
-                UpdateState(textLeftHandTrigger, controllerState.button5Pressed);
-                UpdateState(textLeftIndexTrigger, controllerState.button7Pressed);
+                    UpdateState(ThumbDown, controllerState.lThumbStick.y < -thumbDeadZone);
+                    UpdateState(ThumbUp, controllerState.lThumbStick.y > thumbDeadZone);
 
-                UpdateState(textLeftThumbDown, controllerState.lThumbStick.y < -thumbDeadZone);
-                UpdateState(textLeftThumbUp, controllerState.lThumbStick.y > thumbDeadZone);
+                    UpdateState(ThumbLeft, controllerState.lThumbStick.x < -thumbDeadZone);
+                    UpdateState(ThumbRight, controllerState.lThumbStick.x > thumbDeadZone);
+                    break;
+                case Side.Right:
+                    UpdateState(ButtonX, controllerState.button3Pressed);
+                    UpdateState(ButtonY, controllerState.button4Pressed);
 
-                UpdateState(textLeftThumbLeft, controllerState.lThumbStick.x < -thumbDeadZone);
-                UpdateState(textLeftThumbRight, controllerState.lThumbStick.x > thumbDeadZone);
+                    UpdateState(ButtonOculusStart, controllerState.buttonOculusPressed);
 
-                #endregion
+                    UpdateState(HandTrigger, controllerState.button6Pressed);
+                    UpdateState(IndexTrigger, controllerState.button8Pressed);
 
-                #region Right controller
+                    UpdateState(ThumbDown, controllerState.rThumbStick.y < -thumbDeadZone);
+                    UpdateState(ThumbUp, controllerState.rThumbStick.y > thumbDeadZone);
 
-                UpdateState(textButtonX, controllerState.button3Pressed);
-                UpdateState(textButtonY, controllerState.button4Pressed);
-
-                UpdateState(textButtonOculus, controllerState.buttonOculusPressed);
-
-                UpdateState(textRightHandTrigger, controllerState.button6Pressed);
-                UpdateState(textRightIndexTrigger, controllerState.button8Pressed);
-
-                UpdateState(textRightThumbDown, controllerState.rThumbStick.y < -thumbDeadZone);
-                UpdateState(textRightThumbUp, controllerState.rThumbStick.y > thumbDeadZone);
-
-                UpdateState(textRightThumbLeft, controllerState.rThumbStick.x < -thumbDeadZone);
-                UpdateState(textRightThumbRight, controllerState.rThumbStick.x > thumbDeadZone);
-
-                #endregion
-            }
-
-            //! Updates the given button mapping label to the given pressed state.
-            private void UpdateState(
-                UnityEngine.UI.Text buttonText,
-                bool pressed) // TODO: refactor to a four-state ButtonState (default/down/pressed/up), and use all four colors...
-            {
-                if (buttonText == null)
-                    return;
-
-                buttonText.color = (pressed ? PressedColor : DefaultColor);
+                    UpdateState(ThumbLeft, controllerState.rThumbStick.x < -thumbDeadZone);
+                    UpdateState(ThumbRight, controllerState.rThumbStick.x > thumbDeadZone);
+                    break;
             }
         }
+
+        #endregion Public API
+
+        #region Non-public API
+
+        /// <summary>
+        /// Updates the given button mapping label to the given pressed state.
+        /// </summary>
+        /// <param name="controllerButtonUI"></param>
+        /// <param name="pressed"></param>
+        private void UpdateState(
+            ControllerButtonUI controllerButtonUI,
+            bool pressed) // TODO: refactor to a four-state ButtonState (default/down/pressed/up), and use all four colors...
+        {
+            if (controllerButtonUI == null)
+            {
+                return;
+            }
+
+            controllerButtonUI.TextColor = (pressed ? PressedColor : DefaultColor);
+        }
+
+        #endregion Non-public API
     }
 }

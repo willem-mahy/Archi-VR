@@ -209,28 +209,28 @@ namespace ArchiVR
 
                 if (buttonMapping != null)
                 {
-                    buttonMapping.textLeftHandTrigger.text = "GFX Quality";
+                    buttonMapping.HandTrigger.Text = "GFX Quality";
 
-                    buttonMapping.textLeftIndexTrigger.text = "Verander schaal" + (isEditor ? " (R)" : "");
+                    buttonMapping.IndexTrigger.Text = "Verander schaal" + (isEditor ? " (R)" : "");
 
-                    buttonMapping.textButtonStart.text = "Toggle menu" + (isEditor ? " (F11)" : "");
+                    buttonMapping.ButtonStart.Text = "Toggle menu" + (isEditor ? " (F11)" : "");
 
-                    buttonMapping.textButtonX.text = "Vorig project" + (isEditor ? " (F1)" : "");
-                    buttonMapping.textButtonY.text = "Volgend project" + (isEditor ? " (F2)" : "");
+                    buttonMapping.ButtonX.Text = "Vorig project" + (isEditor ? " (F1)" : "");
+                    buttonMapping.ButtonY.Text = "Volgend project" + (isEditor ? " (F2)" : "");
 
                     if (Application.EnableTrackingSpaceTranslationUpDown)
                     {
-                        buttonMapping.textLeftThumbUp.text = "Beweeg omhoog" + (isEditor ? " (Z)" : "");
-                        buttonMapping.textLeftThumbDown.text = "Beweeg omlaag" + (isEditor ? " (S)" : "");
+                        buttonMapping.ThumbUp.Text = "Beweeg omhoog" + (isEditor ? " (Z)" : "");
+                        buttonMapping.ThumbDown.Text = "Beweeg omlaag" + (isEditor ? " (S)" : "");
                     }
                     else
                     {
-                        buttonMapping.textLeftThumbUp.text = "";
-                        buttonMapping.textLeftThumbDown.text = "";
+                        buttonMapping.ThumbUp.Text = "";
+                        buttonMapping.ThumbDown.Text = "";
                     }
 
-                    buttonMapping.textLeftThumbLeft.text = "< Tracking " + (isEditor ? " (Q)" : "");
-                    buttonMapping.textLeftThumbRight.text = "Tracking >" + (isEditor ? " (D)" : "");
+                    buttonMapping.ThumbLeft.Text = "< Tracking " + (isEditor ? " (Q)" : "");
+                    buttonMapping.ThumbRight.Text = "Tracking >" + (isEditor ? " (D)" : "");
                 }
             }
 
@@ -240,18 +240,18 @@ namespace ArchiVR
 
                 if (buttonMapping != null)
                 {
-                    buttonMapping.textRightIndexTrigger.text = "";
-                    buttonMapping.textRightHandTrigger.text = "";
+                    buttonMapping.IndexTrigger.Text = "";
+                    buttonMapping.HandTrigger.Text = "";
 
-                    buttonMapping.textButtonOculus.text = "Exit" + (isEditor ? " ()" : "");
+                    buttonMapping.ButtonOculusStart.Text = "Exit" + (isEditor ? " ()" : "");
 
-                    buttonMapping.textButtonA.text = "Vorige locatie" + (isEditor ? " (F3)" : "");
-                    buttonMapping.textButtonB.text = "Volgende locatie" + (isEditor ? " (F4)" : "");
+                    buttonMapping.ButtonXA.Text = "Vorige locatie" + (isEditor ? " (F3)" : "");
+                    buttonMapping.ButtonYB.Text = "Volgende locatie" + (isEditor ? " (F4)" : "");
 
-                    buttonMapping.textRightThumbUp.text = "Beweeg vooruit" + (isEditor ? " (ArrowUp)" : "");
-                    buttonMapping.textRightThumbDown.text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
-                    buttonMapping.textRightThumbLeft.text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
-                    buttonMapping.textRightThumbRight.text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
+                    buttonMapping.ThumbUp.Text = "Beweeg vooruit" + (isEditor ? " (ArrowUp)" : "");
+                    buttonMapping.ThumbDown.Text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
+                    buttonMapping.ThumbLeft.Text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
+                    buttonMapping.ThumbRight.Text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
                 }
             }
         }
