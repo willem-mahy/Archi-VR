@@ -1122,7 +1122,7 @@ namespace ArchiVR.Application
         {
             get
             {
-                return Path.Combine(UnityEngine.Application.persistentDataPath, "ApplicationArchiVRSettings.xml");
+                return Path.Combine(UnityEngine.Application.persistentDataPath, "ApplicationArchiVRSettings" + ID + ".xml");
             }
         }
 
