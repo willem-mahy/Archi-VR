@@ -5,11 +5,12 @@ using WM.Application;
 
 namespace WM.UI
 {
-    public class GraphicsMenu : MonoBehaviour
+    /// <summary>
+    /// The 'Graphics' menu panel.
+    /// </summary>
+    public class GraphicsMenu : MenuPanel<UnityApplication>
     {
         #region Variables
-
-        public UnityApplication Application;
 
         public Dropdown QualityDropdown;
 
@@ -24,16 +25,9 @@ namespace WM.UI
         /// <summary>
         /// Start is called before the first frame update
         /// </summary>
-        void Start()
+        override public void Start()
         {
-            #region Get references to GameObjects.
-
-            if (Application == null)
-            {
-                Application = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application").GetComponent<UnityApplication>();
-            }
-
-            #endregion
+            base.Start();
 
             #region Get references to UI components.
 
@@ -49,7 +43,7 @@ namespace WM.UI
 
             if (ShowFpsToggle == null)
             {
-                var showFpsToggleGO = UtilUnity.TryFindGameObject("GraphicsMenu_ShowFpsToggle");
+                var showFpsToggleGO = UtilUnity.FindGameObjectElseError(gameObject.scene, "GraphicsMenu_ShowFpsToggle");
 
                 if (showFpsToggleGO != null)
                 {

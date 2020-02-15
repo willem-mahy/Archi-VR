@@ -98,7 +98,7 @@ namespace WM.Application
         /// <summary>
         /// WHether colocation is enabled.
         /// </summary>
-        private bool _colocationEnabled = true;
+        private bool _colocationEnabled = false;
 
         /// <summary>
         /// 
@@ -607,9 +607,6 @@ namespace WM.Application
         /// </summary>
         public virtual void Init()
         {
-            //Logger.Enabled = EnableLoggerAtStartup; // Now gotten from application settings file...
-
-            //Player.AvatarID = DefaultAvatarID; // Now gotten from application settings file...
             Player.ClientID = Client == null ? new Guid() : Client.ID;
 
             ServerDiscovery.SetLog(Logger);

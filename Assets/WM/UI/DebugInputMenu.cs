@@ -5,14 +5,12 @@ using WM.Application;
 namespace WM.UI
 {
     /// <summary>
-    /// 
+    /// The 'Debug Input' menu panel.
+    /// Shows the actual state of the controller input.
     /// </summary>
-    public class DebugInputMenu : MonoBehaviour
+    public class DebugInputMenu : MenuPanel<UnityApplication>
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public UnityApplication Application;
+        #region Fields
 
         /// <summary>
         /// 
@@ -29,6 +27,11 @@ namespace WM.UI
         /// </summary>
         public Text RControllerText = null;
 
+        #endregion Fields
+
+        #region Public API
+
+        #region GameObject overrides
 
         /// <summary>
         /// Update is called once per frame.
@@ -109,6 +112,12 @@ namespace WM.UI
             RControllerText.text = text;
         }
 
+        #endregion GameObject overrides
+
+        #endregion Public API
+
+        #region Non-public API
+
         /// <summary>
         /// 
         /// </summary>
@@ -141,5 +150,7 @@ namespace WM.UI
 
             return "";
         }
+
+        #endregion Non-public API
     }
-}
+} // namespace WM.UI

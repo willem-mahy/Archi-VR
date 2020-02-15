@@ -1,20 +1,17 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine.UI;
 using WM.Application;
 
 namespace WM.UI
 {
     /// <summary>
-    /// Menu that shows general information about the software and the system on which it is running.
+    /// The 'Info' menu panel.
+    /// Displays general information about:
+    /// - the application.
+    /// - the system on which the application is running.
     /// </summary>
-    public class InfoMenu : MonoBehaviour
+    public class InfoMenu : MenuPanel<UnityApplication>
     {
         #region Variables
-
-        /// <summary>
-        /// The application.
-        /// </summary>
-        public UnityApplication Application;
 
         /// <summary>
         /// The UI Text to display the application version.
@@ -35,17 +32,12 @@ namespace WM.UI
 
         #region GameObject overrides
 
-        // Start is called before the first frame update
-        void Start()
+        /// <summary>
+        /// Start is called before the first frame update.
+        /// </summary>
+        override public void Start()
         {
-            #region Get references to GameObjects.
-
-            if (Application == null)
-            {
-                Application = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application").GetComponent<UnityApplication>();
-            }
-
-            #endregion
+            base.Start();
 
             #region Get references to UI components.
 

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 using WM.Application;
 using WM.Command;
@@ -7,13 +8,11 @@ using WM.Net;
 namespace WM.UI
 {
     /// <summary>
-    /// 
+    /// The 'Network' menu panel.
     /// </summary>
-    public class NetworkMenuPanel : MonoBehaviour
+    public class NetworkMenuPanel : MenuPanel<UnityApplication>
     {
         #region Variables
-
-        public UnityApplication Application;
 
         public Text NetworkModeText;
 
@@ -41,17 +40,9 @@ namespace WM.UI
         /// <summary>
         /// Start is called before the first frame update
         /// </summary>
-        void Start()
+        override public void Start()
         {
-            #region Get references to GameObjects.
-
-            if (Application == null)
-            {
-                var applicationGO = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application");
-                Application = applicationGO.GetComponent<UnityApplication>();
-            }
-
-            #endregion
+            base.Start();
 
             UpdateUI(); // If startup mode is Standalone, the UI is not updated accordingly, so force that explicitely here...
         }
