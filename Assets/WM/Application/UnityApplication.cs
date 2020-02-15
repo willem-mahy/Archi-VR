@@ -1000,7 +1000,7 @@ namespace WM.Application
         /// Process the given message (that came in via the network).
         /// </summary>
         /// <param name="message">The message to process.</param>
-        void IMessageProcessor.Process(object message)
+        public void Process(object message)
         {
             // If it's a command, queue it.
             if (message is ICommand command)
