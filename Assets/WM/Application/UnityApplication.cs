@@ -845,14 +845,10 @@ namespace WM.Application
         /// </summary>
         public void Fly()
         {
-            if (SharedTrackingSpace == true)
+            if ((NetworkMode != NetworkMode.Standalone) && ColocationEnabled)
             {
-                Logger.Warning("Unsupported SharedTrackingSpace == true: movement will be impossible in editor mode clients!");
-            }
-
-            if ((NetworkMode == NetworkMode.Client) && (SharedTrackingSpace == true))
-            {
-                return; // Only server can manipulate tracking space!
+                Logger.Warning("UnityApplication.Fly: Colocation is enabled -> trackingspace manipulation disabled!");
+                return;
             }
 
             #region Compute translation offset vector.
@@ -1247,9 +1243,10 @@ namespace WM.Application
         /// </summary>
         public void UpdateTrackingSpace()
         {
-            if ((NetworkMode == NetworkMode.Client) && (SharedTrackingSpace == true))
+            if ((NetworkMode != NetworkMode.Standalone) && ColocationEnabled)
             {
-                return; // Only server can manipulate tracking space!
+                Logger.Warning("UnityApplication.UpdateTrackingSpace: Colocation is enabled -> trackingspace manipulation disabled!");
+                return;
             }
 
             if (m_ovrCameraRig == null)
