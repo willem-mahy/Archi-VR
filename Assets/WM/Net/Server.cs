@@ -817,7 +817,7 @@ namespace WM.Net
                         }
 
                         _log.Debug(callLogTag + ": Client '" + newClientConnection.ClientID + "' connected.");
-
+                        
                         newClientConnection.SendTCP("Connection Complete");
 
                         OnClientConnected(newClientConnection);
