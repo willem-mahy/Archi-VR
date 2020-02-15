@@ -225,7 +225,7 @@ namespace ArchiVR.Application
         {
             var settings = LoadSettings();
 
-            Logger.Enabled = settings.LoggingEnabled;
+            Logger.Enabled = settings.DebugLogSettings.LoggingEnabled;
 
             QualitySettings.SetQualityLevel(settings.GraphicsSettings.QualityLevel);
             FpsPanelHUD.SetActive(settings.GraphicsSettings.ShowFPS);
@@ -255,6 +255,10 @@ namespace ArchiVR.Application
             m_applicationStates.Add(ApplicationStateDefineSharedReferenceSystem);
             
             base.Init();
+
+            SetSharedReferenceSystemLocalLocation(
+                settings.NetworkSettings.SharedReferencePosition,
+                settings.NetworkSettings.SharedReferenceRotation);
 
             #region Init immersion modes.
 
@@ -1210,10 +1214,15 @@ namespace ArchiVR.Application
         {
             var settings = new ApplicationArchiVRSettings();
 
-            settings.LoggingEnabled = Logger.Enabled;
+            settings.NetworkSettings.ColocationEnabled = ColocationEnabled;
+            settings.NetworkSettings.SharedReferencePosition = SharedReferenceSystem.transform.localPosition;
+            settings.NetworkSettings.SharedReferenceRotation = SharedReferenceSystem.transform.localRotation;
+
+            settings.DebugLogSettings.LoggingEnabled = Logger.Enabled;
             
             settings.GraphicsSettings.QualityLevel = QualitySettings.GetQualityLevel();
             settings.GraphicsSettings.ShowFPS = FpsPanelHUD.activeSelf;
+            settings.GraphicsSettings.ShowReferenceFrames = ShowReferenceSystems;
 
             settings.PlayerNames = _playerNames;
 

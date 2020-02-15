@@ -19,17 +19,17 @@ namespace ArchiVR.Application
     [XmlRoot("ApplicationArchiVRSettings")]
     public class ApplicationArchiVRSettings
     {
-        public GraphicsSettings GraphicsSettings = new GraphicsSettings();
-
-        public bool LoggingEnabled = false;
-
-        public List<string> PlayerNames = new List<string>();
+        public NetworkSettings NetworkSettings = new NetworkSettings();
 
         public PlayerSettings PlayerSettings = new PlayerSettings();
 
-        public SerializableVector3 SharedReferenceFramePosition = Vector3.zero;
+        public GraphicsSettings GraphicsSettings = new GraphicsSettings();
 
-        public SerializableQuaternion SharedReferenceFrameRotation = Quaternion.identity;
+        public DebugLogSettings DebugLogSettings = new DebugLogSettings();
+
+        public List<string> PlayerNames = new List<string>();
+
+        
     }
 
     [Serializable]
@@ -46,5 +46,25 @@ namespace ArchiVR.Application
     {
         public int QualityLevel = 0;
         public bool ShowFPS = false;
+        public bool ShowReferenceFrames = false;
+    }
+
+    [Serializable]
+    [XmlRoot("NetworkSettings")]
+    public class NetworkSettings
+    {
+        public bool ColocationEnabled = false;
+        public Vector3 SharedReferencePosition = Vector3.zero;
+        public Quaternion SharedReferenceRotation = Quaternion.identity;
+    }
+
+    [Serializable]
+    [XmlRoot("DebugLogSettings")]
+    public class DebugLogSettings
+    {
+        public bool LoggingEnabled = false;
+        public bool FilterWarnings = false;
+        public bool FilterErrors = false;
+        public bool FilterDebug = false;
     }
 }
