@@ -1002,6 +1002,20 @@ namespace WM.Application
         /// <param name="message">The message to process.</param>
         public void Process(object message)
         {
+            if (message is AddPlayerCommand addPlayerCommand)
+            {
+                if (this.NetworkMode == NetworkMode.Client)
+                {
+                    Logger.Warning(string.Format("UnityApplication.Process: ClientApp {0} received AddPlayerCmmand for player {1}", Client.LogID, addPlayerCommand.Player.LogID));
+                }
+
+                if (this.NetworkMode == NetworkMode.Server)
+                {
+                    Logger.Warning(string.Format("UnityApplication.Process: ServerApp {0} received AddPlayerCmmand for player {1}", Client.LogID, addPlayerCommand.Player.LogID));
+                }
+
+            }
+
             // If it's a command, queue it.
             if (message is ICommand command)
             {
@@ -1433,7 +1447,7 @@ namespace WM.Application
         public void AddPlayer(
             Player player)
         {
-            Logger.Debug(string.Format(name + ":AddPlayer(Client:{0}, Player:{1}, Name:'{2}')", WM.Net.NetUtil.ShortID(player.ClientID), player.LogID, player.Name));
+            Logger.Warning(string.Format(name + ":AddPlayer(Client:{0}, Player:{1}, Name:'{2}')", WM.Net.NetUtil.ShortID(player.ClientID), player.LogID, player.Name));
 
             lock (Players)
             {
