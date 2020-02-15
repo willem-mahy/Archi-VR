@@ -50,6 +50,8 @@ namespace WM.Colocation
         /// </summary>
         public override void Enter()
         {
+            m_application.m_controllerInput.Reset(); // To prevent a spurious point measurement when starting the procedure.
+
             OVRManager.instance.AllowRecenter = false;
 
             OVRManager.boundary.SetVisible(true);
@@ -64,7 +66,7 @@ namespace WM.Colocation
             
             // Show bounds of tracking system
             
-            InitButtonMappingUI();
+            InitButtonMappingUI_MeasurePoint();
 
             UpdateInfoText();
         }
@@ -144,7 +146,9 @@ namespace WM.Colocation
                 m_application.UpdateTrackingSpace();
             }
 
-            UpdateControllerInfos();            
+            UpdateControllerInfos();
+
+            var back = m_application.m_controllerInput.m_controllerState.button1Down || m_application.m_controllerInput.m_controllerState.button3Down;
 
             if (_newPoints.Count < 2)
             {
@@ -156,7 +160,7 @@ namespace WM.Colocation
                 {
                     MeasurePoint(m_application.m_rightHandAnchor.transform);
                 }
-                else if (m_application.m_controllerInput.m_controllerState.button5Down || m_application.m_controllerInput.m_controllerState.button6Down)
+                else if (back)
                 {
                     ErasePoint();
                 }
@@ -167,7 +171,7 @@ namespace WM.Colocation
                 {
                     m_application.SetActiveApplicationState(0);
                 }
-                else if (m_application.m_controllerInput.m_controllerState.button5Down || m_application.m_controllerInput.m_controllerState.button6Down)
+                else if (back)
                 {
                     ErasePoint();
                 }
@@ -225,7 +229,7 @@ namespace WM.Colocation
         /// <summary>
         /// 
         /// </summary>
-        public void InitButtonMappingUI()
+        public void InitButtonMappingUI_MeasurePoint()
         {
             m_application.Logger.Debug("ApplicationStateDefineSharedReferenceSystem.InitButtonMappingUI()");
 
@@ -237,11 +241,11 @@ namespace WM.Colocation
             if (leftControllerButtonMapping != null)
             {
                 leftControllerButtonMapping.textLeftIndexTrigger.text = "Measure";
-                leftControllerButtonMapping.textLeftHandTrigger.text = "Erase";
+                leftControllerButtonMapping.textLeftHandTrigger.text = "";
 
                 leftControllerButtonMapping.textButtonStart.text = "";
 
-                leftControllerButtonMapping.textButtonX.text = "";
+                leftControllerButtonMapping.textButtonX.text = "Erase";
                 leftControllerButtonMapping.textButtonY.text = "";
 
                 leftControllerButtonMapping.textLeftThumbUp.text = "";
@@ -256,11 +260,59 @@ namespace WM.Colocation
             if (rightControllerButtonMapping != null)
             {
                 rightControllerButtonMapping.textRightIndexTrigger.text = "Measure";
-                rightControllerButtonMapping.textRightHandTrigger.text = "Erase";
+                rightControllerButtonMapping.textRightHandTrigger.text = "";
 
                 rightControllerButtonMapping.textButtonOculus.text = "Exit";
 
-                rightControllerButtonMapping.textButtonA.text = "";
+                rightControllerButtonMapping.textButtonA.text = "Erase";
+                rightControllerButtonMapping.textButtonB.text = "";
+
+                rightControllerButtonMapping.textRightThumbUp.text = (isEditor ? "Beweeg vooruit (ArrowUp)" : "");
+                rightControllerButtonMapping.textRightThumbDown.text = (isEditor ? "Beweeg achteruit (ArrowDown)" : "");
+                rightControllerButtonMapping.textRightThumbLeft.text = (isEditor ? "Beweeg links (ArrowLeft)" : "");
+                rightControllerButtonMapping.textRightThumbRight.text = (isEditor ? "Beweeg rechts (ArrowRight)" : "");
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void InitButtonMappingUI_AcceptSRF()
+        {
+            m_application.Logger.Debug("ApplicationStateDefineSharedReferenceSystem.InitButtonMappingUI()");
+
+            var isEditor = UnityEngine.Application.isEditor;
+
+            // Left controller
+            var leftControllerButtonMapping = m_application.leftControllerButtonMapping;
+
+            if (leftControllerButtonMapping != null)
+            {
+                leftControllerButtonMapping.textLeftIndexTrigger.text = "Accept";
+                leftControllerButtonMapping.textLeftHandTrigger.text = "";
+
+                leftControllerButtonMapping.textButtonStart.text = "";
+
+                leftControllerButtonMapping.textButtonX.text = "Erase";
+                leftControllerButtonMapping.textButtonY.text = "";
+
+                leftControllerButtonMapping.textLeftThumbUp.text = "";
+                leftControllerButtonMapping.textLeftThumbDown.text = "";
+                leftControllerButtonMapping.textLeftThumbLeft.text = "";
+                leftControllerButtonMapping.textLeftThumbRight.text = "";
+            }
+
+            // Right controller
+            var rightControllerButtonMapping = m_application.rightControllerButtonMapping;
+
+            if (rightControllerButtonMapping != null)
+            {
+                rightControllerButtonMapping.textRightIndexTrigger.text = "Accept";
+                rightControllerButtonMapping.textRightHandTrigger.text = "";
+
+                rightControllerButtonMapping.textButtonOculus.text = "Exit";
+
+                rightControllerButtonMapping.textButtonA.text = "Erase";
                 rightControllerButtonMapping.textButtonB.text = "";
 
                 rightControllerButtonMapping.textRightThumbUp.text = (isEditor ? "Beweeg vooruit (ArrowUp)" : "");
@@ -305,6 +357,7 @@ namespace WM.Colocation
             if (_newPoints.Count == 2)
             {
                 CreateNewSharedReferenceSystem();
+                InitButtonMappingUI_AcceptSRF();
             }
 
             UpdateInfoText();
@@ -346,6 +399,7 @@ namespace WM.Colocation
             }
 
             UpdateInfoText();
+            InitButtonMappingUI_MeasurePoint();
         }
 
         /// <summary>
