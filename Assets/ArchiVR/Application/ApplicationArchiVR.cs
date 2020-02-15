@@ -233,6 +233,12 @@ namespace ArchiVR.Application
             _playerNames = settings.PlayerNames;
 
             Player.Name = settings.PlayerSettings.name;
+
+            if (!_playerNames.Contains(Player.Name))
+            {
+                _playerNames.Add(Player.Name);
+            }
+
             Player.AvatarID = settings.PlayerSettings.avatarID;
 
             if (!UnitTestModeEnabled && (OVRManager.instance == null))
