@@ -1600,6 +1600,40 @@ namespace WM.Application
         /// </summary>
         /// <param name="position"></param>
         /// <param name="rotation"></param>
+        public void SetSharedReferenceSystemLocalLocation(
+            Vector3 position,
+            Quaternion rotation)
+        {
+            SetReferenceSystemLocalLocation(
+                SharedReferenceSystem,
+                position,
+                rotation);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="rotation"></param>
+        public static void SetReferenceSystemLocalLocation(
+            ReferenceSystem6DOF referenceSystem,
+            Vector3 position,
+            Quaternion rotation)
+        {
+            var referenceSystemGO = referenceSystem.gameObject;
+
+            // Copy over location.
+            referenceSystemGO.transform.localPosition = position;
+            referenceSystemGO.transform.localRotation = rotation;
+
+            UpdateReferenceSystemCaption(referenceSystem);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="rotation"></param>
         public void SetSharedReferenceSystemLocation(
             Vector3 position,
             Quaternion rotation)
@@ -1626,7 +1660,17 @@ namespace WM.Application
             referenceSystemGO.transform.position = position;
             referenceSystemGO.transform.rotation = rotation;
 
-            // Update caption.
+            UpdateReferenceSystemCaption(referenceSystem);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="referenceSystem"></param>
+        private static void UpdateReferenceSystemCaption(ReferenceSystem6DOF referenceSystem)
+        {
+            var referenceSystemGO = referenceSystem.gameObject;
+            
             var sharedReferenceSystemLocalPosition = referenceSystemGO.transform.localPosition;
             var captionText = string.Format("{0} {1}", referenceSystemGO.name, UtilUnity.ToString(sharedReferenceSystemLocalPosition));
             referenceSystem.CaptionText = captionText;
