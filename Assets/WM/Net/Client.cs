@@ -238,14 +238,6 @@ namespace WM.Net
         #region Public API
 
         /// <summary>
-        /// Sets the log.
-        /// </summary>
-        public void SetLog(Logger log)
-        {
-            _log = log;
-        }
-
-        /// <summary>
         /// Starts initializing the connection to the Server.
         /// 
         /// \pre The Client must be in state 'Disconnected' for this method to succeed.
