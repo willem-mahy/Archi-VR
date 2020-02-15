@@ -223,6 +223,11 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Init()
         {
+            if (!UnitTestModeEnabled && (OVRManager.instance == null))
+            {
+                Instantiate(ovrManagerPrefab, Vector3.zero, Quaternion.identity);
+            }
+
             var settings = LoadSettings();
 
             Logger.Enabled = settings.DebugLogSettings.LoggingEnabled;
@@ -240,12 +245,6 @@ namespace ArchiVR.Application
             }
 
             Player.AvatarID = settings.PlayerSettings.avatarID;
-
-            if (!UnitTestModeEnabled && (OVRManager.instance == null))
-            {
-                // Instantiate at position (0, 0, 0) and zero rotation.
-                Instantiate(ovrManagerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
-            }
 
             // Initialize application modes
             applicationStateTeleporting.TeleportationSystem = this.TeleportationSystem = new TeleportationSystemArchiVR(this);
