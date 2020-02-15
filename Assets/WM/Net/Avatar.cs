@@ -35,8 +35,10 @@ namespace WM.Net
             Head.transform.rotation = state.HeadRotation;
 
             var offsetFromEyesToNeckBase = -0.2f * Head.transform.forward - 0.2f * Head.transform.up;
-            //Body.transform.position = state.HeadPosition + offsetFromEyesToNeckBase;
-            Body.transform.rotation = Quaternion.AngleAxis((float)(Math.Atan2(Head.transform.forward.x, Head.transform.forward.z)), Vector3.up);
+            
+            var fwd = Head.transform.forward;
+            fwd.y = 0;
+            Body.transform.LookAt(Body.transform.position + fwd, Vector3.up);
 
             LHand.transform.position = state.LHandPosition;
             LHand.transform.rotation = state.LHandRotation;
