@@ -48,8 +48,7 @@ namespace WM.UI
 
             if (UnityEngine.Application.isEditor)
             {
-                MenuSizeSlider.maxValue = 0.005f; 
-                MenuSizeSlider.value = MenuHeightSlider.maxValue;
+                MenuSizeSlider.maxValue = 0.005f;
             }
         }
 
@@ -58,6 +57,8 @@ namespace WM.UI
         /// </summary>
         void Update()
         {
+            MenuSizeSlider.SetValueWithoutNotify(Application.WorldSpaceMenu.gameObject.transform.localScale.x);
+            MenuHeightSlider.SetValueWithoutNotify(Application.WorldSpaceMenu.Offset.y);
         }
 
         #region UI Event Handlers
