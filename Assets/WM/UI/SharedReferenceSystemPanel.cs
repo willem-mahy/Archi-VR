@@ -69,6 +69,13 @@ namespace WM.UI
             Application.Logger.Debug("SharedReferenceSystemPanel:OnClickEditButton()");
 
             Application.MenuVisible = false;
+
+            // Prior to entering the 'EditSharedReference' application state,
+            // we need to clear the 'Down' state for all controller buttons,
+            // in order to prevent a spurious measurement of the first point at the location where the controller is located when clicking the 'Edit SRF' button.
+            Application.m_controllerInput.ResetDownStates();
+
+            // Start the 'EditSharedReference' application state,
             Application.SetActiveApplicationState(2);
         }
 

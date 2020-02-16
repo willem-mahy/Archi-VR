@@ -61,8 +61,6 @@ namespace WM.Colocation
         /// </summary>
         public override void Enter()
         {
-            m_application.m_controllerInput.Reset(); // To prevent a spurious point measurement when starting the procedure.
-
             OVRManager.instance.AllowRecenter = false;
 
             OVRManager.boundary.SetVisible(true);
@@ -87,8 +85,6 @@ namespace WM.Colocation
         /// </summary>
         public override void Exit()
         {
-            AcceptNewReferenceSystem();
-
             OVRManager.instance.AllowRecenter = m_application.ColocationEnabled;
 
             OVRManager.boundary.SetVisible(false);
@@ -141,9 +137,9 @@ namespace WM.Colocation
                 newSharedReferenceSystemGO.transform.position,
                 newSharedReferenceSystemGO.transform.rotation);
 
-            // Destroy the new shared reference system.
-            UtilUnity.Destroy(newSharedReferenceSystemGO);
-            _newSharedReferenceSystem = null;
+            RemoveNewSharedReferenceSystem();
+
+            m_application.SetActiveApplicationState(0);
         }
 
         /// <summary>
@@ -157,9 +153,17 @@ namespace WM.Colocation
                 m_application.UpdateTrackingSpace();
             }
 
+            var controllerState = m_application.m_controllerInput.m_controllerState;
+
+            if (controllerState.buttonStartDown)
+            {
+                Abort();
+                return;
+            }
+
             UpdateControllerInfos();
 
-            var back = m_application.m_controllerInput.m_controllerState.button1Down || m_application.m_controllerInput.m_controllerState.button3Down;
+            var back = controllerState.button1Down || m_application.m_controllerInput.m_controllerState.button3Down;
 
             if (_newPoints.Count < 2)
             {
@@ -180,7 +184,8 @@ namespace WM.Colocation
             {
                 if (m_application.m_controllerInput.m_controllerState.button7Down || m_application.m_controllerInput.m_controllerState.button8Down)
                 {
-                    m_application.SetActiveApplicationState(0);
+                    AcceptNewReferenceSystem();
+                    return;
                 }
                 else if (back)
                 {
@@ -251,12 +256,19 @@ namespace WM.Colocation
 
             if (leftControllerButtonMapping != null)
             {
-                leftControllerButtonMapping.IndexTrigger.Text = "Measure";
+                leftControllerButtonMapping.IndexTrigger.Text = "Measure" + (isEditor ? " (R)" : "");
                 leftControllerButtonMapping.HandTrigger.Text = "";
 
-                leftControllerButtonMapping.ButtonStart.Text = "";
+                leftControllerButtonMapping.ButtonStart.Text = "Abort" + (isEditor ? " (F11)" : "");
 
-                leftControllerButtonMapping.ButtonX.Text = "Erase";
+                if (_newPoints.Count == 0)
+                {
+                    leftControllerButtonMapping.ButtonX.Text = "";
+                }
+                else
+                {
+                    leftControllerButtonMapping.ButtonX.Text = "Erase Point " + _newPoints.Count + (isEditor ? " (F1)" : "");
+                }
                 leftControllerButtonMapping.ButtonY.Text = "";
 
                 leftControllerButtonMapping.ThumbUp.Text = "";
@@ -270,18 +282,25 @@ namespace WM.Colocation
 
             if (rightControllerButtonMapping != null)
             {
-                rightControllerButtonMapping.IndexTrigger.Text = "Measure";
+                rightControllerButtonMapping.IndexTrigger.Text = "Measure" + (isEditor ? " (LMB)" : "");
                 rightControllerButtonMapping.HandTrigger.Text = "";
 
-                rightControllerButtonMapping.ButtonOculusStart.Text = "Exit";
+                rightControllerButtonMapping.ButtonOculusStart.Text = "Exit" + (isEditor ? " (F12)" : ""); ;
 
-                rightControllerButtonMapping.ButtonXA.Text = "Erase";
-                rightControllerButtonMapping.ButtonYB.Text = "";
+                if (_newPoints.Count == 0)
+                {
+                    rightControllerButtonMapping.ButtonA.Text = "";
+                }
+                else
+                {
+                    rightControllerButtonMapping.ButtonA.Text = "Erase Point " + _newPoints.Count + (isEditor ? " (F3)" : "");
+                }
+                rightControllerButtonMapping.ButtonB.Text = "";
 
-                rightControllerButtonMapping.ThumbUp.Text = (isEditor ? "Beweeg vooruit (ArrowUp)" : "");
-                rightControllerButtonMapping.ThumbDown.Text = (isEditor ? "Beweeg achteruit (ArrowDown)" : "");
-                rightControllerButtonMapping.ThumbLeft.Text = (isEditor ? "Beweeg links (ArrowLeft)" : "");
-                rightControllerButtonMapping.ThumbRight.Text = (isEditor ? "Beweeg rechts (ArrowRight)" : "");
+                rightControllerButtonMapping.ThumbUp.Text = (isEditor ? "Beweeg vooruit (Up)" : "");
+                rightControllerButtonMapping.ThumbDown.Text = (isEditor ? "Beweeg achteruit (Down)" : "");
+                rightControllerButtonMapping.ThumbLeft.Text = (isEditor ? "Beweeg links (Left)" : "");
+                rightControllerButtonMapping.ThumbRight.Text = (isEditor ? "Beweeg rechts (Right)" : "");
             }
         }
 
@@ -299,12 +318,12 @@ namespace WM.Colocation
 
             if (leftControllerButtonMapping != null)
             {
-                leftControllerButtonMapping.IndexTrigger.Text = "Accept";
+                leftControllerButtonMapping.IndexTrigger.Text = "Accept" + (isEditor ? " (R)" : "");
                 leftControllerButtonMapping.HandTrigger.Text = "";
 
-                leftControllerButtonMapping.ButtonStart.Text = "";
+                leftControllerButtonMapping.ButtonStart.Text = "Abort" + (isEditor ? " (F11)" : "");
 
-                leftControllerButtonMapping.ButtonX.Text = "Erase";
+                leftControllerButtonMapping.ButtonX.Text = "Erase Point 2" + (isEditor ? " (F1)" : ""); ;
                 leftControllerButtonMapping.ButtonY.Text = "";
 
                 leftControllerButtonMapping.ThumbUp.Text = "";
@@ -318,18 +337,18 @@ namespace WM.Colocation
 
             if (rightControllerButtonMapping != null)
             {
-                rightControllerButtonMapping.IndexTrigger.Text = "Accept";
+                rightControllerButtonMapping.IndexTrigger.Text = "Accept" + (isEditor ? " (LMB)" : ""); ;
                 rightControllerButtonMapping.HandTrigger.Text = "";
 
-                rightControllerButtonMapping.ButtonOculusStart.Text = "Exit";
+                rightControllerButtonMapping.ButtonOculusStart.Text = "Exit" + (isEditor ? " (F12)" : "");
 
-                rightControllerButtonMapping.ButtonXA.Text = "Erase";
-                rightControllerButtonMapping.ButtonYB.Text = "";
+                rightControllerButtonMapping.ButtonA.Text = "Erase Point 2" + (isEditor ? " (RMB)" : ""); ;
+                rightControllerButtonMapping.ButtonB.Text = "";
 
-                rightControllerButtonMapping.ThumbUp.Text = (isEditor ? "Beweeg vooruit (ArrowUp)" : "");
-                rightControllerButtonMapping.ThumbDown.Text = (isEditor ? "Beweeg achteruit (ArrowDown)" : "");
-                rightControllerButtonMapping.ThumbLeft.Text = (isEditor ? "Beweeg links (ArrowLeft)" : "");
-                rightControllerButtonMapping.ThumbRight.Text = (isEditor ? "Beweeg rechts (ArrowRight)" : "");
+                rightControllerButtonMapping.ThumbUp.Text = (isEditor ? "Beweeg vooruit (Up)" : "");
+                rightControllerButtonMapping.ThumbDown.Text = (isEditor ? "Beweeg achteruit (Down)" : "");
+                rightControllerButtonMapping.ThumbLeft.Text = (isEditor ? "Beweeg links (Left)" : "");
+                rightControllerButtonMapping.ThumbRight.Text = (isEditor ? "Beweeg rechts (Right)" : "");
             }
         }
 
@@ -372,6 +391,7 @@ namespace WM.Colocation
             }
 
             UpdateInfoText();
+            InitButtonMappingUI_MeasurePoint();
         }
 
         /// <summary>
@@ -396,11 +416,7 @@ namespace WM.Colocation
         /// <param name="t"></param>
         private void ErasePoint()
         {
-            if (_newSharedReferenceSystem != null)
-            {
-                UtilUnity.Destroy(_newSharedReferenceSystem.gameObject);
-                _newSharedReferenceSystem = null;
-            }
+            RemoveNewSharedReferenceSystem();
 
             if (_newPoints.Count > 0)
             {
@@ -458,6 +474,41 @@ namespace WM.Colocation
             _newSharedReferenceSystem.CaptionText = captionText;
 
             _newSharedReferenceSystem.CaptionColor = _newObjectsColor;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void RemoveNewSharedReferenceSystem()
+        {
+            if (_newSharedReferenceSystem != null)
+            {
+                UtilUnity.Destroy(_newSharedReferenceSystem.gameObject);
+                _newSharedReferenceSystem = null;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void RemoveNewMeasuredPoints()
+        {
+            // Clear current measured points.
+            foreach (var point in _newPoints)
+            {
+                UtilUnity.Destroy(point.gameObject);
+            }
+            _newPoints.Clear();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void Abort()
+        {
+            RemoveNewSharedReferenceSystem();
+            RemoveNewMeasuredPoints();
+            m_application.SetActiveApplicationState(0);
         }
     }
 } // namespace WM.Colocation

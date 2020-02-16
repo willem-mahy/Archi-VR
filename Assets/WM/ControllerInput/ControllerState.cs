@@ -323,6 +323,38 @@ namespace WM
             UpdateThumbStickDirectionDownStates(prevState);
         }
 
+        /// <summary>
+        /// Reset (set to 'false') the 'down' state for all controller buttons.
+        /// </summary>
+        public void ResetDownStates()
+        {
+            // Left controller
+            button3Down =
+            button4Down =
+            button5Down =
+            button7Down =
+            buttonStartDown =
+            
+            lThumbstickDown =
+            lThumbstickDirectionUpDown =
+            lThumbstickDirectionDownDown =
+            lThumbstickDirectionLeftDown =
+            lThumbstickDirectionRightDown =
+
+            // Right controller
+            button1Down =
+            button2Down =
+            buttonOculusDown =
+            button6Down = 
+            button8Down = 
+
+            rThumbstickDown =
+            rThumbstickDirectionUpDown =
+            rThumbstickDirectionDownDown =
+            rThumbstickDirectionLeftDown =
+            rThumbstickDirectionRightDown = false;
+        }
+
         #endregion Public API
 
         #region Private API

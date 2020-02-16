@@ -39,6 +39,14 @@
         }
 
         /// <summary>
+        /// Reset (set to 'false') the 'down' state for all controller buttons.
+        /// </summary>
+        public void ResetDownStates()
+        {
+            m_controllerState.ResetDownStates();
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         public void Update()
