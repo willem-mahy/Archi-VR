@@ -236,11 +236,25 @@ namespace ArchiVR.Application
 
             #region Apply Graphics settings
 
+            // Quality level.
             QualitySettings.SetQualityLevel(settings.GraphicsSettings.QualityLevel);
+
+            // Show FPS
             FpsPanelHUD.SetActive(settings.GraphicsSettings.ShowFPS);
+
+            // (*) Clamp world-scale menu size and height to sensible value range when loaded from application settings.
+            // This is necessary if the application settings file does not contain these values yet.
+            // Otherwise we end up with a gigantic menu that is unoperable.
+
+            // World-space menu size
             var size = settings.GraphicsSettings.WorldScaleMenuSize;
+            size = Mathf.Clamp(size, 0.001f, 0.0035f); // (*) 
             WorldSpaceMenu.gameObject.transform.localScale = size * Vector3.one;
-            WorldSpaceMenu.Offset.y = settings.GraphicsSettings.WorldScaleMenuHeight;
+
+            // World-space menu height
+            var height = settings.GraphicsSettings.WorldScaleMenuHeight;
+            height = Mathf.Clamp(height, -1, 1); // (*) 
+            WorldSpaceMenu.Offset.y = height;
             
             #endregion Apply Graphics settings
 
