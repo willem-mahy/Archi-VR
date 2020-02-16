@@ -249,6 +249,32 @@ namespace WM
 
         /// <summary>
         /// Updates the controller state using Unity API (keyboard and mouse) while running in editor.
+        ///
+        /// Mapping of keyboard and mouse is as follows:
+        /// 
+        /// Left controller
+        ///     F1      button3 (X)
+        ///     F2      button4 (Y)
+        ///     F       button5 (Hand Trigger)
+        ///     R       button7 (Index Trigger)
+        ///     F11     buttonStart
+        ///     A       lThumbstick Pressed
+        ///     Q       lThumbStickLeft
+        ///     D       lThumbStickRight
+        ///     S       lThumbStickDown
+        ///     Z       lThumbStickUp
+        ///     
+        /// Right Controller
+        ///     F3      button1 (A)
+        ///     F4      button2 (B)
+        ///     RMB     button6 (Hand trigger)
+        ///     LMB     button8 (Index trigger)
+        ///     F12     buttonOculus
+        ///     A       rThumbstick Pressed
+        ///     Left    rThumbStickLeft
+        ///     Right   rThumbStickRight
+        ///     Down    rThumbStickDown
+        ///     Up      rThumbStickUp
         /// </summary>
         public void Update_Editor(ControllerState prevState)
         {
