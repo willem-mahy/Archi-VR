@@ -190,9 +190,11 @@ namespace WM.UI
                 Application.QueueCommand(new InitNetworkCommand(networkMode));
             }
         }
-                
+
+        #region UI Event Handlers
+
         /// <summary>
-        /// 
+        /// 'On Click' event handler for the 'Start Server' button.
         /// </summary>
         public void StartServerButtonClick()
         {
@@ -200,7 +202,7 @@ namespace WM.UI
         }
 
         /// <summary>
-        /// 
+        /// 'On Click' event handler for the 'Join Server' button.
         /// </summary>
         public void JoinServerButtonClick()
         {
@@ -208,7 +210,7 @@ namespace WM.UI
         }
 
         /// <summary>
-        /// 
+        /// 'On Click' event handler for the 'Stop Server' button.
         /// </summary>
         public void StopServerButtonClick()
         {
@@ -216,19 +218,16 @@ namespace WM.UI
         }
 
         /// <summary>
-        /// 
+        /// 'On Click' event handler for the 'Disconnect' button.
         /// </summary>
         public void DisconnectClientButtonClick()
         {
             OnNetworkModeSelection(NetworkMode.Standalone);
         }
 
-        #region FPS
-
         /// <summary>
-        /// 
+        /// 'Value Changed' event handler for the 'Colocation Enabled' button.
         /// </summary>
-        /// <param name="value"></param>
         public void ColocationToggleOnValueChanged(bool value)
         {
             if (Application)
@@ -237,7 +236,7 @@ namespace WM.UI
             }
         }
 
-        #endregion
+        #endregion UI Event Handlers
 
         #endregion Non-public API
     }
