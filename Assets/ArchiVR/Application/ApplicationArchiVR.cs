@@ -234,8 +234,17 @@ namespace ArchiVR.Application
 
             Logger.Enabled = settings.DebugLogSettings.LoggingEnabled;
 
+            #region Apply Graphics settings
+
             QualitySettings.SetQualityLevel(settings.GraphicsSettings.QualityLevel);
             FpsPanelHUD.SetActive(settings.GraphicsSettings.ShowFPS);
+            var size = settings.GraphicsSettings.WorldScaleMenuSize;
+            WorldSpaceMenu.gameObject.transform.localScale = size * Vector3.one;
+            WorldSpaceMenu.Offset.y = settings.GraphicsSettings.WorldScaleMenuHeight;
+            
+            #endregion Apply Graphics settings
+
+            #region Apply Player settings
 
             _playerNames = settings.PlayerNames;
 
@@ -247,6 +256,8 @@ namespace ArchiVR.Application
             }
 
             Player.AvatarID = settings.PlayerSettings.avatarID;
+
+            #endregion Apply Player settings
 
             // Initialize application modes
             applicationStateTeleporting.TeleportationSystem = this.TeleportationSystem = new TeleportationSystemArchiVR(this);
@@ -1224,6 +1235,8 @@ namespace ArchiVR.Application
             settings.GraphicsSettings.QualityLevel = QualitySettings.GetQualityLevel();
             settings.GraphicsSettings.ShowFPS = FpsPanelHUD.activeSelf;
             settings.GraphicsSettings.ShowReferenceFrames = ShowReferenceSystems;
+            settings.GraphicsSettings.WorldScaleMenuSize = WorldSpaceMenu.gameObject.transform.localScale.x;
+            settings.GraphicsSettings.WorldScaleMenuHeight = WorldSpaceMenu.Offset.y;
 
             settings.PlayerNames = _playerNames;
 

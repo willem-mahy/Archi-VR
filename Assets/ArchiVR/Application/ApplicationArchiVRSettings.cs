@@ -47,6 +47,8 @@ namespace ArchiVR.Application
         public int QualityLevel = 0;
         public bool ShowFPS = false;
         public bool ShowReferenceFrames = false;
+        public float WorldScaleMenuHeight = 0;
+        public float WorldScaleMenuSize = 1;
     }
 
     [Serializable]

@@ -60,6 +60,8 @@ namespace WM.UI
         {
         }
 
+        #region UI Event Handlers
+
         /// <summary>
         /// 'OnValueChange' handler for the 'Menu size' slider.
         /// </summary>
@@ -76,5 +78,7 @@ namespace WM.UI
         {
             Application.WorldSpaceMenu.UpdateOffsetY(MenuHeightSlider.value);
         }
+
+        #endregion UI Event Handlers
     }
 } // namespace WM.UI
