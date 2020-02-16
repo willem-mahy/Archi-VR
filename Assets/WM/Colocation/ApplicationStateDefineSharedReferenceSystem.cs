@@ -19,7 +19,16 @@ namespace WM.Colocation
     /// </summary>
     public class ApplicationStateDefineSharedReferenceSystem : ApplicationState
     {
+        #region Fields
+
+        /// <summary>
+        /// The color to assign to labels of the objects being measured/defined.
+        /// </summary>
         private Color32 _newObjectsColor = new Color32(0, 255, 0, 255);
+
+        /// <summary>
+        /// The color to assign to labels of regular objects.
+        /// </summary>
         private Color32 _defaultObjectsColor = new Color32(255, 255, 255, 255);
 
         /// <summary>
@@ -37,6 +46,8 @@ namespace WM.Colocation
         /// The shared reference system being defined in this procedure.
         /// </summary>
         private ReferenceSystem6DOF _newSharedReferenceSystem;
+
+        #endregion Fields
 
         /// <summary>
         /// Called once, right after construction.
