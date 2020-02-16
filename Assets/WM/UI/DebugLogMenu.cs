@@ -13,10 +13,12 @@ namespace WM.UI
     {
         #region Fields
 
+        public GameObject ScrollViewContent;
+
         /// <summary>
         /// 
         /// </summary>
-        int MaxNumLines = 35;
+        int MaxNumLines = -1;
 
         /// <summary>
         /// 
@@ -78,12 +80,13 @@ namespace WM.UI
 
             if (Text != null)
             {
-                var text = "";
-
                 var log = Application.Logger;
 
                 var numLinesInLog = log.Count;
-                int numLinesToDisplay = System.Math.Min(numLinesInLog, MaxNumLines);
+
+                int numLinesToDisplay = (MaxNumLines > 0) ? System.Math.Min(numLinesInLog, MaxNumLines) : numLinesInLog;
+
+                var text = "";
 
                 for (var lineIndex = 0; lineIndex < numLinesToDisplay; ++lineIndex)
                 {
