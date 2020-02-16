@@ -59,8 +59,10 @@ namespace WM.UI
 
         #endregion GameObject overrides
 
+        #region UI Event Handlers
+
         /// <summary>
-        /// 
+        /// 'On Click' event handler for the 'Edit SRF' button.
         /// </summary>
         private void OnClickEditButton()
         {
@@ -69,5 +71,7 @@ namespace WM.UI
             Application.MenuVisible = false;
             Application.SetActiveApplicationState(2);
         }
+
+        #endregion UI Event Handlers
     }
 } // namespace WM.UI
