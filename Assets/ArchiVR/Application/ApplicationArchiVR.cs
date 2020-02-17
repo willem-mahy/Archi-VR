@@ -495,28 +495,12 @@ namespace ArchiVR.Application
         /// <param name="newPOIIndex"></param>
         void TeleportToPOIInActiveProject(int newPOIIndex)
         {
-            // Determine the new POI index.
-            if (m_POI.Count == 0)
+            var tc = GetTeleporCommandForPOI(newPOIIndex);
+
+            if (tc != null)
             {
-                newPOIIndex = -1;
+                Teleport(tc);
             }
-            else
-            {
-                newPOIIndex = (newPOIIndex) % m_POI.Count;
-
-                while (newPOIIndex < 0)
-                {
-                    newPOIIndex += m_POI.Count;
-                }
-            }
-
-            var tc = new TeleportCommand();
-
-            tc.ProjectIndex = ActiveProjectIndex;
-
-            tc.POIName = newPOIIndex == -1 ? null : m_POI[newPOIIndex].name;
-
-            Teleport(tc);
         }
 
         /// <summary>
@@ -539,6 +523,16 @@ namespace ArchiVR.Application
         /// Next project is activate using controller button 'Y', keyboard key 'F2'.
         /// </summary>
         public bool ActivateNextProject => m_controllerInput.m_controllerState.button4Down;
+
+        /// <summary>
+        /// Previous POI is activate using controller button 'A', keyboard key 'F4'.
+        /// </summary>
+        public bool ActivatePreviousPOI => m_controllerInput.m_controllerState.button1Down;
+
+        /// <summary>
+        /// Next POI is activate using controller button 'B', keyboard key 'F4'.
+        /// </summary>
+        public bool ActivateNextPOI => m_controllerInput.m_controllerState.button2Down;
 
 
         /// <summary>
@@ -569,18 +563,13 @@ namespace ArchiVR.Application
         /// <returns>'true' if a new POI is activated, 'false' otherwise.</returns>
         public bool ToggleActivePOI()
         {
-            // Active project is toggled using X/Y button, F1/F2 keys.
-            bool activatePrev = m_controllerInput.m_controllerState.button1Down;
-
-            if (activatePrev)
+            if (ActivatePreviousPOI)
             {
                 TeleportToPOIInActiveProject(ActivePOIIndex - 1);
                 return true;
             }
 
-            bool activateNext = m_controllerInput.m_controllerState.button2Down;
-
-            if (activateNext)
+            if (ActivateNextPOI)
             {
                 TeleportToPOIInActiveProject(ActivePOIIndex + 1);
                 return true;
@@ -947,11 +936,9 @@ namespace ArchiVR.Application
                 projectIndex = -1;
                 return null;
             }
-            else
-            {
-                projectIndex = UtilIterate.MakeCycle(projectIndex, 0, projectNames.Count);
-            }
-
+            
+            projectIndex = UtilIterate.MakeCycle(projectIndex, 0, projectNames.Count);
+            
             if (projectIndex == ActiveProjectIndex)
             {
                 return null;
@@ -960,6 +947,28 @@ namespace ArchiVR.Application
             var tc = new TeleportCommand();
             tc.ProjectIndex = projectIndex;
             tc.POIName = ActivePOIName;
+
+            return tc;
+        }
+
+        /// <summary>
+        /// Get the TeleportCommand to activate a POI, by index.
+        /// </summary>        
+        public TeleportCommand GetTeleporCommandForPOI(int poiIndex)
+        {
+            // Determine the new POI index.
+            if (m_POI.Count == 0)
+            {
+                poiIndex = -1;
+                return null;
+            }
+
+            poiIndex = UtilIterate.MakeCycle(poiIndex, 0, m_POI.Count);
+
+            var tc = new TeleportCommand();
+
+            tc.ProjectIndex = ActiveProjectIndex;
+            tc.POIName = m_POI[poiIndex].name;
 
             return tc;
         }

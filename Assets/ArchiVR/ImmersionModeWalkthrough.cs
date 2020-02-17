@@ -41,18 +41,18 @@ namespace ArchiVR
             {
                 _teleportAreaGO = UtilUnity.FindGameObjectElseError(Application.gameObject.scene, "TeleportArea");
 
-                var teleportAreaVolumeGO = _teleportAreaGO.transform.Find("TeleportAreaVolume");
+                var teleportAreaVolumeGO = _teleportAreaGO.transform.Find("Volume");
 
                 if (teleportAreaVolumeGO == null)
                 {
-                    Application.Logger.Error("TeleoportAreaVolume gameobject not found.");
+                    Application.Logger.Error("TeleportArea.Volume gameobject not found.");
                 }
 
                 _teleportAreaVolume = teleportAreaVolumeGO.GetComponent<TeleportAreaVolume>();
 
                 if (_teleportAreaVolume == null)
                 {
-                    Application.Logger.Error("TeleoportAreaVolume component not found.");
+                    Application.Logger.Error("TeleportArea.Volume: TeleportAreaVolume component not found.");
                 }
 
                 _teleportAreaGO.SetActive(false);
@@ -96,47 +96,52 @@ namespace ArchiVR
             //WM.Logger.Debug("ImmersionModeWalkthrough.Update()");
             
 
-            _teleportAreaGO.SetActive(tc != null);
-
-            if (tc != null)
-            {
-                Application.HudInfoPanel.SetActive(true);
-                Application.HudInfoText.text = "Move to teleport area";
-            }
-
             if (tc != null && _teleportAreaVolume.AllPlayersPresent)
             {
                 Application.Teleport(tc);
+                
                 tc = null;
-                _teleportAreaGO.SetActive(false);
                 _teleportAreaVolume.AllPlayersPresent = false;
+                
+                // Hide the guidance UI for directing users to the teleport area.
+                _teleportAreaGO.SetActive(false);
                 Application.HudInfoPanel.SetActive(false);
                 Application.HudInfoText.text = "";
                 return;
             }
 
-            if (Application.ActivateNextProject)
+            if (tc == null)
             {
-                tc = Application.GetTeleporCommandForProject(Application.ActiveProjectIndex - 1);
-            }
+                if (Application.ActivateNextProject)
+                {
+                    tc = Application.GetTeleporCommandForProject(Application.ActiveProjectIndex + 1);
+                }
 
-            if (Application.ActivatePreviousProject)
-            {
-                tc = Application.GetTeleporCommandForProject(Application.ActiveProjectIndex + 1);
-            }
+                if (Application.ActivatePreviousProject)
+                {
+                    tc = Application.GetTeleporCommandForProject(Application.ActiveProjectIndex - 1);
+                }
 
-            /*
-            if (Application.ToggleActiveProject())
-            {
-                return;
-            }
+                if (Application.ActivateNextPOI)
+                {
+                    tc = Application.GetTeleporCommandForPOI(Application.ActivePOIIndex + 1);
+                }
 
-            if (Application.ToggleActivePOI())
-            {
-                return;
-            }
-            */
+                if (Application.ActivatePreviousPOI)
+                {
+                    tc = Application.GetTeleporCommandForPOI(Application.ActivePOIIndex - 1);
+                }
 
+                // If we just started a teleport procedure...
+                if (tc != null)
+                {
+                    // Show the guidance UI for directing users to the teleport area.
+                    _teleportAreaGO.SetActive(true);
+                    Application.HudInfoPanel.SetActive(true);
+                    Application.HudInfoText.text = "Move to teleport area";
+                }
+            }
+            
             if (Application.ToggleImmersionModeIfInputAndNetworkModeAllows())
             {
                 return;
