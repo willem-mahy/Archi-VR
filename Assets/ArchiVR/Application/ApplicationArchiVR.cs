@@ -907,8 +907,8 @@ namespace ArchiVR.Application
         {
             get
             {
-                // We delip-berately do NOT return the temptingly simple ActiveProject.name here.
-                // This returns the name (always "Project) of the gameobjet representing the project in the scene.
+                // We deliberately do NOT return the temptingly simple ActiveProject.name here.
+                // This returns the name (always "Project") of the gameobject representing the project in the scene.
                 return ActiveProjectIndex == -1 ? null : projectNames[ActiveProjectIndex];
             }
         }
