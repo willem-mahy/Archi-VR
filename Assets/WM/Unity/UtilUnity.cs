@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using WM.Application;
 
 namespace WM
 {
@@ -15,6 +16,22 @@ namespace WM
         public static string ToString(Vector3 v)
         {
             return string.Format("({0:F3}, {1:F3}, {2:F3})", v.x, v.y, v.z);
+        }
+
+        public static T FindApplication<T>(GameObject gameObject)
+        {
+            var applicationGO = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application");
+
+            var application = applicationGO.GetComponent<T>();
+
+            if (application == null)
+            {
+                var errorMessage = "No component of type '" + typeof(T).ToString() + "' found on gameobject 'Application'!";
+                Debug.LogError(errorMessage);
+                throw new Exception(errorMessage);
+            }
+
+            return application;
         }
 
         /// <summary>

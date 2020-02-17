@@ -310,7 +310,7 @@ namespace ArchiVR.Application
 
             SetActiveProject(0);
 
-            //TestLoadAvatarPrefabsFromResources();
+            TestLoadAvatarPrefabsFromResources();
             //TestLoadGeometryPrefabsFromResources();
             //TestRegisteredAvatars();
         }
@@ -531,23 +531,30 @@ namespace ArchiVR.Application
         }
 
         /// <summary>
+        /// Previous project is activate using controller button 'X', keyboard key 'F1'.
+        /// </summary>
+        public bool ActivatePreviousProject => m_controllerInput.m_controllerState.button3Down;
+
+        /// <summary>
+        /// Next project is activate using controller button 'Y', keyboard key 'F2'.
+        /// </summary>
+        public bool ActivateNextProject => m_controllerInput.m_controllerState.button4Down;
+
+
+        /// <summary>
         /// Checks the current input and toggles the active project if necessary.
         /// </summary>
         /// <returns>'true' if a new project is activated, 'false' otherwise.</returns>
         public bool ToggleActiveProject()
         {
             // Active project is toggled using X/Y button, F1/F2 keys.
-            bool activatePrevProject = m_controllerInput.m_controllerState.button3Down;
-
-            if (activatePrevProject)
+            if (ActivatePreviousProject)
             {
                 SetActiveProject(ActiveProjectIndex - 1);
                 return true;
             }
-
-            bool activateNextProject = m_controllerInput.m_controllerState.button4Down;
-
-            if (activateNextProject)
+            
+            if (ActivateNextProject)
             {
                 SetActiveProject(ActiveProjectIndex + 1);
                 return true;
@@ -582,15 +589,22 @@ namespace ArchiVR.Application
             return false;
         }
 
-        //! Activates a POI, by name.
+        /// <summary>
+        /// Activates a POI, by name.
+        /// </summary>
+        /// <param name="newPOIName"></param>
         void SetActivePOI(string newPOIName)
         {
             // Get the POI index by POI name.
             var newPOIIndex = GetPOIIndex(newPOIName);
 
             if (newPOIIndex == -1)
+            {
                 if (m_POI.Count > 0)
+                {
                     newPOIIndex = 0;
+                }
+            }
 
             ActivePOIIndex = newPOIIndex;
         }
@@ -923,13 +937,15 @@ namespace ArchiVR.Application
             }
         }
 
-        //! Activates a project, by index.
-        void SetActiveProject(int projectIndex)
+        /// <summary>
+        /// Get the TeleportCommand to activate a project, by index.
+        /// </summary>
+        public TeleportCommand GetTeleporCommandForProject(int projectIndex)
         {
             if (projectNames.Count == 0)
             {
                 projectIndex = -1;
-                return;
+                return null;
             }
             else
             {
@@ -938,15 +954,29 @@ namespace ArchiVR.Application
 
             if (projectIndex == ActiveProjectIndex)
             {
-                return;
+                return null;
             }
 
             var tc = new TeleportCommand();
             tc.ProjectIndex = projectIndex;
             tc.POIName = ActivePOIName;
 
-            Teleport(tc);
+            return tc;
         }
+
+        /// <summary>
+        /// Activates a project, by index.
+        /// </summary>
+        void SetActiveProject(int projectIndex)
+        {
+            var tc = GetTeleporCommandForProject(projectIndex);
+
+            if (tc != null)
+            {
+                Teleport(tc);
+            }
+        }
+
         #endregion
 
         #region POI management

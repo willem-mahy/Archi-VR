@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using WM.Application;
 
 namespace WM.UI
 {
@@ -18,16 +19,7 @@ namespace WM.UI
         /// </summary>
         virtual public void Start()
         {
-            var applicationGO = UtilUnity.FindGameObjectElseError(gameObject.scene, "Application");
-            
-            Application = applicationGO.GetComponent<T>();
-
-            if (Application == null)
-            {
-                var errorMessage = "No component of type '" + typeof(T).ToString() + "' found on gameobject 'Application'!";
-                Debug.LogError(errorMessage);
-                throw new Exception(errorMessage);
-            }
+            Application = UtilUnity.FindApplication<T>(gameObject);
         }
 
         #endregion Public API

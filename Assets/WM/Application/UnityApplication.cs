@@ -516,7 +516,7 @@ namespace WM.Application
         /// 
         /// </summary>
         /// <param name="teleportCommand"></param>
-        protected void Teleport(TeleportCommand teleportCommand)
+        public void Teleport(TeleportCommand teleportCommand)
         {
             switch (NetworkMode)
             {

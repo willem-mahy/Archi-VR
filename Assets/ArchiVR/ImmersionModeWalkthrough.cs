@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using WM;
 using WM.Application;
+using WM.Command;
 
 namespace ArchiVR
 {
@@ -11,6 +12,16 @@ namespace ArchiVR
     public class ImmersionModeWalkthrough : ImmersionMode
     {
         #region variables
+
+        /// <summary>
+        /// The teleport area.
+        /// </summary>
+        private GameObject _teleportAreaGO;
+
+        /// <summary>
+        /// The teleport area.
+        /// </summary>
+        private TeleportAreaVolume _teleportAreaVolume;
 
         /// <summary>
         /// A reference system representing the active POI.
@@ -25,6 +36,27 @@ namespace ArchiVR
         public override void Enter()
         {
             Application.Logger.Debug("ImmersionModeWalkthrough.Enter()");
+
+            if (_teleportAreaGO == null)
+            {
+                _teleportAreaGO = UtilUnity.FindGameObjectElseError(Application.gameObject.scene, "TeleportArea");
+
+                var teleportAreaVolumeGO = _teleportAreaGO.transform.Find("TeleportAreaVolume");
+
+                if (teleportAreaVolumeGO == null)
+                {
+                    Application.Logger.Error("TeleoportAreaVolume gameobject not found.");
+                }
+
+                _teleportAreaVolume = teleportAreaVolumeGO.GetComponent<TeleportAreaVolume>();
+
+                if (_teleportAreaVolume == null)
+                {
+                    Application.Logger.Error("TeleoportAreaVolume component not found.");
+                }
+
+                _teleportAreaGO.SetActive(false);
+            }
 
             InitButtonMappingUI();
 
@@ -53,13 +85,47 @@ namespace ArchiVR
             OVRManager.boundary.SetVisible(false);
         }
 
+        TeleportCommand tc;
+
+
         /// <summary>
         /// <see cref="ImmersionMode.Update()"/> implementation.
         /// </summary>
         public override void Update()
         {
             //WM.Logger.Debug("ImmersionModeWalkthrough.Update()");
+            
 
+            _teleportAreaGO.SetActive(tc != null);
+
+            if (tc != null)
+            {
+                Application.HudInfoPanel.SetActive(true);
+                Application.HudInfoText.text = "Move to teleport area";
+            }
+
+            if (tc != null && _teleportAreaVolume.AllPlayersPresent)
+            {
+                Application.Teleport(tc);
+                tc = null;
+                _teleportAreaGO.SetActive(false);
+                _teleportAreaVolume.AllPlayersPresent = false;
+                Application.HudInfoPanel.SetActive(false);
+                Application.HudInfoText.text = "";
+                return;
+            }
+
+            if (Application.ActivateNextProject)
+            {
+                tc = Application.GetTeleporCommandForProject(Application.ActiveProjectIndex - 1);
+            }
+
+            if (Application.ActivatePreviousProject)
+            {
+                tc = Application.GetTeleporCommandForProject(Application.ActiveProjectIndex + 1);
+            }
+
+            /*
             if (Application.ToggleActiveProject())
             {
                 return;
@@ -69,6 +135,7 @@ namespace ArchiVR
             {
                 return;
             }
+            */
 
             if (Application.ToggleImmersionModeIfInputAndNetworkModeAllows())
             {
@@ -133,6 +200,8 @@ namespace ArchiVR
                     activePoiReferenceSystem,
                     Vector3.zero,
                     Quaternion.identity);
+
+                _teleportAreaGO.transform.position = Vector3.zero;
             }
             else
             {
@@ -140,6 +209,8 @@ namespace ArchiVR
                     activePoiReferenceSystem,
                     activePOI.transform.position,
                     activePOI.transform.rotation);
+
+                _teleportAreaGO.transform.position = activePOI.transform.position;
 
                 if (Application.ColocationEnabled)
                 {
