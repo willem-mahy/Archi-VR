@@ -1146,9 +1146,9 @@ namespace WM.Application
                     return;
                 }
 
-                var go = menuPanel.gameObject;
+                var menuPanelGO = menuPanel.gameObject;
 
-                go.SetActive(!go.activeSelf);
+                menuPanelGO.SetActive(!menuPanelGO.activeSelf);
 
                 if (MenuVisible)
                 {
