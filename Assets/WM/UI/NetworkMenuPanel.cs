@@ -44,6 +44,8 @@ namespace WM.UI
         {
             base.Start();
 
+            UpdateUI_IP();
+
             UpdateUI(); // If startup mode is Standalone, the UI is not updated accordingly, so force that explicitely here...
         }
 
@@ -121,8 +123,6 @@ namespace WM.UI
             }
 
             UpdateUI_NetworkModeTitle();
-
-            UpdateUI_IP();
 
             if (ColocationToggle != null)
             {
