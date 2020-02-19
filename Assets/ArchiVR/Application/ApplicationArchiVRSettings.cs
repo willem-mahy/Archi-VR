@@ -8,11 +8,9 @@ namespace ArchiVR.Application
 {
     /*
      * TODO: Add:
-     * - GFX quality
      * - whether or not to show player names above avatars
      * - ActiveProject
      * - ActivePOI
-     * - SharedReferenceFrame
      * - ...
      */
     [Serializable]
@@ -27,9 +25,7 @@ namespace ArchiVR.Application
 
         public DebugLogSettings DebugLogSettings = new DebugLogSettings();
 
-        public List<string> PlayerNames = new List<string>();
-
-        
+        public List<string> PlayerNames = new List<string>();        
     }
 
     [Serializable]
