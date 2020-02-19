@@ -371,7 +371,8 @@ namespace WM.Net
         public string GetClientInfo(int localClientTcpPort)
         {
             string info = "";
-            lock (this.clientConnections)
+
+            lock (clientConnections)
             {
                 foreach (var clientConnection in clientConnections)
                 {
@@ -383,6 +384,7 @@ namespace WM.Net
                     info += "\n";
                 }
             }
+
             return info;
         }
 
@@ -891,6 +893,8 @@ namespace WM.Net
 
                         clientsLockOwner = "None (last:ReceiveFromClientsFunction)";
                     }
+
+                    Thread.Sleep(1);
                 }
                 catch (Exception ex)
                 {
