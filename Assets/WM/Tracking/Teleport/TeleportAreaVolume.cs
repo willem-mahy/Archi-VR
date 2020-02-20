@@ -1,13 +1,12 @@
-﻿using ArchiVR.Application;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
-using WM;
+using WM.Application;
 
-namespace ArchiVR
+namespace WM
 {
     public class TeleportAreaVolume : MonoBehaviour
     {
-        private ApplicationArchiVR _applicationArchiVR;
+        private UnityApplication _application;
 
         private Material _volumeMaterial;
 
@@ -21,7 +20,7 @@ namespace ArchiVR
 
         private void Start()
         {
-            _applicationArchiVR = UtilUnity.FindApplication<ApplicationArchiVR>(gameObject);
+            _application = UtilUnity.FindApplication<UnityApplication>(gameObject);
 
             _text = gameObject.transform.parent.Find("Text").gameObject.GetComponent<TextMeshPro>();
 
@@ -30,25 +29,25 @@ namespace ArchiVR
 
         private void OnTriggerEnter(Collider other)
         {
-            _applicationArchiVR.m_leftControllerText.text = "OnTriggerEnter";
+            _application.m_leftControllerText.text = "OnTriggerEnter";
             AllPlayersPresent = true;
         }
 
         private void OnTriggerExit(Collider other)
         {
-            _applicationArchiVR.m_leftControllerText.text = "OnTriggerExit";
+            _application.m_leftControllerText.text = "OnTriggerExit";
             AllPlayersPresent = false;
         }
 
         private void OnTriggerStay(Collider other)
         {
-            _applicationArchiVR.m_leftControllerText.text = "OnTriggerStay";
+            _application.m_leftControllerText.text = "OnTriggerStay";
         }
 
         private void Update()
         {
             var myPos = gameObject.transform.position;
-            var headPos = _applicationArchiVR.m_centerEyeAnchor.transform.position;
+            var headPos = _application.m_centerEyeAnchor.transform.position;
 
             // Project headPos on the same horizontal plane as myPos.
             headPos.y = myPos.y;

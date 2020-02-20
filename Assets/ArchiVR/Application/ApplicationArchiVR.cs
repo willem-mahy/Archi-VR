@@ -458,7 +458,7 @@ namespace ArchiVR.Application
 
         #region Teleportation fading animation callbacks
 
-        public void OnTeleportFadeOutComplete()
+        public override void OnTeleportFadeOutComplete()
         {
             Logger.Debug("ApplicationArchiVR::OnTeleportFadeInComplete()");
 
@@ -471,7 +471,7 @@ namespace ArchiVR.Application
             }
         }
 
-        public void OnTeleportFadeInComplete()
+        public override void OnTeleportFadeInComplete()
         {
             Logger.Debug("ApplicationArchiVR::OnTeleportFadeInComplete()");
 
@@ -495,7 +495,7 @@ namespace ArchiVR.Application
         /// <param name="newPOIIndex"></param>
         void TeleportToPOIInActiveProject(int newPOIIndex)
         {
-            var tc = GetTeleporCommandForPOI(newPOIIndex);
+            var tc = GetTeleportCommandForPOI(newPOIIndex);
 
             if (tc != null)
             {
@@ -929,7 +929,32 @@ namespace ArchiVR.Application
         /// <summary>
         /// Get the TeleportCommand to activate a project, by index.
         /// </summary>
-        public TeleportCommand GetTeleporCommandForProject(int projectIndex)
+        public TeleportCommand GetTeleportCommandForProject(int projectIndex)
+        {
+            if (projectNames.Count == 0)
+            {
+                projectIndex = -1;
+                return null;
+            }
+
+            projectIndex = UtilIterate.MakeCycle(projectIndex, 0, projectNames.Count);
+
+            if (projectIndex == ActiveProjectIndex)
+            {
+                return null;
+            }
+
+            var tc = new TeleportCommand();
+            tc.ProjectIndex = projectIndex;
+            tc.POIName = ActivePOIName;
+
+            return tc;
+        }
+
+        /// <summary>
+        /// Get the TeleportCommand to activate a project, by index.
+        /// </summary>
+        public TeleportInitiatedCommand GetTeleportInitCommandForProject(int projectIndex)
         {
             if (projectNames.Count == 0)
             {
@@ -944,17 +969,40 @@ namespace ArchiVR.Application
                 return null;
             }
 
-            var tc = new TeleportCommand();
-            tc.ProjectIndex = projectIndex;
-            tc.POIName = ActivePOIName;
+            var tic = new TeleportInitiatedCommand();
+            
+            return tic;
 
-            return tc;
+            //var tc = new TeleportCommand();
+            //tc.ProjectIndex = projectIndex;
+            //tc.POIName = ActivePOIName;
+
+            //return tc;
+        }
+
+        /// <summary>
+        /// Get the TeleportInitiatedCommand to activate a POI, by index.
+        /// </summary>        
+        public TeleportInitiatedCommand GetTeleportInitCommandForPOI(int poiIndex)
+        {
+            // Determine the new POI index.
+            if (m_POI.Count == 0)
+            {
+                poiIndex = -1;
+                return null;
+            }
+
+            poiIndex = UtilIterate.MakeCycle(poiIndex, 0, m_POI.Count);
+
+            var tic = new TeleportInitiatedCommand();
+
+            return tic;
         }
 
         /// <summary>
         /// Get the TeleportCommand to activate a POI, by index.
         /// </summary>        
-        public TeleportCommand GetTeleporCommandForPOI(int poiIndex)
+        public TeleportCommand GetTeleportCommandForPOI(int poiIndex)
         {
             // Determine the new POI index.
             if (m_POI.Count == 0)
@@ -978,7 +1026,7 @@ namespace ArchiVR.Application
         /// </summary>
         void SetActiveProject(int projectIndex)
         {
-            var tc = GetTeleporCommandForProject(projectIndex);
+            var tc = GetTeleportCommandForProject(projectIndex);
 
             if (tc != null)
             {

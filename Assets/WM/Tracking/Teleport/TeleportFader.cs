@@ -1,11 +1,11 @@
-﻿using ArchiVR.Application;
+﻿using WM.Application;
 using UnityEngine;
 
-namespace ArchiVR
+namespace WM.Tracking.Teleport
 {
     public class TeleportFader : MonoBehaviour
     {
-        public ApplicationArchiVR application;
+        public UnityApplication application;
 
         public void OnFadeOutComplete()
         {

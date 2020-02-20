@@ -1286,9 +1286,14 @@ namespace WM.Net
                         return null;
                     }
 
-                    if (udpReceive.allReceivedUDPPackets[clientKey] != "")
+                    bool logCommunication = false;
+
+                    if (logCommunication)
                     {
-                        _log.Debug(callLogTag + ": udpReceive.allReceivedUDPPackets[" + clientKey + "] = '" + udpReceive.allReceivedUDPPackets[clientKey] + "'");
+                        if (udpReceive.allReceivedUDPPackets[clientKey] != "")
+                        {
+                            _log.Debug(callLogTag + ": udpReceive.allReceivedUDPPackets[" + clientKey + "] = '" + udpReceive.allReceivedUDPPackets[clientKey] + "'");
+                        }
                     }
 
                     int frameEndTagLength = Message.XmlEndTag.Length;
@@ -1299,7 +1304,10 @@ namespace WM.Net
                         return null;
                     }
 
-                    _log.Debug(callLogTag + ": found message end!");
+                    if (logCommunication)
+                    {
+                        _log.Debug(callLogTag + ": found message end!");
+                    }
 
                     string temp = udpReceive.allReceivedUDPPackets[clientKey].Substring(0, lastMessageEnd + frameEndTagLength);
 
@@ -1310,7 +1318,10 @@ namespace WM.Net
                         return null;
                     }
 
-                    _log.Debug(callLogTag + ": found message begin!");
+                    if (logCommunication)
+                    {
+                        _log.Debug(callLogTag + ": found message begin!");
+                    }
 
                     // Now get the message XML string.
                     messageXML = temp.Substring(lastMessageBegin, temp.Length - lastMessageBegin);

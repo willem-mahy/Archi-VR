@@ -45,6 +45,19 @@ namespace ArchiVR.Application
             }
         }
 
+        /// <summary>
+        /// Called when a teleport procedure has started.
+        /// </summary>
+        public override void InitTeleport()
+        {
+            var aim = ((ApplicationArchiVR)m_application).ActiveImmersionMode;
+
+            if (aim != null)
+            {
+                aim.InitTeleport();
+            }
+        }
+
         public override void UpdateModelLocationAndScale()
         {
             m_application.Logger.Debug("ApplicationStateDefault.UpdateModelLocationAndScale()");

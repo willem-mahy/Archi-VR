@@ -23,6 +23,12 @@ namespace WM.Command
         {
             application.Logger.Debug("TeleportCommand.Execute()");
 
+            // Hide the guidance UI for directing users to the teleport area.
+            application._teleportAreaGO.SetActive(false);
+            application.HudInfoPanel.SetActive(false);
+            application.HudInfoText.text = "";
+
+            // Teleport
             application.TeleportationSystem.Teleport(this);
         }
     }

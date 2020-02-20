@@ -15,6 +15,11 @@ namespace ArchiVR
 
         public virtual void Update() { }
 
+        /// <summary>
+        /// Called when a teleport procedure has started.
+        /// </summary>
+        public virtual void InitTeleport() { }
+
         public virtual void UpdateModelLocationAndScale() { }
 
         public virtual void UpdateTrackingSpacePosition() { }

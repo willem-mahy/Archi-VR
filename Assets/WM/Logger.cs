@@ -9,6 +9,31 @@ namespace WM
     {
         #region Public API
 
+        public enum LogType
+        {
+            Debug = 1,
+            Warning = 2,
+            Error = 4
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public class LogEntry
+        {
+            public readonly LogType LogType;
+
+            public readonly string Text;
+
+            public LogEntry(
+                LogType logType,
+                string text)
+            {
+                LogType = logType;
+                Text = text;
+            }
+        }
+
         /// <summary>
         /// Enabled state of the Logger.
         /// If not enabled, calls to LogXXX() are NOOP.
@@ -20,9 +45,9 @@ namespace WM
         } = false;
 
         /// <summary>
-        /// Gets the line at given index.
+        /// Gets the log entry at given index.
         /// </summary>
-        public string this[int lineIndex]
+        public LogEntry this[int lineIndex]
         {
             get => _log[lineIndex];
         }
@@ -30,9 +55,33 @@ namespace WM
         /// <summary>
         /// Gets the number of lines in the log.
         /// </summary>
-        public int Count
+        public int NumEntries
         {
             get { return _log.Count; }
+        }
+
+        /// <summary>
+        /// Gets the number of Debug entries in the log.
+        /// </summary>
+        public int NumDebugEntries
+        {
+            get { return _numDebugEntries; }
+        }
+
+        /// <summary>
+        /// Gets the number of Warning entries in the log.
+        /// </summary>
+        public int NumWarningEntries
+        {
+            get { return _numWarningEntries; }
+        }
+
+        /// <summary>
+        /// Gets the number of Error entries in the log.
+        /// </summary>
+        public int NumErrorEntries
+        {
+            get { return _numErrorEntries; }
         }
 
         /// <summary>
@@ -42,16 +91,15 @@ namespace WM
         public void Clear()
         {
             _log.Clear();
+            _numDebugEntries = _numWarningEntries = _numErrorEntries = 0;
         }
 
         /// <summary>
-        /// Logs a header message.
+        /// Adds a Debug entry in the log, formatted as a header.
         /// </summary>
-        /// <param name="caption"></param>
         public void Header(string caption)
         {
-            _log.Add("");
-            _log.Add("=======[" + caption + "]===============================");
+            Debug("=======[" + caption + "]===============================");
         }
 
         /// <summary>
@@ -65,9 +113,11 @@ namespace WM
                 return;
             }
 
-            _log.Add(text);
+            _log.Add(new LogEntry(LogType.Debug, text));
 
             UnityEngine.Debug.Log(text);
+
+            ++_numDebugEntries;
         }
 
         /// <summary>
@@ -81,9 +131,11 @@ namespace WM
                 return;
             }
 
-            _log.Add("Error: " +text);
+            _log.Add(new LogEntry(LogType.Warning, text));
 
             UnityEngine.Debug.LogWarning(text);
+
+            ++_numWarningEntries;
         }
 
         /// <summary>
@@ -97,19 +149,27 @@ namespace WM
                 return;
             }
 
-            _log.Add("Warning: " + text);
+            _log.Add(new LogEntry(LogType.Error, text));
 
             UnityEngine.Debug.LogError(text);
+
+            ++_numErrorEntries;
         }
 
         #endregion Public API
 
         #region Fields
 
+        private int _numDebugEntries = 0;
+
+        private int _numWarningEntries = 0;
+
+        private int _numErrorEntries = 0;
+
         /// <summary>
         /// The logged lines.
         /// </summary>
-        private readonly List<string> _log = new List<string>();
+        private readonly List<LogEntry> _log = new List<LogEntry>();
 
         #endregion Fields
     }

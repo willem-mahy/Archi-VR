@@ -31,6 +31,11 @@
         public virtual void Update() { }
 
         /// <summary>
+        /// Called when a teleport procedure has started.
+        /// </summary>
+        public virtual void InitTeleport() { }
+
+        /// <summary>
         /// TODO: Comment
         /// </summary>
         public virtual void UpdateModelLocationAndScale() { }

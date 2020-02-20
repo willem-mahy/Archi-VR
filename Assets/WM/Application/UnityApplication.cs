@@ -79,9 +79,16 @@ namespace WM.Application
         }
 
         /// <summary>
+        /// The number of frames rendered from start of application.
+        /// </summary>
+        protected int frame = 0;
+
+        /// <summary>
         /// The application version.
         /// </summary>
         public string Version = "";
+
+        #region TrackingSpace
 
         /// <summary>
         /// 
@@ -89,9 +96,22 @@ namespace WM.Application
         protected Vector3 m_centerEyeAnchorPrev = new Vector3();
 
         /// <summary>
-        /// 
+        /// The teleport area.
         /// </summary>
-        protected int frame = 0;
+        public GameObject _teleportAreaGO;
+
+        /// <summary>
+        /// The teleport area.
+        /// </summary>
+        public TeleportAreaVolume _teleportAreaVolume;
+
+        public void InitTeleport()
+        {
+            if (GetActiveApplicationState() != null)
+            {
+                GetActiveApplicationState().InitTeleport();
+            }
+        }
 
         #region Colocation
 
@@ -121,6 +141,8 @@ namespace WM.Application
         }
 
         #endregion Colocation
+
+        #endregion TrackingSpace
 
         #region Player names
 
@@ -1211,7 +1233,11 @@ namespace WM.Application
 
         #endregion Menu Management
 
-        #region
+        #region Tracking Space
+
+        public virtual void OnTeleportFadeOutComplete() { }
+
+        public virtual void OnTeleportFadeInComplete() { }
 
         /// <summary>
         /// How are we manipulating the tracking space?
@@ -1224,12 +1250,6 @@ namespace WM.Application
             Rotate,
             TranslateUpDown
         };
-
-        /// <summary>
-        /// To be implemented by concrete application types.
-        /// </summary>
-        virtual protected void UpdateNetwork()
-        { }
 
         /// <summary>
         /// 
@@ -1364,7 +1384,13 @@ namespace WM.Application
             m_ovrCameraRig.transform.position = m_ovrCameraRig.transform.position + offset;
         }
 
-        #endregion
+        #endregion Tracking Space
+
+        /// <summary>
+        /// To be implemented by concrete application types.
+        /// </summary>
+        virtual protected void UpdateNetwork()
+        { }
 
         #region Avatar management
 

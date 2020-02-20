@@ -14,16 +14,6 @@ namespace ArchiVR
         #region variables
 
         /// <summary>
-        /// The teleport area.
-        /// </summary>
-        private GameObject _teleportAreaGO;
-
-        /// <summary>
-        /// The teleport area.
-        /// </summary>
-        private TeleportAreaVolume _teleportAreaVolume;
-
-        /// <summary>
         /// A reference system representing the active POI.
         /// </summary>
         ReferenceSystem6DOF activePoiReferenceSystem;
@@ -37,25 +27,25 @@ namespace ArchiVR
         {
             Application.Logger.Debug("ImmersionModeWalkthrough.Enter()");
 
-            if (_teleportAreaGO == null)
+            if (Application._teleportAreaGO == null)
             {
-                _teleportAreaGO = UtilUnity.FindGameObjectElseError(Application.gameObject.scene, "TeleportArea");
+                Application._teleportAreaGO = UtilUnity.FindGameObjectElseError(Application.gameObject.scene, "TeleportArea");
 
-                var teleportAreaVolumeGO = _teleportAreaGO.transform.Find("Volume");
+                var teleportAreaVolumeGO = Application._teleportAreaGO.transform.Find("Volume");
 
                 if (teleportAreaVolumeGO == null)
                 {
                     Application.Logger.Error("TeleportArea.Volume gameobject not found.");
                 }
 
-                _teleportAreaVolume = teleportAreaVolumeGO.GetComponent<TeleportAreaVolume>();
+                Application._teleportAreaVolume = teleportAreaVolumeGO.GetComponent<TeleportAreaVolume>();
 
-                if (_teleportAreaVolume == null)
+                if (Application._teleportAreaVolume == null)
                 {
                     Application.Logger.Error("TeleportArea.Volume: TeleportAreaVolume component not found.");
                 }
 
-                _teleportAreaGO.SetActive(false);
+                Application._teleportAreaGO.SetActive(false);
             }
 
             InitButtonMappingUI();
@@ -96,49 +86,49 @@ namespace ArchiVR
             //WM.Logger.Debug("ImmersionModeWalkthrough.Update()");
             
 
-            if (tc != null && _teleportAreaVolume.AllPlayersPresent)
+            if (tc != null && Application._teleportAreaVolume.AllPlayersPresent)
             {
                 Application.Teleport(tc);
                 
                 tc = null;
-                _teleportAreaVolume.AllPlayersPresent = false;
-                
-                // Hide the guidance UI for directing users to the teleport area.
-                _teleportAreaGO.SetActive(false);
-                Application.HudInfoPanel.SetActive(false);
-                Application.HudInfoText.text = "";
-                return;
+                Application._teleportAreaVolume.AllPlayersPresent = false;
             }
 
             if (tc == null)
             {
                 if (Application.ActivateNextProject)
                 {
-                    tc = Application.GetTeleporCommandForProject(Application.ActiveProjectIndex + 1);
+                    tc = Application.GetTeleportCommandForProject(Application.ActiveProjectIndex + 1);
                 }
 
                 if (Application.ActivatePreviousProject)
                 {
-                    tc = Application.GetTeleporCommandForProject(Application.ActiveProjectIndex - 1);
+                    tc = Application.GetTeleportCommandForProject(Application.ActiveProjectIndex - 1);
                 }
 
                 if (Application.ActivateNextPOI)
                 {
-                    tc = Application.GetTeleporCommandForPOI(Application.ActivePOIIndex + 1);
+                    tc = Application.GetTeleportCommandForPOI(Application.ActivePOIIndex + 1);
                 }
 
                 if (Application.ActivatePreviousPOI)
                 {
-                    tc = Application.GetTeleporCommandForPOI(Application.ActivePOIIndex - 1);
+                    tc = Application.GetTeleportCommandForPOI(Application.ActivePOIIndex - 1);
                 }
 
                 // If we just started a teleport procedure...
                 if (tc != null)
                 {
-                    // Show the guidance UI for directing users to the teleport area.
-                    _teleportAreaGO.SetActive(true);
-                    Application.HudInfoPanel.SetActive(true);
-                    Application.HudInfoText.text = "Move to teleport area";
+                    var tic = new TeleportInitiatedCommand();
+                    
+                    if (Application.NetworkInitialized && Application.NetworkMode == WM.Net.NetworkMode.Server)
+                    {
+                        Application.Server.BroadcastCommand(tic);
+                    }
+                    else
+                    {
+                        tic.Execute(Application);
+                    }
                 }
             }
             
@@ -170,7 +160,18 @@ namespace ArchiVR
         }
 
         /// <summary>
-        /// <see cref="ImmersionMode.Update()"/> implementation.
+        /// Called when a teleport procedure has started.
+        /// </summary>
+        public override void InitTeleport()
+        {
+            // Show the guidance UI for directing users to the teleport area.
+            Application._teleportAreaGO.SetActive(true);
+            Application.HudInfoPanel.SetActive(true);
+            Application.HudInfoText.text = "Move to teleport area";
+        }
+
+        /// <summary>
+        /// <see cref="ImmersionMode.UpdateModelLocationAndScale()"/> implementation.
         /// </summary>
         public override void UpdateModelLocationAndScale()
         {
@@ -206,7 +207,7 @@ namespace ArchiVR
                     Vector3.zero,
                     Quaternion.identity);
 
-                _teleportAreaGO.transform.position = Vector3.zero;
+                Application._teleportAreaGO.transform.position = Vector3.zero;
             }
             else
             {
@@ -215,7 +216,7 @@ namespace ArchiVR
                     activePOI.transform.position,
                     activePOI.transform.rotation);
 
-                _teleportAreaGO.transform.position = activePOI.transform.position;
+                Application._teleportAreaGO.transform.position = activePOI.transform.position;
 
                 if (Application.ColocationEnabled)
                 {
