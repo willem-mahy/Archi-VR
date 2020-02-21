@@ -316,6 +316,24 @@ namespace ArchiVR.Application
             //TestRegisteredAvatars();
         }
 
+        #region GameObject overrides
+
+        /// <summary>
+        /// Called when the application is resumed after being paused.
+        /// </summary>
+        void OnApplicationFocus(bool hasFocus)
+        {
+            Logger.Debug("ApplicationArchiVR.OnApplicationFocus(" + hasFocus + ")");        
+        }
+
+        /// <summary>
+        /// Called when the application is paused.
+        /// </summary>
+        void OnApplicationPause(bool pauseStatus)
+        {
+            Logger.Debug("ApplicationArchiVR.OnApplicationPause("+pauseStatus+")");
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -325,6 +343,8 @@ namespace ArchiVR.Application
 
             SaveApplicationSettings();
         }
+
+        #endregion GameObject overrides
 
         #region Avatar management
 
