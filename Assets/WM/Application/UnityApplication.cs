@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using WM.Command;
 using WM.Net;
 using WM.UI;
+using WM.Unity;
 using WM.VR;
 
 namespace WM.Application
@@ -89,6 +90,11 @@ namespace WM.Application
         public string Version = "";
 
         #region TrackingSpace
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected PlayerHeadCollider LocalPlayerHeadCollider;
 
         /// <summary>
         /// 
@@ -675,6 +681,11 @@ namespace WM.Application
                 m_rightHandAnchor = UtilUnity.FindGameObject(scene, "RightHandAnchor");
             }
 
+            if (LocalPlayerHeadCollider == null)
+            {
+                LocalPlayerHeadCollider = UtilUnity.FindGameObjectElseError(scene, "PlayerHeadCollider").GetComponent<PlayerHeadCollider>();
+            }
+
             #endregion Get handles to OVRGameraRig objects
 
             if (m_centerEyeCanvas == null)
@@ -731,6 +742,8 @@ namespace WM.Application
             m_rightControllerText = UtilUnity.FindGameObject(scene, "RightControllerText").GetComponent<UnityEngine.UI.Text>();
 
             #endregion
+
+            LocalPlayerHeadCollider.PlayerID = Player.ID;
 
             // Disable all pickrays.
             if (LPickRay != null)
@@ -1605,6 +1618,22 @@ namespace WM.Application
 
                 player.Avatar = avatarGO.GetComponent<WM.Net.Avatar>();
                 player.AvatarID = avatarID;
+
+                #region Add player head collider.
+
+                // Load prefab
+                var phcPrefab = Resources.Load<GameObject>("WM/Prefab/VR/HeadCollider");
+
+                // Instanciate GO from prefab
+                var phcGO = Instantiate(phcPrefab, Vector3.zero, Quaternion.identity);
+
+                // Attach GO to player's avatar head.
+                phcGO.transform.SetParent(player.Avatar.Head.transform, false);
+
+                var phc = phcGO.GetComponent<PlayerHeadCollider>();
+                phc.PlayerID = player.ID;
+
+                #endregion Add player head collider.
 
                 // Destroy the old avatar (if any).
                 if (oldAvatar != null)

@@ -1,6 +1,9 @@
-﻿using TMPro;
+﻿using System;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using WM.Application;
+using WM.Unity;
 
 namespace WM
 {
@@ -12,11 +15,15 @@ namespace WM
 
         private TextMeshPro _text;
 
+        public HashSet<Guid> Players = new HashSet<Guid>();
+
         public bool AllPlayersPresent
         {
-            get;
-            set;
-        } = false;
+            get
+            {
+                return Players.Count == Math.Max(_application.Players.Count, 1); // WM:TODO: investigate: in standalone, Players is empty?!?
+            }
+        }
 
         private void Start()
         {
@@ -27,21 +34,40 @@ namespace WM
             _volumeMaterial = GetComponent<Renderer>().material;
         }
 
-        private void OnTriggerEnter(Collider other)
+        private void OnTriggerEnter(Collider collider)
         {
-            _application.m_leftControllerText.text = "OnTriggerEnter";
-            AllPlayersPresent = true;
+            _application.Logger.Debug("TeleportAreaVolume.OnTriggerEnter");
+
+            var playerHeadCollider = collider.gameObject.GetComponent<PlayerHeadCollider>();
+
+            if (null != playerHeadCollider)
+            {
+                Players.Add(playerHeadCollider.PlayerID);
+            }
         }
 
-        private void OnTriggerExit(Collider other)
+        private void OnTriggerExit(Collider collider)
         {
-            _application.m_leftControllerText.text = "OnTriggerExit";
-            AllPlayersPresent = false;
+            _application.Logger.Debug("TeleportAreaVolume.OnTriggerExit");
+
+            var playerHeadCollider = collider.gameObject.GetComponent<PlayerHeadCollider>();
+
+            if (null != playerHeadCollider)
+            {
+                Players.Remove(playerHeadCollider.PlayerID);
+            }
         }
 
-        private void OnTriggerStay(Collider other)
+        private void OnTriggerStay(Collider collider)
         {
-            _application.m_leftControllerText.text = "OnTriggerStay";
+            _application.Logger.Debug("TeleportAreaVolume.OnTriggerStay");
+
+            var playerHeadCollider = collider.gameObject.GetComponent<PlayerHeadCollider>();
+
+            if (null != playerHeadCollider)
+            {
+                Players.Add(playerHeadCollider.PlayerID);
+            }
         }
 
         private void Update()

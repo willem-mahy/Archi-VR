@@ -91,7 +91,7 @@ namespace ArchiVR
                 Application.Teleport(tc);
                 
                 tc = null;
-                Application._teleportAreaVolume.AllPlayersPresent = false;
+                //Application._teleportAreaVolume.AllPlayersPresent = false;
             }
 
             if (tc == null)
@@ -119,6 +119,8 @@ namespace ArchiVR
                 // If we just started a teleport procedure...
                 if (tc != null)
                 {
+                    Application._teleportAreaVolume.Players.Clear();
+
                     var tic = new TeleportInitiatedCommand();
                     
                     if (Application.NetworkInitialized && Application.NetworkMode == WM.Net.NetworkMode.Server)
