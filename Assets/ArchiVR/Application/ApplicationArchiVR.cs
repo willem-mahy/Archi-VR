@@ -161,7 +161,7 @@ namespace ArchiVR.Application
         #region Test
 
         /// <summary>
-        /// 
+        /// Load all avatar types.
         /// </summary>
         private void TestLoadAvatarPrefabsFromResources()
         {
@@ -191,7 +191,8 @@ namespace ArchiVR.Application
         }
 
         /// <summary>
-        /// 
+        /// Instanciate prefabs loaded from the paths in the given array.
+        /// The paths must be relative to the Unity 'Resources' folder.
         /// </summary>
         private void LoadPrefabsFromResources(string[] prefabPaths)
         {
@@ -310,7 +311,7 @@ namespace ArchiVR.Application
 
             SetActiveProject(0);
 
-            TestLoadAvatarPrefabsFromResources();
+            //TestLoadAvatarPrefabsFromResources();
             //TestLoadGeometryPrefabsFromResources();
             //TestRegisteredAvatars();
         }
@@ -320,8 +321,12 @@ namespace ArchiVR.Application
         /// </summary>
         public void OnApplicationQuit() // TODO: verify whether this works when running on quest (it did not seem to- so added a 'SaveApplicationSettings() call to UnityApplication, when hiding the menu...)
         {
+            Logger.Debug("ApplicationArchiVR.OnApplicationQuit()");
+
             SaveApplicationSettings();
         }
+
+        #region Avatar management
 
         /// <summary>
         /// <see cref="UnityApplication.DefaultAvatarID"/> implementation.
@@ -379,6 +384,8 @@ namespace ArchiVR.Application
                 AvatarFactory.Register(avatarDefinition.ID, avatarDefinition.ResourcePath);
             }
         }
+
+        #endregion Avatar management
 
         #region Immersion mode
 
