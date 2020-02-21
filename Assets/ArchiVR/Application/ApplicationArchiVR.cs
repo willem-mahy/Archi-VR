@@ -663,7 +663,7 @@ namespace ArchiVR.Application
                 {
                     Logger.Debug("Unloading project sccene '" + _projectScene.Value.name + "'");
 
-                    var asyncUnload = SceneManager.UnloadSceneAsync(_projectScene.Value.name);
+                    var asyncUnload = SceneManager.UnloadSceneAsync(_projectScene.Value);
 
                     // Wait until asynchronous unloading the old project finishes.
                     while (!asyncUnload.isDone)
