@@ -680,11 +680,20 @@ namespace ArchiVR.Application
                 // Load the new project scene
                 var projectScene = SceneManager.GetSceneByName(newProjectName);
 
-                // To support running multiple ArchiVR application instances in the same parent application (eg. WM TestApp)...
-                
-                // ... 1) Give the project scene an application instance-specific name.
-                _projectScene = SceneManager.CreateScene(GetApplicationInstanceSpecificProjectName(newProjectName));
-                SceneManager.MergeScenes(projectScene, _projectScene.Value);
+                bool renameProjectScene = false;
+
+                if (renameProjectScene)
+                {
+                    // To support running multiple ArchiVR application instances in the same parent application (eg. WM TestApp)...
+
+                    // ... 1) Give the project scene an application instance-specific name.
+                    _projectScene = SceneManager.CreateScene(GetApplicationInstanceSpecificProjectName(newProjectName));
+                    SceneManager.MergeScenes(projectScene, _projectScene.Value);
+                }
+                else
+                {
+                    _projectScene = projectScene;
+                }
 
                 LoadingProject = false;
 
