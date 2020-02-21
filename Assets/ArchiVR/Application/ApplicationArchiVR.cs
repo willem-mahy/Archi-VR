@@ -12,6 +12,7 @@ using WM.Application;
 using WM.Colocation;
 using WM.Command;
 using WM.Net;
+using WM.Unity;
 
 [assembly: System.Reflection.AssemblyVersion("1.0.*")]
 
@@ -64,6 +65,11 @@ namespace ArchiVR.Application
     public class ApplicationArchiVR : UnityApplication
     {
         #region Variables
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public EnvironmentalLighting EnvironmentalLighting;
 
         /// <summary>
         /// The OVRManger prefab.
@@ -224,6 +230,17 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Init()
         {
+            EnvironmentalLighting = UtilUnity.FindGameObjectElseError(gameObject.scene, "EnvironmentalLighting").GetComponent<EnvironmentalLighting>();
+
+            if (SharedEnvironmentalLighting == null)
+            {
+                SharedEnvironmentalLighting = EnvironmentalLighting;
+            }
+            else
+            {
+                EnvironmentalLighting.gameObject.SetActive(false);
+            }
+
             if (!UnitTestModeEnabled && (OVRManager.instance == null))
             {
                 Instantiate(ovrManagerPrefab, Vector3.zero, Quaternion.identity);
@@ -654,6 +671,8 @@ namespace ArchiVR.Application
                         yield return null;
                     }
 
+                    ProjectScenes.Remove(_projectScene.Value);
+
                     _projectScene = null;
                 }
 
@@ -677,13 +696,13 @@ namespace ArchiVR.Application
                     yield return null;
                 }
 
-                // Load the new project scene
-                var projectScene = SceneManager.GetSceneByName(newProjectName);
-
-                bool renameProjectScene = false;
+                bool renameProjectScene = false; // Disabled merging the 'saved' project scene into a renamed one, because this seems to break bakd Global Illumination.
 
                 if (renameProjectScene)
                 {
+                    // Get a handle to the save project scene.
+                    var projectScene = SceneManager.GetSceneByName(newProjectName);
+
                     // To support running multiple ArchiVR application instances in the same parent application (eg. WM TestApp)...
 
                     // ... 1) Give the project scene an application instance-specific name.
@@ -692,8 +711,24 @@ namespace ArchiVR.Application
                 }
                 else
                 {
-                    _projectScene = projectScene;
+                    // Get a handle to the save project scene.
+                    for (int i = 0; i < SceneManager.sceneCount; ++i)
+                    {
+                        var scene = SceneManager.GetSceneAt(i);
+
+                        if ((scene.name == newProjectName) & !ProjectScenes.Contains(scene))
+                        {
+                            _projectScene = scene;
+                        }
+                    }
+
+                    if (_projectScene == null)
+                    {
+                        Logger.Error("Failed to locate newly loaded project scene '" + newProjectName + "'");
+                    }
                 }
+
+                ProjectScenes.Add(_projectScene.Value);
 
                 LoadingProject = false;
 
@@ -737,6 +772,8 @@ namespace ArchiVR.Application
         /// - This locking mechanism is not thread-safe.  It does it need to be thread-safe, since all scene loading happens on the same (Main) thread.
         /// </summary>
         static bool LoadingProject = false;
+        static HashSet<Scene> ProjectScenes = new HashSet<Scene>();
+        static EnvironmentalLighting SharedEnvironmentalLighting;
 
         /// <summary>
         /// The currently loaded project scene.

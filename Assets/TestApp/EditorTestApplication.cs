@@ -219,6 +219,8 @@ public class EditorTestApplication : MonoBehaviour
             applicationInstance.ID = applicationInstanceBeingInitializedIndex;
             applicationInstance.EnableInput = (applicationInstanceBeingInitializedIndex == 0);
 
+            ((ApplicationArchiVR)applicationInstance).EnvironmentalLighting.gameObject.SetActive(false);
+
             _applicationInstances.Add(applicationInstance);
 
             foreach (var go in applicationScene.GetRootGameObjects())
