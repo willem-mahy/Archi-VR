@@ -246,35 +246,18 @@ namespace ArchiVR.Application
                 Instantiate(ovrManagerPrefab, Vector3.zero, Quaternion.identity);
             }
 
+            // Load the application settings and enable logger ASAP at startup,
+            // in order to include appliction initialization into the log.
             var settings = LoadSettings();
+
+            Logger.Enabled = settings.DebugLogSettings.LoggingEnabled;
+            
+
+            #region Apply Network settings
 
             ColocationEnabled = settings.NetworkSettings.ColocationEnabled;
 
-            Logger.Enabled = settings.DebugLogSettings.LoggingEnabled;
-
-            #region Apply Graphics settings
-
-            // Quality level.
-            QualitySettings.SetQualityLevel(settings.GraphicsSettings.QualityLevel);
-
-            // Show FPS
-            FpsPanelHUD.SetActive(settings.GraphicsSettings.ShowFPS);
-
-            // (*) Clamp world-scale menu size and height to sensible value range when loaded from application settings.
-            // This is necessary if the application settings file does not contain these values yet.
-            // Otherwise we end up with a gigantic menu that is unoperable.
-
-            // World-space menu size
-            var size = settings.GraphicsSettings.WorldScaleMenuSize;
-            size = Mathf.Clamp(size, 0.001f, 0.0035f); // (*) 
-            WorldSpaceMenu.gameObject.transform.localScale = size * Vector3.one;
-
-            // World-space menu height
-            var height = settings.GraphicsSettings.WorldScaleMenuHeight;
-            height = Mathf.Clamp(height, -1, 1); // (*) 
-            WorldSpaceMenu.Offset.y = height;
-            
-            #endregion Apply Graphics settings
+            #endregion Apply Network settings
 
             #region Apply Player settings
 
@@ -299,6 +282,32 @@ namespace ArchiVR.Application
             m_applicationStates.Add(ApplicationStateDefineSharedReferenceSystem);
             
             base.Init();
+
+            #region Apply Graphics settings
+
+            // Quality level.
+            QualitySettings.SetQualityLevel(settings.GraphicsSettings.QualityLevel);
+
+            // Show Reference Systems
+            ShowReferenceSystems = settings.GraphicsSettings.ShowReferenceFrames;
+
+            // Show FPS
+            FpsPanelHUD.SetActive(settings.GraphicsSettings.ShowFPS);
+
+            // (*) Clamp world-scale menu size and height to sensible value range when loaded from application settings.
+            // This is necessary if the application settings file does not contain these values yet.
+            // Otherwise we end up with a gigantic menu that is unoperable.
+
+            // World-space menu size
+            var worldSpaceMenuSize = Mathf.Clamp(settings.GraphicsSettings.WorldScaleMenuSize, 0.001f, MaxWorldSpaceMenuSize); // (*)
+            WorldSpaceMenu.gameObject.transform.localScale = worldSpaceMenuSize * Vector3.one;
+
+            // World-space menu height
+            var height = settings.GraphicsSettings.WorldScaleMenuHeight;
+            height = Mathf.Clamp(height, -1, 1); // (*) 
+            WorldSpaceMenu.Offset.y = height;
+
+            #endregion Apply Graphics settings
 
             SetSharedReferenceSystemLocalLocation(
                 settings.NetworkSettings.SharedReferencePosition,
@@ -1230,7 +1239,7 @@ namespace ArchiVR.Application
 
             var layers = modelTransform.Find("Layers");
 
-            if (modelTransform == null)
+            if (layers == null)
             {
                 throw new Exception("Active project's 'Model' does not contain a child named 'Layers'.");
             }
