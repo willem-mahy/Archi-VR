@@ -568,24 +568,24 @@ namespace ArchiVR.Application
         }
 
         /// <summary>
-        /// Previous project is activate using controller button 'X', keyboard key 'F1'.
+        /// Previous project is activate using controller button 'X'
         /// </summary>
-        public bool ActivatePreviousProject => m_controllerInput.m_controllerState.button3Down;
+        public bool ActivatePreviousProject => m_controllerInput.m_controllerState.xButtonDown;
 
         /// <summary>
-        /// Next project is activate using controller button 'Y', keyboard key 'F2'.
+        /// Next project is activate using controller button 'Y'
         /// </summary>
-        public bool ActivateNextProject => m_controllerInput.m_controllerState.button4Down;
+        public bool ActivateNextProject => m_controllerInput.m_controllerState.yButtonDown;
 
         /// <summary>
-        /// Previous POI is activate using controller button 'A', keyboard key 'F4'.
+        /// Previous POI is activate using controller button 'A'
         /// </summary>
-        public bool ActivatePreviousPOI => m_controllerInput.m_controllerState.button1Down;
+        public bool ActivatePreviousPOI => m_controllerInput.m_controllerState.aButtonDown;
 
         /// <summary>
-        /// Next POI is activate using controller button 'B', keyboard key 'F4'.
+        /// Next POI is activate using controller button 'B'
         /// </summary>
-        public bool ActivateNextPOI => m_controllerInput.m_controllerState.button2Down;
+        public bool ActivateNextPOI => m_controllerInput.m_controllerState.bButtonDown;
 
 
         /// <summary>
@@ -860,7 +860,7 @@ namespace ArchiVR.Application
         public bool ToggleImmersionModeIfInputAndNetworkModeAllows()
         {
             // Immersion mode is toggled using I key, Left index trigger.
-            bool toggleImmersionMode = m_controllerInput.m_controllerState.button7Down || Input.GetKeyDown(KeyCode.I);
+            bool toggleImmersionMode = m_controllerInput.m_controllerState.lIndexTriggerDown || Input.GetKeyDown(KeyCode.I);
 
             if (toggleImmersionMode)
             {

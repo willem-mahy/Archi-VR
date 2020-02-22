@@ -155,7 +155,7 @@ namespace WM.Colocation
 
             var controllerState = m_application.m_controllerInput.m_controllerState;
 
-            if (controllerState.buttonStartDown)
+            if (controllerState.startButtonDown)
             {
                 Abort();
                 return;
@@ -163,15 +163,15 @@ namespace WM.Colocation
 
             UpdateControllerInfos();
 
-            var back = controllerState.button1Down || m_application.m_controllerInput.m_controllerState.button3Down;
+            var back = controllerState.aButtonDown || m_application.m_controllerInput.m_controllerState.xButtonDown;
 
             if (_newPoints.Count < 2)
             {
-                if (m_application.m_controllerInput.m_controllerState.button7Down)
+                if (m_application.m_controllerInput.m_controllerState.lIndexTriggerDown)
                 {
                     MeasurePoint(m_application.m_leftHandAnchor.transform);
                 }
-                else if (m_application.m_controllerInput.m_controllerState.button8Down)
+                else if (m_application.m_controllerInput.m_controllerState.rIndexTriggerDown)
                 {
                     MeasurePoint(m_application.m_rightHandAnchor.transform);
                 }
@@ -182,7 +182,7 @@ namespace WM.Colocation
             }
             else
             {
-                if (m_application.m_controllerInput.m_controllerState.button7Down || m_application.m_controllerInput.m_controllerState.button8Down)
+                if (m_application.m_controllerInput.m_controllerState.lIndexTriggerDown || m_application.m_controllerInput.m_controllerState.rIndexTriggerDown)
                 {
                     AcceptNewReferenceSystem();
                     return;

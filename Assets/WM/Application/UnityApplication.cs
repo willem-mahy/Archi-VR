@@ -1038,7 +1038,7 @@ namespace WM.Application
             #region Toggle HUD menu.
 
             // HUD menu is toggled using left controller Start button, or F11 button in Editor.
-            bool toggleMenu = m_controllerInput.m_controllerState.buttonStartDown;
+            bool toggleMenu = m_controllerInput.m_controllerState.startButtonDown;
 
             if (toggleMenu)
             {

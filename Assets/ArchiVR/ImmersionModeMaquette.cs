@@ -149,7 +149,7 @@ namespace ArchiVR
             if (Application.NetworkMode != WM.Net.NetworkMode.Client)
             {
                 // Toggle model layer visibility using picking.
-                if (Application.m_controllerInput.m_controllerState.button8Down)
+                if (Application.m_controllerInput.m_controllerState.rIndexTriggerDown)
                 {
                     if (pickedLayer != null)
                     {

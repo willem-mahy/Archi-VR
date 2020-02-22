@@ -26,8 +26,10 @@ namespace WM.UI
         /// <summary>
         /// Start is called before the first frame update
         /// </summary>
-        void Start()
+        override public void Start()
         {
+            base.Start();
+
             #region Get references to GameObjects.
 
             if (Application == null)

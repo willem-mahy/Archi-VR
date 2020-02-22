@@ -93,13 +93,13 @@ namespace WM.UI
             switch (Hand)
             {
                 case Side.Left:
-                    UpdateState(ButtonXA, controllerState.button1Pressed);
-                    UpdateState(ButtonYB, controllerState.button2Pressed);
+                    UpdateState(ButtonX, controllerState.xButtonPressed);
+                    UpdateState(ButtonY, controllerState.yButtonPressed);
 
-                    UpdateState(ButtonStart, controllerState.buttonStartPressed);
+                    UpdateState(ButtonStart, controllerState.startButtonPressed);
 
-                    UpdateState(HandTrigger, controllerState.button5Pressed);
-                    UpdateState(IndexTrigger, controllerState.button7Pressed);
+                    UpdateState(HandTrigger, controllerState.lHandTriggerPressed);
+                    UpdateState(IndexTrigger, controllerState.lIndexTriggerPressed);
 
                     UpdateState(ThumbDown, controllerState.lThumbStick.y < -thumbDeadZone);
                     UpdateState(ThumbUp, controllerState.lThumbStick.y > thumbDeadZone);
@@ -108,13 +108,13 @@ namespace WM.UI
                     UpdateState(ThumbRight, controllerState.lThumbStick.x > thumbDeadZone);
                     break;
                 case Side.Right:
-                    UpdateState(ButtonX, controllerState.button3Pressed);
-                    UpdateState(ButtonY, controllerState.button4Pressed);
+                    UpdateState(ButtonA, controllerState.aButtonPressed);
+                    UpdateState(ButtonB, controllerState.bButtonPressed);
 
                     UpdateState(ButtonOculusStart, controllerState.buttonOculusPressed);
 
-                    UpdateState(HandTrigger, controllerState.button6Pressed);
-                    UpdateState(IndexTrigger, controllerState.button8Pressed);
+                    UpdateState(HandTrigger, controllerState.rHandTriggerPressed);
+                    UpdateState(IndexTrigger, controllerState.rIndexTriggerPressed);
 
                     UpdateState(ThumbDown, controllerState.rThumbStick.y < -thumbDeadZone);
                     UpdateState(ThumbUp, controllerState.rThumbStick.y > thumbDeadZone);

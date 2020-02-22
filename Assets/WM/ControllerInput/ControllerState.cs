@@ -2,6 +2,15 @@
 
 namespace WM
 {
+    // The Quest controller buttons are mapped as follows:
+    // button1 = A
+    // button2 = B
+    // button3 = X
+    // button4 = Y
+    // button5 = Right Hand Trigger
+    // button6 = Left Hand Trigger
+    // button7 = Right Index Trigger
+    // button8 = Left Index Trigger
     public class ControllerState
     {
         #region Constants
@@ -28,36 +37,29 @@ namespace WM
 
         public bool touchControllersConnected = false;
 
-        // button1 = A
-        // button2 = B
-        // button3 = X
-        // button4 = Y
-        // button5 = Right Hand Trigger
-        // button6 = Left Hand Trigger
-        // button7 = Right Index Trigger
-        // button8 = Left Index Trigger
-        public bool button1Down = false;
-        public bool button2Down = false;
-        public bool button3Down = false;
-        public bool button4Down = false;
-        public bool button5Down = false;
-        public bool button6Down = false;
-        public bool button7Down = false;
-        public bool button8Down = false;
-        public bool buttonStartDown = false;
+        
+        public bool aButtonDown = false;
+        public bool bButtonDown = false;
+        public bool xButtonDown = false;
+        public bool yButtonDown = false;
+        public bool lHandTriggerDown = false;
+        public bool rHandTriggerDown = false;
+        public bool lIndexTriggerDown = false;
+        public bool rIndexTriggerDown = false;
+        public bool startButtonDown = false;
         public bool buttonOculusDown = false;
         public bool buttonThumbstickPDown = false;
         public bool buttonThumbstickSDown = false;
 
-        public bool button1Pressed = false;
-        public bool button2Pressed = false;
-        public bool button3Pressed = false;
-        public bool button4Pressed = false;
-        public bool button5Pressed = false;
-        public bool button6Pressed = false;
-        public bool button7Pressed = false;
-        public bool button8Pressed = false;
-        public bool buttonStartPressed = false;
+        public bool aButtonPressed = false;
+        public bool bButtonPressed = false;
+        public bool xButtonPressed = false;
+        public bool yButtonPressed = false;
+        public bool lHandTriggerPressed = false;
+        public bool rHandTriggerPressed = false;
+        public bool lIndexTriggerPressed = false;
+        public bool rIndexTriggerPressed = false;
+        public bool startButtonPressed = false;
         public bool buttonOculusPressed = false;
         public bool buttonThumbstickPPressed = false;
         public bool buttonThumbstickSPressed = false;
@@ -121,29 +123,29 @@ namespace WM
 
             touchControllersConnected = joystickNames.Length == 2;
 
-            button1Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button1ID);
-            button2Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button2ID);
-            button3Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button3ID);
-            button4Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button4ID);
-            button5Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button5ID);
-            button6Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button6ID);
-            button7Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button7ID);
-            button8Down = touchControllersConnected && UnityEngine.Input.GetKeyDown(button8ID);
+            aButtonDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(button1ID);
+            bButtonDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(button2ID);
+            xButtonDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(button3ID);
+            yButtonDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(button4ID);
+            lHandTriggerDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(button5ID);
+            rHandTriggerDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(button6ID);
+            lIndexTriggerDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(button7ID);
+            rIndexTriggerDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(button8ID);
 
-            buttonStartDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(startButtonID);
+            startButtonDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(startButtonID);
 
             buttonThumbstickPDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(thumbstickPID);
             buttonThumbstickSDown = touchControllersConnected && UnityEngine.Input.GetKeyDown(thumbstickSID);
 
-            button1Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button1ID);
-            button2Pressed = touchControllersConnected && UnityEngine.Input.GetKey(button2ID);
-            button3Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button3ID);
-            button4Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button4ID);
-            button5Pressed = touchControllersConnected && UnityEngine.Input.GetKey(button5ID);
-            button6Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button6ID);
-            button7Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button7ID);
-            button8Pressed = touchControllersConnected && UnityEngine.Input.GetButton(button8ID);
-            buttonStartPressed = touchControllersConnected && UnityEngine.Input.GetButton(startButtonID);
+            aButtonPressed = touchControllersConnected && UnityEngine.Input.GetButton(button1ID);
+            bButtonPressed = touchControllersConnected && UnityEngine.Input.GetKey(button2ID);
+            xButtonPressed = touchControllersConnected && UnityEngine.Input.GetButton(button3ID);
+            yButtonPressed = touchControllersConnected && UnityEngine.Input.GetButton(button4ID);
+            lHandTriggerPressed = touchControllersConnected && UnityEngine.Input.GetKey(button5ID);
+            rHandTriggerPressed = touchControllersConnected && UnityEngine.Input.GetButton(button6ID);
+            lIndexTriggerPressed = touchControllersConnected && UnityEngine.Input.GetButton(button7ID);
+            rIndexTriggerPressed = touchControllersConnected && UnityEngine.Input.GetButton(button8ID);
+            startButtonPressed = touchControllersConnected && UnityEngine.Input.GetButton(startButtonID);
 
             leftControllerActive = touchControllersConnected && joystickNames[0] == "";
             rightControllerActive = joystickNames.Length == 2 && joystickNames[1] == "";
@@ -163,16 +165,16 @@ namespace WM
             rTouchConnected = OVRInput.IsControllerConnected(OVRInput.Controller.RTouch);
 
             // Get existing button presses.
-            button1Pressed = OVRInput.Get(OVRInput.Button.One);
-            button2Pressed = OVRInput.Get(OVRInput.Button.Two);
-            button3Pressed = OVRInput.Get(OVRInput.Button.Three);
-            button4Pressed = OVRInput.Get(OVRInput.Button.Four);
-            button5Pressed = OVRInput.Get(OVRInput.Button.PrimaryHandTrigger);
-            button6Pressed = OVRInput.Get(OVRInput.Button.SecondaryHandTrigger);
-            button7Pressed = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger);
-            button8Pressed = OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
+            this.aButtonPressed = OVRInput.Get(OVRInput.Button.One);
+            this.bButtonPressed = OVRInput.Get(OVRInput.Button.Two);
+            this.xButtonPressed = OVRInput.Get(OVRInput.Button.Three);
+            this.yButtonPressed = OVRInput.Get(OVRInput.Button.Four);
+            lHandTriggerPressed = OVRInput.Get(OVRInput.Button.PrimaryHandTrigger);
+            rHandTriggerPressed = OVRInput.Get(OVRInput.Button.SecondaryHandTrigger);
+            lIndexTriggerPressed = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger);
+            rIndexTriggerPressed = OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger);
 
-            buttonStartPressed = OVRInput.Get(OVRInput.Button.Start);
+            startButtonPressed = OVRInput.Get(OVRInput.Button.Start);
 
             buttonThumbstickPPressed = OVRInput.Get(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.Touch);
             buttonThumbstickSPressed = OVRInput.Get(OVRInput.Button.SecondaryThumbstick, OVRInput.Controller.Touch);
@@ -209,32 +211,32 @@ namespace WM
             bool GetDownWouldWork = false;
             if (GetDownWouldWork)
             {
-                button1Down = OVRInput.GetDown(OVRInput.Button.One);
-                button2Down = OVRInput.GetDown(OVRInput.Button.Two);
-                button3Down = OVRInput.GetDown(OVRInput.Button.Three);
-                button4Down = OVRInput.GetDown(OVRInput.Button.Four);
-                button5Down = OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger);
-                button6Down = OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger);
-                button7Down = OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger);
-                button8Down = OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger);
+                aButtonDown = OVRInput.GetDown(OVRInput.Button.One);
+                bButtonDown = OVRInput.GetDown(OVRInput.Button.Two);
+                xButtonDown = OVRInput.GetDown(OVRInput.Button.Three);
+                yButtonDown = OVRInput.GetDown(OVRInput.Button.Four);
+                lHandTriggerDown = OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger);
+                rHandTriggerDown = OVRInput.GetDown(OVRInput.Button.SecondaryHandTrigger);
+                lIndexTriggerDown = OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger);
+                rIndexTriggerDown = OVRInput.GetDown(OVRInput.Button.SecondaryIndexTrigger);
 
-                buttonStartDown = OVRInput.GetDown(OVRInput.Button.Start);
+                startButtonDown = OVRInput.GetDown(OVRInput.Button.Start);
 
                 buttonThumbstickPDown = OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.Touch);
                 buttonThumbstickSDown = OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick, OVRInput.Controller.Touch);
             }
             else
             {
-                button1Down = (!prevState.button1Down && !prevState.button1Pressed) && button1Pressed;
-                button2Down = (!prevState.button2Down && !prevState.button2Pressed) && button2Pressed;
-                button3Down = (!prevState.button3Down && !prevState.button3Pressed) && button3Pressed;
-                button4Down = (!prevState.button4Down && !prevState.button4Pressed) && button4Pressed;
-                button5Down = (!prevState.button5Down && !prevState.button5Pressed) && button5Pressed;
-                button6Down = (!prevState.button6Down && !prevState.button6Pressed) && button6Pressed;
-                button7Down = (!prevState.button7Down && !prevState.button7Pressed) && button7Pressed;
-                button8Down = (!prevState.button8Down && !prevState.button8Pressed) && button8Pressed;
+                aButtonDown = (!prevState.aButtonDown && !prevState.aButtonPressed) && this.aButtonPressed;
+                bButtonDown = (!prevState.bButtonDown && !prevState.bButtonPressed) && this.bButtonPressed;
+                xButtonDown = (!prevState.xButtonDown && !prevState.xButtonPressed) && this.xButtonPressed;
+                yButtonDown = (!prevState.yButtonDown && !prevState.yButtonPressed) && this.yButtonPressed;
+                lHandTriggerDown = (!prevState.lHandTriggerDown && !prevState.lHandTriggerPressed) && lHandTriggerPressed;
+                rHandTriggerDown = (!prevState.rHandTriggerDown && !prevState.rHandTriggerPressed) && rHandTriggerPressed;
+                lIndexTriggerDown = (!prevState.lIndexTriggerDown && !prevState.lIndexTriggerPressed) && lIndexTriggerPressed;
+                rIndexTriggerDown = (!prevState.rIndexTriggerDown && !prevState.rIndexTriggerPressed) && rIndexTriggerPressed;
 
-                buttonStartDown = (!prevState.buttonStartDown && !prevState.buttonStartPressed) && buttonStartPressed;
+                startButtonDown = (!prevState.startButtonDown && !prevState.startButtonPressed) && startButtonPressed;
 
                 buttonThumbstickPDown = (!prevState.buttonThumbstickPDown && !prevState.lThumbstickPressed) && buttonThumbstickPPressed;
                 buttonThumbstickSDown = (!prevState.buttonThumbstickSDown && !prevState.rThumbstickPressed) && buttonThumbstickPPressed;
@@ -253,8 +255,8 @@ namespace WM
         /// Mapping of keyboard and mouse is as follows:
         /// 
         /// Left controller
-        ///     F1      button3 (X)
-        ///     F2      button4 (Y)
+        ///     F1      button1 (X)
+        ///     F2      button2 (Y)
         ///     F       button5 (Hand Trigger)
         ///     R       button7 (Index Trigger)
         ///     F11     buttonStart
@@ -265,8 +267,8 @@ namespace WM
         ///     Z       lThumbStickUp
         ///     
         /// Right Controller
-        ///     F3      button1 (A)
-        ///     F4      button2 (B)
+        ///     F3      button3 (A)
+        ///     F4      button4 (B)
         ///     RMB     button6 (Hand trigger)
         ///     LMB     button8 (Index trigger)
         ///     F12     buttonOculus
@@ -279,11 +281,11 @@ namespace WM
         public void Update_Editor(ControllerState prevState)
         {
             // Left controller
-            UpdateButtonState(KeyCode.F1, ref button3Down, ref button3Pressed);
-            UpdateButtonState(KeyCode.F2, ref button4Down, ref button4Pressed);
-            UpdateButtonState(KeyCode.F, ref button5Down, ref button5Pressed);
-            UpdateButtonState(KeyCode.R, ref button7Down, ref button7Pressed);
-            UpdateButtonState(KeyCode.F11, ref buttonStartDown, ref buttonStartPressed);
+            UpdateButtonState(KeyCode.F1, ref xButtonDown, ref xButtonPressed);
+            UpdateButtonState(KeyCode.F2, ref yButtonDown, ref yButtonPressed);
+            UpdateButtonState(KeyCode.F, ref lHandTriggerDown, ref lHandTriggerPressed);
+            UpdateButtonState(KeyCode.R, ref lIndexTriggerDown, ref lIndexTriggerPressed);
+            UpdateButtonState(KeyCode.F11, ref startButtonDown, ref startButtonPressed);
             UpdateButtonState(KeyCode.A, ref lThumbstickDown, ref lThumbstickPressed);
 
             if (Input.GetKey(KeyCode.Q)) lThumbStick.x -= 1;
@@ -292,13 +294,13 @@ namespace WM
             if (Input.GetKey(KeyCode.Z)) lThumbStick.y += 1;
 
             // Right controller
-            UpdateButtonState(KeyCode.F3, ref button1Down, ref button1Pressed);
-            UpdateButtonState(KeyCode.F4, ref button2Down, ref button2Pressed);
+            UpdateButtonState(KeyCode.F3, ref aButtonDown, ref aButtonPressed);
+            UpdateButtonState(KeyCode.F4, ref bButtonDown, ref bButtonPressed);
+            if (Input.GetMouseButtonDown(1)) rHandTriggerDown = true;
+            if (Input.GetMouseButton(1)) rHandTriggerPressed = true;
+            if (Input.GetMouseButtonDown(0)) rIndexTriggerDown = true;
+            if (Input.GetMouseButton(0)) rIndexTriggerPressed = true;
             UpdateButtonState(KeyCode.F12, ref buttonOculusDown, ref buttonOculusPressed);
-            if (Input.GetMouseButtonDown(1)) button6Down = true;
-            if (Input.GetMouseButton(1)) button6Pressed = true;
-            if (Input.GetMouseButtonDown(0)) button8Down = true;
-            if (Input.GetMouseButton(0)) button8Pressed = true;
 
             if (Input.GetKey(KeyCode.LeftArrow)) rThumbStick.x -= 1;
             if (Input.GetKey(KeyCode.RightArrow)) rThumbStick.x += 1;
@@ -329,11 +331,11 @@ namespace WM
         public void ResetDownStates()
         {
             // Left controller
-            button3Down =
-            button4Down =
-            button5Down =
-            button7Down =
-            buttonStartDown =
+            xButtonDown =
+            yButtonDown =
+            lHandTriggerDown =
+            lIndexTriggerDown =
+            startButtonDown =
             
             lThumbstickDown =
             lThumbstickDirectionUpDown =
@@ -342,11 +344,11 @@ namespace WM
             lThumbstickDirectionRightDown =
 
             // Right controller
-            button1Down =
-            button2Down =
+            aButtonDown =
+            bButtonDown =
             buttonOculusDown =
-            button6Down = 
-            button8Down = 
+            rHandTriggerDown = 
+            rIndexTriggerDown = 
 
             rThumbstickDown =
             rThumbstickDirectionUpDown =
