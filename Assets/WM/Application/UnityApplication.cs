@@ -8,6 +8,7 @@ using WM.Command;
 using WM.Net;
 using WM.UI;
 using WM.Unity;
+using WM.Unity.Tracking;
 using WM.VR;
 
 namespace WM.Application
@@ -89,7 +90,12 @@ namespace WM.Application
         /// </summary>
         public string Version = "";
 
-        #region TrackingSpace
+        #region VR Tracking
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected OVRBoundaryRepresentation OvrBoundaryRepresentation;
 
         /// <summary>
         /// 
@@ -258,15 +264,32 @@ namespace WM.Application
 
         public GameObject FpsPanelHUD;
 
+        #region Reference Systems
+
         /// <summary>
-        /// 
+        /// The list of reference systems.
         /// </summary>
-        private bool _showReferenceSystems = true;
+        private List<ReferenceSystem6DOF> _referenceSystems = new List<ReferenceSystem6DOF>();
 
         /// <summary>
         /// 
         /// </summary>
-        private List<ReferenceSystem6DOF> _referenceSystems = new List<ReferenceSystem6DOF>();
+        private void UpdateRefenceSystemsVisibility()
+        {
+            OvrBoundaryRepresentation.gameObject.SetActive(_showReferenceSystems);
+
+            foreach (var referenceSystem in _referenceSystems)
+            {
+                referenceSystem.gameObject.SetActive(_showReferenceSystems);
+            }
+        }
+
+        #region ShowReferenceSystems
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private bool _showReferenceSystems = true;
 
         /// <summary>
         /// 
@@ -284,16 +307,11 @@ namespace WM.Application
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        private void UpdateRefenceSystemsVisibility()
-        {
-            foreach (var referenceSystem in _referenceSystems)
-            {
-                referenceSystem.gameObject.SetActive(_showReferenceSystems);
-            }
-        }
+        #endregion ShowReferenceSystems
+
+        #endregion Reference Systems
+
+        #region OVR GameObjects
 
         #region OVRCameraRig GameObjects
 
@@ -311,7 +329,9 @@ namespace WM.Application
 
         public OVRPointerVisualizer SelectionVisualizer;
 
-        #endregion
+        #endregion OVRCameraRig GameObjects
+
+        #endregion OVR GameObjects
 
         #region Application state
 
@@ -654,31 +674,40 @@ namespace WM.Application
 
             var scene = gameObject.scene;
 
+            #region Get handles to VR Tracking objects
+            
             #region Get handles to OVRGameraRig game objects
 
             if (m_ovrCameraRig == null)
             {
-                m_ovrCameraRig = UtilUnity.FindGameObject(scene, "OVRCameraRig");
+                m_ovrCameraRig = UtilUnity.FindGameObjectElseError(scene, "OVRCameraRig");
             }
 
             if (trackingSpace == null)
             {
-                trackingSpace = UtilUnity.FindGameObject(scene, "TrackingSpace");
+                trackingSpace = UtilUnity.FindGameObjectElseError(scene, "TrackingSpace");
             }
 
             if (m_centerEyeAnchor == null)
             {
-                m_centerEyeAnchor = UtilUnity.FindGameObject(scene, "CenterEyeAnchor");
+                m_centerEyeAnchor = UtilUnity.FindGameObjectElseError(scene, "CenterEyeAnchor");
             }
 
             if (m_leftHandAnchor == null)
             {
-                m_leftHandAnchor = UtilUnity.FindGameObject(scene, "LeftHandAnchor");
+                m_leftHandAnchor = UtilUnity.FindGameObjectElseError(scene, "LeftHandAnchor");
             }
 
             if (m_rightHandAnchor == null)
             {
-                m_rightHandAnchor = UtilUnity.FindGameObject(scene, "RightHandAnchor");
+                m_rightHandAnchor = UtilUnity.FindGameObjectElseError(scene, "RightHandAnchor");
+            }
+
+            #endregion Get handles to OVRGameraRig game objects
+
+            if (OvrBoundaryRepresentation == null)
+            {
+                OvrBoundaryRepresentation = UtilUnity.FindGameObjectElseError(scene, "OVRBoundaryRepresentation").GetComponent<OVRBoundaryRepresentation>();
             }
 
             if (LocalPlayerHeadCollider == null)
@@ -686,7 +715,7 @@ namespace WM.Application
                 LocalPlayerHeadCollider = UtilUnity.FindGameObjectElseError(scene, "PlayerHeadCollider").GetComponent<PlayerHeadCollider>();
             }
 
-            #endregion Get handles to OVRGameraRig objects
+            #endregion Get handles to VR Tracking objects
 
             if (m_centerEyeCanvas == null)
             {
@@ -1442,6 +1471,11 @@ namespace WM.Application
         /// 
         /// </summary>
         public readonly ResourcePrefabGameObjectFactory AvatarFactory = new ResourcePrefabGameObjectFactory();
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public float MaxWorldSpaceMenuSize => (UnityEngine.Application.isEditor) ? 0.005f : 0.0035f;
 
         /// <summary>
         /// Instanciates the avatar prefabe at given index, and returns a reference to the avatar instance.

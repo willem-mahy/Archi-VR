@@ -7,22 +7,17 @@ namespace WM.UI
     /// <summary>
     /// 
     /// </summary>
-    public class MenuSettingsPanel : MonoBehaviour
+    public class MenuSettingsPanel : MenuPanel<UnityApplication>
     {
         #region Variables
 
         /// <summary>
-        /// 
-        /// </summary>
-        public UnityApplication Application;
-
-        /// <summary>
-        /// 
+        /// The slider controlling the menu size.
         /// </summary>
         public Slider MenuSizeSlider;
 
         /// <summary>
-        /// 
+        /// The slider controlling the menu height.
         /// </summary>
         public Slider MenuHeightSlider;
 
@@ -46,10 +41,7 @@ namespace WM.UI
 
             MenuHeightSlider.onValueChanged.AddListener((float value) => { MenuHeightSliderOnValueChange(value); });
 
-            if (UnityEngine.Application.isEditor)
-            {
-                MenuSizeSlider.maxValue = 0.005f;
-            }
+            MenuSizeSlider.maxValue = Application.MaxWorldSpaceMenuSize;
         }
 
         /// <summary>
