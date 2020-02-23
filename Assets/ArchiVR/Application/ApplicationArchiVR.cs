@@ -102,13 +102,53 @@ namespace ArchiVR.Application
 
         #endregion
 
-        #region Model Layers
+        #region Layers
 
         /// <summary>
-        /// The model layers.
+        /// Represents a layer (eg. "Kelder", "Gelijkvloers", "Verdiep", "Zolder")
         /// </summary>
-        private List<GameObject> m_modelLayers = new List<GameObject>();
+        public class Layer
+        {
+            /// <summary>
+            /// The gameobject containing the basic model geometry (as imported from sketchup).
+            /// </summary>
+            public GameObject Model;
 
+            /// <summary>
+            /// The gameobject containing the furniture geometry.
+            /// </summary>
+            public GameObject Furniture;
+
+            /// <summary>
+            /// The gameobject containing the lighting definitions and geometry.
+            /// </summary>
+            public GameObject Lighting;
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="active"></param>
+            public void SetActive(bool active)
+            {
+                Model.SetActive(active);
+                
+                if (Furniture != null)
+                {
+                    Furniture.SetActive(active);
+                }
+
+                if (Lighting != null)
+                {
+                    Lighting.SetActive(active);
+                }
+            }
+        };
+
+        /// <summary>
+        /// The layers.
+        /// </summary>
+        private Dictionary<string, Layer> m_layers = new Dictionary<string, Layer>();
+        
         #endregion
 
         #region POI
@@ -1196,12 +1236,12 @@ namespace ArchiVR.Application
         #region Model Layer management
 
         /// <summary>
-        /// Gets a handle to the list of model layers.
+        /// Gets a list containing a handle to the layers.
         /// </summary>
         /// <returns></returns>
-        public IList<GameObject> GetModelLayers()
+        public List<Layer> GetModelLayers()
         {
-            return m_modelLayers;
+            return new List<Layer>(m_layers.Values);
         }
 
         /// <summary>
@@ -1209,7 +1249,7 @@ namespace ArchiVR.Application
         /// </summary>
         public void UnhideAllModelLayers()
         {
-            foreach (var layer in m_modelLayers)
+            foreach (var layer in m_layers.Values)
             {
                 layer.SetActive(true);
             }
@@ -1220,7 +1260,7 @@ namespace ArchiVR.Application
         /// </summary>
         public void GatherActiveProjectLayers()
         {
-            m_modelLayers.Clear();
+            m_layers.Clear();
 
             var activeProject = ActiveProject;
 
@@ -1229,26 +1269,99 @@ namespace ArchiVR.Application
                 return;
             }
 
-            // Gather all POI in the current active project.
-            var modelTransform = activeProject.transform.Find("Model");
-
-            if (modelTransform == null)
+            // Gather model layers.
             {
-                throw new Exception("Active project does not contain a child named 'Model'.");
+                var modelTransform = activeProject.transform.Find("Model");
+
+                if (modelTransform == null)
+                {
+                    Logger.Error("Active project does not contain a child named 'Model'.");
+                }
+
+                var layers = modelTransform.Find("Layers");
+
+                if (layers == null)
+                {
+                    Logger.Error("Active project's 'Model' does not contain a child named 'Layers'.");
+                }
+
+                foreach (Transform layerTransform in layers.transform)
+                {
+                    var layerModelGO = layerTransform.gameObject;
+
+                    var layer = new Layer();
+                    layer.Model = layerModelGO;
+
+                    m_layers.Add(layerModelGO.name, layer);
+                }
             }
 
-            var layers = modelTransform.Find("Layers");
-
-            if (layers == null)
+            // Gather lighting layers.
             {
-                throw new Exception("Active project's 'Model' does not contain a child named 'Layers'.");
+                var lightingTransform = activeProject.transform.Find("Lighting");
+
+                if (lightingTransform == null)
+                {
+                    Logger.Warning("Active project does not contain a child named 'Lighting'.");
+                }
+                else
+                {
+                    var layers = lightingTransform.Find("Layers");
+
+                    if (layers == null)
+                    {
+                        Logger.Warning("Active project's 'Lighting' does not contain a child named 'Layers'.");
+                    }
+
+                    foreach (Transform layerTransform in layers.transform)
+                    {
+                        var layerLightingGO = layerTransform.gameObject;
+
+                        if (m_layers.ContainsKey(layerLightingGO.name))
+                        {
+                            m_layers[layerLightingGO.name].Lighting = layerLightingGO;
+                        }
+                        else
+                        {
+                            var warning = string.Format("No corresponding layer '{0}' found for lighting layer.", layerLightingGO.name);
+                            Logger.Warning(warning);
+                        }
+                    }
+                }
             }
 
-            foreach (Transform layerTransform in layers.transform)
+            // Gather furniture layers.
             {
-                var layer = layerTransform.gameObject;
+                var lightingTransform = activeProject.transform.Find("Furniture");
 
-                m_modelLayers.Add(layer);
+                if (lightingTransform == null)
+                {
+                    Logger.Warning("Active project does not contain a child named 'Furniture'.");
+                }
+                else
+                {
+                    var layers = lightingTransform.Find("Layers");
+
+                    if (layers == null)
+                    {
+                        Logger.Warning("Active project's 'Furniture' does not contain a child named 'Layers'.");
+                    }
+
+                    foreach (Transform layerTransform in layers.transform)
+                    {
+                        var layerFurnitureGO = layerTransform.gameObject;
+
+                        if (m_layers.ContainsKey(layerFurnitureGO.name))
+                        {
+                            m_layers[layerFurnitureGO.name].Furniture = layerFurnitureGO;
+                        }
+                        else
+                        {
+                            var warning = string.Format("No corresponding layer '{0}' found for furniture layer.", layerFurnitureGO.name);
+                            Logger.Warning(warning);
+                        }
+                    }
+                }
             }
         }
 

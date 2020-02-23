@@ -256,9 +256,9 @@ namespace ArchiVR
                 foreach (var layer in Application.GetModelLayers())
                 {
                     PickRecursively(
-                        layer,
+                        layer.Model,
                         pickRay,
-                        layer,
+                        layer.Model,
                         ref pickedLayer,
                         ref minHitDistance);
                 }
@@ -272,7 +272,7 @@ namespace ArchiVR
                     int layerIndex = 0;
                     foreach (var layer in Application.GetModelLayers())
                     {
-                        if (pickedLayer == layer)
+                        if (pickedLayer == layer.Model)
                         {
                             pickedLayerIndex = layerIndex;
                             break;

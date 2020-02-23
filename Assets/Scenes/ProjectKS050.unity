@@ -3018,7 +3018,7 @@ Transform:
   - {fileID: 159256504}
   - {fileID: 1146350005}
   - {fileID: 451573433}
-  m_Father: {fileID: 1258037551}
+  m_Father: {fileID: 1133712435}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &194586648
@@ -4901,7 +4901,7 @@ GameObject:
   m_Component:
   - component: {fileID: 398373792}
   m_Layer: 0
-  m_Name: Verdiep
+  m_Name: Verdieping
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10285,7 +10285,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1258037551}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 30, y: 30, z: 0}
 --- !u!108 &935352318
 Light:
@@ -12393,7 +12393,7 @@ Transform:
   - {fileID: 729935491}
   - {fileID: 643179431}
   - {fileID: 1447090758}
-  m_Father: {fileID: 1258037551}
+  m_Father: {fileID: 1133712435}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1079054812
@@ -13089,6 +13089,39 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!1 &1133712434
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1133712435}
+  m_Layer: 0
+  m_Name: Layers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1133712435
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1133712434}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 188857536}
+  - {fileID: 1182938624}
+  - {fileID: 1044294764}
+  m_Father: {fileID: 1258037551}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1134279654
 GameObject:
   m_ObjectHideFlags: 0
@@ -13744,7 +13777,7 @@ Transform:
   - {fileID: 1241483818}
   - {fileID: 1612596927}
   - {fileID: 336375304}
-  m_Father: {fileID: 1258037551}
+  m_Father: {fileID: 1133712435}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1195132496
@@ -14283,7 +14316,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1258037551}
   m_Layer: 0
-  m_Name: Lights
+  m_Name: Lighting
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14300,10 +14333,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 188857536}
-  - {fileID: 1182938624}
-  - {fileID: 1044294764}
   - {fileID: 935352317}
+  - {fileID: 1133712435}
   m_Father: {fileID: 2056735212}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
