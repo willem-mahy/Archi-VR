@@ -11,8 +11,85 @@ using WM.Net;
 
 public class EditorTestApplication : MonoBehaviour
 {
-    private int DefaultViewLayout = 8;
-    private int DefaultNumApplicationInstances = 4;
+    private int DefaultNumApplicationInstances = 2;
+
+    private int DefaultViewLayout = 2;
+
+    static Rect[][] WindowPlacements =
+    {
+        // 1 view
+        new Rect[]
+        {
+            new Rect(0.0f, 0.0f, 1.0f, 1.0f),
+            new Rect(0.0f, 0.0f, 0.0f, 0.0f),
+            new Rect(0.0f, 0.0f, 0.0f, 0.0f),
+            new Rect(0.0f, 0.0f, 0.0f, 0.0f)
+        },
+        // 2 views (-)
+        new Rect[]
+        {
+            new Rect(0.0f, 0.0f, 1.0f, 0.5f),
+            new Rect(0.0f, 0.5f, 1.0f, 0.5f),
+            new Rect(0.0f, 0.0f, 0.0f, 0.0f),
+            new Rect(0.0f, 0.0f, 0.0f, 0.0f)
+        },
+        // 2 views (|)
+        new Rect[]
+        {
+            new Rect(0.0f, 0.0f, 0.5f, 1.0f),
+            new Rect(0.5f, 0.0f, 0.5f, 1.0f),
+            new Rect(0.0f, 0.0f, 0.0f, 0.0f),
+            new Rect(0.0f, 0.0f, 0.0f, 0.0f)
+        },
+        // 3 views (_|_)
+        new Rect[]
+        {
+            new Rect(0.0f, 0.0f, 1.0f, 0.5f),
+            new Rect(0.0f, 0.5f, 0.5f, 0.5f),
+            new Rect(0.0f, 0.5f, 0.5f, 0.5f),
+            new Rect(0.0f, 0.0f, 0.0f, 0.0f)
+        },
+        // 3 views (T)
+        new Rect[]
+        {
+            new Rect(0.0f, 0.0f, 0.5f, 0.5f),
+            new Rect(0.5f, 0.0f, 0.5f, 0.5f),
+            new Rect(0.0f, 0.5f, 1.0f, 0.5f),
+            new Rect(0.0f, 0.0f, 0.0f, 0.0f)
+        },
+        // 3 views (-|)
+        new Rect[]
+        {
+            new Rect(0.0f, 0.0f, 0.5f, 0.5f),
+            new Rect(0.0f, 0.5f, 0.5f, 0.5f),
+            new Rect(0.5f, 0.0f, 0.5f, 1.0f),
+            new Rect(0.0f, 0.0f, 0.0f, 0.0f)
+        },
+        // 3 views (|-)
+        new Rect[]
+        {
+            new Rect(0.0f, 0.0f, 0.5f, 1.0f),
+            new Rect(0.5f, 0.0f, 0.5f, 0.5f),
+            new Rect(0.5f, 0.5f, 0.5f, 0.5f),
+            new Rect(0.0f, 0.0f, 0.0f, 0.0f)
+        },
+        // 3 views (-|)
+        new Rect[]
+        {
+            new Rect(0.0f, 0.0f, 0.5f, 0.5f),
+            new Rect(0.0f, 0.5f, 0.5f, 1.0f),
+            new Rect(0.0f, 0.5f, 0.5f, 0.5f),
+            new Rect(0.0f, 0.0f, 0.0f, 0.0f)
+        },
+        // 4 views
+        new Rect[]
+        {
+            new Rect(0.0f, 0.0f, 0.5f, 0.5f),
+            new Rect(0.5f, 0.0f, 0.5f, 0.5f),
+            new Rect(0.0f, 0.5f, 0.5f, 0.5f),
+            new Rect(0.5f, 0.5f, 0.5f, 0.5f)
+        },
+    };
 
     private bool _applicationInstancesInitialized = false;
 
