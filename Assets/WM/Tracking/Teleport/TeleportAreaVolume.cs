@@ -60,7 +60,7 @@ namespace WM
 
         private void OnTriggerStay(Collider collider)
         {
-            _application.Logger.Debug("TeleportAreaVolume.OnTriggerStay");
+            //_application.Logger.Debug("TeleportAreaVolume.OnTriggerStay");
 
             var playerHeadCollider = collider.gameObject.GetComponent<PlayerHeadCollider>();
 
