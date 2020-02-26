@@ -884,10 +884,10 @@ namespace WM.Net
         }
 
         /// <summary>
-        /// Try to connect to the server at given IP.
+        /// Try to connect to the server at given IP, or time out.
         /// </summary>
         /// <param name="serverIP"></param>
-        /// <returns></returns>
+        /// <returns>Whether the connection was successfull(true), or timed out(false).</returns>
         private bool TryConnectToServer(ServerInfo serverInfo)
         {
             var callLogTag = LogID + ".TryConnectToServer()";
