@@ -1231,11 +1231,6 @@ namespace WM.Application
                 {
                     RemovePickRaySelectionTarget(gameObject);
                 }
-
-                if (!MenuVisible)
-                {
-                    SaveApplicationSettings();
-                }
             }
         }
 
