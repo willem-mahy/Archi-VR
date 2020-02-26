@@ -122,6 +122,20 @@ public class EditorTestApplication : MonoBehaviour
             ActivateNextApplicationInstance();
         }
 
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            // Toggle loggling enabled/disabled for all application instances.
+            if (_applicationInstances.Count != 0)
+            {
+                var enable = !_applicationInstances[0].Logger.Enabled;
+
+                foreach (var applicationInstance in _applicationInstances)
+                {
+                    applicationInstance.Logger.Enabled = enable;
+                }
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.F9))
         {
             // Set menu mode to 'Network' for all application instances.
