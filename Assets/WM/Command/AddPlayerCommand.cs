@@ -48,5 +48,10 @@ namespace WM.Command
 
             application.AddPlayer(Player);
         }
+
+        public override string ToString()
+        {
+            return "AddPlayerCommand (Player: " + Player.LogID + ")";
+        }
     }
 }
