@@ -1370,7 +1370,7 @@ namespace ArchiVR.Application
         /// </summary>
         protected override void UpdateNetwork()
         {
-            Logger.Debug(name + ".UpdateNetwork()");
+            //Logger.Debug(name + ".UpdateNetwork()");
 
             if (((m_centerEyeAnchor.transform.position - m_centerEyeAnchorPrev).magnitude > 0.01f) || (frame++ % 10 == 0))
             {
