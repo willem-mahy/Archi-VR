@@ -900,7 +900,7 @@ namespace WM.Application
         {
             if ((NetworkMode != NetworkMode.Standalone) && ColocationEnabled)
             {
-                Logger.Warning("UnityApplication.Fly: Colocation is enabled -> trackingspace manipulation disabled!");
+                //Logger.Warning("UnityApplication.Fly: Colocation is enabled -> trackingspace manipulation disabled!");
                 return;
             }
 
