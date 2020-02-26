@@ -109,7 +109,6 @@ namespace ArchiVR.Net
                 _log.Debug(logCallTag);
             }
 
-
             try
             {
                 // Get all received UDP messages.
