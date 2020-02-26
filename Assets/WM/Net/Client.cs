@@ -942,11 +942,6 @@ namespace WM.Net
             }
             else
             {
-                //if (obj is ICommand command)
-                //{
-                //    this.A.QueueCommand(command);
-                //}
-
                 throw new Exception("Client.ProcessMessage: MessageProcessor is null");
             }
         }
