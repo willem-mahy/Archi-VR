@@ -129,10 +129,7 @@ public class EditorTestApplication : MonoBehaviour
             {
                 var enable = !_applicationInstances[0].Logger.Enabled;
 
-                foreach (var applicationInstance in _applicationInstances)
-                {
-                    applicationInstance.Logger.Enabled = enable;
-                }
+                EnableLoggers(enable);
             }
         }
 
@@ -380,6 +377,16 @@ public class EditorTestApplication : MonoBehaviour
             ai.SetPlayerAvatar(playerAvatars[i]);
         }
 
+        bool showDebugLogMenu = false;
+        
+        if (showDebugLogMenu)
+        {
+            ShowMenus(4);
+            EnableLoggers(true);
+        }
+
+        #region Initialize application instances to their initial network mode
+
         _applicationInstances[0].QueueCommand(new InitNetworkCommand(NetworkMode.Server));
 
         while (_applicationInstances[0].Server.State != Server.ServerState.Running)
@@ -397,7 +404,34 @@ public class EditorTestApplication : MonoBehaviour
             }
         }
 
+        #endregion Initialize application instances to their initial network mode
+
         _applicationInstancesInitialized = true;
+    }
+
+    /// <summary>
+    /// Make all application instances show the menu at given index.
+    /// </summary>
+    /// <param name="menuIndex"></param>
+    private void ShowMenus(int menuIndex)
+    {
+        foreach (var applicationInstance in _applicationInstances)
+        {
+            applicationInstance.MenuVisible = true;
+            applicationInstance.SetActiveMenu(menuIndex);
+        }
+    }
+
+    /// <summary>
+    /// Enable(true) or disable the Logger for all application instances.
+    /// </summary>
+    /// <param name="enable"></param>
+    private void EnableLoggers(bool enable)
+    {
+        foreach (var applicationInstance in _applicationInstances)
+        {
+            applicationInstance.Logger.Enabled = enable;
+        }
     }
 
     /// <summary>
