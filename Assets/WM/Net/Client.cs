@@ -675,10 +675,12 @@ namespace WM.Net
         }
 
         /// <summary>
-        /// First receive all available critical messages (TCP) from the Server.
+        /// Get critical messages received from the Server over TCP.
+        /// The received messages (and any potential data fragments in front of/between them) are flushed from the icoming data buffer.
         /// </summary>
-        /// <returns></returns>
-        private List<String> ReceiveTcpMessagesFromServer()
+        /// <param name="maxNumberOfMessagesToReceive">Optional.  If specified, not all, but only up to the given number of messages are returned.</param>
+        /// <returns>A list containing the XML-encoded received messages.</returns>        
+        private List<String> ReceiveTcpMessagesFromServer(int maxNumberOfMessagesToReceive = int.MaxValue)
         {
             var receivedMessages = new List<String>();
 
@@ -749,6 +751,11 @@ namespace WM.Net
                 int c = dataFromServer.Length;
                 var remainder = dataFromServer.Substring(firstMessageEnd + EndTagLength);
                 dataFromServer = remainder;
+
+                if (receivedMessages.Count == maxNumberOfMessagesToReceive)
+                {
+                    return receivedMessages;
+                }
             }
         }
 
