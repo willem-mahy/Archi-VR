@@ -330,7 +330,10 @@ namespace WM.Net
         {
             var logCallTag = LogID + ".SendMessageUdp()";
 
-            _log.Debug(logCallTag);
+            if (_log.enableLogUDP)
+            {
+                _log.Debug(logCallTag);
+            }
 
             if (udpSend == null)
             {
@@ -406,7 +409,10 @@ namespace WM.Net
         {
             var logCallTag = LogID + ".GetReceivedMessagesUdp()";
 
-            _log.Debug(logCallTag);
+            if (_log.enableLogUDP)
+            {
+                _log.Debug(logCallTag);
+            }
 
             if (udpReceive == null)
             {

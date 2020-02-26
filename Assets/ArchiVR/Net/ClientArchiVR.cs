@@ -70,7 +70,10 @@ namespace ArchiVR.Net
         {
             var logCallTag = LogID + ".SendAvatarStateToUdp()";
 
-            _log.Debug(logCallTag);
+            if (_log.enableLogUDP)
+            {
+                _log.Debug(logCallTag);
+            }
 
             try
             {
@@ -101,7 +104,11 @@ namespace ArchiVR.Net
         {
             var logCallTag = LogID + ".UpdateAvatarStatesFromUdp()";
 
-            _log.Debug(logCallTag);
+            if (_log.enableLogUDP)
+            { 
+                _log.Debug(logCallTag);
+            }
+
 
             try
             {
@@ -121,7 +128,10 @@ namespace ArchiVR.Net
                 {
                     var avatarState = (AvatarState)(obj);
 
-                    _log.Debug(logCallTag + ": Received avatar state for player[" + avatarState.PlayerID + "].");
+                    if (_log.enableLogUDP)
+                    {
+                        _log.Debug(logCallTag + ": Received avatar state for player[" + avatarState.PlayerID + "].");
+                    }
 
                     receivedAvatarStates[avatarState.PlayerID] = avatarState;
                 }

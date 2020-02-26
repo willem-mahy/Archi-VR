@@ -9,6 +9,11 @@ namespace WM
     {
         #region Public API
 
+        /// <summary>
+        /// Whether UDP network communications should be logged.
+        /// </summary>
+        public bool enableLogUDP = false;
+
         public enum LogType
         {
             Debug = 1,

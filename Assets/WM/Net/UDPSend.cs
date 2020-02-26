@@ -73,7 +73,10 @@ namespace WM.Net
         {
             var logCallTag = "UDPSend.SendString()";
 
-            _log.Debug(logCallTag);
+            if (_log.enableLogUDP)
+            {
+                _log.Debug(logCallTag);
+            }
 
             if (remoteEndPoint == null)
             {
@@ -101,7 +104,10 @@ namespace WM.Net
         {
             var logCallTag = "UDPSend.Send()";
 
-            _log.Debug(logCallTag);
+            if (_log.enableLogUDP)
+            {
+                _log.Debug(logCallTag);
+            }
 
             if (remoteEndPoint == null)
             {

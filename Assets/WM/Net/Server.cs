@@ -1203,7 +1203,11 @@ namespace WM.Net
         public void SendDataToUdp(string data, int clientIndex)
         {
             var callLogTag = LogID + ".SendDataToUdp()";
-            _log.Debug(callLogTag);
+
+            if (_log.enableLogUDP)
+            {
+                _log.Debug(callLogTag);
+            }
 
             lock (clientConnections)
             {
@@ -1286,9 +1290,7 @@ namespace WM.Net
                         return null;
                     }
 
-                    bool logCommunication = false;
-
-                    if (logCommunication)
+                    if (_log.enableLogUDP)
                     {
                         if (udpReceive.allReceivedUDPPackets[clientKey] != "")
                         {
@@ -1304,7 +1306,7 @@ namespace WM.Net
                         return null;
                     }
 
-                    if (logCommunication)
+                    if (_log.enableLogUDP)
                     {
                         _log.Debug(callLogTag + ": found message end!");
                     }
@@ -1318,7 +1320,7 @@ namespace WM.Net
                         return null;
                     }
 
-                    if (logCommunication)
+                    if (_log.enableLogUDP)
                     {
                         _log.Debug(callLogTag + ": found message begin!");
                     }
