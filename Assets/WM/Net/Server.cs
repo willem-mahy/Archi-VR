@@ -252,9 +252,9 @@ namespace WM.Net
             }
 
             /// <summary>
-            /// 
+            /// Send the gven string over TCP.
             /// </summary>
-            /// <param name="data"></param>
+            /// <param name="data">The string to send.</param>
             public void SendTCP(string data)
             {
                 if (tcpClient == null)
