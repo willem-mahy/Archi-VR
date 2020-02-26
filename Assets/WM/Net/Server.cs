@@ -818,7 +818,7 @@ namespace WM.Net
                             clientsLockOwner = "None (AcceptClientFunction)";
                         }
 
-                        _log.Debug(callLogTag + ": Client '" + newClientConnection.ClientID + "' connected.");
+                        _log.Debug(string.Format("{0}: Client '{1}' connected -> send '{2}'.", callLogTag, newClientConnection.ClientID, ConnectionCompleteMessage));
                         
                         newClientConnection.SendTCP("Connection Complete");
 
