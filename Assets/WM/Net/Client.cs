@@ -773,6 +773,8 @@ namespace WM.Net
                 ServerInfo = GetServerInfoFromUdpBroadcast();
             }
 
+            dataFromServer = "";
+
             while (State != ClientState.Disconnecting)
             {
                 lock (stateLock)
@@ -808,36 +810,67 @@ namespace WM.Net
                             udpSend.Init();
                         }
 
-                        _log.Debug(callLogTag + ": Waiting for 'Connection Complete' from server");
-                        while (!tcpServerStream.DataAvailable)
-                        {
-                        }
+                        break; // We successfully established our private TCP connection to the server...
+                    }
+                }
+            }
 
-                        // Receive data from server.
-                        var bytesFromServer = new byte[tcpClient.ReceiveBufferSize];
-                        var numBytesRead = tcpServerStream.Read(bytesFromServer, 0, (int)tcpClient.ReceiveBufferSize);
+            // Now wait for the server to notify us that he finished up...
+            _log.Debug(callLogTag + ": Waiting for 'Connection Complete' from server");
+            while (State != ClientState.Disconnecting)
+            {
+                lock (stateLock)
+                {
+                    // Wait for ConnectionCompleteMessage from Server.
+                    var messageFromServer = ReceiveTcpMessagesFromServer(1);
 
-                        var textFromServer = Encoding.ASCII.GetString(bytesFromServer, 0, numBytesRead);
+                    switch (messageFromServer.Count)
+                    {
+                        case 0:
+                            continue;
+                        case 1:
+                            {
+                                var messageXML = messageFromServer[0];
+                                var message = Message.GetObjectFromMessageXML(messageXML);
 
-                        if (textFromServer != "Connection Complete")
-                        {
-                            _log.Error(callLogTag + ": Received '" + textFromServer + "' instead of 'Connection Complete'");
-                        }
-                        else
-                        {
-                            _log.Debug(callLogTag + ": Received 'Connection Complete' from Server");
-                        }
+                                if (message is string messageString)
+                                {
+                                    if (messageString == Server.ConnectionCompleteMessage)
+                                    {
+                                        _log.Debug(string.Format("{0}: Received '{1}' from server.", callLogTag, Server.ConnectionCompleteMessage));
 
-                        OnConnect();
+                                        OnConnect();
 
-                        State = ClientState.Connected;
+                                        State = ClientState.Connected;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        string warning = string.Format("{0}: Received unexpected string '{1}' from server, expecting '{2}'", callLogTag, messageString, Server.ConnectionCompleteMessage);
+                                        _log.Warning(warning);
+                                    }
+                                }
+                                else
+                                {
+                                    string warning = string.Format("{0}: Received non-string '{1}' from server, expecting '{2}'", callLogTag, messageXML, Server.ConnectionCompleteMessage);
+                                    _log.Warning(warning);
+                                }
+                            }
+                            continue;
+                        default:
+                            string error = string.Format("{0}: ReceiveTcpMessagesFromServer(1) returned more than {1} message!", callLogTag, messageFromServer.Count);
+                            _log.Debug(error);
+                            continue;
+                    }
+
+                    if (State == ClientState.Connected)
+                    {
                         break; // We are Connected: stop connecting...
                     }
                 }
             }
 
             /// ... and start communicating with server...
-            dataFromServer = "";
 
             while (State != ClientState.Disconnecting) // ... until shutdown has been initiated.
             {

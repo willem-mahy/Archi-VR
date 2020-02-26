@@ -103,6 +103,11 @@ namespace WM.Net
     /// </summary>
     abstract public class Server : MonoBehaviour
     {
+        // When the connection on the server side is completed for a given client,
+        // this string is send as a notification to the connecting client.
+        public static readonly string ConnectionCompleteMessage = "Connection Complete";
+
+
         /// <summary>
         /// Holds all data related to a client connected to the server.
         /// </summary>    
@@ -820,7 +825,7 @@ namespace WM.Net
 
                         _log.Debug(string.Format("{0}: Client '{1}' connected -> send '{2}'.", callLogTag, newClientConnection.ClientID, ConnectionCompleteMessage));
                         
-                        newClientConnection.SendTCP("Connection Complete");
+                        newClientConnection.SendTCP(Message.EncodeObjectAsXml(ConnectionCompleteMessage));
 
                         OnClientConnected(newClientConnection);
                     }
