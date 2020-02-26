@@ -292,7 +292,6 @@ namespace ArchiVR.Application
 
             Logger.Enabled = settings.DebugLogSettings.LoggingEnabled;
             
-
             #region Apply Network settings
 
             ColocationEnabled = settings.NetworkSettings.ColocationEnabled;
