@@ -288,7 +288,7 @@ namespace ArchiVR
 
                 if (buttonMapping != null)
                 {
-                    buttonMapping.HandTrigger.Text = "GFX Quality";
+                    buttonMapping.HandTrigger.Text = "";
 
                     buttonMapping.IndexTrigger.Text = "Verander schaal" + (isEditor ? " (R)" : "");
 
