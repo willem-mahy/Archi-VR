@@ -155,6 +155,7 @@ namespace ArchiVR
 
             Application.UpdateTrackingSpace();
 
+            // Pressing 'C' on the keyboard is a shortcut for starting the SRF measurement procedure.
             if (Input.GetKeyDown(KeyCode.C))
             {
                 Application.SetActiveApplicationState(2);
