@@ -2,6 +2,8 @@
 using WM;
 using WM.Application;
 using WM.Command;
+using ArchiVR.Application;
+using WM.Colocation;
 
 namespace ArchiVR
 {
@@ -9,7 +11,7 @@ namespace ArchiVR
     /// In this immersion mode, the user can walk around in the real-scale model.
     /// The user can jump between a list of Points-Of-Interest, predefined in the project.
     /// </summary>
-    public class ImmersionModeWalkthrough : ImmersionMode
+    public class ImmersionModeWalkthrough : ApplicationState<ApplicationArchiVR>
     {
         #region variables
 
@@ -20,45 +22,52 @@ namespace ArchiVR
 
         #endregion
 
+        public ImmersionModeWalkthrough(ApplicationArchiVR application) : base(application)
+        {
+        }
+
         /// <summary>
         /// <see cref="ImmersionMode.Enter()"/> implementation.
         /// </summary>
         public override void Enter()
         {
-            Application.Logger.Debug("ImmersionModeWalkthrough.Enter()");
+            m_application.Logger.Debug("ImmersionModeWalkthrough.Enter()");
 
-            if (Application._teleportAreaGO == null)
+            if (m_application._teleportAreaGO == null)
             {
-                Application._teleportAreaGO = UtilUnity.FindGameObjectElseError(Application.gameObject.scene, "TeleportArea");
+                m_application._teleportAreaGO = UtilUnity.FindGameObjectElseError(m_application.gameObject.scene, "TeleportArea");
 
-                var teleportAreaVolumeGO = Application._teleportAreaGO.transform.Find("Volume");
+                var teleportAreaVolumeGO = m_application._teleportAreaGO.transform.Find("Volume");
 
                 if (teleportAreaVolumeGO == null)
                 {
-                    Application.Logger.Error("TeleportArea.Volume gameobject not found.");
+                    m_application.Logger.Error("TeleportArea.Volume gameobject not found.");
                 }
 
-                Application._teleportAreaVolume = teleportAreaVolumeGO.GetComponent<TeleportAreaVolume>();
+                m_application._teleportAreaVolume = teleportAreaVolumeGO.GetComponent<TeleportAreaVolume>();
 
-                if (Application._teleportAreaVolume == null)
+                if (m_application._teleportAreaVolume == null)
                 {
-                    Application.Logger.Error("TeleportArea.Volume: TeleportAreaVolume component not found.");
+                    m_application.Logger.Error("TeleportArea.Volume: TeleportAreaVolume component not found.");
                 }
 
-                Application._teleportAreaGO.SetActive(false);
+                m_application._teleportAreaGO.SetActive(false);
             }
 
             InitButtonMappingUI();
 
             // Restore default moving up/down.
-            Application.m_flySpeedUpDown = 1.0f;
+            m_application.m_flySpeedUpDown = 1.0f;
 
-            Application.UnhideAllModelLayers();
+            m_application.UnhideAllModelLayers();
 
             if (activePoiReferenceSystem == null)
             {
-                activePoiReferenceSystem = Application.CreateReferenceSystem("POI", null);
+                activePoiReferenceSystem = m_application.CreateReferenceSystem("POI", null);
             }
+
+            UpdateModelLocationAndScale();
+            UpdateTrackingSpacePosition();
         }
 
         /// <summary>
@@ -66,99 +75,135 @@ namespace ArchiVR
         /// </summary>
         public override void Exit()
         {
-            Application.Logger.Debug("ImmersionModeWalkthrough.Exit()");
+            m_application.Logger.Debug("ImmersionModeWalkthrough.Exit()");
 
             // Restore default moving up/down.
-            Application.m_flySpeedUpDown = UnityApplication.DefaultFlySpeedUpDown;
+            m_application.m_flySpeedUpDown = UnityApplication.DefaultFlySpeedUpDown;
 
             // We might have made the boundary visible, so make sure it is hidden again.
             OVRManager.boundary.SetVisible(false);
         }
 
-        TeleportCommand tc;
+        /// <summary>
+        /// <see cref="ImmersionMode.Resume()"/> implementation.
+        /// </summary>
+        public override void Resume()
+        {
+            m_application.Logger.Debug("ImmersionModeWalkthrough.Resume()");
 
+            InitButtonMappingUI();
+
+            // Restore default moving up/down.
+            m_application.m_flySpeedUpDown = 1.0f;
+
+            m_application.UnhideAllModelLayers();
+
+            UpdateModelLocationAndScale();
+            UpdateTrackingSpacePosition();
+        }
 
         /// <summary>
         /// <see cref="ImmersionMode.Update()"/> implementation.
         /// </summary>
         public override void Update()
         {
-            //WM.Logger.Debug("ImmersionModeWalkthrough.Update()");
-            
+            //m_application.Logger.Debug("ImmersionModeWalkthrough.Update()");
 
-            if (tc != null && Application._teleportAreaVolume.AllPlayersPresent)
+            if (_teleportCommand != null && m_application._teleportAreaVolume.AllPlayersPresent)
             {
-                Application.Teleport(tc);
+                m_application.Teleport(_teleportCommand);
                 
-                tc = null;
-                //Application._teleportAreaVolume.AllPlayersPresent = false;
+                _teleportCommand = null;
+                //m_application._teleportAreaVolume.AllPlayersPresent = false;
             }
 
-            if (tc == null)
+            if (_teleportCommand == null)
             {
-                if (Application.ActivateNextProject)
+                if (m_application.ActivateNextProject)
                 {
-                    tc = Application.GetTeleportCommandForProject(Application.ActiveProjectIndex + 1);
+                    _teleportCommand = m_application.GetTeleportCommandForProject(m_application.ActiveProjectIndex + 1);
                 }
 
-                if (Application.ActivatePreviousProject)
+                if (m_application.ActivatePreviousProject)
                 {
-                    tc = Application.GetTeleportCommandForProject(Application.ActiveProjectIndex - 1);
+                    _teleportCommand = m_application.GetTeleportCommandForProject(m_application.ActiveProjectIndex - 1);
                 }
 
-                if (Application.ActivateNextPOI)
+                if (m_application.ActivateNextPOI)
                 {
-                    tc = Application.GetTeleportCommandForPOI(Application.ActivePOIIndex + 1);
+                    _teleportCommand = m_application.GetTeleportCommandForPOI(m_application.ActivePOIIndex + 1);
                 }
 
-                if (Application.ActivatePreviousPOI)
+                if (m_application.ActivatePreviousPOI)
                 {
-                    tc = Application.GetTeleportCommandForPOI(Application.ActivePOIIndex - 1);
+                    _teleportCommand = m_application.GetTeleportCommandForPOI(m_application.ActivePOIIndex - 1);
                 }
 
                 // If we just started a teleport procedure...
-                if (tc != null)
+                if (_teleportCommand != null)
                 {
-                    Application._teleportAreaVolume.Players.Clear();
+                    m_application._teleportAreaVolume.Players.Clear();
 
                     var tic = new TeleportInitiatedCommand();
                     
-                    if (Application.NetworkInitialized && Application.NetworkMode == WM.Net.NetworkMode.Server)
+                    if (m_application.NetworkInitialized && m_application.NetworkMode == WM.Net.NetworkMode.Server)
                     {
-                        Application.Server.BroadcastCommand(tic);
+                        m_application.Server.BroadcastCommand(tic);
                     }
                     else
                     {
-                        tic.Execute(Application);
+                        tic.Execute(m_application);
                     }
                 }
             }
             
-            if (Application.ToggleImmersionModeIfInputAndNetworkModeAllows())
+            if (m_application.ToggleImmersionModeIfInputAndNetworkModeAllows())
             {
                 return;
             }
 
+            var controllerState = m_application.m_controllerInput.m_controllerState;
+
             // Toggle Enable/Disable translating tracking space Up/Down using left thumbstick click.
-            if (Application.m_controllerInput.m_controllerState.lThumbstickDown)
+            if (controllerState.lThumbstickDown)
             {
-                Application.EnableTrackingSpaceTranslationUpDown = !Application.EnableTrackingSpaceTranslationUpDown;
+                m_application.EnableTrackingSpaceTranslationUpDown = !m_application.EnableTrackingSpaceTranslationUpDown;
                 InitButtonMappingUI();
             }
 
             // By default, do not show the boundary.  We will set it visible in Fly() and UpdateTrackingSpace() below, if needed.
             OVRManager.boundary.SetVisible(false);
 
-            Application.Fly();
+            m_application.Fly();
 
-            Application.m_rightControllerText.text = Application.ActivePOIName ?? "";
+            m_application.m_rightControllerText.text = m_application.ActivePOIName ?? "";
 
-            Application.UpdateTrackingSpace();
+            m_application.UpdateTrackingSpace();
 
             // Pressing 'C' on the keyboard is a shortcut for starting the SRF measurement procedure.
             if (Input.GetKeyDown(KeyCode.C))
             {
-                Application.SetActiveApplicationState(2);
+                m_application.PushApplicationState(new ApplicationStateDefineSharedReferenceSystem(m_application));
+            }
+
+            // Pressing 'F' on the keyboard is a shortcut for starting editing furniture.
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                //m_application.PushApplicationState(new ApplicationStateEditFurniture(m_application));
+            }
+
+            // Pressing 'L' on the keyboard is a shortcut for starting editing lights.
+            if (Input.GetKeyDown(KeyCode.L))
+            {
+                m_application.PushApplicationState(new ApplicationStateEditLight(m_application));
+            }
+
+            // Pressing 'BackSpace' on the keyboard is a shortcut for returning to the default state.
+            var returnToDefaultState = controllerState.lIndexTriggerDown || Input.GetKeyDown(KeyCode.Backspace);
+
+            if (returnToDefaultState)
+            {
+                m_application.PopApplicationState();
             }
         }
 
@@ -168,9 +213,9 @@ namespace ArchiVR
         public override void InitTeleport()
         {
             // Show the guidance UI for directing users to the teleport area.
-            Application._teleportAreaGO.SetActive(true);
-            Application.HudInfoPanel.SetActive(true);
-            Application.HudInfoText.text = "Move to teleport area";
+            m_application._teleportAreaGO.SetActive(true);
+            m_application.HudInfoPanel.SetActive(true);
+            m_application.HudInfoText.text = "Move to teleport area";
         }
 
         /// <summary>
@@ -178,16 +223,16 @@ namespace ArchiVR
         /// </summary>
         public override void UpdateModelLocationAndScale()
         {
-            Application.Logger.Debug("ImmersionModeWalkthrough.UpdateModelLocationAndScale()");
+            m_application.Logger.Debug("ImmersionModeWalkthrough.UpdateModelLocationAndScale()");
 
-            var activeProject = Application.ActiveProject;
+            var activeProject = m_application.ActiveProject;
 
             if (activeProject == null)
             {
                 return;
             }
 
-            activeProject.transform.position = Application.OffsetPerID;
+            activeProject.transform.position = m_application.OffsetPerID;
             activeProject.transform.rotation = Quaternion.identity;
             activeProject.transform.localScale = Vector3.one;
         }
@@ -197,20 +242,20 @@ namespace ArchiVR
         /// </summary>
         public override void UpdateTrackingSpacePosition()
         {
-            Application.Logger.Debug("ImmersionModeWalkthrough.UpdateTrackingSpacePosition()");
+            m_application.Logger.Debug("ImmersionModeWalkthrough.UpdateTrackingSpacePosition()");
 
-            var activePOI = Application.ActivePOI;
+            var activePOI = m_application.ActivePOI;
 
             if (activePOI == null)
             {
-                Application.ResetTrackingSpacePosition();
+                m_application.ResetTrackingSpacePosition();
 
                 UnityApplication.SetReferenceSystemLocation(
                     activePoiReferenceSystem,
                     Vector3.zero,
                     Quaternion.identity);
 
-                Application._teleportAreaGO.transform.position = Vector3.zero;
+                m_application._teleportAreaGO.transform.position = Vector3.zero;
             }
             else
             {
@@ -219,16 +264,16 @@ namespace ArchiVR
                     activePOI.transform.position,
                     activePOI.transform.rotation);
 
-                Application._teleportAreaGO.transform.position = activePOI.transform.position;
+                m_application._teleportAreaGO.transform.position = activePOI.transform.position;
 
-                if (Application.ColocationEnabled)
+                if (m_application.ColocationEnabled)
                 {
-                    Application.m_ovrCameraRig.transform.SetPositionAndRotation(
+                    m_application.m_ovrCameraRig.transform.SetPositionAndRotation(
                             Vector3.zero,
                             Quaternion.identity);
 
-                    var transformTRF = Application.trackingSpace.gameObject.transform;
-                    var transformSRF = Application.SharedReferenceSystem.gameObject.transform;
+                    var transformTRF = m_application.trackingSpace.gameObject.transform;
+                    var transformSRF = m_application.SharedReferenceSystem.gameObject.transform;
 
                     var matrix_S_T = transformSRF.worldToLocalMatrix * transformTRF.localToWorldMatrix;
                     //var matrix_T_S = transformTRF.worldToLocalMatrix * transformSRF.localToWorldMatrix;
@@ -240,7 +285,7 @@ namespace ArchiVR
 
                     var matrix_result = matrix_POI_W * matrix_S_T;
 
-                    Application.m_ovrCameraRig.transform.FromMatrix(matrix_result);
+                    m_application.m_ovrCameraRig.transform.FromMatrix(matrix_result);
                 }
                 else
                 {
@@ -248,20 +293,20 @@ namespace ArchiVR
 
                     if (alignEyeToPOI)
                     {
-                        var rotTrackingSpace = Application.m_ovrCameraRig.transform.rotation.eulerAngles;
-                        var rotEye = Application.m_centerEyeCanvas.transform.parent.rotation.eulerAngles;
+                        var rotTrackingSpace = m_application.m_ovrCameraRig.transform.rotation.eulerAngles;
+                        var rotEye = m_application.m_centerEyeCanvas.transform.parent.rotation.eulerAngles;
 
                         var rot = activePOI.transform.rotation.eulerAngles;
 
                         rot.y = rot.y + (rotTrackingSpace.y - rotEye.y);
 
-                        Application.m_ovrCameraRig.transform.SetPositionAndRotation(
+                        m_application.m_ovrCameraRig.transform.SetPositionAndRotation(
                             activePOI.transform.position,
                             Quaternion.Euler(rot));
                     }
                     else
                     {
-                        Application.m_ovrCameraRig.transform.SetPositionAndRotation(
+                        m_application.m_ovrCameraRig.transform.SetPositionAndRotation(
                             activePOI.transform.position,
                             activePOI.transform.rotation);
                     }
@@ -269,7 +314,7 @@ namespace ArchiVR
 
                 if (UnityEngine.Application.isEditor)
                 {
-                    Application.m_ovrCameraRig.transform.position = Application.m_ovrCameraRig.transform.position + new Vector3(0, 1.8f, 0);
+                    m_application.m_ovrCameraRig.transform.position = m_application.m_ovrCameraRig.transform.position + new Vector3(0, 1.8f, 0);
                 }
             }
         }
@@ -277,15 +322,15 @@ namespace ArchiVR
         /// <summary>
         /// <see cref="ImmersionMode.InitButtonMappingUI()"/> implementation.
         /// </summary>
-        public override void InitButtonMappingUI()
+        public /*override*/ void InitButtonMappingUI()
         {
-            Application.Logger.Debug("ImmersionModeWalkthrough.InitButtonMappingUI()");
+            m_application.Logger.Debug("ImmersionModeWalkthrough.InitButtonMappingUI()");
 
             var isEditor = UnityEngine.Application.isEditor;
 
             // Left controller
             {
-                var buttonMapping = Application.leftControllerButtonMapping;
+                var buttonMapping = m_application.leftControllerButtonMapping;
 
                 if (buttonMapping != null)
                 {
@@ -298,7 +343,7 @@ namespace ArchiVR
                     buttonMapping.ButtonX.Text = "Vorig project" + (isEditor ? " (F1)" : "");
                     buttonMapping.ButtonY.Text = "Volgend project" + (isEditor ? " (F2)" : "");
 
-                    if (Application.EnableTrackingSpaceTranslationUpDown)
+                    if (m_application.EnableTrackingSpaceTranslationUpDown)
                     {
                         buttonMapping.ThumbUp.Text = "Beweeg omhoog" + (isEditor ? " (Z)" : "");
                         buttonMapping.ThumbDown.Text = "Beweeg omlaag" + (isEditor ? " (S)" : "");
@@ -316,7 +361,7 @@ namespace ArchiVR
 
             // Right controller
             {
-                var buttonMapping = Application.rightControllerButtonMapping;
+                var buttonMapping = m_application.rightControllerButtonMapping;
 
                 if (buttonMapping != null)
                 {
@@ -335,5 +380,10 @@ namespace ArchiVR
                 }
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private TeleportCommand _teleportCommand;
     }
 }

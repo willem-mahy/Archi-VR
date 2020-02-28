@@ -11,6 +11,79 @@ namespace WM
     public class UtilUnity
     {
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="go"></param>
+        public static Bounds? CalculateBounds(GameObject go)
+        {
+            var colliders = go.GetComponentsInChildren<Collider>();
+
+            if (colliders.Length == 0)
+            {
+                return null;
+            }
+
+            var bounds = new Bounds(colliders[0].bounds.center, colliders[0].bounds.size);
+         
+            foreach (var col in colliders)
+            {
+                bounds.Encapsulate(col.bounds);
+            }
+
+            return bounds;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="layer"></param>
+        /// <param name="pickRay"></param>
+        /// <param name="gameObject"></param>
+        /// <param name="pickedLayer"></param>
+        /// <param name="minHitDistance"></param>
+        public static void PickRecursively(
+            GameObject layer,
+            Ray pickRay,
+            GameObject gameObject,
+            ref GameObject pickedLayer,
+            ref RaycastHit hitInfoOut)
+        {
+            // Pick-test on self.
+            var geometryCollider = gameObject.GetComponent<Collider>();
+
+            if (geometryCollider)
+            {
+                // Raycast
+                var hitInfo = new RaycastHit();
+
+                if (geometryCollider.Raycast(pickRay, out hitInfo, 9000))
+                {
+                    if (float.IsNaN(hitInfoOut.distance))
+                    {
+                        hitInfoOut = hitInfo;
+                        pickedLayer = layer;
+                    }
+                    else if (hitInfoOut.distance < hitInfoOut.distance)
+                    {
+                        hitInfoOut = hitInfo;
+                        pickedLayer = layer;
+                    }
+                }
+            }
+
+            // Recurse.
+            foreach (Transform childTransform in gameObject.transform)
+            {
+                PickRecursively(
+                        layer,
+                        pickRay,
+                        childTransform.gameObject,
+                        ref pickedLayer,
+                        ref hitInfoOut);
+            }
+        }
+
+        /// <summary>
         /// Returns a string representation of the given Vector3.
         /// </summary>
         public static string ToString(Vector3 v)

@@ -43,9 +43,12 @@ namespace ArchiVR.Command
         {
             application.Logger.Debug("SetModelLocationCommand.Execute()");
 
-            var immersionModeMaquette = ((ApplicationArchiVR)application).ImmersionModeMaquette;
+            var immersionModeMaquette = application.ActiveApplicationState as ImmersionModeMaquette;
 
-            immersionModeMaquette.SetModelLocation(PositionOffset, RotationOffset);
+            if (null != immersionModeMaquette)
+            {
+                immersionModeMaquette.SetModelLocation(PositionOffset, RotationOffset);
+            }
         }
     }
 }

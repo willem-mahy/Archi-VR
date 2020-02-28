@@ -2,13 +2,20 @@
 
 namespace ArchiVR.Application
 {
-    public class ApplicationStateTeleporting : ApplicationState
+    public class ApplicationStateTeleporting : ApplicationState<ApplicationArchiVR>
         {
             #region variables
 
-            public ITeleportationSystem TeleportationSystem;
+            public ITeleportationSystem TeleportationSystem { get; private set; }
 
-            #endregion
+        #endregion
+
+            public ApplicationStateTeleporting(
+                ApplicationArchiVR application,
+                ITeleportationSystem teleportationSystem) : base(application)
+            {
+                TeleportationSystem = teleportationSystem;
+            }
 
             public override void Init()
             {
@@ -112,7 +119,7 @@ namespace ArchiVR.Application
             {
                 m_application.Logger.Debug("ApplicationStateTeleporting.OnTeleportFadeInComplete()");
 
-                m_application.SetActiveApplicationState(0);
+                m_application.PopApplicationState();
             }
         }
 } // namespace ArchiVR.Application

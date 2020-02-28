@@ -15,9 +15,6 @@ namespace Demo.Application
         /// </summary>
         public GameObject ovrManagerPrefab;
 
-        // The typed application states.
-        public ApplicationStateDefault applicationStateDefault = new ApplicationStateDefault();
-
         #endregion
 
         /// <summary>
@@ -42,11 +39,9 @@ namespace Demo.Application
                 Instantiate(ovrManagerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
             }
 
-            m_applicationStates.Add(applicationStateDefault);
-
             base.Init();
 
-            SetActiveApplicationState(0);
+            PushApplicationState(new ApplicationStateDefault(this));
         }
 
         /// <summary>

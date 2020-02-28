@@ -119,10 +119,12 @@ namespace WM.Application
 
         public void InitTeleport()
         {
-            if (GetActiveApplicationState() != null)
+            if (null == ActiveApplicationState)
             {
-                GetActiveApplicationState().InitTeleport();
+                return;
             }
+            
+            ActiveApplicationState.InitTeleport();
         }
 
         #region Colocation
@@ -335,50 +337,64 @@ namespace WM.Application
 
         #region Application state
 
-        // The list of application states.
-        protected List<ApplicationState> m_applicationStates = new List<ApplicationState>();
-
-        // The active immersion mode index.
-        private int m_activeApplicationStateIndex = -1;
-
-        //! Gets the active application state.  Returns null if no state is active.
-        public ApplicationState GetActiveApplicationState()
-        {
-            if (m_activeApplicationStateIndex == -1)
-                return null;
-
-            return m_applicationStates[m_activeApplicationStateIndex];
-        }
+        private Stack<IApplicationState> _applicationStateStack = new Stack<IApplicationState>();
 
         /// <summary>
-        /// Sets the active application state.
+        /// The current application state.
+        /// null if no state is active.
         /// </summary>
-        /// <param name="applicationState"></param>
-        /// <returns></returns>
-        public ApplicationState SetActiveApplicationState(int applicationStateIndex)
+        public IApplicationState ActiveApplicationState
         {
-            if (GetActiveApplicationState() != null)
+            get
             {
-                GetActiveApplicationState().Exit();
+                if (_applicationStateStack.Count == 0)
+                {
+                    return null;
+                }
+
+                return _applicationStateStack.Peek();
+            }
+        }
+
+        public void PushApplicationState(IApplicationState applicationState)
+        {
+            if (null != ActiveApplicationState)
+            {
+                ActiveApplicationState.Pause();
             }
 
-            m_activeApplicationStateIndex = applicationStateIndex;
+            _applicationStateStack.Push(applicationState);
 
-            if (GetActiveApplicationState() != null)
+            if (null != ActiveApplicationState)
             {
-                GetActiveApplicationState().Enter();
+                ActiveApplicationState.Enter();
+            }
+        }
+
+        public void PopApplicationState()
+        {
+            if (null == ActiveApplicationState)
+            {
+                return;
             }
 
-            return m_applicationStates[m_activeApplicationStateIndex];
+            ActiveApplicationState.Exit();
+
+            _applicationStateStack.Pop();
+
+            if (null != ActiveApplicationState)
+            {
+                ActiveApplicationState.Resume();
+            }
         }
 
         #endregion Application state
 
-        #region Controller UI
+#region Controller UI
 
-        #region Button mapping UI
+#region Button mapping UI
 
-        public ButtonMappingUI leftControllerButtonMapping = null;
+public ButtonMappingUI leftControllerButtonMapping = null;
         public ButtonMappingUI rightControllerButtonMapping = null;
 
         #endregion
@@ -787,16 +803,6 @@ namespace WM.Application
 
             CreateReferenceSystems();
 
-            #region Init application states.
-
-            foreach (var applicationState in m_applicationStates)
-            {
-                applicationState.m_application = this;
-                applicationState.Init();
-            }
-
-            #endregion
-
             MenuVisible = false;
 
             UpdateSelectionVisualizerVisibility();
@@ -896,8 +902,18 @@ namespace WM.Application
         /// <summary>
         /// 
         /// </summary>
+        public bool LocomotionEnabled = true;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public void Fly()
         {
+            if (!LocomotionEnabled)
+            {
+                return;
+            }
+
             if ((NetworkMode != NetworkMode.Standalone) && ColocationEnabled)
             {
                 //Logger.Warning("UnityApplication.Fly: Colocation is enabled -> trackingspace manipulation disabled!");
@@ -1047,9 +1063,9 @@ namespace WM.Application
 
             #endregion
 
-            if (GetActiveApplicationState() != null)
+            if (null != ActiveApplicationState)
             {
-                GetActiveApplicationState().Update();
+                ActiveApplicationState.Update();
             }
         }
 
@@ -1303,9 +1319,13 @@ namespace WM.Application
         /// </summary>
         public void UpdateTrackingSpace()
         {
+            if (!LocomotionEnabled)
+            {
+                return;
+            }
+
             if ((NetworkMode != NetworkMode.Standalone) && ColocationEnabled)
             {
-                Logger.Warning("UnityApplication.UpdateTrackingSpace: Colocation is enabled -> trackingspace manipulation disabled!");
                 return;
             }
 
@@ -1329,7 +1349,7 @@ namespace WM.Application
             // Translate Up/Down using left thumbstick Y.
             float magnitudeUp = EnableTrackingSpaceTranslationUpDown ? controllerState.lThumbStick.y : 0.0f;
 
-            // Update maquette manipulationMode
+            // Update tracking space manipulationMode
             bool manipulating = (Mathf.Abs(magnitudeRotate) > 0.1f) || (Mathf.Abs(magnitudeUp) > 0.1f);
             if (trackingSpaceManipulationMode == TrackingSpaceManipulationMode.None)
             {

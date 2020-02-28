@@ -17,7 +17,7 @@ namespace WM.Colocation
     /// _W : expressed in world space.
     /// _T : expressed in tracking system space.
     /// </summary>
-    public class ApplicationStateDefineSharedReferenceSystem : ApplicationState
+    public class ApplicationStateDefineSharedReferenceSystem : ApplicationState<UnityApplication>
     {
         #region Fields
 
@@ -49,15 +49,19 @@ namespace WM.Colocation
 
         #endregion Fields
 
+        public ApplicationStateDefineSharedReferenceSystem(UnityApplication application) : base(application)
+        {
+        }
+
         /// <summary>
-        /// Called once, right after construction.
+        /// <see cref="ApplicationState{T}.Init"/> implementation.
         /// </summary>
         public override void Init()
         {
         }
 
         /// <summary>
-        /// Called when the application enters the application state.
+        /// <see cref="ApplicationState{T}.Enter"/> implementation.
         /// </summary>
         public override void Enter()
         {
@@ -81,7 +85,7 @@ namespace WM.Colocation
         }
 
         /// <summary>
-        /// Called when the application exits the application state.
+        /// <see cref="ApplicationState{T}.Exit"/> implementation.
         /// </summary>
         public override void Exit()
         {
@@ -139,11 +143,11 @@ namespace WM.Colocation
 
             RemoveNewSharedReferenceSystem();
 
-            m_application.SetActiveApplicationState(0);
+            m_application.PopApplicationState();
         }
 
         /// <summary>
-        /// Called every frame while the application is in the application state.
+        /// <see cref="ApplicationState{T}.Update"/> implementation.
         /// </summary>
         public override void Update()
         {
@@ -155,10 +159,13 @@ namespace WM.Colocation
 
             var controllerState = m_application.m_controllerInput.m_controllerState;
 
-            if (controllerState.startButtonDown)
+            // Pressing 'BackSpace' on the keyboard is a shortcut for returning to the default state.
+            var returnToDefaultState = controllerState.lIndexTriggerDown || Input.GetKeyDown(KeyCode.Backspace);
+
+            if (returnToDefaultState)
             {
-                Abort();
-                return;
+                Abort(); 
+                //m_application.PopApplicationState();
             }
 
             UpdateControllerInfos();
@@ -508,7 +515,7 @@ namespace WM.Colocation
         {
             RemoveNewSharedReferenceSystem();
             RemoveNewMeasuredPoints();
-            m_application.SetActiveApplicationState(0);
+            m_application.PopApplicationState();
         }
     }
 } // namespace WM.Colocation

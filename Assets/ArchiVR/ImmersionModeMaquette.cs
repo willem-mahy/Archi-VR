@@ -3,6 +3,7 @@ using UnityEngine;
 using WM;
 using WM.Application;
 using WM.Net;
+using ArchiVR.Application;
 
 namespace ArchiVR
 {
@@ -31,7 +32,7 @@ namespace ArchiVR
     /// (because of unwanted rotations/translations being triggered
     /// by small accidental offsets on the other thumbstick axis).
     /// </summary>
-    public class ImmersionModeMaquette : ImmersionMode
+    public class ImmersionModeMaquette : ApplicationState<ApplicationArchiVR>
     {
         #region variables
 
@@ -71,16 +72,20 @@ namespace ArchiVR
 
         #endregion
 
+        public ImmersionModeMaquette(ApplicationArchiVR application) : base(application)
+        {
+        }
+
         /// <summary>
         /// <see cref="ImmersionMode.Init()"/> implementation.
         /// </summary>
         public override void Init()
         {
-            Application.Logger.Debug("ImmersionModeMaquette.Init()");
+            m_application.Logger.Debug("ImmersionModeMaquette.Init()");
 
             if (m_maquettePreviewContext == null)
             {
-                m_maquettePreviewContext = UtilUnity.FindGameObjectElseError(Application.gameObject.scene, "MaquettePreviewContext");
+                m_maquettePreviewContext = UtilUnity.FindGameObjectElseError(m_application.gameObject.scene, "MaquettePreviewContext");
             }
 
             if (m_maquettePreviewContext)
@@ -94,7 +99,7 @@ namespace ArchiVR
         /// </summary>
         public override void Enter()
         {
-            Application.Logger.Debug("ImmersionModeMaquette.Enter()");
+            m_application.Logger.Debug("ImmersionModeMaquette.Enter()");
 
             InitButtonMappingUI();
 
@@ -102,12 +107,15 @@ namespace ArchiVR
                 m_maquettePreviewContext.SetActive(true);
 
             // Disable moving up/down.
-            Application.m_flySpeedUpDown = 0.0f;
+            m_application.m_flySpeedUpDown = 0.0f;
 
             // Enable only R pickray.
-            Application.RPickRay.gameObject.SetActive(true);
+            m_application.RPickRay.gameObject.SetActive(true);
 
             maquetteManipulationMode = MaquetteManipulationMode.None;
+
+            UpdateModelLocationAndScale();
+            UpdateTrackingSpacePosition();
         }
 
         /// <summary>
@@ -115,7 +123,7 @@ namespace ArchiVR
         /// </summary>
         public override void Exit()
         {
-            Application.Logger.Debug("ImmersionModeMaquette.Exit()");
+            m_application.Logger.Debug("ImmersionModeMaquette.Exit()");
 
             if (m_maquettePreviewContext)
             {
@@ -123,9 +131,9 @@ namespace ArchiVR
             }
 
             // Restore default moving up/down.
-            Application.m_flySpeedUpDown = UnityApplication.DefaultFlySpeedUpDown;
+            m_application.m_flySpeedUpDown = UnityApplication.DefaultFlySpeedUpDown;
 
-            Application.RPickRay.gameObject.SetActive(false);
+            m_application.RPickRay.gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -135,33 +143,33 @@ namespace ArchiVR
         {
             //WM.Logger.Debug("ImmersionModeMaquette.Update()");
 
-            if (Application.ToggleActiveProject())
+            if (m_application.ToggleActiveProject())
             {
                 return;
             }
 
-            if (Application.ToggleImmersionModeIfInputAndNetworkModeAllows())
-            {
-                return;
-            }
+            //if (m_application.ToggleImmersionModeIfInputAndNetworkModeAllows())
+            //{
+            //    return;
+            //}
 
             // Clients cannot toggle model layer visibility!
-            if (Application.NetworkMode != WM.Net.NetworkMode.Client)
+            if (m_application.NetworkMode != WM.Net.NetworkMode.Client)
             {
                 // Toggle model layer visibility using picking.
-                if (Application.m_controllerInput.m_controllerState.rIndexTriggerDown)
+                if (m_application.m_controllerInput.m_controllerState.rIndexTriggerDown)
                 {
                     if (pickedLayer != null)
                     {
-                        Application.SetModelLayerVisible(pickedLayerIndex, !pickedLayer.activeSelf);
+                        m_application.SetModelLayerVisible(pickedLayerIndex, !pickedLayer.activeSelf);
                         //pickedLayer.SetActive(!pickedLayer.activeSelf);
                     }
                     else
                     {
                         int layerIndex = 0;
-                        foreach (var layer in Application.GetModelLayers())
+                        foreach (var layer in m_application.GetModelLayers())
                         {
-                            Application.SetModelLayerVisible(layerIndex, true);
+                            m_application.SetModelLayerVisible(layerIndex, true);
                             ++layerIndex;
                         }
 
@@ -171,16 +179,16 @@ namespace ArchiVR
             }
 
             // Show name of picked model layer in right control text.
-            Application.m_rightControllerText.text = (pickedLayer == null) ? "" : pickedLayer.name;
+            m_application.m_rightControllerText.text = (pickedLayer == null) ? "" : pickedLayer.name;
 
-            Application.Fly();
+            m_application.Fly();
 
             #region Maquette manipulation.
 
             // Clients cannot manipulate model!
-            if (Application.NetworkMode != WM.Net.NetworkMode.Client)
+            if (m_application.NetworkMode != WM.Net.NetworkMode.Client)
             {
-                var cs = Application.m_controllerInput.m_controllerState;
+                var cs = m_application.m_controllerInput.m_controllerState;
 
                 float magnitudeRotateMaquette = cs.lThumbStick.x;
                 float magnitudeTranslateMaquette = cs.lThumbStick.y;
@@ -229,13 +237,13 @@ namespace ArchiVR
                 {
                     var command = new SetModelLocationCommand(positionOffset, rotationOffset);
 
-                    if (Application.NetworkMode == NetworkMode.Server)
+                    if (m_application.NetworkMode == NetworkMode.Server)
                     {
-                        Application.Server.BroadcastCommand(command);
+                        m_application.Server.BroadcastCommand(command);
                     }
                     else
                     {
-                        command.Execute(Application);
+                        command.Execute(m_application);
                     }
                 }
             }
@@ -245,22 +253,23 @@ namespace ArchiVR
             #region Updated picked model layer
 
             // Clients cannot pick model layers!
-            if (Application.NetworkMode != NetworkMode.Client)
+            if (m_application.NetworkMode != NetworkMode.Client)
             {
-                var pickRay = Application.RPickRay.GetRay();
+                var pickRay = m_application.RPickRay.GetRay();
 
-                float minHitDistance = float.NaN;
+                var hitInfo = new RaycastHit();
+                hitInfo.distance = float.NaN;
 
                 pickedLayer = null;
                 
-                foreach (var layer in Application.GetModelLayers())
+                foreach (var layer in m_application.GetModelLayers())
                 {
-                    PickRecursively(
+                    UtilUnity.PickRecursively(
                         layer.Model,
                         pickRay,
                         layer.Model,
                         ref pickedLayer,
-                        ref minHitDistance);
+                        ref hitInfo);
                 }
 
                 if (pickedLayer == null)
@@ -270,7 +279,7 @@ namespace ArchiVR
                 else
                 {
                     int layerIndex = 0;
-                    foreach (var layer in Application.GetModelLayers())
+                    foreach (var layer in m_application.GetModelLayers())
                     {
                         if (pickedLayer == layer.Model)
                         {
@@ -282,10 +291,20 @@ namespace ArchiVR
                     Debug.Assert(pickedLayerIndex != -1);
                 }
 
-                Application.RPickRay.HitDistance = minHitDistance;
+                m_application.RPickRay.HitDistance = hitInfo.distance;
             }
 
             #endregion
+
+            var controllerState = m_application.m_controllerInput.m_controllerState;
+
+            // Pressing 'BackSpace' on the keyboard is a shortcut for returning to the default state.
+            var returnToDefaultState = controllerState.lIndexTriggerDown || Input.GetKeyDown(KeyCode.Backspace);
+
+            if (returnToDefaultState)
+            {
+                m_application.PopApplicationState();
+            }
         }
 
         /// <summary>
@@ -305,79 +324,11 @@ namespace ArchiVR
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="layer"></param>
-        /// <param name="pickRay"></param>
-        /// <param name="gameObject"></param>
-        /// <param name="pickedLayer"></param>
-        /// <param name="minHitDistance"></param>
-        private void PickRecursively(
-            GameObject layer,
-            Ray pickRay,
-            GameObject gameObject,
-            ref GameObject pickedLayer,
-            ref float minHitDistance)
-        {
-            // Pick-test on self.
-            var geometryCollider = gameObject.GetComponent<Collider>();
-
-            if (geometryCollider)
-            {
-                float hitDistance = float.NaN;
-
-                // Raycast
-                RaycastHit hitInfo = new RaycastHit();
-
-                if (geometryCollider.Raycast(pickRay, out hitInfo, 9000))
-                {
-                    hitDistance = hitInfo.distance;
-                }
-
-                // Bounds-check.
-                /*
-                if (geometryCollider.bounds.IntersectRay(pickRay, out hitDistance))
-                {
-                }
-                else
-                {
-                    hitDistance = float.Nan;
-                }
-                */
-
-                if (!float.IsNaN(hitDistance))
-                {
-                    if (float.IsNaN(minHitDistance))
-                    {
-                        minHitDistance = hitDistance;
-                        pickedLayer = layer;
-                    }
-                    else if (hitDistance < minHitDistance)
-                    {
-                        minHitDistance = hitDistance;
-                        pickedLayer = layer;
-                    }
-                }
-            }
-
-            // Recurse.
-            foreach (Transform childTransform in gameObject.transform)
-            {
-                PickRecursively(
-                        layer,
-                        pickRay,
-                        childTransform.gameObject,
-                        ref pickedLayer,
-                        ref minHitDistance);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public override void UpdateModelLocationAndScale()
         {
             //Logger.Debug("ImmersionModeMaquette.UpdateModelLocationAndScale()");
 
-            var activeProject = Application.ActiveProject;
+            var activeProject = m_application.ActiveProject;
 
             if (activeProject == null)
             {
@@ -389,18 +340,18 @@ namespace ArchiVR
             activeProject.transform.rotation = Quaternion.identity;
             activeProject.transform.localScale = scale * Vector3.one;
 
-            activeProject.transform.position = Application.OffsetPerID;
+            activeProject.transform.position = m_application.OffsetPerID;
 
             // Locate around anchor.
             {
                 var modelAnchor = UtilUnity.FindGameObjectElseWarn(
-                    Application.gameObject.scene,
+                    m_application.gameObject.scene,
                     "ModelAnchor",
-                    Application.Logger);
+                    m_application.Logger);
 
                 if (modelAnchor != null)
                 {
-                    activeProject.transform.position -= scale * (modelAnchor.transform.localPosition - Application.OffsetPerID);
+                    activeProject.transform.position -= scale * (modelAnchor.transform.localPosition - m_application.OffsetPerID);
                 }
             }
 
@@ -410,7 +361,7 @@ namespace ArchiVR
             activeProject.transform.position = pos;
 
             // Rotate it.
-            activeProject.transform.RotateAround(Application.OffsetPerID, Vector3.up, m_maquetteRotation);
+            activeProject.transform.RotateAround(m_application.OffsetPerID, Vector3.up, m_maquetteRotation);
         }
 
         /// <summary>
@@ -418,58 +369,58 @@ namespace ArchiVR
         /// </summary>
         public override void UpdateTrackingSpacePosition()
         {
-            Application.Logger.Debug("ImmersionModeMaquette.UpdateTrackingSpacePosition()");
+            m_application.Logger.Debug("ImmersionModeMaquette.UpdateTrackingSpacePosition()");
 
-            Application.ResetTrackingSpacePosition(); // Center around model.
+            m_application.ResetTrackingSpacePosition(); // Center around model.
 
             if (UnityEngine.Application.isEditor)
             {
-                Application.m_ovrCameraRig.transform.position = Application.m_ovrCameraRig.transform.position + new Vector3(0, 1.8f, 0);
+                m_application.m_ovrCameraRig.transform.position = m_application.m_ovrCameraRig.transform.position + new Vector3(0, 1.8f, 0);
             }
         }
 
         /// <summary>
         /// <see cref="ImmersionMode.InitButtonMappingUI()"/> implementation.
         /// </summary>
-        public override void InitButtonMappingUI()
+        public /*override*/ void InitButtonMappingUI()
         {
-            Application.Logger.Debug("ImmersionModeMaquette.InitButtonMappingUI()");
+            m_application.Logger.Debug("ImmersionModeMaquette.InitButtonMappingUI()");
 
             var isEditor = UnityEngine.Application.isEditor;
 
             // Left controller
-            if (Application.leftControllerButtonMapping != null)
+            if (m_application.leftControllerButtonMapping != null)
             {
-                Application.leftControllerButtonMapping.HandTrigger.Text = "GFX Quality";
+                m_application.leftControllerButtonMapping.HandTrigger.Text = "GFX Quality";
 
-                Application.leftControllerButtonMapping.IndexTrigger.Text = "Verander schaal" + (isEditor ? " (?)" : "");
+                m_application.leftControllerButtonMapping.IndexTrigger.Text = "Verander schaal" + (isEditor ? " (?)" : "");
 
-                Application.leftControllerButtonMapping.ButtonStart.Text = "Toggle menu" + (isEditor ? " (F11)" : "");
+                m_application.leftControllerButtonMapping.ButtonStart.Text = "Toggle menu" + (isEditor ? " (F11)" : "");
 
-                Application.leftControllerButtonMapping.ButtonX.Text = "Vorig project" + (isEditor ? " (F1)" : "");
-                Application.leftControllerButtonMapping.ButtonY.Text = "Volgend project" + (isEditor ? " (F2)" : "");
+                m_application.leftControllerButtonMapping.ButtonX.Text = "Vorig project" + (isEditor ? " (F1)" : "");
+                m_application.leftControllerButtonMapping.ButtonY.Text = "Volgend project" + (isEditor ? " (F2)" : "");
 
-                Application.leftControllerButtonMapping.ThumbUp.Text = "Model omhoog" + (isEditor ? " (Z)" : "");
-                Application.leftControllerButtonMapping.ThumbDown.Text = "Model omlaag" + (isEditor ? " (S)" : "");
-                Application.leftControllerButtonMapping.ThumbLeft.Text = "Model links" + (isEditor ? " (Q)" : "");
-                Application.leftControllerButtonMapping.ThumbRight.Text = "Model rechts" + (isEditor ? " (D)" : "");
+                m_application.leftControllerButtonMapping.ThumbUp.Text = "Model omhoog" + (isEditor ? " (Z)" : "");
+                m_application.leftControllerButtonMapping.ThumbDown.Text = "Model omlaag" + (isEditor ? " (S)" : "");
+                m_application.leftControllerButtonMapping.ThumbLeft.Text = "Model links" + (isEditor ? " (Q)" : "");
+                m_application.leftControllerButtonMapping.ThumbRight.Text = "Model rechts" + (isEditor ? " (D)" : "");
             }
 
             // Right controller
-            if (Application.rightControllerButtonMapping != null)
+            if (m_application.rightControllerButtonMapping != null)
             {
-                Application.rightControllerButtonMapping.IndexTrigger.Text = "";
-                Application.rightControllerButtonMapping.HandTrigger.Text = "";
+                m_application.rightControllerButtonMapping.IndexTrigger.Text = "";
+                m_application.rightControllerButtonMapping.HandTrigger.Text = "";
 
-                Application.rightControllerButtonMapping.ButtonOculusStart.Text = "Exit";
+                m_application.rightControllerButtonMapping.ButtonOculusStart.Text = "Exit";
 
-                Application.rightControllerButtonMapping.ButtonXA.Text = "";
-                Application.rightControllerButtonMapping.ButtonYB.Text = "";
+                m_application.rightControllerButtonMapping.ButtonXA.Text = "";
+                m_application.rightControllerButtonMapping.ButtonYB.Text = "";
 
-                Application.rightControllerButtonMapping.ThumbUp.Text = "Beweeg vooruit" + (isEditor ? "(ArrowUp)" : "");
-                Application.rightControllerButtonMapping.ThumbDown.Text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
-                Application.rightControllerButtonMapping.ThumbLeft.Text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
-                Application.rightControllerButtonMapping.ThumbRight.Text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
+                m_application.rightControllerButtonMapping.ThumbUp.Text = "Beweeg vooruit" + (isEditor ? "(ArrowUp)" : "");
+                m_application.rightControllerButtonMapping.ThumbDown.Text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
+                m_application.rightControllerButtonMapping.ThumbLeft.Text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
+                m_application.rightControllerButtonMapping.ThumbRight.Text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
             }
         }
     }

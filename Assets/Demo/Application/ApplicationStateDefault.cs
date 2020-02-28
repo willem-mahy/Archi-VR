@@ -2,11 +2,15 @@
 
 namespace Demo.Application
 {
-    public class ApplicationStateDefault : ApplicationState
+    public class ApplicationStateDefault : ApplicationState<ApplicationDemo>
     {
         #region variables
-        
+
         #endregion
+
+        public ApplicationStateDefault(ApplicationDemo application) : base(application)
+        {
+        }
 
         public override void Init()
         {

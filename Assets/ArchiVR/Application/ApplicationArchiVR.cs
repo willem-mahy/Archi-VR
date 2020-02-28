@@ -9,7 +9,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using WM;
 using WM.Application;
-using WM.Colocation;
 using WM.Command;
 using WM.Net;
 using WM.Unity;
@@ -49,7 +48,7 @@ namespace ArchiVR.Application
 
             if (Application.m_fadeAnimator != null)
             {
-                Application.SetActiveApplicationState(1);
+                Application.PushApplicationState(new ApplicationStateTeleporting(Application, this));
             }
             else
             {
@@ -81,12 +80,12 @@ namespace ArchiVR.Application
         /// </summary>
         public GameObject EventSystem;
 
-        /// <summary>
-        /// The typed application states.
-        /// </summary>
-        public readonly ApplicationStateDefault applicationStateDefault = new ApplicationStateDefault();
-        public readonly ApplicationStateTeleporting applicationStateTeleporting = new ApplicationStateTeleporting();
-        public readonly ApplicationStateDefineSharedReferenceSystem ApplicationStateDefineSharedReferenceSystem = new ApplicationStateDefineSharedReferenceSystem();
+        ///// <summary>
+        ///// The typed application states.
+        ///// </summary>
+        //public readonly ApplicationStateDefault applicationStateDefault = new ApplicationStateDefault();
+        public ApplicationStateTeleporting applicationStateTeleporting { get; private set; }
+        //public readonly ApplicationStateDefineSharedReferenceSystem ApplicationStateDefineSharedReferenceSystem = new ApplicationStateDefineSharedReferenceSystem();
 
         #region Project
 
@@ -313,13 +312,10 @@ namespace ArchiVR.Application
 
             #endregion Apply Player settings
 
-            // Initialize application modes
-            applicationStateTeleporting.TeleportationSystem = this.TeleportationSystem = new TeleportationSystemArchiVR(this);
+            // Initialize application states
+            TeleportationSystem = new TeleportationSystemArchiVR(this);
+            applicationStateTeleporting = new ApplicationStateTeleporting(this, TeleportationSystem);
 
-            m_applicationStates.Add(applicationStateDefault);
-            m_applicationStates.Add(applicationStateTeleporting);
-            m_applicationStates.Add(ApplicationStateDefineSharedReferenceSystem);
-            
             base.Init();
 
             #region Apply Graphics settings
@@ -352,19 +348,6 @@ namespace ArchiVR.Application
                 settings.NetworkSettings.SharedReferencePosition,
                 settings.NetworkSettings.SharedReferenceRotation);
 
-            #region Init immersion modes.
-
-            m_immersionModes.Add(ImmersionModeWalkthrough);
-            m_immersionModes.Add(ImmersionModeMaquette);
-
-            foreach (var immersionMode in m_immersionModes)
-            {
-                immersionMode.Application = this;
-                immersionMode.Init();
-            }
-
-            # endregion
-
             GatherProjects();
 
             if (!UnitTestModeEnabled)
@@ -375,6 +358,8 @@ namespace ArchiVR.Application
             SetActiveImmersionMode(DefaultImmersionModeIndex);
 
             SetActiveProject(0);
+
+            PushApplicationState(new ApplicationStateDefault(this));
 
             //TestLoadAvatarPrefabsFromResources();
             //TestLoadGeometryPrefabsFromResources();
@@ -397,12 +382,14 @@ namespace ArchiVR.Application
         void OnApplicationPause(bool pauseStatus)
         {
             Logger.Debug("ApplicationArchiVR.OnApplicationPause("+pauseStatus+")");
+
+            SaveApplicationSettings(); // TODO: This was added because OnApplicationQuit() seems NOT to be called when closing down the application on Quest headset
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public void OnApplicationQuit() // TODO: verify whether this works when running on quest (it did not seem to- so added a 'SaveApplicationSettings() call to UnityApplication, when hiding the menu...)
+        public void OnApplicationQuit() // TODO: This seems NOT to be called when closing down the application on Quest headset
         {
             Logger.Debug("ApplicationArchiVR.OnApplicationQuit()");
 
@@ -479,61 +466,61 @@ namespace ArchiVR.Application
         /// </summary>
         public const int DefaultImmersionModeIndex = 0;
 
-        /// <summary>
-        /// The 'Walkthrough'immersion mode.
-        /// </summary>
-        ImmersionModeWalkthrough immersionModeWalkthrough = new ImmersionModeWalkthrough();
+        ///// <summary>
+        ///// The 'Walkthrough' application state.
+        ///// </summary>
+        //ImmersionModeWalkthrough immersionModeWalkthrough = new ImmersionModeWalkthrough();
 
-        /// <summary>
-        /// The 'Maquette'immersion mode.
-        /// </summary>
-        ImmersionModeMaquette immersionModeMaquette = new ImmersionModeMaquette();
+        ///// <summary>
+        ///// The 'Maquette'immersion mode.
+        ///// </summary>
+        //ImmersionModeMaquette immersionModeMaquette = new ImmersionModeMaquette();
 
-        /// <summary>
-        /// The immersion modes list.
-        /// </summary>
-        List<ImmersionMode> m_immersionModes = new List<ImmersionMode>();
+        ///// <summary>
+        ///// The immersion modes list.
+        ///// </summary>
+        //List<ImmersionMode> m_immersionModes = new List<ImmersionMode>();
 
-        /// <summary>
-        /// The active immersion mode index.
-        /// </summary>
-        public int ActiveImmersionModeIndex { get; set; } = -1;
+        ///// <summary>
+        ///// The active immersion mode index.
+        ///// </summary>
+        //public int ActiveImmersionModeIndex { get; set; } = -1;
 
-        // The active immersion mode.
-        public ImmersionMode ActiveImmersionMode
-        {
-            get
-            {
-                if (ActiveImmersionModeIndex == -1)
-                {
-                    return null;
-                }
+        //// The active immersion mode.
+        //public ImmersionMode ActiveImmersionMode
+        //{
+        //    get
+        //    {
+        //        if (ActiveImmersionModeIndex == -1)
+        //        {
+        //            return null;
+        //        }
 
-                return m_immersionModes[ActiveImmersionModeIndex];
-            }
-        }
+        //        return m_immersionModes[ActiveImmersionModeIndex];
+        //    }
+        //}
 
-        /// <summary>
-        /// The 'Walkthrough' immersion mode.
-        /// </summary>
-        public ImmersionModeWalkthrough ImmersionModeWalkthrough
-        {
-            get
-            {
-                return immersionModeWalkthrough;
-            }
-        }
+        ///// <summary>
+        ///// The 'Walkthrough' immersion mode.
+        ///// </summary>
+        //public ImmersionModeWalkthrough ImmersionModeWalkthrough
+        //{
+        //    get
+        //    {
+        //        return immersionModeWalkthrough;
+        //    }
+        //}
 
-        /// <summary>
-        /// The 'Maquette' immersion mode.
-        /// </summary>
-        public ImmersionModeMaquette ImmersionModeMaquette
-        {
-            get
-            {
-                return immersionModeMaquette;
-            }
-        }
+        ///// <summary>
+        ///// The 'Maquette' immersion mode.
+        ///// </summary>
+        //public ImmersionModeMaquette ImmersionModeMaquette
+        //{
+        //    get
+        //    {
+        //        return immersionModeMaquette;
+        //    }
+        //}
 
         #endregion
 
@@ -556,10 +543,9 @@ namespace ArchiVR.Application
 
             m_fadeAnimator.ResetTrigger("FadeOut");
 
-            var applicationState = GetActiveApplicationState();
-            if (applicationState != null)
+            if (null != ActiveApplicationState)
             {
-                applicationState.OnTeleportFadeOutComplete();
+                ActiveApplicationState.OnTeleportFadeOutComplete();
             }
         }
 
@@ -572,10 +558,9 @@ namespace ArchiVR.Application
             // This denotifies that we are no longer teleporting, and makes the command processor resume.
             TeleportCommand = null;
 
-            var applicationState = GetActiveApplicationState();
-            if (applicationState != null)
+            if (null != ActiveApplicationState)
             {
-                applicationState.OnTeleportFadeInComplete();
+                ActiveApplicationState.OnTeleportFadeInComplete();
             }
         }
 
@@ -803,7 +788,7 @@ namespace ArchiVR.Application
 
             TeleportCommand = null;
 
-            ActiveImmersionMode.UpdateTrackingSpacePosition();
+            ActiveApplicationState.UpdateTrackingSpacePosition();
 
             if (m_fadeAnimator != null)
             {
@@ -841,32 +826,6 @@ namespace ArchiVR.Application
 
         #endregion
 
-        #region
-
-        /// <summary>
-        /// 
-        /// </summary>
-        void UpdateTrackingSpacePosition()
-        {
-            if (ActiveImmersionMode == null)
-                return;
-
-            ActiveImmersionMode.UpdateTrackingSpacePosition();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        void UpdateModelLocationAndScale()
-        {
-            if (ActiveImmersionMode == null)
-                return;
-
-            ActiveImmersionMode.UpdateModelLocationAndScale();
-        }
-
-        #endregion
-
         #region Immersion mode management
 
         /// <summary>
@@ -874,22 +833,22 @@ namespace ArchiVR.Application
         /// </summary>
         void ToggleImmersionModeIfNetworkModeAllows()
         {
-            var c = new SetImmersionModeCommand();
-            c.ImmersionModeIndex = 1 - ActiveImmersionModeIndex;
+            //var c = new SetImmersionModeCommand();
+            //c.ImmersionModeIndex = 1 - ActiveImmersionModeIndex;
 
-            switch (NetworkMode)
-            {
-                case NetworkMode.Standalone:
-                    {
-                        QueueCommand(c);
-                    }
-                    break;
-                case NetworkMode.Server:
-                    {
-                        Server.BroadcastCommand(c);
-                    }
-                    break;
-            }
+            //switch (NetworkMode)
+            //{
+            //    case NetworkMode.Standalone:
+            //        {
+            //            QueueCommand(c);
+            //        }
+            //        break;
+            //    case NetworkMode.Server:
+            //        {
+            //            Server.BroadcastCommand(c);
+            //        }
+            //        break;
+            //}
         }
 
         /// <summary>
@@ -916,30 +875,32 @@ namespace ArchiVR.Application
         /// <param name="immersionModeIndex"></param>
         public void SetActiveImmersionMode(int immersionModeIndex)
         {
-            if (immersionModeIndex == ActiveImmersionModeIndex)
-            {
-                return; // Nothing to do.
-            }
+            //if (immersionModeIndex == ActiveImmersionModeIndex)
+            //{
+            //    return; // Nothing to do.
+            //}
 
-            var aim = ActiveImmersionMode;
+            //var aim = ActiveImmersionMode;
 
-            if (aim != null)
-            {
-                aim.Exit();
-            }
+            //if (aim != null)
+            //{
+            //    aim.Exit();
+            //}
 
-            ActiveImmersionModeIndex = immersionModeIndex;
+            //ActiveImmersionModeIndex = immersionModeIndex;
 
-            aim = ActiveImmersionMode;
+            //aim = ActiveImmersionMode;
 
-            if (aim != null)
-            {
-                aim.Enter();
-            }
+            //if (aim != null)
+            //{
+            //    aim.Enter();
+            //}
 
-            UpdateModelLocationAndScale();
-
-            UpdateTrackingSpacePosition();
+            //if (null != ActiveApplicationState)
+            //{
+            //    ActiveApplicationState.UpdateModelLocationAndScale();
+            //    ActiveApplicationState.UpdateTrackingSpacePosition();
+            //}
         }
 
         #endregion
@@ -1542,5 +1503,13 @@ namespace ArchiVR.Application
         }
 
         #endregion
+
+        public List<GameObject> LightingObjects = new List<GameObject>();
+
+        public List<GameObject> FurnitureObjects = new List<GameObject>();
+
+        public readonly Color SelectionColor = new Color(1, 0, 0);
+
+        public readonly Color HoverColor = new Color(1, 1, 0);
     };
 }

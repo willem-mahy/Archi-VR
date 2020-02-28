@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using WM.Application;
+using WM.Colocation;
 
 namespace WM.UI
 {
@@ -76,7 +77,7 @@ namespace WM.UI
             Application.m_controllerInput.ResetDownStates();
 
             // Start the 'EditSharedReference' application state,
-            Application.SetActiveApplicationState(2);
+            Application.PushApplicationState(new ApplicationStateDefineSharedReferenceSystem(Application));
         }
 
         #endregion UI Event Handlers

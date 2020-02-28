@@ -64,10 +64,10 @@ namespace ArchiVR.Net
                 SendCommand(teleportCommand, newClientConnection);
 
                 // ...the same immersion mode.
-                var setImmersionModeCommand = new SetImmersionModeCommand();
-                setImmersionModeCommand.ImmersionModeIndex = applicationArchiVR.ActiveImmersionModeIndex;
+                //var setImmersionModeCommand = new SetImmersionModeCommand();
+                //setImmersionModeCommand.ImmersionModeIndex = applicationArchiVR.ActiveImmersionModeIndex;
 
-                SendCommand(setImmersionModeCommand, newClientConnection);
+                //SendCommand(setImmersionModeCommand, newClientConnection);
             }
 
             bool playerForClientReceived = false;
