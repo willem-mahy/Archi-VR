@@ -383,6 +383,7 @@ namespace ArchiVR.Application
         {
             Logger.Debug("ApplicationArchiVR.OnApplicationPause("+pauseStatus+")");
 
+            SaveProjectData();
             SaveApplicationSettings(); // TODO: This was added because OnApplicationQuit() seems NOT to be called when closing down the application on Quest headset
         }
 
@@ -393,6 +394,7 @@ namespace ArchiVR.Application
         {
             Logger.Debug("ApplicationArchiVR.OnApplicationQuit()");
 
+            SaveProjectData();
             SaveApplicationSettings();
         }
 
@@ -776,6 +778,8 @@ namespace ArchiVR.Application
 
                 // Update left controller UI displaying the project name.
                 m_leftControllerText.text = (ActiveProjectName != null) ? GetProjectNameShort(ActiveProjectName) : "No project loaded.";
+
+                LoadProjectData();
             }
 
             // Gather the POI from the new project.
@@ -1456,6 +1460,99 @@ namespace ArchiVR.Application
         /// <summary>
         /// 
         /// </summary>
+        private string ProjectDataFilePath
+        {
+            get
+            {
+                return Path.Combine(UnityEngine.Application.persistentDataPath, "ProjectData_" + ActiveProjectName + ".xml");
+            }
+        }
+
+        /// <summary>
+        /// Saves the ProjectData to XML file.
+        /// </summary>
+        public void SaveProjectData()
+        {
+            Logger.Debug("ApplicationArchiVR.SaveProjectData(" + ProjectDataFilePath + ")");
+
+            try
+            {
+                var serializer = new XmlSerializer(typeof(ProjectData));
+
+                using (var writer = new StreamWriter(ProjectDataFilePath))
+                {
+                    serializer.Serialize(writer, ProjectData);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Warning("Failed to save project data file!" + e.Message);
+            }
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private void LoadProjectData()
+        {
+            Logger.Debug("ApplicationArchiVR.LoadProjectData(" + ProjectDataFilePath + ")");
+
+            ProjectData = null;
+
+            if (File.Exists(ProjectDataFilePath))
+            {
+                try
+                {
+                    var serializer = new XmlSerializer(typeof(ProjectData));
+
+                    using (var reader = new StreamReader(ProjectDataFilePath))
+                    {
+                        ProjectData = serializer.Deserialize(reader) as ProjectData;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Warning("Failed to load project data file!" + e.Message);
+                }
+            }
+
+            if (ProjectData == null)
+            {
+                ProjectData = new ProjectData();
+            }
+
+
+            foreach (var lightGO in LightingObjects)
+            {
+                UtilUnity.Destroy(lightGO);
+            }
+            LightingObjects.Clear();
+
+            
+
+            foreach (var lightDefinition in ProjectData.LightingData.lightDefinitions)
+            {
+                var lightPrefab = Resources.Load<GameObject>(lightDefinition.PrefabPath);
+
+                var lightGO = GameObject.Instantiate(
+                    lightPrefab,
+                    Vector3.zero,
+                    Quaternion.identity);
+
+                lightGO.transform.position = lightDefinition.Position;
+                lightGO.transform.rotation = lightDefinition.Rotation;
+
+                lightDefinition.GameObject = lightGO;
+
+                LightingObjects.Add(lightGO);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="settings"></param>
         private void SaveSettings(ApplicationArchiVRSettings settings)
         {
@@ -1511,5 +1608,7 @@ namespace ArchiVR.Application
         public readonly Color SelectionColor = new Color(1, 0, 0);
 
         public readonly Color HoverColor = new Color(1, 1, 0);
+
+        public ProjectData ProjectData = new ProjectData();
     };
 }

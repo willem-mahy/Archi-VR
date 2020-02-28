@@ -34,7 +34,7 @@ namespace ArchiVR.Application
         {
             foreach (var lightType in _lightTypes)
             {
-                _lightTypePrefabs.Add(Resources.Load<GameObject>(ActiveLightType.PrefabPath));
+                _lightTypePrefabs.Add(Resources.Load<GameObject>(lightType.PrefabPath));
             }
 
             Resume();
@@ -149,15 +149,7 @@ namespace ArchiVR.Application
             {
                 if (_hitInfo.HasValue)
                 {
-                    var lightGO = GameObject.Instantiate(
-                        ActiveLightTypePrefab,
-                        Vector3.zero,
-                        Quaternion.identity);
-
-                    lightGO.transform.position = _hitInfo.Value.point;
-                    lightGO.transform.LookAt(_hitInfo.Value.point + _hitInfo.Value.normal, Vector3.up);
-
-                    m_application.LightingObjects.Add(lightGO);
+                    CreateLight();
                 }
             }
         }
@@ -210,6 +202,9 @@ namespace ArchiVR.Application
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void ActivatePreviousLightType()
         {
             _activeLightTypeIndex = UtilIterate.MakeCycle(--_activeLightTypeIndex, 0, _lightTypes.Count);
@@ -217,6 +212,9 @@ namespace ArchiVR.Application
             OnActiveLightTypeChanged();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void ActivateNextLightType()
         {
             _activeLightTypeIndex = UtilIterate.MakeCycle(++_activeLightTypeIndex, 0, _lightTypes.Count);
@@ -224,6 +222,9 @@ namespace ArchiVR.Application
             OnActiveLightTypeChanged();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void OnActiveLightTypeChanged()
         {
             if (null != _previewGO)
@@ -240,6 +241,29 @@ namespace ArchiVR.Application
 
             m_application.m_leftControllerText.text = ActiveLightType.Name;
             m_application.m_leftControllerText.gameObject.SetActive(true);
+        }
+
+        private void CreateLight()
+        {
+            var lightGO = GameObject.Instantiate(
+                ActiveLightTypePrefab,
+                Vector3.zero,
+                Quaternion.identity);
+
+            lightGO.transform.position = _hitInfo.Value.point;
+            lightGO.transform.LookAt(_hitInfo.Value.point + _hitInfo.Value.normal, Vector3.up);
+
+            m_application.LightingObjects.Add(lightGO);
+
+            var lightDefinition = new LightDefinition()
+            {
+                Position = lightGO.transform.position,
+                Rotation = lightGO.transform.rotation,
+                PrefabPath = ActiveLightType.PrefabPath,
+                GameObject = lightGO
+            };
+
+            m_application.ProjectData.LightingData.lightDefinitions.Add(lightDefinition);
         }
 
         #region Fields
