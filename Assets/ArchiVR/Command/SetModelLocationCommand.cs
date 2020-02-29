@@ -43,7 +43,7 @@ namespace ArchiVR.Command
         {
             application.Logger.Debug("SetModelLocationCommand.Execute()");
 
-            var immersionModeMaquette = application.ActiveApplicationState as ImmersionModeMaquette;
+            var immersionModeMaquette = application.ActiveApplicationState as ApplicationStateMaquette;
 
             if (null != immersionModeMaquette)
             {

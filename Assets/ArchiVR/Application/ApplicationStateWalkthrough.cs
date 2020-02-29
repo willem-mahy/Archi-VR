@@ -11,7 +11,7 @@ namespace ArchiVR
     /// In this immersion mode, the user can walk around in the real-scale model.
     /// The user can jump between a list of Points-Of-Interest, predefined in the project.
     /// </summary>
-    public class ImmersionModeWalkthrough : ApplicationState<ApplicationArchiVR>
+    public class ApplicationStateWalkthrough : ApplicationState<ApplicationArchiVR>
     {
         #region variables
 
@@ -22,7 +22,7 @@ namespace ArchiVR
 
         #endregion
 
-        public ImmersionModeWalkthrough(ApplicationArchiVR application) : base(application)
+        public ApplicationStateWalkthrough(ApplicationArchiVR application) : base(application)
         {
         }
 
@@ -195,8 +195,42 @@ namespace ArchiVR
             // Pressing 'L' on the keyboard is a shortcut for starting editing lights.
             if (Input.GetKeyDown(KeyCode.L))
             {
-                m_application.PushApplicationState(new ApplicationStateEditLight(m_application));
+                var applicationState = new ApplicationStateEditLight<LightDefinition>(
+                    m_application,
+                    "Light",
+                    ref m_application.LightingObjects,
+                    ref m_application.ProjectData.LightingData.lightDefinitions,
+                    m_application._lightTypes);
+
+                m_application.PushApplicationState(applicationState);
             }
+
+            // Pressing 'F' on the keyboard is a shortcut for starting editing props.
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                var applicationState = new ApplicationStateEditLight<PropDefinition>(
+                    m_application,
+                    "Prop",
+                    ref m_application.PropObjects,
+                    ref m_application.ProjectData.PropData.propDefinitions,
+                    m_application._propTypes);
+
+                m_application.PushApplicationState(applicationState);
+            }
+
+            // Pressing 'P' on the keyboard is a shortcut for starting editing POI's.
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                var applicationState = new ApplicationStateEditLight<POIDefinition>(
+                    m_application,
+                    "POI",
+                    ref m_application.PropObjects,
+                    ref m_application.ProjectData.POIData.poiDefinitions,
+                    m_application._poiTypes);
+
+                m_application.PushApplicationState(applicationState);
+            }
+
 
             // Pressing 'BackSpace' on the keyboard is a shortcut for returning to the default state.
             var returnToDefaultState = controllerState.lIndexTriggerDown || Input.GetKeyDown(KeyCode.Backspace);

@@ -1,5 +1,18 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!65 &6805469836306650543
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2016668808981504661}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.7169249, y: 1.3381729, z: 4.422303}
+  m_Center: {x: 0.006763339, y: 0.656054, z: 0.060871124}
 --- !u!1 &3261683589082797596
 GameObject:
   m_ObjectHideFlags: 0
@@ -14,7 +27,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 1
   m_IsActive: 1
 --- !u!4 &8330526307605843006
 Transform:
@@ -42,6 +55,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Car Audi A6 01 Blue
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2291006488609559945, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
         type: 3}
@@ -98,8 +121,59 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -3940306551558372850, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7373240763299288772, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 151555708559660996, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6377617404474395713, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984190301201017715, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -3094393463470013828, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2163131074281843400, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -9161192197867303391, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5495894605798827853, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4583cd75c8e039e41a9ccbdc5cb739f2, type: 3}
+--- !u!1 &2016668808981504661 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,
+    type: 3}
+  m_PrefabInstance: {fileID: 7556275527657241500}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3289875405622022278 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4216859302048453862, guid: 4583cd75c8e039e41a9ccbdc5cb739f2,

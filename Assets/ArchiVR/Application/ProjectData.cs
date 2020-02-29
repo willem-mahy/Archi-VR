@@ -10,11 +10,18 @@ namespace ArchiVR.Application
     [XmlRoot("ArchiVRProjectData")]
     public class ProjectData
     {
+        public POIData POIData = new POIData(); 
+        
         public LightingData LightingData = new LightingData();
 
-        //public FurnitureData FurnitureData = new FurnitureData();
+        public PropData PropData = new PropData();
+    }
 
-        //public POIData POIData = new POIData();
+    [Serializable]
+    [XmlRoot("POIData")]
+    public class POIData
+    {
+        public List<POIDefinition> poiDefinitions = new List<POIDefinition>();
     }
 
     [Serializable]
@@ -25,16 +32,51 @@ namespace ArchiVR.Application
     }
 
     [Serializable]
-    [XmlRoot("LightingData")]
-    public class LightDefinition
+    [XmlRoot("PropData")]
+    public class PropData
+    {
+        public List<PropDefinition> propDefinitions = new List<PropDefinition>();
+    }
+
+    [Serializable]
+    [XmlRoot("ObjectDefinition")]
+    public class ObjectDefinition
     {
         public string PrefabPath;
-        
+
         public SerializableVector3 Position;
 
         public SerializableQuaternion Rotation;
 
+        public string Name;
+
         [XmlIgnoreAttribute]
         public GameObject GameObject;
+    }
+
+    [Serializable]
+    [XmlRoot("POIDefinition")]
+    public class POIDefinition : ObjectDefinition
+    {   
+    }
+
+    [Serializable]
+    [XmlRoot("LightDefinition")]
+    public class LightDefinition : ObjectDefinition
+    {
+        public string LayerName;
+
+        public Color LightColor;
+
+        public Color BodyColor1;
+
+        public Color BodyColor2;
+    }
+
+    [Serializable]
+    [XmlRoot("PropDefinition")]
+    public class PropDefinition : ObjectDefinition
+    {
+        public string LayerName;
     }
 }

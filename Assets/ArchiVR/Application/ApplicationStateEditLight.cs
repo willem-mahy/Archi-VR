@@ -7,12 +7,23 @@ using WM.Unity;
 namespace ArchiVR.Application
 {
     /// <summary>
-    /// Application state in which the user defines a light.
+    /// Application state in which the user edits lights (select, delete, create).
     /// </summary>
-    public class ApplicationStateEditLight : ApplicationState<ApplicationArchiVR>
+    public class ApplicationStateEditLight<D>
+        : ApplicationState<ApplicationArchiVR>
+         where D : new()
     {
-        public ApplicationStateEditLight(ApplicationArchiVR application) : base(application)
+        public ApplicationStateEditLight(
+            ApplicationArchiVR application,
+            string objectTypeName,
+            ref List<GameObject> objects,
+            ref List<D> objectDefinitions,
+            List<ObjectPrefabDefinition> objectPrefabDefinitions) : base(application)
         {
+            _objectTypeName = objectTypeName;
+            _objects = objects;
+            _objectDefinitions = objectDefinitions;
+            _objectPrefabDefinitions = objectPrefabDefinitions;
         }
 
         /// <summary>
@@ -70,7 +81,7 @@ namespace ArchiVR.Application
             // Enable only R pickray.
             m_application.RPickRay.gameObject.SetActive(true);
 
-            m_application.HudInfoText.text = "Edit light";
+            m_application.HudInfoText.text = "Edit " + _objectTypeName;
             m_application.HudInfoPanel.SetActive(true);
 
             InitButtonMappingUI();
@@ -95,7 +106,14 @@ namespace ArchiVR.Application
             // Pressing 'L' on the keyboard is a shortcut for starting creating a light.
             if (controllerState.aButtonDown || Input.GetKeyDown(KeyCode.C))
             {
-                m_application.PushApplicationState(new ApplicationStateDefineLight(m_application));
+                var applicationState = new ApplicationStateDefineLight<D>(
+                    m_application,
+                    _objectTypeName,
+                    ref _objects,
+                    ref _objectDefinitions,
+                    _objectPrefabDefinitions);
+
+                m_application.PushApplicationState(applicationState);
             }
 
             // Whils hand trigger is pressed, selection is additive.
@@ -266,12 +284,33 @@ namespace ArchiVR.Application
 
             foreach (var light in selectedLights)
             {
-                m_application.LightingObjects.Remove(light);
+                foreach (var objectDefinition in _objectDefinitions)
+                {
+                    var od = objectDefinition as ObjectDefinition;
+                    
+                    if (null != od)
+                    {
+                        if (od.GameObject == light)
+                        {
+                            _objectDefinitions.Remove(objectDefinition);
+                        }
+                    }
+                }
+
+                _objects.Remove(light);
                 UtilUnity.Destroy(light);
-            }
+            }   
         }
 
         #region Fields
+
+        string _objectTypeName;
+
+        List<GameObject> _objects;
+        
+        List<D> _objectDefinitions;
+
+        List<ObjectPrefabDefinition> _objectPrefabDefinitions;
 
         private bool _addToSelection = false;
 

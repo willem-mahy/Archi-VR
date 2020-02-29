@@ -17,6 +17,12 @@ using WM.Unity;
 
 namespace ArchiVR.Application
 {
+    public class ObjectPrefabDefinition
+    {
+        public string Name;
+        public string PrefabPath;
+    };
+
     public class TeleportationSystemArchiVR : WM.Application.ITeleportationSystem
     {
         public ApplicationArchiVR Application;
@@ -200,6 +206,45 @@ namespace ArchiVR.Application
         List<GameObject> m_POI = new List<GameObject>();
 
         #endregion
+
+        public readonly List<ObjectPrefabDefinition> _lightTypes = new List<ObjectPrefabDefinition>()
+        {
+            new ObjectPrefabDefinition() { Name = "Ceiling Round", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Ceiling Round" },
+            new ObjectPrefabDefinition() { Name = "TL", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/TL/TL Single 120cm" },
+            new ObjectPrefabDefinition() { Name = "Spot Round", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Spot/Round/SpotBuiltInRound" },
+            new ObjectPrefabDefinition() { Name = "Wall Cube", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Spot/Wall Cube/Wall Cube" },
+            new ObjectPrefabDefinition() { Name = "Pendant Sphere", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Pendant/Pendant Sphere" }
+        };
+
+        public readonly List<ObjectPrefabDefinition> _poiTypes = new List<ObjectPrefabDefinition>()
+        {
+            new ObjectPrefabDefinition() { Name = "POI", PrefabPath = "ArchiVR/Prefab/POI" }
+        };
+
+        public readonly List<ObjectPrefabDefinition> _propTypes = new List<ObjectPrefabDefinition>()
+        {
+            new ObjectPrefabDefinition() { Name = "Sofa 1P", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 1P" },
+            new ObjectPrefabDefinition() { Name = "Sofa 1P", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 2P" },
+            new ObjectPrefabDefinition() { Name = "TV Philips", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/TV Philips" },
+            new ObjectPrefabDefinition() { Name = "TV Meubel", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/TV Meubel 600x2800x500" },
+            
+            new ObjectPrefabDefinition() { Name = "Herbs1", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Plants/Herbs1" },
+            new ObjectPrefabDefinition() { Name = "Herbs2", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Plants/Herbs2" },
+            
+            new ObjectPrefabDefinition() { Name = "Drying Rack", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Sanitair/Drying Rack 01 White 207x57x115" },
+            
+            new ObjectPrefabDefinition() { Name = "Laundry Baskets", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Storage/Laundry_Baskets" },
+            new ObjectPrefabDefinition() { Name = "Storage Rack White", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Storage/Storage_Rack_White_01" },
+            new ObjectPrefabDefinition() { Name = "Storage Rack Wood", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Storage/Storage_Rack_Wood_01" },
+
+            new ObjectPrefabDefinition() { Name = "Lavabo VINOVA 10002 47x13x26", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Toilet/Lavabo VINOVA 10002 47x13x26" },
+            new ObjectPrefabDefinition() { Name = "Toilet Pot 01", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Toilet/Toilet Pot 01" },
+            new ObjectPrefabDefinition() { Name = "Toilet Roll Holder 01", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Toilet/Toilet Roll Holder 01" },
+
+            new ObjectPrefabDefinition() { Name = "Lavender", PrefabPath = "ArchiVR/Prefab/Architectural/Vegetation/Bushes/Lavender" },
+
+            new ObjectPrefabDefinition() { Name = "Audi A6 01 Blue", PrefabPath = "ArchiVR/Prefab/Vehicle/Civilian/Audi/Car Audi A6 01 Blue" },
+        };
 
         #endregion
 
@@ -1523,6 +1568,45 @@ namespace ArchiVR.Application
                 ProjectData = new ProjectData();
             }
 
+            #region Prop Objects
+
+            #region Clear old POI Objects
+
+            foreach (var poiGO in m_POI)
+            {
+                UtilUnity.Destroy(poiGO);
+            }
+            m_POI.Clear();
+
+            #endregion Clear old POI Objects
+
+            #region Import POI Objects
+
+            foreach (var poiDefinition in ProjectData.POIData.poiDefinitions)
+            {
+                var poiPrefab = Resources.Load<GameObject>(poiDefinition.PrefabPath);
+
+                var poiGO = GameObject.Instantiate(
+                    poiPrefab,
+                    Vector3.zero,
+                    Quaternion.identity);
+
+                poiGO.name = poiDefinition.Name;
+                poiGO.transform.position = poiDefinition.Position;
+                poiGO.transform.rotation = poiDefinition.Rotation;
+
+                poiDefinition.GameObject = poiGO;
+
+                m_POI.Add(poiGO);
+            }
+
+            #endregion Import Prop Objects
+
+            #endregion Prop Objects
+
+            #region Lighting Objects
+
+            #region Clear old Lighting Objects
 
             foreach (var lightGO in LightingObjects)
             {
@@ -1530,7 +1614,9 @@ namespace ArchiVR.Application
             }
             LightingObjects.Clear();
 
-            
+            #endregion Clear old Lighting Objects
+
+            #region Import Lighting Objects
 
             foreach (var lightDefinition in ProjectData.LightingData.lightDefinitions)
             {
@@ -1541,6 +1627,7 @@ namespace ArchiVR.Application
                     Vector3.zero,
                     Quaternion.identity);
 
+                lightGO.name = lightDefinition.Name;
                 lightGO.transform.position = lightDefinition.Position;
                 lightGO.transform.rotation = lightDefinition.Rotation;
 
@@ -1548,6 +1635,46 @@ namespace ArchiVR.Application
 
                 LightingObjects.Add(lightGO);
             }
+
+            #endregion Import Lighting Objects
+
+            #endregion Lighting Objects
+
+            #region Prop Objects
+
+            #region Clear old Prop Objects
+
+            foreach (var propGO in PropObjects)
+            {
+                UtilUnity.Destroy(propGO);
+            }
+            PropObjects.Clear();
+
+            #endregion Clear old Prop Objects
+
+            #region Import Prop Objects
+
+            foreach (var propDefinition in ProjectData.PropData.propDefinitions)
+            {
+                var propPrefab = Resources.Load<GameObject>(propDefinition.PrefabPath);
+
+                var propGO = GameObject.Instantiate(
+                    propPrefab,
+                    Vector3.zero,
+                    Quaternion.identity);
+
+                propGO.name = propDefinition.Name;
+                propGO.transform.position = propDefinition.Position;
+                propGO.transform.rotation = propDefinition.Rotation;
+
+                propDefinition.GameObject = propGO;
+
+                PropObjects.Add(propGO);
+            }
+
+            #endregion Import Prop Objects
+
+            #endregion Prop Objects
         }
 
         /// <summary>
@@ -1603,7 +1730,7 @@ namespace ArchiVR.Application
 
         public List<GameObject> LightingObjects = new List<GameObject>();
 
-        public List<GameObject> FurnitureObjects = new List<GameObject>();
+        public List<GameObject> PropObjects = new List<GameObject>();
 
         public readonly Color SelectionColor = new Color(1, 0, 0);
 

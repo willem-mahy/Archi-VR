@@ -6,18 +6,23 @@ using WM.Application;
 namespace ArchiVR.Application
 {
     /// <summary>
-    /// Application state in which the user defines a light.
+    /// Application state in which the user creates a light.
     /// </summary>
-    public class ApplicationStateDefineLight : ApplicationState<ApplicationArchiVR>
+    public class ApplicationStateDefineLight<D>
+        : ApplicationState<ApplicationArchiVR>
+         where D : new()
     {
-        public class LightType
+        public ApplicationStateDefineLight(
+            ApplicationArchiVR application,
+            string objectTypeName,
+            ref List<GameObject> objects,
+            ref List<D> objectDefinitions,
+            List<ObjectPrefabDefinition> objectPrefabDefinitions) : base(application)
         {
-            public string Name;
-            public string PrefabPath;
-        };
-
-        public ApplicationStateDefineLight(ApplicationArchiVR application) : base(application)
-        {
+            _objectTypeName = objectTypeName;
+            _objects = objects;
+            _objectDefinitions = objectDefinitions;
+            _objectPrefabDefinitions = objectPrefabDefinitions;
         }
 
         /// <summary>
@@ -32,9 +37,9 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Enter()
         {
-            foreach (var lightType in _lightTypes)
+            foreach (var objectPrefabDefinition in _objectPrefabDefinitions)
             {
-                _lightTypePrefabs.Add(Resources.Load<GameObject>(lightType.PrefabPath));
+                _objectPrefabs.Add(Resources.Load<GameObject>(objectPrefabDefinition.PrefabPath));
             }
 
             Resume();
@@ -66,7 +71,7 @@ namespace ArchiVR.Application
             // Enable only R pickray.
             m_application.RPickRay.gameObject.SetActive(true);
 
-            m_application.HudInfoText.text = "Create light";
+            m_application.HudInfoText.text = "Create " + _objectTypeName;
             m_application.HudInfoPanel.SetActive(true);
 
             InitButtonMappingUI();
@@ -81,7 +86,7 @@ namespace ArchiVR.Application
         {
             m_application.Fly();
             m_application.UpdateTrackingSpace();
-
+             
             var controllerState = m_application.m_controllerInput.m_controllerState;
 
             // Pressing 'BackSpace' on the keyboard is a shortcut for returning to the default state.
@@ -134,23 +139,55 @@ namespace ArchiVR.Application
 
             #endregion Update picked position
 
-            if (null != _previewGO)
-            {
-                _previewGO.SetActive(_hitInfo.HasValue);
-
-                if (_hitInfo.HasValue)
-                {
-                    _previewGO.transform.position = _hitInfo.Value.point;
-                    _previewGO.transform.LookAt(_hitInfo.Value.point + _hitInfo.Value.normal, Vector3.up);
-                }
-            }
-
             if (m_application.m_controllerInput.m_controllerState.rIndexTriggerDown)
             {
                 if (_hitInfo.HasValue)
                 {
-                    CreateLight();
+                    _pickedInfos.Add(_hitInfo.Value);
+
+                    if (null != _previewGO)
+                    {
+                        var pi = _previewGO.GetComponent<IPickInitializable>();
+
+                        if (null == pi)
+                        {
+                            CreateLight();
+                            return;
+                        }
+                    }
                 }
+            }
+
+            if (null != _previewGO)
+            {
+                var picks = new List<RaycastHit>(_pickedInfos);
+
+                if (_hitInfo.HasValue)
+                {
+                    picks.Add(_hitInfo.Value);
+                }
+
+                _previewGO.SetActive(0 != picks.Count);
+
+                if (0 != picks.Count)
+                {
+                    var pi = _previewGO.GetComponent<IPickInitializable>();
+
+                    if (null != pi)
+                    {
+                        pi.Initialize(picks);
+                    }
+                    else
+                    {
+                        _previewGO.transform.position = _hitInfo.Value.point;
+                        _previewGO.transform.LookAt(_hitInfo.Value.point + _hitInfo.Value.normal, Vector3.up);
+                    }
+                }
+            }
+
+            if (m_application.m_controllerInput.m_controllerState.xButtonDown)
+            {
+                CreateLight();
             }
         }
 
@@ -173,7 +210,7 @@ namespace ArchiVR.Application
 
                 leftControllerButtonMapping.ButtonStart.Text = "";
 
-                leftControllerButtonMapping.ButtonX.Text = "";
+                leftControllerButtonMapping.ButtonX.Text = "Place";
                 leftControllerButtonMapping.ButtonY.Text = "";
 
                 leftControllerButtonMapping.ThumbUp.Text = "";
@@ -187,7 +224,7 @@ namespace ArchiVR.Application
 
             if (rightControllerButtonMapping != null)
             {
-                rightControllerButtonMapping.IndexTrigger.Text = "Place light";
+                rightControllerButtonMapping.IndexTrigger.Text = "Pick";
                 rightControllerButtonMapping.HandTrigger.Text = "";
 
                 rightControllerButtonMapping.ButtonOculusStart.Text = "";
@@ -207,7 +244,7 @@ namespace ArchiVR.Application
         /// </summary>
         private void ActivatePreviousLightType()
         {
-            _activeLightTypeIndex = UtilIterate.MakeCycle(--_activeLightTypeIndex, 0, _lightTypes.Count);
+            _activeLightTypeIndex = UtilIterate.MakeCycle(--_activeLightTypeIndex, 0, _objectPrefabDefinitions.Count);
 
             OnActiveLightTypeChanged();
         }
@@ -217,7 +254,7 @@ namespace ArchiVR.Application
         /// </summary>
         private void ActivateNextLightType()
         {
-            _activeLightTypeIndex = UtilIterate.MakeCycle(++_activeLightTypeIndex, 0, _lightTypes.Count);
+            _activeLightTypeIndex = UtilIterate.MakeCycle(++_activeLightTypeIndex, 0, _objectPrefabDefinitions.Count);
 
             OnActiveLightTypeChanged();
         }
@@ -250,44 +287,83 @@ namespace ArchiVR.Application
                 Vector3.zero,
                 Quaternion.identity);
 
-            lightGO.transform.position = _hitInfo.Value.point;
-            lightGO.transform.LookAt(_hitInfo.Value.point + _hitInfo.Value.normal, Vector3.up);
+            var pi = lightGO.GetComponent<IPickInitializable>();
+
+            if (null != pi)
+            {
+                pi.Initialize(_pickedInfos);
+            }
+            else
+            {
+                lightGO.transform.position = _hitInfo.Value.point;
+                lightGO.transform.LookAt(_hitInfo.Value.point + _hitInfo.Value.normal, Vector3.up);
+            }
 
             m_application.LightingObjects.Add(lightGO);
 
-            var lightDefinition = new LightDefinition()
-            {
-                Position = lightGO.transform.position,
-                Rotation = lightGO.transform.rotation,
-                PrefabPath = ActiveLightType.PrefabPath,
-                GameObject = lightGO
-            };
+            var d = new D();
 
-            m_application.ProjectData.LightingData.lightDefinitions.Add(lightDefinition);
+            if (d is ObjectDefinition objectDefinition)
+            {
+                objectDefinition.Name = lightGO.name;
+                objectDefinition.Position = lightGO.transform.position;
+                objectDefinition.Rotation = lightGO.transform.rotation;
+                objectDefinition.PrefabPath = ActiveLightType.PrefabPath;
+                objectDefinition.GameObject = lightGO;
+            }
+
+            if (d is LightDefinition lightDefinition)
+            {
+                //lightDefinition.LayerName = ;
+                //lightDefinition.LightColor = ;
+                //lightDefinition.BodyColor1 = ;
+                //lightDefinition.BodyColor2 = ;
+            }
+
+            if (d is PropDefinition propDefinition)
+            {   
+                //propDefinition.LayerName = ;
+            }
+
+            if (d is POIDefinition poiDefinition)
+            {
+                //poiDefinition.LayerName = ;
+            }
+
+            _objectDefinitions.Add(d);
+
+            _pickedInfos.Clear();
         }
 
         #region Fields
 
-        private List<LightType> _lightTypes = new List<LightType>()
-        {
-            new LightType() { Name = "Ceiling Round", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Ceiling Round" },
-            new LightType() { Name = "TL", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/TL/TL Single 120cm" },
-            new LightType() { Name = "Spot Round", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Spot/Round/SpotBuiltInRound" },
-            new LightType() { Name = "Wall Cube", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Spot/Wall Cube/Wall Cube" },
-            new LightType() { Name = "Pendant Sphere", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Pendant/Pendant Sphere" }
-        };
+        string _objectTypeName;
+
+        List<GameObject> _objects;
+
+        List<D> _objectDefinitions;
+
+        List<ObjectPrefabDefinition> _objectPrefabDefinitions;
 
         private int _activeLightTypeIndex = 0;
 
-        public LightType ActiveLightType => _lightTypes[_activeLightTypeIndex];
+        public ObjectPrefabDefinition ActiveLightType => _objectPrefabDefinitions[_activeLightTypeIndex];
 
+        /// <summary>
+        /// The position where the pick ray is currently picking.
+        /// </summary>
+        private List<RaycastHit> _pickedInfos = new List<RaycastHit>();
+
+        /// <summary>
+        /// The position where the pick ray is currently picking.
+        /// </summary>
         private RaycastHit? _hitInfo;
 
-        private GameObject ActiveLightTypePrefab => _lightTypePrefabs[_activeLightTypeIndex];
+        private GameObject ActiveLightTypePrefab => _objectPrefabs[_activeLightTypeIndex];
 
         private GameObject _previewGO;
 
-        private List<GameObject> _lightTypePrefabs = new List<GameObject>();
+        private List<GameObject> _objectPrefabs = new List<GameObject>();
 
         #endregion Fields
     }

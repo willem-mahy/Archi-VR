@@ -11,8 +11,10 @@ GameObject:
   - component: {fileID: 1271132310673687742}
   - component: {fileID: 195406333055841470}
   - component: {fileID: 4812929736920864011}
+  - component: {fileID: 5005701738962388373}
+  - component: {fileID: 7385928308199969710}
   m_Layer: 0
-  m_Name: Zeteltje
+  m_Name: Sofa 1P
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25,9 +27,9 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2312124649062675004}
-  m_LocalRotation: {x: -2.339536e-17, y: -0.7798846, z: 1.6704861e-17, w: 0.62592345}
-  m_LocalPosition: {x: 5.554756, y: 0.4462913, z: 5.8177333}
-  m_LocalScale: {x: 0.9375, y: 0.9375, z: 0.9375}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -80,3 +82,29 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &5005701738962388373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2312124649062675004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b25eefacd00237e4b9fb2b720fa5d09a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!64 &7385928308199969710
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2312124649062675004}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 0
+  m_CookingOptions: 14
+  m_Mesh: {fileID: -5042071197278523987, guid: 6a9fa23b63baf5749acbbee8674f682a, type: 3}

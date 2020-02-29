@@ -49,12 +49,12 @@ namespace ArchiVR.Application
             
             if (controllerState.rIndexTriggerDown)
             {
-                m_application.PushApplicationState(new ImmersionModeWalkthrough(m_application));
+                m_application.PushApplicationState(new ApplicationStateWalkthrough(m_application));
             }
 
             if (controllerState.rHandTriggerDown)
             {
-                m_application.PushApplicationState(new ImmersionModeMaquette(m_application));
+                m_application.PushApplicationState(new ApplicationStateMaquette(m_application));
             }
         }
 

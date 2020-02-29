@@ -32,7 +32,7 @@ namespace ArchiVR
     /// (because of unwanted rotations/translations being triggered
     /// by small accidental offsets on the other thumbstick axis).
     /// </summary>
-    public class ImmersionModeMaquette : ApplicationState<ApplicationArchiVR>
+    public class ApplicationStateMaquette : ApplicationState<ApplicationArchiVR>
     {
         #region variables
 
@@ -72,7 +72,7 @@ namespace ArchiVR
 
         #endregion
 
-        public ImmersionModeMaquette(ApplicationArchiVR application) : base(application)
+        public ApplicationStateMaquette(ApplicationArchiVR application) : base(application)
         {
         }
 
