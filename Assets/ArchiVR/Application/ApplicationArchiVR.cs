@@ -242,8 +242,13 @@ namespace ArchiVR.Application
         {
             ObjectPrefabDefinitions = new List<ObjectPrefabDefinition>()
             {
+                new ObjectPrefabDefinition() { Name = "Lavabo Dubbel 140x50x50",                            PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Bathroom/Lavabo Dubbel 140x50x50" },
+                new ObjectPrefabDefinition() { Name = "Mirror 142x70",                                      PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Bathroom/Mirror 142x70" },
+                new ObjectPrefabDefinition() { Name = "Radiator_Electric_Acova_Regate_El_Air_(50x135cm)",   PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Bathroom/Radiator_Electric_Acova_Regate_El_Air_(50x135cm)" },
+                new ObjectPrefabDefinition() { Name = "Douche 1",                                           PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Bathroom/Douche/Douche 1" },
+
                 new ObjectPrefabDefinition() { Name = "Sofa 1P",    PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 1P" },
-                new ObjectPrefabDefinition() { Name = "Sofa 1P",    PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 2P" },
+                new ObjectPrefabDefinition() { Name = "Sofa 2P",    PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 2P" },
                 new ObjectPrefabDefinition() { Name = "TV Philips", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/TV Philips" },
                 new ObjectPrefabDefinition() { Name = "TV Meubel",  PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/TV Meubel 600x2800x500" },
 
