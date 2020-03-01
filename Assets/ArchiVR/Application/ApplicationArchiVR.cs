@@ -368,7 +368,7 @@ namespace ArchiVR.Application
 
             // Maquette preview context is disabled, by default.
             MaquettePreviewContext.SetActive(false);
-
+            
             if (!UnitTestModeEnabled && (OVRManager.instance == null))
             {
                 Instantiate(ovrManagerPrefab, Vector3.zero, Quaternion.identity);
@@ -404,7 +404,7 @@ namespace ArchiVR.Application
             // Initialize application states
             TeleportationSystem = new TeleportationSystemArchiVR(this);
             applicationStateTeleporting = new ApplicationStateTeleporting(this, TeleportationSystem);
-
+            
             base.Init();
 
             #region Apply Graphics settings
@@ -443,13 +443,13 @@ namespace ArchiVR.Application
             {
                 RegisterAvatars();
             }
-            
+
             SetActiveImmersionMode(DefaultImmersionModeIndex);
 
             SetActiveProject(0);
 
             PushApplicationState(new ApplicationStateDefault(this));
-
+            
             //TestLoadAvatarPrefabsFromResources();
             //TestLoadGeometryPrefabsFromResources();
             //TestRegisteredAvatars();
@@ -472,8 +472,11 @@ namespace ArchiVR.Application
         {
             Logger.Debug("ApplicationArchiVR.OnApplicationPause("+pauseStatus+")");
 
-            SaveProjectData();
-            SaveApplicationSettings(); // TODO: This was added because OnApplicationQuit() seems NOT to be called when closing down the application on Quest headset
+            if (pauseStatus)
+            {
+                SaveProjectData();
+                SaveApplicationSettings(); // TODO: This was added because OnApplicationQuit() seems NOT to be called when closing down the application on Quest headset
+            }
         }
 
         /// <summary>
@@ -483,8 +486,8 @@ namespace ArchiVR.Application
         {
             Logger.Debug("ApplicationArchiVR.OnApplicationQuit()");
 
-            SaveProjectData();
-            SaveApplicationSettings();
+            //SaveProjectData();
+            //SaveApplicationSettings();
         }
 
         #endregion GameObject overrides
