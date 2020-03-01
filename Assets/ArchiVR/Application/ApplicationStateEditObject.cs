@@ -87,8 +87,6 @@ namespace ArchiVR.Application
             m_application.HudInfoText.text = "Edit " + _objectTypeName;
             m_application.HudInfoPanel.SetActive(true);
 
-            InitButtonMappingUI();
-
             OnHover(null);
             OnSelect(null);
         }
@@ -106,6 +104,8 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Update()
         {
+            UpdateControllerButtonUI();
+
             var controllerState = m_application.m_controllerInput.m_controllerState;
                         
             // Delete selected lights.
@@ -177,14 +177,30 @@ namespace ArchiVR.Application
             }
         }
 
+        private string GetSelectionText()
+        {
+            switch (_selectedObjects.Count)
+            {
+                case 0:
+                    return "";
+                case 1:
+                    return "Selected: " + _selectedObjects[0].name;
+                default:
+                    return "Selected: " + _selectedObjects.Count + " " + _objectTypeName + "s.";
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
-        public void InitButtonMappingUI()
+        public void UpdateControllerButtonUI()
         {
-            m_application.Logger.Debug("ApplicationStateDefineLight.InitButtonMappingUI()");
+            //m_application.Logger.Debug("ApplicationStateEditObject.UpdateControllerButtonUI()");
 
             var isEditor = UnityEngine.Application.isEditor;
+
+            m_application.m_leftControllerText.text = GetSelectionText();
+            m_application.m_rightControllerText.text = (null == _hoveredObject) ? "" : _hoveredObject.name;
 
             // Left controller
             var leftControllerButtonMapping = m_application.leftControllerButtonMapping;
@@ -211,12 +227,12 @@ namespace ArchiVR.Application
             if (rightControllerButtonMapping != null)
             {
                 rightControllerButtonMapping.IndexTrigger.Text = "Select";
-                rightControllerButtonMapping.HandTrigger.Text = "Additive selection";
+                rightControllerButtonMapping.HandTrigger.Text = _selectedObjects.Count == 0 ? "" : "Additive selection";
 
                 rightControllerButtonMapping.ButtonOculusStart.Text = "";
 
                 rightControllerButtonMapping.ButtonA.Text = "";
-                rightControllerButtonMapping.ButtonB.Text = "Delete";
+                rightControllerButtonMapping.ButtonB.Text = _selectedObjects.Count == 0 ? "" : "Delete";
 
                 rightControllerButtonMapping.ThumbUp.Text = "";
                 rightControllerButtonMapping.ThumbDown.Text = "";

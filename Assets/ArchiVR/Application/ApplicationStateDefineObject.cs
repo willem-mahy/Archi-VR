@@ -76,8 +76,6 @@ namespace ArchiVR.Application
             m_application.HudInfoText.text = "Create " + _objectTypeName;
             m_application.HudInfoPanel.SetActive(true);
 
-            InitButtonMappingUI();
-
             OnActiveObjectTypeChanged();
         }
 
@@ -86,6 +84,8 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Update()
         {
+            UpdateControllerButtonUI();
+
             m_application.Fly();
             m_application.UpdateTrackingSpace();
              
@@ -196,9 +196,9 @@ namespace ArchiVR.Application
         /// <summary>
         /// 
         /// </summary>
-        public void InitButtonMappingUI()
+        public void UpdateControllerButtonUI()
         {
-            m_application.Logger.Debug("ApplicationStateDefineLight.InitButtonMappingUI()");
+            //m_application.Logger.Debug("ApplicationStateDefineObject.UpdateControllerButtonUI()");
 
             var isEditor = UnityEngine.Application.isEditor;
 

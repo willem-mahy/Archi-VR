@@ -186,6 +186,11 @@ namespace ArchiVR.Application
                     return null;
                 }
 
+                if (ActivePOIIndex >= PoiObjects.Count)
+                {
+                    return null;
+                }
+
                 return PoiObjects[ActivePOIIndex];
             }
         }

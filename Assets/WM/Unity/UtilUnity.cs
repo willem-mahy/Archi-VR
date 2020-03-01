@@ -63,7 +63,7 @@ namespace WM
                         hitInfoOut = hitInfo;
                         pickedLayer = layer;
                     }
-                    else if (hitInfoOut.distance < hitInfoOut.distance)
+                    else if (hitInfo.distance < hitInfoOut.distance)
                     {
                         hitInfoOut = hitInfo;
                         pickedLayer = layer;
