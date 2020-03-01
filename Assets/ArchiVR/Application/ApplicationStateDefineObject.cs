@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ArchiVR.Application.PickInitialization;
+using System.Collections.Generic;
 using UnityEngine;
 using WM;
 using WM.Application;
@@ -6,23 +7,23 @@ using WM.Application;
 namespace ArchiVR.Application
 {
     /// <summary>
-    /// Application state in which the user creates a light.
+    /// Application state in which the user creates an object.
     /// </summary>
-    public class ApplicationStateDefineLight<D>
+    public class ApplicationStateDefineObject<D>
         : ApplicationState<ApplicationArchiVR>
          where D : new()
     {
-        public ApplicationStateDefineLight(
+        public ApplicationStateDefineObject(
             ApplicationArchiVR application,
             string objectTypeName,
             ref List<GameObject> objects,
             ref List<D> objectDefinitions,
-            List<ObjectPrefabDefinition> objectPrefabDefinitions) : base(application)
+            ApplicationArchiVR.ObjectEditSettings editSettings) : base(application)
         {
             _objectTypeName = objectTypeName;
             _objects = objects;
             _objectDefinitions = objectDefinitions;
-            _objectPrefabDefinitions = objectPrefabDefinitions;
+            _editSettings = editSettings;
         }
 
         /// <summary>
@@ -37,7 +38,7 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Enter()
         {
-            foreach (var objectPrefabDefinition in _objectPrefabDefinitions)
+            foreach (var objectPrefabDefinition in _editSettings.ObjectPrefabDefinitions)
             {
                 _objectPrefabs.Add(Resources.Load<GameObject>(objectPrefabDefinition.PrefabPath));
             }
@@ -76,7 +77,7 @@ namespace ArchiVR.Application
 
             InitButtonMappingUI();
 
-            OnActiveLightTypeChanged();
+            OnActiveObjectTypeChanged();
         }
 
         /// <summary>
@@ -99,12 +100,12 @@ namespace ArchiVR.Application
 
             if (controllerState.lThumbstickDirectionLeftDown)
             {
-                ActivatePreviousLightType();
+                ActivatePreviousObjectType();
             }
 
             if (controllerState.lThumbstickDirectionRightDown)
             {
-                ActivateNextLightType();
+                ActivateNextObjectType();
             }
 
             #region Update picked position
@@ -147,11 +148,11 @@ namespace ArchiVR.Application
 
                     if (null != _previewGO)
                     {
-                        var pi = _previewGO.GetComponent<IPickInitializable>();
+                        var pi = _previewGO.GetComponent<PickInitializable>();
 
                         if (null == pi)
                         {
-                            CreateLight();
+                            CreateObject();
                             return;
                         }
                     }
@@ -171,7 +172,7 @@ namespace ArchiVR.Application
 
                 if (0 != picks.Count)
                 {
-                    var pi = _previewGO.GetComponent<IPickInitializable>();
+                    var pi = _previewGO.GetComponent<PickInitializable>();
 
                     if (null != pi)
                     {
@@ -187,7 +188,7 @@ namespace ArchiVR.Application
 
             if (m_application.m_controllerInput.m_controllerState.xButtonDown)
             {
-                CreateLight();
+                CreateObject();
             }
         }
 
@@ -242,27 +243,27 @@ namespace ArchiVR.Application
         /// <summary>
         /// 
         /// </summary>
-        private void ActivatePreviousLightType()
+        private void ActivatePreviousObjectType()
         {
-            _activeLightTypeIndex = UtilIterate.MakeCycle(--_activeLightTypeIndex, 0, _objectPrefabDefinitions.Count);
+            _editSettings.ActiveObjectTypeIndex = UtilIterate.MakeCycle(--_editSettings.ActiveObjectTypeIndex, 0, _editSettings.ObjectPrefabDefinitions.Count);
 
-            OnActiveLightTypeChanged();
+            OnActiveObjectTypeChanged();
         }
 
         /// <summary>
         /// 
         /// </summary>
-        private void ActivateNextLightType()
+        private void ActivateNextObjectType()
         {
-            _activeLightTypeIndex = UtilIterate.MakeCycle(++_activeLightTypeIndex, 0, _objectPrefabDefinitions.Count);
+            _editSettings.ActiveObjectTypeIndex = UtilIterate.MakeCycle(++_editSettings.ActiveObjectTypeIndex, 0, _editSettings.ObjectPrefabDefinitions.Count);
 
-            OnActiveLightTypeChanged();
+            OnActiveObjectTypeChanged();
         }
 
         /// <summary>
         /// 
         /// </summary>
-        private void OnActiveLightTypeChanged()
+        private void OnActiveObjectTypeChanged()
         {
             if (null != _previewGO)
             {
@@ -272,22 +273,22 @@ namespace ArchiVR.Application
             }
 
             _previewGO = GameObject.Instantiate(
-                ActiveLightTypePrefab,
+                ActiveObjectTypePrefab,
                 Vector3.zero,
                 Quaternion.identity);
 
-            m_application.m_leftControllerText.text = ActiveLightType.Name;
+            m_application.m_leftControllerText.text = ActiveObjectTypePrefabDefinition.Name;
             m_application.m_leftControllerText.gameObject.SetActive(true);
         }
 
-        private void CreateLight()
+        private void CreateObject()
         {
-            var lightGO = GameObject.Instantiate(
-                ActiveLightTypePrefab,
+            var objectGO = GameObject.Instantiate(
+                ActiveObjectTypePrefab,
                 Vector3.zero,
                 Quaternion.identity);
 
-            var pi = lightGO.GetComponent<IPickInitializable>();
+            var pi = objectGO.GetComponent<PickInitializable>();
 
             if (null != pi)
             {
@@ -295,21 +296,21 @@ namespace ArchiVR.Application
             }
             else
             {
-                lightGO.transform.position = _hitInfo.Value.point;
-                lightGO.transform.LookAt(_hitInfo.Value.point + _hitInfo.Value.normal, Vector3.up);
+                objectGO.transform.position = _hitInfo.Value.point;
+                objectGO.transform.LookAt(_hitInfo.Value.point + _hitInfo.Value.normal, Vector3.up);
             }
 
-            m_application.LightingObjects.Add(lightGO);
+            _objects.Add(objectGO);
 
             var d = new D();
 
             if (d is ObjectDefinition objectDefinition)
             {
-                objectDefinition.Name = lightGO.name;
-                objectDefinition.Position = lightGO.transform.position;
-                objectDefinition.Rotation = lightGO.transform.rotation;
-                objectDefinition.PrefabPath = ActiveLightType.PrefabPath;
-                objectDefinition.GameObject = lightGO;
+                objectDefinition.Name = objectGO.name;
+                objectDefinition.Position = objectGO.transform.position;
+                objectDefinition.Rotation = objectGO.transform.rotation;
+                objectDefinition.PrefabPath = ActiveObjectTypePrefabDefinition.PrefabPath;
+                objectDefinition.GameObject = objectGO;
             }
 
             if (d is LightDefinition lightDefinition)
@@ -343,11 +344,9 @@ namespace ArchiVR.Application
 
         List<D> _objectDefinitions;
 
-        List<ObjectPrefabDefinition> _objectPrefabDefinitions;
+        private ApplicationArchiVR.ObjectEditSettings _editSettings;
 
-        private int _activeLightTypeIndex = 0;
-
-        public ObjectPrefabDefinition ActiveLightType => _objectPrefabDefinitions[_activeLightTypeIndex];
+        public ObjectPrefabDefinition ActiveObjectTypePrefabDefinition => _editSettings.ObjectPrefabDefinitions[_editSettings.ActiveObjectTypeIndex];
 
         /// <summary>
         /// The position where the pick ray is currently picking.
@@ -359,7 +358,7 @@ namespace ArchiVR.Application
         /// </summary>
         private RaycastHit? _hitInfo;
 
-        private GameObject ActiveLightTypePrefab => _objectPrefabs[_activeLightTypeIndex];
+        private GameObject ActiveObjectTypePrefab => _objectPrefabs[_editSettings.ActiveObjectTypeIndex];
 
         private GameObject _previewGO;
 

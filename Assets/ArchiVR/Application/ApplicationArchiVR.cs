@@ -89,9 +89,7 @@ namespace ArchiVR.Application
         ///// <summary>
         ///// The typed application states.
         ///// </summary>
-        //public readonly ApplicationStateDefault applicationStateDefault = new ApplicationStateDefault();
         public ApplicationStateTeleporting applicationStateTeleporting { get; private set; }
-        //public readonly ApplicationStateDefineSharedReferenceSystem ApplicationStateDefineSharedReferenceSystem = new ApplicationStateDefineSharedReferenceSystem();
 
         #region Project
 
@@ -207,52 +205,80 @@ namespace ArchiVR.Application
 
         #endregion
 
-        public readonly List<ObjectPrefabDefinition> _lightTypes = new List<ObjectPrefabDefinition>()
+        /// <summary>
+        /// 
+        /// </summary>
+        public class ObjectEditSettings
         {
-            new ObjectPrefabDefinition() { Name = "Ceiling Round", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Ceiling Round" },
-            new ObjectPrefabDefinition() { Name = "TL", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/TL/TL Single 120cm" },
-            new ObjectPrefabDefinition() { Name = "Spot Round", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Spot/Round/SpotBuiltInRound" },
-            new ObjectPrefabDefinition() { Name = "Wall Cube", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Spot/Wall Cube/Wall Cube" },
-            new ObjectPrefabDefinition() { Name = "Pendant Sphere", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Pendant/Pendant Sphere" }
+            public int ActiveObjectTypeIndex = 0;
+
+            public List<ObjectPrefabDefinition> ObjectPrefabDefinitions = new List<ObjectPrefabDefinition>();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public readonly ObjectEditSettings LightingEditSettings = new ObjectEditSettings()
+        {
+            ObjectPrefabDefinitions = new List<ObjectPrefabDefinition>()
+            {
+                new ObjectPrefabDefinition() { Name = "Ceiling Round", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Ceiling Round" },
+                new ObjectPrefabDefinition() { Name = "TL", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/TL/TL Single 120cm" },
+                new ObjectPrefabDefinition() { Name = "Spot Round", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Spot/Round/SpotBuiltInRound" },
+                new ObjectPrefabDefinition() { Name = "Wall Cube", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Spot/Wall Cube/Wall Cube" },
+                new ObjectPrefabDefinition() { Name = "Pendant Sphere", PrefabPath = "ArchiVR/Prefab/Architectural/Lighting/Pendant/Pendant Sphere" }
+            }
         };
 
-        public readonly List<ObjectPrefabDefinition> _poiTypes = new List<ObjectPrefabDefinition>()
+        /// <summary>
+        /// 
+        /// </summary>
+        public readonly ObjectEditSettings PropsEditSettings = new ObjectEditSettings()
         {
-            new ObjectPrefabDefinition() { Name = "POI", PrefabPath = "ArchiVR/Prefab/POI" }
+            ObjectPrefabDefinitions = new List<ObjectPrefabDefinition>()
+            {
+                new ObjectPrefabDefinition() { Name = "Sofa 1P",    PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 1P" },
+                new ObjectPrefabDefinition() { Name = "Sofa 1P",    PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 2P" },
+                new ObjectPrefabDefinition() { Name = "TV Philips", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/TV Philips" },
+                new ObjectPrefabDefinition() { Name = "TV Meubel",  PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/TV Meubel 600x2800x500" },
+
+                new ObjectPrefabDefinition() { Name = "Herbs1", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Plants/Herbs1" },
+                new ObjectPrefabDefinition() { Name = "Herbs2", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Plants/Herbs2" },
+
+                new ObjectPrefabDefinition() { Name = "Drying Rack",    PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Sanitair/Drying Rack 01 White 207x57x115" },
+
+                new ObjectPrefabDefinition() { Name = "Laundry Baskets",    PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Storage/Laundry_Baskets" },
+                new ObjectPrefabDefinition() { Name = "Storage Rack White", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Storage/Storage_Rack_White_01" },
+                new ObjectPrefabDefinition() { Name = "Storage Rack Wood",  PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Storage/Storage_Rack_Wood_01" },
+
+                new ObjectPrefabDefinition() { Name = "Lavabo VINOVA 10002 47x13x26",   PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Toilet/Lavabo VINOVA 10002 47x13x26" },
+                new ObjectPrefabDefinition() { Name = "Toilet Pot 01",                  PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Toilet/Toilet Pot 01" },
+                new ObjectPrefabDefinition() { Name = "Toilet Roll Holder 01",          PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Toilet/Toilet Roll Holder 01" },
+
+                new ObjectPrefabDefinition() { Name = "Lavender",   PrefabPath = "ArchiVR/Prefab/Architectural/Vegetation/Bushes/Lavender" },
+
+                new ObjectPrefabDefinition() { Name = "Audi A6 01 Blue",    PrefabPath = "ArchiVR/Prefab/Vehicle/Civilian/Audi/Car Audi A6 01 Blue" },
+            }
         };
 
-        public readonly List<ObjectPrefabDefinition> _propTypes = new List<ObjectPrefabDefinition>()
+        /// <summary>
+        /// 
+        /// </summary>
+        public readonly ObjectEditSettings POIEditSettings = new ObjectEditSettings()
         {
-            new ObjectPrefabDefinition() { Name = "Sofa 1P", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 1P" },
-            new ObjectPrefabDefinition() { Name = "Sofa 1P", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 2P" },
-            new ObjectPrefabDefinition() { Name = "TV Philips", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/TV Philips" },
-            new ObjectPrefabDefinition() { Name = "TV Meubel", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/TV Meubel 600x2800x500" },
-            
-            new ObjectPrefabDefinition() { Name = "Herbs1", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Plants/Herbs1" },
-            new ObjectPrefabDefinition() { Name = "Herbs2", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Plants/Herbs2" },
-            
-            new ObjectPrefabDefinition() { Name = "Drying Rack", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Sanitair/Drying Rack 01 White 207x57x115" },
-            
-            new ObjectPrefabDefinition() { Name = "Laundry Baskets", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Storage/Laundry_Baskets" },
-            new ObjectPrefabDefinition() { Name = "Storage Rack White", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Storage/Storage_Rack_White_01" },
-            new ObjectPrefabDefinition() { Name = "Storage Rack Wood", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Storage/Storage_Rack_Wood_01" },
-
-            new ObjectPrefabDefinition() { Name = "Lavabo VINOVA 10002 47x13x26", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Toilet/Lavabo VINOVA 10002 47x13x26" },
-            new ObjectPrefabDefinition() { Name = "Toilet Pot 01", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Toilet/Toilet Pot 01" },
-            new ObjectPrefabDefinition() { Name = "Toilet Roll Holder 01", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Toilet/Toilet Roll Holder 01" },
-
-            new ObjectPrefabDefinition() { Name = "Lavender", PrefabPath = "ArchiVR/Prefab/Architectural/Vegetation/Bushes/Lavender" },
-
-            new ObjectPrefabDefinition() { Name = "Audi A6 01 Blue", PrefabPath = "ArchiVR/Prefab/Vehicle/Civilian/Audi/Car Audi A6 01 Blue" },
+            ObjectPrefabDefinitions = new List<ObjectPrefabDefinition>()
+            {
+                new ObjectPrefabDefinition() { Name = "POI", PrefabPath = "ArchiVR/Prefab/POI" }
+            }
         };
 
         #endregion
 
-        #region Test
+                #region Test
 
-        /// <summary>
-        /// Load all avatar types.
-        /// </summary>
+                /// <summary>
+                /// Load all avatar types.
+                /// </summary>
         private void TestLoadAvatarPrefabsFromResources()
         {
             string[] prefabPaths =

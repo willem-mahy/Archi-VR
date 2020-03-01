@@ -9,21 +9,21 @@ namespace ArchiVR.Application
     /// <summary>
     /// Application state in which the user edits lights (select, delete, create).
     /// </summary>
-    public class ApplicationStateEditLight<D>
+    public class ApplicationStateEditObject<D>
         : ApplicationState<ApplicationArchiVR>
          where D : new()
     {
-        public ApplicationStateEditLight(
+        public ApplicationStateEditObject(
             ApplicationArchiVR application,
             string objectTypeName,
             ref List<GameObject> objects,
             ref List<D> objectDefinitions,
-            List<ObjectPrefabDefinition> objectPrefabDefinitions) : base(application)
+            ApplicationArchiVR.ObjectEditSettings editSettings) : base(application)
         {
             _objectTypeName = objectTypeName;
             _objects = objects;
             _objectDefinitions = objectDefinitions;
-            _objectPrefabDefinitions = objectPrefabDefinitions;
+            _editSettings = editSettings;
         }
 
         /// <summary>
@@ -106,12 +106,12 @@ namespace ArchiVR.Application
             // Pressing 'L' on the keyboard is a shortcut for starting creating a light.
             if (controllerState.aButtonDown || Input.GetKeyDown(KeyCode.C))
             {
-                var applicationState = new ApplicationStateDefineLight<D>(
+                var applicationState = new ApplicationStateDefineObject<D>(
                     m_application,
                     _objectTypeName,
                     ref _objects,
                     ref _objectDefinitions,
-                    _objectPrefabDefinitions);
+                    _editSettings);
 
                 m_application.PushApplicationState(applicationState);
             }
@@ -161,7 +161,7 @@ namespace ArchiVR.Application
 
             if (m_application.m_controllerInput.m_controllerState.rIndexTriggerDown)
             {
-                OnSelect(_hoveredLight);
+                OnSelect(_hoveredObject);
             }
         }
 
@@ -213,39 +213,39 @@ namespace ArchiVR.Application
             }
         }
 
-        private void OnHover(GameObject light)
+        private void OnHover(GameObject gameObject)
         {
-            _hoveredLight = light;
+            _hoveredObject = gameObject;
 
-            if (null == light)
+            if (null == gameObject)
             {
                 _hoverBoxGO.gameObject.SetActive(false);
             }
             else
             {
                 _hoverBoxGO.SetActive(true);
-                _hoverBoxGO.transform.SetParent(light.transform, false);
+                //_hoverBoxGO.transform.SetParent(gameObject.transform, false);
 
-                var bounds = UtilUnity.CalculateBounds(_hoveredLight);
+                var bounds = UtilUnity.CalculateBounds(_hoveredObject);
 
                 if (bounds.HasValue)
                 {
                     _hoverBoxGO.transform.position = bounds.Value.center;
-                    _hoverBox.Size = light.transform.InverseTransformVector(bounds.Value.size);
+                    _hoverBox.Size = gameObject.transform.InverseTransformVector(bounds.Value.size);
                 }
             }
         }
 
-        private void OnSelect(GameObject light)
+        private void OnSelect(GameObject @object)
         {
             if (!_addToSelection)
             {
-                _selectedLights.Clear();
+                _selectedObjects.Clear();
             }
 
-            if (null != light)
+            if (null != @object)
             {
-                _selectedLights.Add(light);
+                _selectedObjects.Add(@object);
             }
 
             foreach (var box in _selectBoxes)
@@ -254,72 +254,88 @@ namespace ArchiVR.Application
             }
             _selectBoxes.Clear();
 
-            foreach (var selectedLight in _selectedLights)
+            foreach (var selectedObject in _selectedObjects)
             {
-                var boxGO = new GameObject("LightEditSelectBox");
+                var boxGO = new GameObject("SelectedObjectBoundingBox");
                 var box = boxGO.AddComponent<LineRendererBox>();
                 box.Color = m_application.SelectionColor;
 
                 boxGO.SetActive(true);
-                boxGO.transform.SetParent(light.transform, false);
+                boxGO.transform.SetParent(@object.transform, false);
 
-                var bounds = UtilUnity.CalculateBounds(selectedLight);
+                var bounds = UtilUnity.CalculateBounds(selectedObject);
 
                 if (bounds.HasValue)
                 {
                     boxGO.transform.position = bounds.Value.center;
-                    box.Size = selectedLight.transform.InverseTransformVector(bounds.Value.size);
+                    box.Size = selectedObject.transform.InverseTransformVector(bounds.Value.size);
                 }
 
                 _selectBoxes.Add(box);
             }
         }
 
+        /// <summary>
+        /// Deletes the selected objects.
+        /// </summary>
         private void Delete()
         {
-            var selectedLights = new List<GameObject>(_selectedLights);
+            var selectedObjects = new List<GameObject>(_selectedObjects);
 
             OnHover(null);
             OnSelect(null);
 
-            foreach (var light in selectedLights)
+            foreach (var selectedObject in selectedObjects)
             {
-                foreach (var objectDefinition in _objectDefinitions)
+                var objectDefinition = GetObjectDefinition(selectedObject);
+                _objectDefinitions.Remove(objectDefinition);
+
+                _objects.Remove(selectedObject);
+                UtilUnity.Destroy(selectedObject);
+            }   
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="gameObject"></param>
+        /// <returns></returns>
+        private D GetObjectDefinition(GameObject gameObject)
+        {
+            foreach (var objectDefinition in _objectDefinitions)
+            {
+                var od = objectDefinition as ObjectDefinition;
+
+                if (null != od)
                 {
-                    var od = objectDefinition as ObjectDefinition;
-                    
-                    if (null != od)
+                    if (od.GameObject == gameObject)
                     {
-                        if (od.GameObject == light)
-                        {
-                            _objectDefinitions.Remove(objectDefinition);
-                        }
+                        return objectDefinition;
                     }
                 }
+            }
 
-                _objects.Remove(light);
-                UtilUnity.Destroy(light);
-            }   
+            return default(D);
         }
 
         #region Fields
 
-        string _objectTypeName;
+        private string _objectTypeName;
 
-        List<GameObject> _objects;
-        
-        List<D> _objectDefinitions;
+        private List<GameObject> _objects;
 
-        List<ObjectPrefabDefinition> _objectPrefabDefinitions;
+        private List<D> _objectDefinitions;
+
+        private ApplicationArchiVR.ObjectEditSettings _editSettings;
 
         private bool _addToSelection = false;
 
-        private GameObject _hoveredLight;
+        private GameObject _hoveredObject;
         
         private GameObject _hoverBoxGO;
         private LineRendererBox _hoverBox;
 
-        private List<GameObject> _selectedLights = new List<GameObject>();
+        private List<GameObject> _selectedObjects = new List<GameObject>();
 
         private List<LineRendererBox> _selectBoxes = new List<LineRendererBox>();
 

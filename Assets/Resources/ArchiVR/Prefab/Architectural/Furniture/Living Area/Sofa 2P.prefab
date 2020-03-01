@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 7091041494529413686}
   - component: {fileID: 7091041494529413681}
   - component: {fileID: 7091041494529413680}
-  - component: {fileID: 2349381120656383961}
   - component: {fileID: 95892581943761899}
+  - component: {fileID: 4739091011226268332}
   m_Layer: 0
   m_Name: Sofa 2P
   m_TagString: Untagged
@@ -82,18 +82,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &2349381120656383961
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7091041494529413683}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b25eefacd00237e4b9fb2b720fa5d09a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!64 &95892581943761899
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -108,3 +96,16 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 14
   m_Mesh: {fileID: -5032370399278268027, guid: 6a9fa23b63baf5749acbbee8674f682a, type: 3}
+--- !u!114 &4739091011226268332
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7091041494529413683}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681920dd4123fef4381e2714652e9088, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PickInitializationTypes: 01000000

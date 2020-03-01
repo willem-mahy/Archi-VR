@@ -195,12 +195,12 @@ namespace ArchiVR
             // Pressing 'L' on the keyboard is a shortcut for starting editing lights.
             if (Input.GetKeyDown(KeyCode.L))
             {
-                var applicationState = new ApplicationStateEditLight<LightDefinition>(
+                var applicationState = new ApplicationStateEditObject<LightDefinition>(
                     m_application,
                     "Light",
                     ref m_application.LightingObjects,
                     ref m_application.ProjectData.LightingData.lightDefinitions,
-                    m_application._lightTypes);
+                    m_application.LightingEditSettings);
 
                 m_application.PushApplicationState(applicationState);
             }
@@ -208,12 +208,12 @@ namespace ArchiVR
             // Pressing 'F' on the keyboard is a shortcut for starting editing props.
             if (Input.GetKeyDown(KeyCode.F))
             {
-                var applicationState = new ApplicationStateEditLight<PropDefinition>(
+                var applicationState = new ApplicationStateEditObject<PropDefinition>(
                     m_application,
                     "Prop",
                     ref m_application.PropObjects,
                     ref m_application.ProjectData.PropData.propDefinitions,
-                    m_application._propTypes);
+                    m_application.PropsEditSettings);
 
                 m_application.PushApplicationState(applicationState);
             }
@@ -221,12 +221,12 @@ namespace ArchiVR
             // Pressing 'P' on the keyboard is a shortcut for starting editing POI's.
             if (Input.GetKeyDown(KeyCode.P))
             {
-                var applicationState = new ApplicationStateEditLight<POIDefinition>(
+                var applicationState = new ApplicationStateEditObject<POIDefinition>(
                     m_application,
                     "POI",
                     ref m_application.PropObjects,
                     ref m_application.ProjectData.POIData.poiDefinitions,
-                    m_application._poiTypes);
+                    m_application.POIEditSettings);
 
                 m_application.PushApplicationState(applicationState);
             }
