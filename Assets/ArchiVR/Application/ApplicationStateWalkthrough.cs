@@ -224,7 +224,7 @@ namespace ArchiVR
                 var applicationState = new ApplicationStateEditObject<POIDefinition>(
                     m_application,
                     "POI",
-                    ref m_application.PropObjects,
+                    ref m_application.PoiObjects,
                     ref m_application.ProjectData.POIData.poiDefinitions,
                     m_application.POIEditSettings);
 

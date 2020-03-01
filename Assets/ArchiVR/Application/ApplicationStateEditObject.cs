@@ -72,9 +72,12 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Resume()
         {
-            _hoverBoxGO = new GameObject("LightEditHoverBox");
-            _hoverBox = _hoverBoxGO.AddComponent<LineRendererBox>();
-            _hoverBox.Color = m_application.HoverColor;
+            if (null == _hoverBoxGO)
+            {
+                _hoverBoxGO = new GameObject("LightEditHoverBox");
+                _hoverBox = _hoverBoxGO.AddComponent<LineRendererBox>();
+                _hoverBox.Color = m_application.HoverColor;
+            }
 
             m_application.LocomotionEnabled = false;
 
@@ -88,6 +91,14 @@ namespace ArchiVR.Application
 
             OnHover(null);
             OnSelect(null);
+        }
+
+        /// <summary>
+        /// <see cref="ApplicationState{T}.Pause"/> implementation.
+        /// </summary>
+        public override void Pause()
+        {
+            _hoverBoxGO.SetActive(false);
         }
 
         /// <summary>
@@ -114,6 +125,7 @@ namespace ArchiVR.Application
                     _editSettings);
 
                 m_application.PushApplicationState(applicationState);
+                return;
             }
 
             // Whils hand trigger is pressed, selection is additive.
@@ -128,13 +140,13 @@ namespace ArchiVR.Application
                 return;
             }
 
-            #region Update hovered light
+            #region Update hovered object
 
-            GameObject hoveredLight = null;
+            GameObject hoveredObject = null;
 
             var pickRay = m_application.RPickRay.GetRay();
 
-            foreach (var light in m_application.LightingObjects)
+            foreach (var gameObject in _objects)
             {
                 var hitInfo = new RaycastHit();
                 hitInfo.distance = float.NaN;
@@ -142,22 +154,22 @@ namespace ArchiVR.Application
                 GameObject pickedGO = null;
 
                 UtilUnity.PickRecursively(
-                    light,
+                    gameObject,
                     pickRay,
-                    light,
+                    gameObject,
                     ref pickedGO,
                     ref hitInfo);
 
                 if (null != pickedGO)
                 {
-                    hoveredLight = light;
+                    hoveredObject = gameObject;
                     break;
                 }
             }
 
-            OnHover(hoveredLight);
+            OnHover(hoveredObject);
 
-            #endregion Update hovered light
+            #endregion Update hovered object
 
             if (m_application.m_controllerInput.m_controllerState.rIndexTriggerDown)
             {
@@ -224,7 +236,6 @@ namespace ArchiVR.Application
             else
             {
                 _hoverBoxGO.SetActive(true);
-                //_hoverBoxGO.transform.SetParent(gameObject.transform, false);
 
                 var bounds = UtilUnity.CalculateBounds(_hoveredObject);
 
@@ -236,42 +247,61 @@ namespace ArchiVR.Application
             }
         }
 
-        private void OnSelect(GameObject @object)
+        private void OnSelect(GameObject gameObject)
         {
-            if (!_addToSelection)
-            {
-                _selectedObjects.Clear();
-            }
-
-            if (null != @object)
-            {
-                _selectedObjects.Add(@object);
-            }
-
+            // Remove bounding boxes from current selection.
             foreach (var box in _selectBoxes)
             {
-                UtilUnity.Destroy(box.gameObject);                
+                UtilUnity.Destroy(box.gameObject);
             }
             _selectBoxes.Clear();
 
+
+            // Update selection.
+            if (_addToSelection)
+            {
+                if (null != gameObject)
+                {
+                    if (_selectedObjects.Contains(gameObject))
+                    {
+                        _selectedObjects.Remove(gameObject);
+                    }
+                    else
+                    {
+                        _selectedObjects.Add(gameObject);
+                    }
+                }
+            }
+            else
+            {
+                _selectedObjects.Clear();
+
+                if (null != gameObject)
+                {
+                    _selectedObjects.Add(gameObject);
+                }
+            }
+
+
+            // Add bounding boxes for current selection.
             foreach (var selectedObject in _selectedObjects)
             {
-                var boxGO = new GameObject("SelectedObjectBoundingBox");
-                var box = boxGO.AddComponent<LineRendererBox>();
-                box.Color = m_application.SelectionColor;
+                var selectedObjectBoundingBoxGO = new GameObject("SelectedObjectBoundingBox");
+                var selectedObjectBoundingBox = selectedObjectBoundingBoxGO.AddComponent<LineRendererBox>();
+                selectedObjectBoundingBox.Color = m_application.SelectionColor;
 
-                boxGO.SetActive(true);
-                boxGO.transform.SetParent(@object.transform, false);
+                selectedObjectBoundingBoxGO.SetActive(true);
+                selectedObjectBoundingBoxGO.transform.SetParent(selectedObject.transform, false);
 
                 var bounds = UtilUnity.CalculateBounds(selectedObject);
 
                 if (bounds.HasValue)
                 {
-                    boxGO.transform.position = bounds.Value.center;
-                    box.Size = selectedObject.transform.InverseTransformVector(bounds.Value.size);
+                    selectedObjectBoundingBoxGO.transform.position = bounds.Value.center;
+                    selectedObjectBoundingBox.Size = selectedObject.transform.InverseTransformVector(bounds.Value.size);
                 }
 
-                _selectBoxes.Add(box);
+                _selectBoxes.Add(selectedObjectBoundingBox);
             }
         }
 

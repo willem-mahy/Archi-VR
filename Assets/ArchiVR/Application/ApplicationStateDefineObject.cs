@@ -1,4 +1,5 @@
 ﻿using ArchiVR.Application.PickInitialization;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using WM;
@@ -287,6 +288,9 @@ namespace ArchiVR.Application
                 ActiveObjectTypePrefab,
                 Vector3.zero,
                 Quaternion.identity);
+
+            // Give the new object a unique name.
+            objectGO.name = ActiveObjectTypePrefab.name + " (" + Guid.NewGuid().ToString() + ")";
 
             var pi = objectGO.GetComponent<PickInitializable>();
 

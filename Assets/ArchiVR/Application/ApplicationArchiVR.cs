@@ -186,7 +186,7 @@ namespace ArchiVR.Application
                     return null;
                 }
 
-                return m_POI[ActivePOIIndex];
+                return PoiObjects[ActivePOIIndex];
             }
         }
 
@@ -201,7 +201,7 @@ namespace ArchiVR.Application
         /// <summary>
         /// The list of Points-Of-Interest in the active project.
         /// </summary>
-        List<GameObject> m_POI = new List<GameObject>();
+        public List<GameObject> PoiObjects = new List<GameObject>();
 
         #endregion
 
@@ -739,7 +739,7 @@ namespace ArchiVR.Application
 
             if (newPOIIndex == -1)
             {
-                if (m_POI.Count > 0)
+                if (PoiObjects.Count > 0)
                 {
                     newPOIIndex = 0;
                 }
@@ -854,7 +854,7 @@ namespace ArchiVR.Application
             }
 
             // Gather the POI from the new project.
-            GatherActiveProjectPOI();
+            //GatherActiveProjectPOI(); // Replaced by loading POI from the ProjectData.XML
 
             // Gather the layers from the new project.
             GatherActiveProjectLayers();
@@ -1143,13 +1143,13 @@ namespace ArchiVR.Application
         public TeleportInitiatedCommand GetTeleportInitCommandForPOI(int poiIndex)
         {
             // Determine the new POI index.
-            if (m_POI.Count == 0)
+            if (PoiObjects.Count == 0)
             {
                 poiIndex = -1;
                 return null;
             }
 
-            poiIndex = UtilIterate.MakeCycle(poiIndex, 0, m_POI.Count);
+            poiIndex = UtilIterate.MakeCycle(poiIndex, 0, PoiObjects.Count);
 
             var tic = new TeleportInitiatedCommand();
 
@@ -1162,18 +1162,18 @@ namespace ArchiVR.Application
         public TeleportCommand GetTeleportCommandForPOI(int poiIndex)
         {
             // Determine the new POI index.
-            if (m_POI.Count == 0)
+            if (PoiObjects.Count == 0)
             {
                 poiIndex = -1;
                 return null;
             }
 
-            poiIndex = UtilIterate.MakeCycle(poiIndex, 0, m_POI.Count);
+            poiIndex = UtilIterate.MakeCycle(poiIndex, 0, PoiObjects.Count);
 
             var tc = new TeleportCommand();
 
             tc.ProjectIndex = ActiveProjectIndex;
-            tc.POIName = m_POI[poiIndex].name;
+            tc.POIName = PoiObjects[poiIndex].name;
 
             return tc;
         }
@@ -1198,7 +1198,7 @@ namespace ArchiVR.Application
         //! Gathers all POI for the currently active project.
         public void GatherActiveProjectPOI()
         {
-            m_POI.Clear();
+            PoiObjects.Clear();
 
             var activeProject = ActiveProject;
 
@@ -1219,7 +1219,7 @@ namespace ArchiVR.Application
 
                     foreach (Transform childOfPOIs in POIs.transform)
                     {
-                        m_POI.Add(childOfPOIs.gameObject);
+                        PoiObjects.Add(childOfPOIs.gameObject);
                     }
 
                     break;
@@ -1236,7 +1236,7 @@ namespace ArchiVR.Application
         {
             get
             {
-                return m_POI.Count == 0 ? -1 : 0;
+                return PoiObjects.Count == 0 ? -1 : 0;
             }
         }
 
@@ -1254,7 +1254,7 @@ namespace ArchiVR.Application
         int GetPOIIndex(string poiName)
         {
             int poiIndex = 0;
-            foreach (var poi in m_POI)
+            foreach (var poi in PoiObjects)
             {
                 if (poi.name == poiName)
                 {
@@ -1598,11 +1598,11 @@ namespace ArchiVR.Application
 
             #region Clear old POI Objects
 
-            foreach (var poiGO in m_POI)
+            foreach (var poiGO in PoiObjects)
             {
                 UtilUnity.Destroy(poiGO);
             }
-            m_POI.Clear();
+            PoiObjects.Clear();
 
             #endregion Clear old POI Objects
 
@@ -1623,7 +1623,7 @@ namespace ArchiVR.Application
 
                 poiDefinition.GameObject = poiGO;
 
-                m_POI.Add(poiGO);
+                PoiObjects.Add(poiGO);
             }
 
             #endregion Import Prop Objects
