@@ -12,6 +12,8 @@ namespace WM.UI
     {
         #region Variables
 
+        public bool EnableRotation = false;
+
         /// <summary>
         /// The camera to which this gameobject is anchored.
         /// This gameobject will update every frame to be at the given translational offset from the anchor camera.
@@ -69,6 +71,11 @@ namespace WM.UI
         /// </summary>
         void Update()
         {
+            if (EnableRotation)
+            {
+                UpdateAnchoring();
+            }
+
             UpdateLocation();
         }
 
