@@ -36,9 +36,6 @@ namespace ArchiVR
     {
         #region variables
 
-        // The surroundings in which the maquette is previewed
-        private GameObject m_maquettePreviewContext;
-
         // The maquette translational manipulation speed.
         float maquetteMoveSpeed = 1.0f;
 
@@ -82,16 +79,6 @@ namespace ArchiVR
         public override void Init()
         {
             m_application.Logger.Debug("ImmersionModeMaquette.Init()");
-
-            if (m_maquettePreviewContext == null)
-            {
-                m_maquettePreviewContext = UtilUnity.FindGameObjectElseError(m_application.gameObject.scene, "MaquettePreviewContext");
-            }
-
-            if (m_maquettePreviewContext)
-            {
-                m_maquettePreviewContext.SetActive(false);
-            }
         }
 
         /// <summary>
@@ -101,10 +88,7 @@ namespace ArchiVR
         {
             m_application.Logger.Debug("ImmersionModeMaquette.Enter()");
 
-            InitButtonMappingUI();
-
-            if (m_maquettePreviewContext)
-                m_maquettePreviewContext.SetActive(true);
+            m_application.MaquettePreviewContext.SetActive(true);
 
             // Disable moving up/down.
             m_application.m_flySpeedUpDown = 0.0f;
@@ -125,10 +109,7 @@ namespace ArchiVR
         {
             m_application.Logger.Debug("ImmersionModeMaquette.Exit()");
 
-            if (m_maquettePreviewContext)
-            {
-                m_maquettePreviewContext.SetActive(false);
-            }
+            m_application.MaquettePreviewContext.SetActive(false);
 
             // Restore default moving up/down.
             m_application.m_flySpeedUpDown = UnityApplication.DefaultFlySpeedUpDown;
@@ -142,6 +123,8 @@ namespace ArchiVR
         public override void Update()
         {
             //WM.Logger.Debug("ImmersionModeMaquette.Update()");
+
+            UpdateControllerUI();
 
             if (m_application.ToggleActiveProject())
             {
@@ -362,6 +345,20 @@ namespace ArchiVR
 
             // Rotate it.
             activeProject.transform.RotateAround(m_application.OffsetPerID, Vector3.up, m_maquetteRotation);
+
+            m_application.PropGameObject.transform.position = activeProject.transform.position;
+            m_application.PropGameObject.transform.rotation = activeProject.transform.rotation;
+            m_application.PropGameObject.transform.localScale = activeProject.transform.localScale;
+
+            m_application.PoiGameObject.transform.position = activeProject.transform.position;
+            m_application.PoiGameObject.transform.rotation = activeProject.transform.rotation;
+            m_application.PoiGameObject.transform.localScale = activeProject.transform.localScale;
+
+            m_application.LightingGameObject.transform.position = activeProject.transform.position;
+            m_application.LightingGameObject.transform.rotation = activeProject.transform.rotation;
+            m_application.LightingGameObject.transform.localScale = activeProject.transform.localScale;
+
+
         }
 
         /// <summary>
@@ -382,7 +379,7 @@ namespace ArchiVR
         /// <summary>
         /// <see cref="ImmersionMode.InitButtonMappingUI()"/> implementation.
         /// </summary>
-        public /*override*/ void InitButtonMappingUI()
+        public /*override*/ void UpdateControllerUI()
         {
             m_application.Logger.Debug("ImmersionModeMaquette.InitButtonMappingUI()");
 

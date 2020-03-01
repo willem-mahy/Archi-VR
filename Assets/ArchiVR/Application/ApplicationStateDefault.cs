@@ -30,20 +30,28 @@ namespace ArchiVR.Application
         {
             m_application.Logger.Debug("ApplicationStateDefault.Resume()");
 
-            m_application.m_leftControllerText.text =
+            m_application.m_leftControllerText.text = "";
             m_application.m_rightControllerText.text = "Please choose immersion mode";
 
-            InitButtonMappingUI();
+            m_application.ProjectVisible = false;
+            m_application.MaquettePreviewContext.SetActive(true);
+
+            UpdateTrackingSpacePosition();
         }
 
         public override void Pause()
         {
             m_application.Logger.Debug("ApplicationStateDefault.Pause()");
+
+            m_application.MaquettePreviewContext.SetActive(false);
+            m_application.ProjectVisible = true;
         }
 
         public override void Update()
         {
             //m_application.Logger.Debug("ApplicationStateDefault.Update()");
+
+            UpdateControllerUI();
 
             var controllerState = m_application.m_controllerInput.m_controllerState; 
             
@@ -61,7 +69,7 @@ namespace ArchiVR.Application
         /// <summary>
         /// 
         /// </summary>
-        public /*override*/ void InitButtonMappingUI()
+        public /*override*/ void UpdateControllerUI()
         {
             m_application.Logger.Debug("ApplicationStateDefault.InitButtonMappingUI()");
 
@@ -136,14 +144,14 @@ namespace ArchiVR.Application
 
         public override void UpdateTrackingSpacePosition()
         {
-            //m_application.Logger.Debug("ApplicationStateDefault.UpdateTrackingSpacePosition()");
+            m_application.Logger.Debug("ApplicationStateDefault.UpdateTrackingSpacePosition()");
 
-            //var aim = ((ApplicationArchiVR)m_application).ActiveImmersionMode;
+            m_application.ResetTrackingSpacePosition(); // Center around model.
 
-            //if (aim != null)
-            //{
-            //    aim.UpdateTrackingSpacePosition();
-            //}
+            if (UnityEngine.Application.isEditor)
+            {
+                m_application.m_ovrCameraRig.transform.position = m_application.m_ovrCameraRig.transform.position + new Vector3(0, 1.8f, 0);
+            }
         }
     }
 } // namespace ArchiVR.Application

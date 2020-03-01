@@ -84,7 +84,7 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Update()
         {
-            UpdateControllerButtonUI();
+            UpdateControllerUI();
 
             m_application.Fly();
             m_application.UpdateTrackingSpace();
@@ -92,11 +92,17 @@ namespace ArchiVR.Application
             var controllerState = m_application.m_controllerInput.m_controllerState;
 
             // Pressing 'BackSpace' on the keyboard is a shortcut for returning to the default state.
-            var returnToDefaultState = controllerState.lIndexTriggerDown || Input.GetKeyDown(KeyCode.Backspace);
+            var returnToEditState = controllerState.lIndexTriggerDown || Input.GetKeyDown(KeyCode.Backspace);
 
-            if (returnToDefaultState)
+            if (returnToEditState)
             {
                 m_application.PopApplicationState();
+            }
+
+            // If user presses R Hand trigger, remove a picked point.
+            if (m_application.m_controllerInput.m_controllerState.rHandTriggerDown)
+            {
+                if (_pickedInfos.Count > 0) _pickedInfos.RemoveAt(_pickedInfos.Count - 1);
             }
 
             if (controllerState.lThumbstickDirectionLeftDown)
@@ -141,6 +147,7 @@ namespace ArchiVR.Application
 
             #endregion Update picked position
 
+            // If user presses R Index trigger, pick a point.
             if (m_application.m_controllerInput.m_controllerState.rIndexTriggerDown)
             {
                 if (_hitInfo.HasValue)
@@ -196,7 +203,7 @@ namespace ArchiVR.Application
         /// <summary>
         /// 
         /// </summary>
-        public void UpdateControllerButtonUI()
+        public void UpdateControllerUI()
         {
             //m_application.Logger.Debug("ApplicationStateDefineObject.UpdateControllerButtonUI()");
 
@@ -227,7 +234,7 @@ namespace ArchiVR.Application
             if (rightControllerButtonMapping != null)
             {
                 rightControllerButtonMapping.IndexTrigger.Text = "Pick";
-                rightControllerButtonMapping.HandTrigger.Text = "";
+                rightControllerButtonMapping.HandTrigger.Text = (_pickedInfos.Count == 0) ? "" : "Remove Pick";
 
                 rightControllerButtonMapping.ButtonOculusStart.Text = "";
 

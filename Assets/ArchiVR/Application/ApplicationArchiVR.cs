@@ -96,7 +96,7 @@ namespace ArchiVR.Application
         /// <summary>
         /// The list of names of all projects included in the build.
         /// </summary>
-        List<string> projectNames = new List<string>();
+        List<string> _projectSceneNames = new List<string>();
 
         /// <summary>
         /// The index of the currently active project.
@@ -279,11 +279,11 @@ namespace ArchiVR.Application
 
         #endregion
 
-                #region Test
+        #region Test
 
-                /// <summary>
-                /// Load all avatar types.
-                /// </summary>
+        /// <summary>
+        /// Load all avatar types.
+        /// </summary>
         private void TestLoadAvatarPrefabsFromResources()
         {
             string[] prefabPaths =
@@ -355,6 +355,14 @@ namespace ArchiVR.Application
             {
                 EnvironmentalLighting.gameObject.SetActive(false);
             }
+
+            if (MaquettePreviewContext == null)
+            {
+                MaquettePreviewContext = UtilUnity.FindGameObjectElseError(gameObject.scene, "MaquettePreviewContext");
+            }
+
+            // Maquette preview context is disabled, by default.
+            MaquettePreviewContext.SetActive(false);
 
             if (!UnitTestModeEnabled && (OVRManager.instance == null))
             {
@@ -788,7 +796,7 @@ namespace ArchiVR.Application
                 }
 
                 // Then load the new projct
-                var newProjectName = GetProjectName(TeleportCommand.ProjectIndex);
+                var newProjectName = GetProjectSceneName(TeleportCommand.ProjectIndex);
 
                 Logger.Debug("Loading project '" + newProjectName + "'");
 
@@ -851,9 +859,6 @@ namespace ArchiVR.Application
 
                 // Update active project index to point to newly activated project.
                 ActiveProjectIndex = TeleportCommand.ProjectIndex;
-
-                // Update left controller UI displaying the project name.
-                m_leftControllerText.text = (ActiveProjectName != null) ? GetProjectNameShort(ActiveProjectName) : "No project loaded.";
 
                 LoadProjectData();
             }
@@ -1008,7 +1013,7 @@ namespace ArchiVR.Application
         /// </summary>
         void GatherProjects()
         {
-            projectNames = GetProjectNames();
+            _projectSceneNames = GetProjectNames();
         }
 
         /// <summary>
@@ -1032,14 +1037,22 @@ namespace ArchiVR.Application
             return projectNames;
         }
 
-        //! Gets the name of a project, by index.
-        public string GetProjectName(int projectIndex)
+        /// <summary>
+        /// Gets the name of a project, by index.
+        /// </summary>
+        /// <param name="projectIndex"></param>
+        /// <returns></returns>
+        public string GetProjectSceneName(int projectIndex)
         {
-            return projectNames[projectIndex];
+            return _projectSceneNames[projectIndex];
         }
 
-        //! Get the short-format (excluding prefix 'Project') project name for the given project name.
-        string GetProjectNameShort(string projectName)
+        /// <summary>
+        /// Get the short-format (excluding prefix 'Project') project name for the given project name.
+        /// </summary>
+        /// <param name="projectName"></param>
+        /// <returns></returns>
+        public string GetProjectName(string projectName)
         {
             string prefix = "project";
 
@@ -1060,7 +1073,7 @@ namespace ArchiVR.Application
             {
                 // We deliberately do NOT return the temptingly simple ActiveProject.name here.
                 // This returns the name (always "Project") of the gameobject representing the project in the scene.
-                return ActiveProjectIndex == -1 ? null : projectNames[ActiveProjectIndex];
+                return ActiveProjectIndex == -1 ? null : _projectSceneNames[ActiveProjectIndex];
             }
         }
 
@@ -1093,13 +1106,13 @@ namespace ArchiVR.Application
         /// </summary>
         public TeleportCommand GetTeleportCommandForProject(int projectIndex)
         {
-            if (projectNames.Count == 0)
+            if (_projectSceneNames.Count == 0)
             {
                 projectIndex = -1;
                 return null;
             }
 
-            projectIndex = UtilIterate.MakeCycle(projectIndex, 0, projectNames.Count);
+            projectIndex = UtilIterate.MakeCycle(projectIndex, 0, _projectSceneNames.Count);
 
             if (projectIndex == ActiveProjectIndex)
             {
@@ -1118,13 +1131,13 @@ namespace ArchiVR.Application
         /// </summary>
         public TeleportInitiatedCommand GetTeleportInitCommandForProject(int projectIndex)
         {
-            if (projectNames.Count == 0)
+            if (_projectSceneNames.Count == 0)
             {
                 projectIndex = -1;
                 return null;
             }
             
-            projectIndex = UtilIterate.MakeCycle(projectIndex, 0, projectNames.Count);
+            projectIndex = UtilIterate.MakeCycle(projectIndex, 0, _projectSceneNames.Count);
             
             if (projectIndex == ActiveProjectIndex)
             {
@@ -1457,6 +1470,33 @@ namespace ArchiVR.Application
             }
         }
 
+        private bool _projectVisible = true;
+
+        /// <summary>
+        /// Whether the project is visible, or not.
+        /// </summary>
+        public bool ProjectVisible
+        {
+            get
+            {
+                return _projectVisible;
+            }
+
+            set
+            {
+                _projectVisible = value;
+
+                if (ActiveProject != null)
+                {
+                    ActiveProject.SetActive(_projectVisible);
+                }
+
+                LightingGameObject.SetActive(_projectVisible);
+                PoiGameObject.SetActive(_projectVisible);
+                PropGameObject.SetActive(_projectVisible);
+            }
+        }
+
         /// <summary>
         /// Temporary caches the OVRManager headpose rotation while EnableInput is false.
         /// </summary>
@@ -1626,6 +1666,8 @@ namespace ArchiVR.Application
                 poiGO.transform.position = poiDefinition.Position;
                 poiGO.transform.rotation = poiDefinition.Rotation;
 
+                poiGO.transform.SetParent(PoiGameObject.transform, false);
+
                 poiDefinition.GameObject = poiGO;
 
                 PoiObjects.Add(poiGO);
@@ -1662,6 +1704,8 @@ namespace ArchiVR.Application
                 lightGO.transform.position = lightDefinition.Position;
                 lightGO.transform.rotation = lightDefinition.Rotation;
 
+                lightGO.transform.SetParent(LightingGameObject.transform, false);
+
                 lightDefinition.GameObject = lightGO;
 
                 LightingObjects.Add(lightGO);
@@ -1697,6 +1741,8 @@ namespace ArchiVR.Application
                 propGO.name = propDefinition.Name;
                 propGO.transform.position = propDefinition.Position;
                 propGO.transform.rotation = propDefinition.Rotation;
+
+                propGO.transform.SetParent(PropGameObject.transform, false);
 
                 propDefinition.GameObject = propGO;
 
@@ -1759,9 +1805,35 @@ namespace ArchiVR.Application
 
         #endregion
 
+        /// <summary>
+        /// The surroundings in which the maquette is previewed.
+        /// </summary>
+        public GameObject MaquettePreviewContext { get; private set; }
+
+        /// <summary>
+        /// The game object to which all Lighting game objects are parented.
+        /// </summary>
+        public GameObject LightingGameObject;
+
+        /// <summary>
+        /// The list of Lighting game objects.
+        /// </summary>
         public List<GameObject> LightingObjects = new List<GameObject>();
 
+        /// <summary>
+        /// The game object to which all Prop game objects are parented.
+        /// </summary>
+        public GameObject PropGameObject;
+
+        /// <summary>
+        /// The list of Prop game objects.
+        /// </summary>
         public List<GameObject> PropObjects = new List<GameObject>();
+
+        /// <summary>
+        /// The game object to which all POI game objects are parented.
+        /// </summary>
+        public GameObject PoiGameObject;
 
         public readonly Color SelectionColor = new Color(1, 0, 0);
 

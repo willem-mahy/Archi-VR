@@ -31,7 +31,7 @@ namespace ArchiVR
         /// </summary>
         public override void Enter()
         {
-            m_application.Logger.Debug("ImmersionModeWalkthrough.Enter()");
+            m_application.Logger.Debug("ApplicationStateWalkthrough.Enter()");
 
             if (m_application._teleportAreaGO == null)
             {
@@ -54,8 +54,6 @@ namespace ArchiVR
                 m_application._teleportAreaGO.SetActive(false);
             }
 
-            InitButtonMappingUI();
-
             // Restore default moving up/down.
             m_application.m_flySpeedUpDown = 1.0f;
 
@@ -75,7 +73,7 @@ namespace ArchiVR
         /// </summary>
         public override void Exit()
         {
-            m_application.Logger.Debug("ImmersionModeWalkthrough.Exit()");
+            m_application.Logger.Debug("ApplicationStateWalkthrough.Exit()");
 
             // Restore default moving up/down.
             m_application.m_flySpeedUpDown = UnityApplication.DefaultFlySpeedUpDown;
@@ -89,9 +87,7 @@ namespace ArchiVR
         /// </summary>
         public override void Resume()
         {
-            m_application.Logger.Debug("ImmersionModeWalkthrough.Resume()");
-
-            InitButtonMappingUI();
+            m_application.Logger.Debug("ApplicationStateWalkthrough.Resume()");
 
             // Restore default moving up/down.
             m_application.m_flySpeedUpDown = 1.0f;
@@ -107,7 +103,9 @@ namespace ArchiVR
         /// </summary>
         public override void Update()
         {
-            //m_application.Logger.Debug("ImmersionModeWalkthrough.Update()");
+            //m_application.Logger.Debug("ApplicationStateWalkthrough.Update()");
+
+            UpdateControllerUI();
 
             if (_teleportCommand != null && m_application._teleportAreaVolume.AllPlayersPresent)
             {
@@ -168,7 +166,7 @@ namespace ArchiVR
             if (controllerState.lThumbstickDown)
             {
                 m_application.EnableTrackingSpaceTranslationUpDown = !m_application.EnableTrackingSpaceTranslationUpDown;
-                InitButtonMappingUI();
+                UpdateControllerUI();
             }
 
             // By default, do not show the boundary.  We will set it visible in Fly() and UpdateTrackingSpace() below, if needed.
@@ -257,7 +255,7 @@ namespace ArchiVR
         /// </summary>
         public override void UpdateModelLocationAndScale()
         {
-            m_application.Logger.Debug("ImmersionModeWalkthrough.UpdateModelLocationAndScale()");
+            m_application.Logger.Debug("ApplicationStateWalkthrough.UpdateModelLocationAndScale()");
 
             var activeProject = m_application.ActiveProject;
 
@@ -269,6 +267,18 @@ namespace ArchiVR
             activeProject.transform.position = m_application.OffsetPerID;
             activeProject.transform.rotation = Quaternion.identity;
             activeProject.transform.localScale = Vector3.one;
+
+            m_application.PropGameObject.transform.position = m_application.OffsetPerID;
+            m_application.PropGameObject.transform.rotation = Quaternion.identity;
+            m_application.PropGameObject.transform.localScale = Vector3.one;
+
+            m_application.PoiGameObject.transform.position = m_application.OffsetPerID;
+            m_application.PoiGameObject.transform.rotation = Quaternion.identity;
+            m_application.PoiGameObject.transform.localScale = Vector3.one;
+
+            m_application.LightingGameObject.transform.position = m_application.OffsetPerID;
+            m_application.LightingGameObject.transform.rotation = Quaternion.identity;
+            m_application.LightingGameObject.transform.localScale = Vector3.one;
         }
 
         /// <summary>
@@ -276,7 +286,7 @@ namespace ArchiVR
         /// </summary>
         public override void UpdateTrackingSpacePosition()
         {
-            m_application.Logger.Debug("ImmersionModeWalkthrough.UpdateTrackingSpacePosition()");
+            m_application.Logger.Debug("ApplicationStateWalkthrough.UpdateTrackingSpacePosition()");
 
             var activePOI = m_application.ActivePOI;
 
@@ -356,11 +366,14 @@ namespace ArchiVR
         /// <summary>
         /// <see cref="ImmersionMode.InitButtonMappingUI()"/> implementation.
         /// </summary>
-        public /*override*/ void InitButtonMappingUI()
+        public /*override*/ void UpdateControllerUI()
         {
-            m_application.Logger.Debug("ImmersionModeWalkthrough.InitButtonMappingUI()");
+            m_application.Logger.Debug("ApplicationStateWalkthrough.InitButtonMappingUI()");
 
             var isEditor = UnityEngine.Application.isEditor;
+
+            // Update left controller UI displaying the project name.
+            m_application.m_leftControllerText.text = (m_application.ActiveProjectName != null) ? m_application.GetProjectName(m_application.ActiveProjectName) : "No project loaded.";
 
             // Left controller
             {

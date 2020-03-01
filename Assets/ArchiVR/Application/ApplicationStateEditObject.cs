@@ -104,7 +104,7 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Update()
         {
-            UpdateControllerButtonUI();
+            UpdateControllerUI();
 
             var controllerState = m_application.m_controllerInput.m_controllerState;
                         
@@ -114,7 +114,7 @@ namespace ArchiVR.Application
                 Delete();
             }
 
-            // Pressing 'L' on the keyboard is a shortcut for starting creating a light.
+            // Pressing 'C' on the keyboard is a shortcut for starting creation of an object.
             if (controllerState.aButtonDown || Input.GetKeyDown(KeyCode.C))
             {
                 var applicationState = new ApplicationStateDefineObject<D>(
@@ -128,7 +128,7 @@ namespace ArchiVR.Application
                 return;
             }
 
-            // Whils hand trigger is pressed, selection is additive.
+            // While hand trigger is pressed, selection is additive.
             _addToSelection = controllerState.rHandTriggerPressed;
 
             // Pressing 'BackSpace' on the keyboard is a shortcut for returning to the default state.
@@ -193,7 +193,7 @@ namespace ArchiVR.Application
         /// <summary>
         /// 
         /// </summary>
-        public void UpdateControllerButtonUI()
+        public void UpdateControllerUI()
         {
             //m_application.Logger.Debug("ApplicationStateEditObject.UpdateControllerButtonUI()");
 
