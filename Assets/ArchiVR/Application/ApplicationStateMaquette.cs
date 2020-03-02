@@ -346,19 +346,13 @@ namespace ArchiVR
             // Rotate it.
             activeProject.transform.RotateAround(m_application.OffsetPerID, Vector3.up, m_maquetteRotation);
 
-            m_application.PropGameObject.transform.position = activeProject.transform.position;
-            m_application.PropGameObject.transform.rotation = activeProject.transform.rotation;
-            m_application.PropGameObject.transform.localScale = activeProject.transform.localScale;
-
-            m_application.PoiGameObject.transform.position = activeProject.transform.position;
-            m_application.PoiGameObject.transform.rotation = activeProject.transform.rotation;
-            m_application.PoiGameObject.transform.localScale = activeProject.transform.localScale;
-
-            m_application.LightingGameObject.transform.position = activeProject.transform.position;
-            m_application.LightingGameObject.transform.rotation = activeProject.transform.rotation;
-            m_application.LightingGameObject.transform.localScale = activeProject.transform.localScale;
-
-
+            foreach (var editData in m_application.EditDatas)
+            {
+                var t = editData.ContainerGameObject.transform;
+                t.position = activeProject.transform.position;
+                t.rotation = activeProject.transform.rotation;
+                t.localScale = activeProject.transform.localScale;
+            }
         }
 
         /// <summary>

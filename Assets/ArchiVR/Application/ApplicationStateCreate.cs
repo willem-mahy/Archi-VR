@@ -10,21 +10,13 @@ namespace ArchiVR.Application
     /// <summary>
     /// Application state in which the user creates an object.
     /// </summary>
-    public class ApplicationStateDefineObject<D>
-        : ApplicationState<ApplicationArchiVR>
-         where D : new()
+    public class ApplicationStateCreate : ApplicationState<ApplicationArchiVR>
     {
-        public ApplicationStateDefineObject(
+        public ApplicationStateCreate(
             ApplicationArchiVR application,
-            string objectTypeName,
-            ref List<GameObject> objects,
-            ref List<D> objectDefinitions,
-            ApplicationArchiVR.ObjectEditSettings editSettings) : base(application)
+            int objectTypeIndex) : base(application)
         {
-            _objectTypeName = objectTypeName;
-            _objects = objects;
-            _objectDefinitions = objectDefinitions;
-            _editSettings = editSettings;
+            _objectTypeIndex = objectTypeIndex;
         }
 
         /// <summary>
@@ -52,7 +44,7 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Exit()
         {
-            m_application.LocomotionEnabled = true;
+            //m_application.LocomotionEnabled = true;
 
             // Enable only R pickray.
             m_application.RPickRay.gameObject.SetActive(false);
@@ -68,12 +60,12 @@ namespace ArchiVR.Application
 
         public override void Resume()
         {
-            m_application.LocomotionEnabled = false;
+            m_application.LocomotionEnabled = true;// false;
 
             // Enable only R pickray.
             m_application.RPickRay.gameObject.SetActive(true);
 
-            m_application.HudInfoText.text = "Create " + _objectTypeName;
+            m_application.HudInfoText.text = "Create " + EditData.Settings.ObjectTypeName;
             m_application.HudInfoPanel.SetActive(true);
 
             OnActiveObjectTypeChanged();
@@ -87,7 +79,7 @@ namespace ArchiVR.Application
             UpdateControllerUI();
 
             m_application.Fly();
-            m_application.UpdateTrackingSpace();
+            //m_application.UpdateTrackingSpace();
              
             var controllerState = m_application.m_controllerInput.m_controllerState;
 
@@ -281,23 +273,25 @@ namespace ArchiVR.Application
             }
 
             _previewGO = GameObject.Instantiate(
-                ActiveObjectTypePrefab,
+                ActiveObjectPrefab,
                 Vector3.zero,
                 Quaternion.identity);
 
-            m_application.m_leftControllerText.text = ActiveObjectTypePrefabDefinition.Name;
+            m_application.m_leftControllerText.text = ActiveObjectPrefabDefinition.Name;
             m_application.m_leftControllerText.gameObject.SetActive(true);
         }
 
         private void CreateObject()
         {
+            #region 1) Create the new object's GameObject
+
             var objectGO = GameObject.Instantiate(
-                ActiveObjectTypePrefab,
+                ActiveObjectPrefab,
                 Vector3.zero,
                 Quaternion.identity);
 
             // Give the new object a unique name.
-            objectGO.name = ActiveObjectTypePrefab.name + " (" + Guid.NewGuid().ToString() + ")";
+            objectGO.name = ActiveObjectPrefab.name + " (" + Guid.NewGuid().ToString() + ")";
 
             var pi = objectGO.GetComponent<PickInitializable>();
 
@@ -311,20 +305,37 @@ namespace ArchiVR.Application
                 objectGO.transform.LookAt(_hitInfo.Value.point + _hitInfo.Value.normal, Vector3.up);
             }
 
-            _objects.Add(objectGO);
+            _gameObjects.Add(objectGO);
 
-            var d = new D();
+            #endregion 1) Create the new object's GameObject
 
-            if (d is ObjectDefinition objectDefinition)
+            #region 2) Create the new object's ObjectDefinition
+
+            ObjectDefinition objectDefinition; // TODO: = ActiveObjectPrefab.GetDefinition();
+
+            switch (_objectTypeIndex) // Design defect!
             {
-                objectDefinition.Name = objectGO.name;
-                objectDefinition.Position = objectGO.transform.position;
-                objectDefinition.Rotation = objectGO.transform.rotation;
-                objectDefinition.PrefabPath = ActiveObjectTypePrefabDefinition.PrefabPath;
-                objectDefinition.GameObject = objectGO;
+                case 0:
+                    objectDefinition = new LightDefinition();
+                    break;
+                case 1:
+                    objectDefinition = new PropDefinition();
+                    break;
+                case 2:
+                    objectDefinition = new POIDefinition();
+                    break;
+                default:
+                    objectDefinition = new ObjectDefinition();
+                    break;
             }
 
-            if (d is LightDefinition lightDefinition)
+            objectDefinition.Name = objectGO.name;
+            objectDefinition.Position = objectGO.transform.position;
+            objectDefinition.Rotation = objectGO.transform.rotation;
+            objectDefinition.PrefabPath = ActiveObjectPrefabDefinition.PrefabPath;
+            objectDefinition.GameObject = objectGO;
+
+            if (objectDefinition is LightDefinition lightDefinition)
             {
                 //lightDefinition.LayerName = ;
                 //lightDefinition.LightColor = ;
@@ -332,32 +343,36 @@ namespace ArchiVR.Application
                 //lightDefinition.BodyColor2 = ;
             }
 
-            if (d is PropDefinition propDefinition)
+            if (objectDefinition is PropDefinition propDefinition)
             {   
                 //propDefinition.LayerName = ;
             }
 
-            if (d is POIDefinition poiDefinition)
+            if (objectDefinition is POIDefinition poiDefinition)
             {
                 //poiDefinition.LayerName = ;
             }
 
-            _objectDefinitions.Add(d);
+            _objectDefinitions.Add(objectDefinition);
+
+            #endregion 2) Create the new object's ObjectDefinition
 
             _pickedInfos.Clear();
         }
 
         #region Fields
 
-        string _objectTypeName;
+        private int _objectTypeIndex;
 
-        List<GameObject> _objects;
+        private ApplicationArchiVR.EditData EditData => m_application.EditDatas[_objectTypeIndex];
 
-        List<D> _objectDefinitions;
+        private List<GameObject> _gameObjects => EditData.GameObjects;
 
-        private ApplicationArchiVR.ObjectEditSettings _editSettings;
+        private List<ObjectDefinition> _objectDefinitions => EditData.ObjectDefinitions;
 
-        public ObjectPrefabDefinition ActiveObjectTypePrefabDefinition => _editSettings.ObjectPrefabDefinitions[_editSettings.ActiveObjectPrefabIndex];
+        private ApplicationArchiVR.ObjectEditSettings _editSettings => EditData.Settings;
+
+        public ObjectPrefabDefinition ActiveObjectPrefabDefinition => _editSettings.ObjectPrefabDefinitions[_editSettings.ActiveObjectPrefabIndex];
 
         /// <summary>
         /// The position where the pick ray is currently picking.
@@ -369,7 +384,7 @@ namespace ArchiVR.Application
         /// </summary>
         private RaycastHit? _hitInfo;
 
-        private GameObject ActiveObjectTypePrefab => _objectPrefabs[_editSettings.ActiveObjectPrefabIndex];
+        private GameObject ActiveObjectPrefab => _objectPrefabs[_editSettings.ActiveObjectPrefabIndex];
 
         private GameObject _previewGO;
 

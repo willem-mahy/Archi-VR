@@ -184,51 +184,17 @@ namespace ArchiVR
                 m_application.PushApplicationState(new ApplicationStateDefineSharedReferenceSystem(m_application));
             }
 
-            // Pressing 'F' on the keyboard is a shortcut for starting editing furniture.
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                //m_application.PushApplicationState(new ApplicationStateEditFurniture(m_application));
-            }
+            // Edit mode is activated by:
+            // - Pressing 'E' on the keyboard
+            // - Clicking with the L or R thumbstick
+            var activateEditMode = Input.GetKeyDown(KeyCode.P) || controllerState.lThumbstickDown || controllerState.rThumbstickDown;
 
-            // Pressing 'L' on the keyboard is a shortcut for starting editing lights.
-            if (Input.GetKeyDown(KeyCode.L))
+            if (Input.GetKeyDown(KeyCode.E) || controllerState.lIndexTriggerDown)
             {
-                var applicationState = new ApplicationStateEditObject<LightDefinition>(
-                    m_application,
-                    "Light",
-                    ref m_application.LightingObjects,
-                    ref m_application.ProjectData.LightingData.lightDefinitions,
-                    m_application.LightingEditSettings);
+                var applicationState = new ApplicationStateEdit(m_application);
 
                 m_application.PushApplicationState(applicationState);
             }
-
-            // Pressing 'F' on the keyboard is a shortcut for starting editing props.
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                var applicationState = new ApplicationStateEditObject<PropDefinition>(
-                    m_application,
-                    "Prop",
-                    ref m_application.PropObjects,
-                    ref m_application.ProjectData.PropData.propDefinitions,
-                    m_application.PropsEditSettings);
-
-                m_application.PushApplicationState(applicationState);
-            }
-
-            // Pressing 'P' on the keyboard is a shortcut for starting editing POI's.
-            if (Input.GetKeyDown(KeyCode.P))
-            {
-                var applicationState = new ApplicationStateEditObject<POIDefinition>(
-                    m_application,
-                    "POI",
-                    ref m_application.PoiObjects,
-                    ref m_application.ProjectData.POIData.poiDefinitions,
-                    m_application.POIEditSettings);
-
-                m_application.PushApplicationState(applicationState);
-            }
-
 
             // Pressing 'BackSpace' on the keyboard is a shortcut for returning to the default state.
             var returnToDefaultState = controllerState.lIndexTriggerDown || Input.GetKeyDown(KeyCode.Backspace);
@@ -268,17 +234,13 @@ namespace ArchiVR
             activeProject.transform.rotation = Quaternion.identity;
             activeProject.transform.localScale = Vector3.one;
 
-            m_application.PropGameObject.transform.position = m_application.OffsetPerID;
-            m_application.PropGameObject.transform.rotation = Quaternion.identity;
-            m_application.PropGameObject.transform.localScale = Vector3.one;
-
-            m_application.PoiGameObject.transform.position = m_application.OffsetPerID;
-            m_application.PoiGameObject.transform.rotation = Quaternion.identity;
-            m_application.PoiGameObject.transform.localScale = Vector3.one;
-
-            m_application.LightingGameObject.transform.position = m_application.OffsetPerID;
-            m_application.LightingGameObject.transform.rotation = Quaternion.identity;
-            m_application.LightingGameObject.transform.localScale = Vector3.one;
+            foreach (var editData in m_application.EditDatas)
+            {
+                var t = editData.ContainerGameObject.transform;
+                t.position      = activeProject.transform.position;
+                t.rotation      = activeProject.transform.rotation;
+                t.localScale    = activeProject.transform.localScale;
+            }
         }
 
         /// <summary>
