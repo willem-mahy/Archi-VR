@@ -79,29 +79,36 @@ namespace ArchiVR.Application
             UpdateControllerUI();
 
             m_application.Fly();
-            //m_application.UpdateTrackingSpace();
+            //m_application.UpdateTrackingSpace();  // Tempoarily disabled manipulation of the tracking space, since it collides with the input mapping for toggling active prefab type below.
              
             var controllerState = m_application.m_controllerInput.m_controllerState;
 
-            // Pressing 'BackSpace' on the keyboard is a shortcut for returning to the default state.
-            var returnToEditState = controllerState.lIndexTriggerDown || Input.GetKeyDown(KeyCode.Backspace);
+            // Exiting edit mode is done by:
+            // - Pressing left controller index trigger.
+            var returnToParentState =controllerState.lIndexTriggerDown;
 
-            if (returnToEditState)
+            if (returnToParentState)
             {
                 m_application.PopApplicationState();
+                return;
             }
 
-            // If user presses R Hand trigger, remove a picked point.
+            // Removing a picked point is performed by:
+            // - Pressing the R controller hand trigger.
             if (m_application.m_controllerInput.m_controllerState.rHandTriggerDown)
             {
                 if (_pickedInfos.Count > 0) _pickedInfos.RemoveAt(_pickedInfos.Count - 1);
             }
 
+            // Activating the previous prefab type is performed by:
+            // - Flipping the L controller thumb stick Left.
             if (controllerState.lThumbstickDirectionLeftDown)
             {
                 ActivatePreviousObjectType();
             }
 
+            // Activating the next prefab type is performed by:
+            // - Flipping the L controller thumb stick Right.
             if (controllerState.lThumbstickDirectionRightDown)
             {
                 ActivateNextObjectType();
@@ -139,7 +146,8 @@ namespace ArchiVR.Application
 
             #endregion Update picked position
 
-            // If user presses R Index trigger, pick a point.
+            // Picking a point is performed by:
+            //  - Pressing the R controller index trigger.
             if (m_application.m_controllerInput.m_controllerState.rIndexTriggerDown)
             {
                 if (_hitInfo.HasValue)
@@ -186,6 +194,8 @@ namespace ArchiVR.Application
                 }
             }
 
+            // Creating an object is performed by:
+            //  - Pressing the controller 'X' button.
             if (m_application.m_controllerInput.m_controllerState.xButtonDown)
             {
                 CreateObject();
@@ -206,18 +216,18 @@ namespace ArchiVR.Application
 
             if (leftControllerButtonMapping != null)
             {
-                leftControllerButtonMapping.IndexTrigger.Text = "";
+                leftControllerButtonMapping.IndexTrigger.Text = "Back" + (isEditor ? " (R)" : "");
                 leftControllerButtonMapping.HandTrigger.Text = "";
 
                 leftControllerButtonMapping.ButtonStart.Text = "";
 
-                leftControllerButtonMapping.ButtonX.Text = "Place";
+                leftControllerButtonMapping.ButtonX.Text = "Place" + (isEditor ? " (F1)" : "");
                 leftControllerButtonMapping.ButtonY.Text = "";
 
                 leftControllerButtonMapping.ThumbUp.Text = "";
                 leftControllerButtonMapping.ThumbDown.Text = "";
-                leftControllerButtonMapping.ThumbLeft.Text = "Prev Type";
-                leftControllerButtonMapping.ThumbRight.Text = "Next Type";
+                leftControllerButtonMapping.ThumbLeft.Text = "Prev Type" + (isEditor ? " (Q)" : "");
+                leftControllerButtonMapping.ThumbRight.Text = "Next Type" + (isEditor ? " (D)" : "");
             }
 
             // Right controller
@@ -225,8 +235,8 @@ namespace ArchiVR.Application
 
             if (rightControllerButtonMapping != null)
             {
-                rightControllerButtonMapping.IndexTrigger.Text = "Pick";
-                rightControllerButtonMapping.HandTrigger.Text = (_pickedInfos.Count == 0) ? "" : "Remove Pick";
+                rightControllerButtonMapping.IndexTrigger.Text = "Pick" + (isEditor ? " (LMB)" : "");
+                rightControllerButtonMapping.HandTrigger.Text = (_pickedInfos.Count == 0) ? "" : "Remove Pick" + (isEditor ? " (RMB)" : "");
 
                 rightControllerButtonMapping.ButtonOculusStart.Text = "";
 

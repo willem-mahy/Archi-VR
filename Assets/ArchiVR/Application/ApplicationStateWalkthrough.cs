@@ -155,10 +155,12 @@ namespace ArchiVR
                 }
             }
             
+            /*
             if (m_application.ToggleImmersionModeIfInputAndNetworkModeAllows())
             {
                 return;
             }
+            */
 
             var controllerState = m_application.m_controllerInput.m_controllerState;
 
@@ -178,26 +180,31 @@ namespace ArchiVR
 
             m_application.UpdateTrackingSpace();
 
-            // Pressing 'C' on the keyboard is a shortcut for starting the SRF measurement procedure.
+            // Starting the SRF measurement procedure is done by (editor-mode shortcut only)
+            // - Pressing 'C' on the keyboard.
             if (Input.GetKeyDown(KeyCode.C))
             {
                 m_application.PushApplicationState(new ApplicationStateDefineSharedReferenceSystem(m_application));
             }
 
             // Edit mode is activated by:
-            // - Pressing 'E' on the keyboard
-            // - Clicking with the L or R thumbstick
-            var activateEditMode = Input.GetKeyDown(KeyCode.P) || controllerState.lThumbstickDown || controllerState.rThumbstickDown;
+            // - Pressing 'E' on the keyboard.
+            // - Clicking with the L or R thumbstick.
+            var activateEditMode =
+                Input.GetKeyDown(KeyCode.E)
+                || controllerState.lHandTriggerDown || controllerState.rHandTriggerDown // TODO: remove when thumb stick presses are working...
+                || controllerState.lThumbstickDown || controllerState.rThumbstickDown;
 
-            if (Input.GetKeyDown(KeyCode.E) || controllerState.lIndexTriggerDown)
+            if (activateEditMode)
             {
                 var applicationState = new ApplicationStateEdit(m_application);
 
                 m_application.PushApplicationState(applicationState);
             }
 
-            // Pressing 'BackSpace' on the keyboard is a shortcut for returning to the default state.
-            var returnToDefaultState = controllerState.lIndexTriggerDown || Input.GetKeyDown(KeyCode.Backspace);
+            // Returning the the default state, is done by:
+            // - Pressing the left controller index trigger.
+            var returnToDefaultState = controllerState.lIndexTriggerDown;
 
             if (returnToDefaultState)
             {
@@ -330,7 +337,7 @@ namespace ArchiVR
         /// </summary>
         public /*override*/ void UpdateControllerUI()
         {
-            m_application.Logger.Debug("ApplicationStateWalkthrough.InitButtonMappingUI()");
+            //m_application.Logger.Debug("ApplicationStateWalkthrough.UpdateControllerUI()");
 
             var isEditor = UnityEngine.Application.isEditor;
 
@@ -345,7 +352,7 @@ namespace ArchiVR
                 {
                     buttonMapping.HandTrigger.Text = "";
 
-                    buttonMapping.IndexTrigger.Text = "Verander schaal" + (isEditor ? " (R)" : "");
+                    buttonMapping.IndexTrigger.Text = "Back" + (isEditor ? " (R)" : "");
 
                     buttonMapping.ButtonStart.Text = "Toggle menu" + (isEditor ? " (F11)" : "");
 

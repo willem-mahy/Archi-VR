@@ -143,14 +143,11 @@ namespace ArchiVR.Application
                 ActiveObjectTypeIndex = 2;
             }
 
-            // Delete selected lights.
-            if (controllerState.bButtonDown)
-            {
-                Delete();
-            }
-
-            // Pressing 'C' on the keyboard is a shortcut for starting creation of an object.
-            if (controllerState.aButtonDown || Input.GetKeyDown(KeyCode.C))
+            // Starting creation of an object is done by:
+            //  - Pressing the controller 'A' button.
+            var startCreateMode = controllerState.aButtonDown;
+            
+            if (startCreateMode)
             {
                 var applicationState = new ApplicationStateCreate(
                     m_application,
@@ -160,13 +157,24 @@ namespace ArchiVR.Application
                 return;
             }
 
-            // While hand trigger is pressed, selection is additive.
+            // Delete selected lights is performed by:
+            //  - Pressing the controller 'B' button.
+            var delete = controllerState.bButtonDown;
+
+            if (delete)
+            {
+                Delete();
+            }
+
+            // Additive selection is enabled while:
+            // - keeping R controller hand trigger pressed.
             _addToSelection = controllerState.rHandTriggerPressed;
 
-            // Pressing 'BackSpace' on the keyboard is a shortcut for returning to the default state.
-            var returnToDefaultState = controllerState.lIndexTriggerDown || Input.GetKeyDown(KeyCode.Backspace);
+            // Exiting edit mode is done by:
+            // - Pressing left controller index trigger.
+            var returnToParentState = controllerState.lIndexTriggerDown;
 
-            if (returnToDefaultState)
+            if (returnToParentState)
             {
                 m_application.PopApplicationState();
                 return;
@@ -239,7 +247,7 @@ namespace ArchiVR.Application
 
             if (leftControllerButtonMapping != null)
             {
-                leftControllerButtonMapping.IndexTrigger.Text = "";
+                leftControllerButtonMapping.IndexTrigger.Text = "Back" + (isEditor ? " (R)" : "");
                 leftControllerButtonMapping.HandTrigger.Text = "";
 
                 leftControllerButtonMapping.ButtonStart.Text = "";
@@ -258,18 +266,18 @@ namespace ArchiVR.Application
 
             if (rightControllerButtonMapping != null)
             {
-                rightControllerButtonMapping.IndexTrigger.Text = "Select";
+                rightControllerButtonMapping.IndexTrigger.Text = "Select" + (isEditor ? " (LMB)" : "");
                 rightControllerButtonMapping.HandTrigger.Text = _selectedObjects.Count == 0 ? "" : "Additive selection";
 
                 rightControllerButtonMapping.ButtonOculusStart.Text = "";
 
-                rightControllerButtonMapping.ButtonA.Text = "Create";
-                rightControllerButtonMapping.ButtonB.Text = _selectedObjects.Count == 0 ? "" : "Delete";
+                rightControllerButtonMapping.ButtonA.Text = "Create" + (isEditor ? " (F3)" : "");
+                rightControllerButtonMapping.ButtonB.Text = _selectedObjects.Count == 0 ? "" : "Delete" + (isEditor ? " (F4)" : "");
 
-                rightControllerButtonMapping.ThumbUp.Text = "";
-                rightControllerButtonMapping.ThumbDown.Text = "";
-                rightControllerButtonMapping.ThumbLeft.Text = "";
-                rightControllerButtonMapping.ThumbRight.Text = "";
+                rightControllerButtonMapping.ThumbUp.Text = "Beweeg vooruit" + (isEditor ? " (ArrowUp)" : "");
+                rightControllerButtonMapping.ThumbDown.Text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
+                rightControllerButtonMapping.ThumbLeft.Text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
+                rightControllerButtonMapping.ThumbRight.Text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
             }
         }
 

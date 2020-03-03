@@ -239,10 +239,14 @@ namespace WM
                 startButtonDown = (!prevState.startButtonDown && !prevState.startButtonPressed) && startButtonPressed;
 
                 buttonThumbstickPDown = (!prevState.buttonThumbstickPDown && !prevState.lThumbstickPressed) && buttonThumbstickPPressed;
-                buttonThumbstickSDown = (!prevState.buttonThumbstickSDown && !prevState.rThumbstickPressed) && buttonThumbstickPPressed;
+                buttonThumbstickSDown = (!prevState.buttonThumbstickSDown && !prevState.rThumbstickPressed) && buttonThumbstickSPressed;
 
                 UpdateThumbStickDirectionDownStates(prevState);
             }
+
+            lThumbstickDown = buttonThumbstickPDown;
+            rThumbstickDown = buttonThumbstickSDown;
+
 
             // Get thumbstick positions. (X/Y range of -1.0f to 1.0f)
             lThumbStick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);

@@ -234,10 +234,10 @@ namespace ArchiVR.Application
                 rightControllerButtonMapping.ButtonA.Text = "Create";
                 rightControllerButtonMapping.ButtonB.Text = _selectedObjects.Count == 0 ? "" : "Delete";
 
-                rightControllerButtonMapping.ThumbUp.Text = "";
-                rightControllerButtonMapping.ThumbDown.Text = "";
-                rightControllerButtonMapping.ThumbLeft.Text = "";
-                rightControllerButtonMapping.ThumbRight.Text = "";
+                rightControllerButtonMapping.ThumbUp.Text = "Beweeg vooruit" + (isEditor ? " (ArrowUp)" : "");
+                rightControllerButtonMapping.ThumbDown.Text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
+                rightControllerButtonMapping.ThumbLeft.Text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
+                rightControllerButtonMapping.ThumbRight.Text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
             }
         }
 

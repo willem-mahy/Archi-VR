@@ -83,7 +83,7 @@ namespace WM.UI
             HeaderText.text = text;
 
             text = "";
-            text += "\nThumbstick:";
+            text += "\nThumbstick:" + GetButtonStateText(controllerState.lThumbstickDown, controllerState.lThumbstickPressed);
             text += "\n\tAxes: " + GetThumbStickAxesStateText(controllerState.lThumbStick);
             text += "\n\tLeft: " + GetButtonStateText(controllerState.lThumbstickDirectionLeftDown, controllerState.lThumbstickDirectionLeftPressed);
             text += "\n\tRight: " + GetButtonStateText(controllerState.lThumbstickDirectionRightDown, controllerState.lThumbstickDirectionRightPressed);
@@ -97,7 +97,7 @@ namespace WM.UI
             LControllerText.text = text;
 
             text = "";
-            text += "\nThumbstick:";
+            text += "\nThumbstick:" + GetButtonStateText(controllerState.rThumbstickDown, controllerState.rThumbstickPressed);
             text += "\n\tAxes: " + GetThumbStickAxesStateText(controllerState.rThumbStick);
             text += "\n\tLeft: " + GetButtonStateText(controllerState.rThumbstickDirectionLeftDown, controllerState.rThumbstickDirectionLeftPressed);
             text += "\n\tRight: " + GetButtonStateText(controllerState.rThumbstickDirectionRightDown, controllerState.rThumbstickDirectionRightPressed);
