@@ -67,6 +67,8 @@ namespace ArchiVR.Application
             {
                 m_application.PoiContainerGameObject.SetActive(false);
             }
+
+            m_application.SaveProjectData();
         }
 
         /// <summary>
@@ -91,7 +93,6 @@ namespace ArchiVR.Application
             // Enable only R pickray.
             m_application.RPickRay.gameObject.SetActive(true);
 
-            m_application.HudInfoText.text = "Edit " + EditData.Settings.ObjectTypeName;
             m_application.HudInfoPanel.SetActive(true);
 
             OnHover(null);
@@ -239,6 +240,8 @@ namespace ArchiVR.Application
 
             var isEditor = UnityEngine.Application.isEditor;
 
+            m_application.HudInfoText.text = "Edit " + EditData.Settings.ObjectTypeName;
+
             m_application.m_leftControllerText.text = GetSelectionText();
             m_application.m_rightControllerText.text = (null == _hoveredObject) ? "" : _hoveredObject.name;
 
@@ -364,7 +367,7 @@ namespace ArchiVR.Application
         /// <summary>
         /// Deletes the selected objects.
         /// </summary>
-        private void Delete()
+        public void Delete()
         {
             var selectedObjects = new List<GameObject>(_selectedObjects);
 

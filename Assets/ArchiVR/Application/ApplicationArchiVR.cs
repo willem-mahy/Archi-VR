@@ -249,6 +249,9 @@ namespace ArchiVR.Application
                 new ObjectPrefabDefinition() { Name = "Radiator_Electric_Acova_Regate_El_Air_(50x135cm)",   PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Bathroom/Radiator_Electric_Acova_Regate_El_Air_(50x135cm)" },
                 new ObjectPrefabDefinition() { Name = "Douche 1",                                           PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Bathroom/Douche/Douche 1" },
 
+                new ObjectPrefabDefinition() { Name = "Bed 1P", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Bedroom/Bed_2P_01" },
+                new ObjectPrefabDefinition() { Name = "Bed 2P", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Bedroom/Bed_1P" },
+
                 new ObjectPrefabDefinition() { Name = "Sofa 1P",    PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 1P" },
                 new ObjectPrefabDefinition() { Name = "Sofa 2P",    PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 2P" },
                 new ObjectPrefabDefinition() { Name = "TV Philips", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/TV Philips" },

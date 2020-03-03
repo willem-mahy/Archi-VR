@@ -10,6 +10,9 @@ namespace ArchiVR.UI
     /// </summary>
     public class EditMenuPanel : MenuPanel<ApplicationArchiVR>
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public void Update()
         {
             if (null != ApplicationState)
@@ -27,6 +30,7 @@ namespace ArchiVR.UI
                 ButtonPOI.colors = colors;
             }
         }
+        
         #region UI Event Handlers
 
         /// <summary>
@@ -57,6 +61,16 @@ namespace ArchiVR.UI
             Application.Logger.Debug("OnClickPropButton()");
 
             ApplicationState.ActiveObjectTypeIndex = 1;
+        }
+
+        /// <summary>
+        /// 'On Click' event handler for the 'Delete' button.
+        /// </summary>
+        public void OnClickDeleteButton()
+        {
+            Application.Logger.Debug("OnClickDeleteButton()");
+
+            ApplicationState.Delete();
         }
 
         #endregion UI Event Handlers

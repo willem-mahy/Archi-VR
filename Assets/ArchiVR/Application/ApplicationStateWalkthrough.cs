@@ -192,8 +192,7 @@ namespace ArchiVR
             // - Clicking with the L or R thumbstick.
             var activateEditMode =
                 Input.GetKeyDown(KeyCode.E)
-                || controllerState.lHandTriggerDown || controllerState.rHandTriggerDown // TODO: remove when thumb stick presses are working...
-                || controllerState.lThumbstickDown || controllerState.rThumbstickDown;
+                || controllerState.lHandTriggerDown || controllerState.rHandTriggerDown;
 
             if (activateEditMode)
             {
@@ -350,7 +349,7 @@ namespace ArchiVR
 
                 if (buttonMapping != null)
                 {
-                    buttonMapping.HandTrigger.Text = "";
+                    buttonMapping.HandTrigger.Text = "Edit" + (isEditor ? " (F)" : "");
 
                     buttonMapping.IndexTrigger.Text = "Back" + (isEditor ? " (R)" : "");
 
@@ -382,7 +381,7 @@ namespace ArchiVR
                 if (buttonMapping != null)
                 {
                     buttonMapping.IndexTrigger.Text = "";
-                    buttonMapping.HandTrigger.Text = "";
+                    buttonMapping.HandTrigger.Text = "Edit" + (isEditor ? " (RMB)" : "");
 
                     buttonMapping.ButtonOculusStart.Text = "Exit" + (isEditor ? " ()" : "");
 
