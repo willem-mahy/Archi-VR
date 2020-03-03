@@ -6,7 +6,7 @@ using WM.Application;
 namespace WM.UI
 {
     /// <summary>
-    /// 
+    /// Add this to a GameObject, to enforce a specific relative spatial rotation with a given anchor GameObject.
     /// </summary>
     public class HUDMenu : MonoBehaviour
     {
