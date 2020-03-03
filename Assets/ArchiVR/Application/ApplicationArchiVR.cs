@@ -252,6 +252,10 @@ namespace ArchiVR.Application
                 new ObjectPrefabDefinition() { Name = "Bed 1P", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Bedroom/Bed_2P_01" },
                 new ObjectPrefabDefinition() { Name = "Bed 2P", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Bedroom/Bed_1P" },
 
+                new ObjectPrefabDefinition() { Name = "Chair 01", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Dining Area/Chair 01" },
+                new ObjectPrefabDefinition() { Name = "Table 01", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Dining Area/Table 01" },
+                new ObjectPrefabDefinition() { Name = "Vases", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Dining Area/Vases" },
+
                 new ObjectPrefabDefinition() { Name = "Sofa 1P",    PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 1P" },
                 new ObjectPrefabDefinition() { Name = "Sofa 2P",    PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/Sofa 2P" },
                 new ObjectPrefabDefinition() { Name = "TV Philips", PrefabPath = "ArchiVR/Prefab/Architectural/Furniture/Living Area/TV Philips" },

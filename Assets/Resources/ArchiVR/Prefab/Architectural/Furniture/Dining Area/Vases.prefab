@@ -11,12 +11,13 @@ GameObject:
   - component: {fileID: 8634279045033468787}
   - component: {fileID: 8634279045033468785}
   - component: {fileID: 8634279045033468784}
+  - component: {fileID: 4001646516456533944}
   m_Layer: 0
   m_Name: Bloem 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &8634279045033468787
 Transform:
@@ -80,6 +81,19 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!65 &4001646516456533944
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8634279045033468786}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.2949794, y: 0.84531605, z: 0.3017612}
+  m_Center: {x: 0.10485256, y: 0.4226581, z: 0.08916564}
 --- !u!1 &8634279045673935174
 GameObject:
   m_ObjectHideFlags: 0
@@ -91,12 +105,13 @@ GameObject:
   - component: {fileID: 8634279045673935175}
   - component: {fileID: 8634279045673935173}
   - component: {fileID: 8634279045673935172}
+  - component: {fileID: 3640698200318529461}
   m_Layer: 0
   m_Name: Vaas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &8634279045673935175
 Transform:
@@ -158,6 +173,19 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!65 &3640698200318529461
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8634279045673935174}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.21377704, y: 0.21377708, z: 0.40750006}
+  m_Center: {x: 0, y: 0, z: 0.20375003}
 --- !u!1 &8634279045693377116
 GameObject:
   m_ObjectHideFlags: 0
@@ -172,7 +200,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &8634279045693377117
 Transform:
@@ -182,7 +210,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8634279045693377116}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.35859013, y: 0, z: 0.14895278}
+  m_LocalPosition: {x: 0.0044492483, y: 0, z: -0.007958233}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 8634279045033468787}
@@ -201,12 +229,13 @@ GameObject:
   - component: {fileID: 8634279045893098539}
   - component: {fileID: 8634279045893098537}
   - component: {fileID: 8634279045893098536}
+  - component: {fileID: 2983929953914547592}
   m_Layer: 0
   m_Name: Kleine ronde groene glas vaas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &8634279045893098539
 Transform:
@@ -216,7 +245,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8634279045893098538}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.076511316, y: 1.8047785e-16, z: 0.088244624}
+  m_LocalPosition: {x: -0.27762955, y: 1.8047785e-16, z: -0.06866639}
   m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
   m_Children: []
   m_Father: {fileID: 8634279046385908101}
@@ -268,6 +297,19 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!65 &2983929953914547592
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8634279045893098538}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.20886898, y: 0.20886901, z: 0.18851481}
+  m_Center: {x: 0.0024193935, y: 0.0000009536743, z: 0.09425741}
 --- !u!1 &8634279046072426422
 GameObject:
   m_ObjectHideFlags: 0
@@ -279,12 +321,13 @@ GameObject:
   - component: {fileID: 8634279046072426423}
   - component: {fileID: 8634279046072426421}
   - component: {fileID: 8634279046072426420}
+  - component: {fileID: 5915604488984998847}
   m_Layer: 0
   m_Name: Witte druppelvaas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &8634279046072426423
 Transform:
@@ -294,7 +337,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8634279046072426422}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.64271665, y: 1.8047785e-16, z: 0.088920325}
+  m_LocalPosition: {x: 0.28857577, y: 1.8047785e-16, z: -0.06799069}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 8634279046385908101}
@@ -346,6 +389,19 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!65 &5915604488984998847
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8634279046072426422}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.17784065, y: 0.1778407, z: 0.27410007}
+  m_Center: {x: 0, y: 0, z: 0.13705003}
 --- !u!1 &8634279046385908100
 GameObject:
   m_ObjectHideFlags: 0
@@ -355,12 +411,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8634279046385908101}
+  - component: {fileID: 8026750614918941722}
   m_Layer: 0
-  m_Name: Vazen
+  m_Name: Vases
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &8634279046385908101
 Transform:
@@ -370,7 +427,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8634279046385908100}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 9.045911, y: 1.1826229, z: 6.0397973}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 8634279045893098539}
@@ -380,6 +437,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8026750614918941722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8634279046385908100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681920dd4123fef4381e2714652e9088, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PickInitializationTypes: 01000000
 --- !u!1 &8634279046692286028
 GameObject:
   m_ObjectHideFlags: 0
@@ -391,12 +461,13 @@ GameObject:
   - component: {fileID: 8634279046692286029}
   - component: {fileID: 8634279046692286027}
   - component: {fileID: 8634279046692286026}
+  - component: {fileID: 341223749288819021}
   m_Layer: 0
   m_Name: Group 29
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &8634279046692286029
 Transform:
@@ -458,6 +529,19 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!65 &341223749288819021
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8634279046692286028}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.247005, y: 0.24700506, z: 0.32499877}
+  m_Center: {x: 0.1235025, y: 0, z: 0.16249938}
 --- !u!1 &8634279046940636729
 GameObject:
   m_ObjectHideFlags: 0
@@ -469,12 +553,13 @@ GameObject:
   - component: {fileID: 8634279046940636726}
   - component: {fileID: 8634279046940636724}
   - component: {fileID: 8634279046940636727}
+  - component: {fileID: 6886446307787213259}
   m_Layer: 0
   m_Name: Plant
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &8634279046940636726
 Transform:
@@ -538,6 +623,19 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!65 &6886446307787213259
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8634279046940636729}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.39940423, y: 0.907017, z: 0.32461902}
+  m_Center: {x: -0.03112812, y: 0.4558189, z: 0.033131916}
 --- !u!1 &8634279046940852719
 GameObject:
   m_ObjectHideFlags: 0
@@ -552,7 +650,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &8634279046940852716
 Transform:
@@ -562,7 +660,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8634279046940852719}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.065140866, y: 0, z: 0.14091101}
+  m_LocalPosition: {x: -0.289, y: -0, z: -0.016}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 8634279046940636726}
