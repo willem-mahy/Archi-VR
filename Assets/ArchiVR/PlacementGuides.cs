@@ -53,6 +53,9 @@ namespace ArchiVR
             //gameObject3.AddComponent<RenderOnTop>();
         }
 
+        /// <summary>
+        /// Make the guide measure the distance from its origin, to the first object its laser line encounters.
+        /// </summary>
         public void Update()
         {
             var points = new Vector3[2]
@@ -178,6 +181,8 @@ namespace ArchiVR
             }
         }
 
+        #endregion GameObject overrides
+
         /// <summary>
         /// 
         /// </summary>
@@ -188,7 +193,5 @@ namespace ArchiVR
                 guide.Update();
             }
         }
-
-        #endregion GameObject overrides        
     }
 }
