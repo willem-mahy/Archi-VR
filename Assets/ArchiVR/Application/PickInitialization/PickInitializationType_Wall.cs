@@ -30,19 +30,32 @@ namespace ArchiVR.Application.PickInitialization
             GameObject gameObject,
             List<RaycastHit> picks)
         {
+            var transform = gameObject.transform;
+
             switch (picks.Count)
             {
                 case 0:
                     {
                     }
                     break;
-                default:
+                case 1:
                     {
-                        var transform = gameObject.transform;
-
                         var position = picks[0].point;
                         var lookat = position + picks[0].normal;
                         var up = Vector3.up;
+
+                        transform.position = position;
+                        transform.LookAt(lookat, up);
+                    }
+                    break;
+                default: // 2 or more picks: just use the first 2
+                    {
+                        var offsetPoint0Point1 = (picks[1].point - picks[0].point);
+                        var forwardDirection = offsetPoint0Point1.normalized;
+
+                        var position = picks[0].point;
+                        var lookat = position + picks[0].normal;
+                        var up = forwardDirection;
 
                         transform.position = position;
                         transform.LookAt(lookat, up);

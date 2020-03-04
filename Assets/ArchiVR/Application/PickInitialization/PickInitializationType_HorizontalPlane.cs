@@ -47,10 +47,16 @@ namespace ArchiVR.Application.PickInitialization
 
             switch (picks.Count)
             {
+                case 0:
+                    break;
                 case 1:
                     {
-                        transform.position = picks[0].point;
-                        transform.rotation = Quaternion.identity;
+                        var position = picks[0].point;
+                        var lookat = position + picks[0].normal;
+                        var up = Vector3.right;
+
+                        transform.position = position;
+                        transform.LookAt(lookat, up);
                     }
                     break;
                 default: // 2 or more picks: just use the first 2
@@ -60,8 +66,8 @@ namespace ArchiVR.Application.PickInitialization
                         var forwardDirection = offsetPoint0Point1Horizontal.normalized;
 
                         var position = picks[0].point;
-                        var lookat = position + forwardDirection;
-                        var up = Vector3.up;
+                        var lookat = position + picks[0].normal;
+                        var up = forwardDirection;
 
                         transform.position = position;
                         transform.LookAt(lookat, up);
