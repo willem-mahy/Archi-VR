@@ -196,7 +196,7 @@ namespace ArchiVR.Application
 
             // Creating an object is performed by:
             //  - Pressing the controller 'X' button.
-            if (m_application.m_controllerInput.m_controllerState.xButtonDown)
+            if (m_application.m_controllerInput.m_controllerState.aButtonDown)
             {
                 CreateObject();
             }
@@ -221,7 +221,7 @@ namespace ArchiVR.Application
 
                 leftControllerButtonMapping.ButtonStart.Text = "";
 
-                leftControllerButtonMapping.ButtonX.Text = "Place";
+                leftControllerButtonMapping.ButtonX.Text = "";
                 leftControllerButtonMapping.ButtonY.Text = "";
 
                 leftControllerButtonMapping.ThumbUp.Text = "";
@@ -240,7 +240,7 @@ namespace ArchiVR.Application
 
                 rightControllerButtonMapping.ButtonOculusStart.Text = "";
 
-                rightControllerButtonMapping.ButtonA.Text = "";
+                rightControllerButtonMapping.ButtonA.Text = "Place";
                 rightControllerButtonMapping.ButtonB.Text = "";
 
                 rightControllerButtonMapping.ThumbUp.Text = "Forward";
@@ -296,6 +296,11 @@ namespace ArchiVR.Application
             m_application.m_leftControllerText.gameObject.SetActive(true);
         }
 
+        /// <summary>
+        /// Create an instance of the active prefab,
+        /// position it at the location of the preview,
+        /// and add it persistently to the project content.
+        /// </summary>
         private void CreateObject()
         {
             #region 1) Create the new object's GameObject
