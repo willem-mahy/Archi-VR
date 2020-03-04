@@ -27,6 +27,33 @@ namespace WM.UI
         /// </summary>
         private Text _text;
 
+        /// <summary>
+        /// The Text.
+        /// </summary>
+        private string _label;
+
+        /// <summary>
+        /// The Text.
+        /// </summary>
+        private string _editorMapping;
+
+        /// <summary>
+        /// The Text.
+        /// </summary>
+        public string EditorMapping
+        {
+            get
+            {
+                return _editorMapping;
+            }
+            set
+            {
+                _editorMapping = value;
+
+                UpdateTextText();
+            }
+        }
+
         #region Public API
 
         void Awake()
@@ -59,9 +86,9 @@ namespace WM.UI
             }
             set
             {
-                _text.text = value;
+                _label = value;
 
-                gameObject.SetActive((value != null) && (value != ""));
+                UpdateTextText();
             }
         }
 
@@ -81,5 +108,28 @@ namespace WM.UI
         }
 
         #endregion Public API
+
+        /// <summary>
+        /// Updates the text of the Text.
+        /// </summary>
+        private void UpdateTextText()
+        {
+            if (string.IsNullOrEmpty(_label))
+            {
+                gameObject.SetActive(false);
+                return;
+            }
+
+            var text = _label;
+
+            if (UnityEngine.Application.isEditor && !string.IsNullOrEmpty(_editorMapping))
+            {
+                text += string.Format(" ({0})", _editorMapping);
+            }
+
+            _text.text = text;
+
+            gameObject.SetActive(true);
+        }
     }
 }

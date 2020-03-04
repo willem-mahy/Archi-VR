@@ -216,18 +216,18 @@ namespace ArchiVR.Application
 
             if (leftControllerButtonMapping != null)
             {
-                leftControllerButtonMapping.IndexTrigger.Text = "Back" + (isEditor ? " (R)" : "");
+                leftControllerButtonMapping.IndexTrigger.Text = "Back";
                 leftControllerButtonMapping.HandTrigger.Text = "";
 
                 leftControllerButtonMapping.ButtonStart.Text = "";
 
-                leftControllerButtonMapping.ButtonX.Text = "Place" + (isEditor ? " (F1)" : "");
+                leftControllerButtonMapping.ButtonX.Text = "Place";
                 leftControllerButtonMapping.ButtonY.Text = "";
 
                 leftControllerButtonMapping.ThumbUp.Text = "";
                 leftControllerButtonMapping.ThumbDown.Text = "";
-                leftControllerButtonMapping.ThumbLeft.Text = "Prev Type" + (isEditor ? " (Q)" : "");
-                leftControllerButtonMapping.ThumbRight.Text = "Next Type" + (isEditor ? " (D)" : "");
+                leftControllerButtonMapping.ThumbLeft.Text = "Prev Type";
+                leftControllerButtonMapping.ThumbRight.Text = "Next Type";
             }
 
             // Right controller
@@ -235,18 +235,18 @@ namespace ArchiVR.Application
 
             if (rightControllerButtonMapping != null)
             {
-                rightControllerButtonMapping.IndexTrigger.Text = "Pick" + (isEditor ? " (LMB)" : "");
-                rightControllerButtonMapping.HandTrigger.Text = (_pickedInfos.Count == 0) ? "" : "Remove Pick" + (isEditor ? " (RMB)" : "");
+                rightControllerButtonMapping.IndexTrigger.Text = "Pick";
+                rightControllerButtonMapping.HandTrigger.Text = (_pickedInfos.Count == 0) ? "" : "Remove Pick";
 
                 rightControllerButtonMapping.ButtonOculusStart.Text = "";
 
                 rightControllerButtonMapping.ButtonA.Text = "";
                 rightControllerButtonMapping.ButtonB.Text = "";
 
-                rightControllerButtonMapping.ThumbUp.Text = "Beweeg vooruit" + (isEditor ? " (Up)" : "");
-                rightControllerButtonMapping.ThumbDown.Text = "Beweeg achteruit" + (isEditor ? " (Down)" : "");
-                rightControllerButtonMapping.ThumbLeft.Text = "Beweeg links" + (isEditor ? "(Left)" : "");
-                rightControllerButtonMapping.ThumbRight.Text = "Beweeg rechts" + (isEditor ? " (Right)" : "");
+                rightControllerButtonMapping.ThumbUp.Text = "Forward";
+                rightControllerButtonMapping.ThumbDown.Text = "Backward";
+                rightControllerButtonMapping.ThumbLeft.Text = "Left";
+                rightControllerButtonMapping.ThumbRight.Text = "Right";
             }
         }
 

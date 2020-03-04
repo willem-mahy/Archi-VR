@@ -241,10 +241,10 @@ namespace ArchiVR.Application
                 rightControllerButtonMapping.ButtonA.Text = "";
                 rightControllerButtonMapping.ButtonB.Text = "";
 
-                rightControllerButtonMapping.ThumbUp.Text = "Beweeg vooruit" + (isEditor ? " (Up)" : "");
-                rightControllerButtonMapping.ThumbDown.Text = "Beweeg achteruit" + (isEditor ? " (Down)" : "");
-                rightControllerButtonMapping.ThumbLeft.Text = "Beweeg links" + (isEditor ? "(Left)" : "");
-                rightControllerButtonMapping.ThumbRight.Text = "Beweeg rechts" + (isEditor ? " (Right)" : "");
+                rightControllerButtonMapping.ThumbUp.Text = "Forward";
+                rightControllerButtonMapping.ThumbDown.Text = "Backward";
+                rightControllerButtonMapping.ThumbLeft.Text = "Left";
+                rightControllerButtonMapping.ThumbRight.Text = "Right";
             }
         }
 

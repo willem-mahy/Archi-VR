@@ -382,19 +382,19 @@ namespace ArchiVR
             // Left controller
             if (m_application.leftControllerButtonMapping != null)
             {
-                m_application.leftControllerButtonMapping.HandTrigger.Text = "GFX Quality";
+                m_application.leftControllerButtonMapping.HandTrigger.Text = "";
 
-                m_application.leftControllerButtonMapping.IndexTrigger.Text = "Verander schaal" + (isEditor ? " (?)" : "");
+                m_application.leftControllerButtonMapping.IndexTrigger.Text = "Verander schaal";
 
-                m_application.leftControllerButtonMapping.ButtonStart.Text = "Toggle menu" + (isEditor ? " (F11)" : "");
+                m_application.leftControllerButtonMapping.ButtonStart.Text = "Toggle menu";
 
-                m_application.leftControllerButtonMapping.ButtonX.Text = "Vorig project" + (isEditor ? " (F1)" : "");
-                m_application.leftControllerButtonMapping.ButtonY.Text = "Volgend project" + (isEditor ? " (F2)" : "");
+                m_application.leftControllerButtonMapping.ButtonX.Text = "Vorig project";
+                m_application.leftControllerButtonMapping.ButtonY.Text = "Volgend project";
 
-                m_application.leftControllerButtonMapping.ThumbUp.Text = "Model omhoog" + (isEditor ? " (Z)" : "");
-                m_application.leftControllerButtonMapping.ThumbDown.Text = "Model omlaag" + (isEditor ? " (S)" : "");
-                m_application.leftControllerButtonMapping.ThumbLeft.Text = "Model links" + (isEditor ? " (Q)" : "");
-                m_application.leftControllerButtonMapping.ThumbRight.Text = "Model rechts" + (isEditor ? " (D)" : "");
+                m_application.leftControllerButtonMapping.ThumbUp.Text = "Model omhoog";
+                m_application.leftControllerButtonMapping.ThumbDown.Text = "Model omlaag";
+                m_application.leftControllerButtonMapping.ThumbLeft.Text = "Model links";
+                m_application.leftControllerButtonMapping.ThumbRight.Text = "Model rechts";
             }
 
             // Right controller
@@ -408,10 +408,10 @@ namespace ArchiVR
                 m_application.rightControllerButtonMapping.ButtonXA.Text = "";
                 m_application.rightControllerButtonMapping.ButtonYB.Text = "";
 
-                m_application.rightControllerButtonMapping.ThumbUp.Text = "Beweeg vooruit" + (isEditor ? "(ArrowUp)" : "");
-                m_application.rightControllerButtonMapping.ThumbDown.Text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
-                m_application.rightControllerButtonMapping.ThumbLeft.Text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
-                m_application.rightControllerButtonMapping.ThumbRight.Text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
+                m_application.rightControllerButtonMapping.ThumbUp.Text = "Forward";
+                m_application.rightControllerButtonMapping.ThumbDown.Text = "Backward";
+                m_application.rightControllerButtonMapping.ThumbLeft.Text = "Left";
+                m_application.rightControllerButtonMapping.ThumbRight.Text = "Right";
             }
         }
     }

@@ -197,8 +197,6 @@ namespace ArchiVR.Application
         {
             //m_application.Logger.Debug("ApplicationStateEditObject.UpdateControllerButtonUI()");
 
-            var isEditor = UnityEngine.Application.isEditor;
-
             m_application.m_leftControllerText.text = GetSelectionText();
             m_application.m_rightControllerText.text = (null == _hoveredObject) ? "" : _hoveredObject.name;
 
@@ -234,10 +232,10 @@ namespace ArchiVR.Application
                 rightControllerButtonMapping.ButtonA.Text = "Create";
                 rightControllerButtonMapping.ButtonB.Text = _selectedObjects.Count == 0 ? "" : "Delete";
 
-                rightControllerButtonMapping.ThumbUp.Text = "Beweeg vooruit" + (isEditor ? " (ArrowUp)" : "");
-                rightControllerButtonMapping.ThumbDown.Text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
-                rightControllerButtonMapping.ThumbLeft.Text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
-                rightControllerButtonMapping.ThumbRight.Text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
+                rightControllerButtonMapping.ThumbUp.Text = "Forward";
+                rightControllerButtonMapping.ThumbDown.Text = "Backward";
+                rightControllerButtonMapping.ThumbLeft.Text = "Left";
+                rightControllerButtonMapping.ThumbRight.Text = "Right";
             }
         }
 

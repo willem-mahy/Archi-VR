@@ -807,7 +807,59 @@ public ButtonMappingUI leftControllerButtonMapping = null;
 
             UpdateSelectionVisualizerVisibility();
 
+            InitControllerUIEditorMappings();
+
             new InitNetworkCommand(StartupNetworkMode).Execute(this);
+        }
+
+        /// <summary>
+        /// Initializes the editor-mode button mappings on the Controller UI.
+        /// </summary>
+        public void InitControllerUIEditorMappings()
+        {
+            Logger.Debug("UnityApplication.InitControllerUIEditorMappings()");
+
+            // Left controller
+            {
+                var buttonMapping = leftControllerButtonMapping;
+
+                if (buttonMapping != null)
+                {
+                    buttonMapping.HandTrigger.EditorMapping = "F";
+                    buttonMapping.IndexTrigger.EditorMapping = "R";
+
+                    buttonMapping.ButtonStart.EditorMapping = "F11";
+
+                    buttonMapping.ButtonX.EditorMapping = "F1";
+                    buttonMapping.ButtonY.EditorMapping = "F2";
+
+                    buttonMapping.ThumbUp.EditorMapping = "Z";
+                    buttonMapping.ThumbDown.EditorMapping = "S";
+                    buttonMapping.ThumbLeft.EditorMapping = "Q";
+                    buttonMapping.ThumbRight.EditorMapping = "D";
+                }
+            }
+
+            // Right controller
+            {
+                var buttonMapping = rightControllerButtonMapping;
+
+                if (buttonMapping != null)
+                {
+                    buttonMapping.IndexTrigger.EditorMapping = "LMB";
+                    buttonMapping.HandTrigger.EditorMapping = "RMB";
+
+                    buttonMapping.ButtonOculusStart.EditorMapping = "";
+
+                    buttonMapping.ButtonA.EditorMapping = "F3";
+                    buttonMapping.ButtonB.EditorMapping = "F4";
+
+                    buttonMapping.ThumbUp.EditorMapping = @"/\";
+                    buttonMapping.ThumbDown.EditorMapping = @"\/";
+                    buttonMapping.ThumbLeft.EditorMapping = "<";
+                    buttonMapping.ThumbRight.EditorMapping = ">";
+                }
+            }
         }
 
         /// <summary>

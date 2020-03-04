@@ -263,10 +263,10 @@ namespace WM.Colocation
 
             if (leftControllerButtonMapping != null)
             {
-                leftControllerButtonMapping.IndexTrigger.Text = "Measure" + (isEditor ? " (R)" : "");
+                leftControllerButtonMapping.IndexTrigger.Text = "Measure";
                 leftControllerButtonMapping.HandTrigger.Text = "";
 
-                leftControllerButtonMapping.ButtonStart.Text = "Abort" + (isEditor ? " (F11)" : "");
+                leftControllerButtonMapping.ButtonStart.Text = "Abort";
 
                 if (_newPoints.Count == 0)
                 {
@@ -274,7 +274,7 @@ namespace WM.Colocation
                 }
                 else
                 {
-                    leftControllerButtonMapping.ButtonX.Text = "Erase Point " + _newPoints.Count + (isEditor ? " (F1)" : "");
+                    leftControllerButtonMapping.ButtonX.Text = "Erase Point " + _newPoints.Count;
                 }
                 leftControllerButtonMapping.ButtonY.Text = "";
 
@@ -289,10 +289,10 @@ namespace WM.Colocation
 
             if (rightControllerButtonMapping != null)
             {
-                rightControllerButtonMapping.IndexTrigger.Text = "Measure" + (isEditor ? " (LMB)" : "");
+                rightControllerButtonMapping.IndexTrigger.Text = "Measure";
                 rightControllerButtonMapping.HandTrigger.Text = "";
 
-                rightControllerButtonMapping.ButtonOculusStart.Text = "Exit" + (isEditor ? " (F12)" : ""); ;
+                rightControllerButtonMapping.ButtonOculusStart.Text = "Exit";
 
                 if (_newPoints.Count == 0)
                 {
@@ -300,14 +300,14 @@ namespace WM.Colocation
                 }
                 else
                 {
-                    rightControllerButtonMapping.ButtonA.Text = "Erase Point " + _newPoints.Count + (isEditor ? " (F3)" : "");
+                    rightControllerButtonMapping.ButtonA.Text = "Erase Point " + _newPoints.Count;
                 }
                 rightControllerButtonMapping.ButtonB.Text = "";
 
-                rightControllerButtonMapping.ThumbUp.Text = (isEditor ? "Beweeg vooruit (Up)" : "");
-                rightControllerButtonMapping.ThumbDown.Text = (isEditor ? "Beweeg achteruit (Down)" : "");
-                rightControllerButtonMapping.ThumbLeft.Text = (isEditor ? "Beweeg links (Left)" : "");
-                rightControllerButtonMapping.ThumbRight.Text = (isEditor ? "Beweeg rechts (Right)" : "");
+                rightControllerButtonMapping.ThumbUp.Text = "Forward";
+                rightControllerButtonMapping.ThumbDown.Text = "Backward";
+                rightControllerButtonMapping.ThumbLeft.Text = "Left";
+                rightControllerButtonMapping.ThumbRight.Text = "Right";
             }
         }
 
@@ -325,12 +325,12 @@ namespace WM.Colocation
 
             if (leftControllerButtonMapping != null)
             {
-                leftControllerButtonMapping.IndexTrigger.Text = "Accept" + (isEditor ? " (R)" : "");
+                leftControllerButtonMapping.IndexTrigger.Text = "Accept";
                 leftControllerButtonMapping.HandTrigger.Text = "";
 
-                leftControllerButtonMapping.ButtonStart.Text = "Abort" + (isEditor ? " (F11)" : "");
+                leftControllerButtonMapping.ButtonStart.Text = "Abort";
 
-                leftControllerButtonMapping.ButtonX.Text = "Erase Point 2" + (isEditor ? " (F1)" : ""); ;
+                leftControllerButtonMapping.ButtonX.Text = "Erase Point 2";
                 leftControllerButtonMapping.ButtonY.Text = "";
 
                 leftControllerButtonMapping.ThumbUp.Text = "";
@@ -344,18 +344,18 @@ namespace WM.Colocation
 
             if (rightControllerButtonMapping != null)
             {
-                rightControllerButtonMapping.IndexTrigger.Text = "Accept" + (isEditor ? " (LMB)" : ""); ;
+                rightControllerButtonMapping.IndexTrigger.Text = "Accept";
                 rightControllerButtonMapping.HandTrigger.Text = "";
 
-                rightControllerButtonMapping.ButtonOculusStart.Text = "Exit" + (isEditor ? " (F12)" : "");
+                rightControllerButtonMapping.ButtonOculusStart.Text = "Exit";
 
-                rightControllerButtonMapping.ButtonA.Text = "Erase Point 2" + (isEditor ? " (RMB)" : ""); ;
+                rightControllerButtonMapping.ButtonA.Text = "Erase Point 2";
                 rightControllerButtonMapping.ButtonB.Text = "";
 
-                rightControllerButtonMapping.ThumbUp.Text = (isEditor ? "Beweeg vooruit (Up)" : "");
-                rightControllerButtonMapping.ThumbDown.Text = (isEditor ? "Beweeg achteruit (Down)" : "");
-                rightControllerButtonMapping.ThumbLeft.Text = (isEditor ? "Beweeg links (Left)" : "");
-                rightControllerButtonMapping.ThumbRight.Text = (isEditor ? "Beweeg rechts (Right)" : "");
+                rightControllerButtonMapping.ThumbUp.Text = "Forward";
+                rightControllerButtonMapping.ThumbDown.Text = "Backward";
+                rightControllerButtonMapping.ThumbLeft.Text = "Left";
+                rightControllerButtonMapping.ThumbRight.Text = "Right";
             }
         }
 

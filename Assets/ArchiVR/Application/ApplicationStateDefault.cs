@@ -104,7 +104,7 @@ namespace ArchiVR.Application
                     buttonMapping.IndexTrigger.Text = "Walkthrough";
                     buttonMapping.HandTrigger.Text = "Maquette";
 
-                    buttonMapping.ButtonOculusStart.Text = "Exit" + (isEditor ? " ()" : "");
+                    buttonMapping.ButtonOculusStart.Text = "Exit";
 
                     buttonMapping.ButtonXA.Text = "";
                     buttonMapping.ButtonYB.Text = "";

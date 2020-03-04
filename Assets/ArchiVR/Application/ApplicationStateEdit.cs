@@ -250,7 +250,7 @@ namespace ArchiVR.Application
 
             if (leftControllerButtonMapping != null)
             {
-                leftControllerButtonMapping.IndexTrigger.Text = "Back" + (isEditor ? " (R)" : "");
+                leftControllerButtonMapping.IndexTrigger.Text = "Back";
                 leftControllerButtonMapping.HandTrigger.Text = "";
 
                 leftControllerButtonMapping.ButtonStart.Text = "";
@@ -269,18 +269,18 @@ namespace ArchiVR.Application
 
             if (rightControllerButtonMapping != null)
             {
-                rightControllerButtonMapping.IndexTrigger.Text = "Select" + (isEditor ? " (LMB)" : "");
+                rightControllerButtonMapping.IndexTrigger.Text = "Select";
                 rightControllerButtonMapping.HandTrigger.Text = _selectedObjects.Count == 0 ? "" : "Additive selection";
 
                 rightControllerButtonMapping.ButtonOculusStart.Text = "";
 
-                rightControllerButtonMapping.ButtonA.Text = "Create" + (isEditor ? " (F3)" : "");
-                rightControllerButtonMapping.ButtonB.Text = _selectedObjects.Count == 0 ? "" : "Delete" + (isEditor ? " (F4)" : "");
+                rightControllerButtonMapping.ButtonA.Text = "Create";
+                rightControllerButtonMapping.ButtonB.Text = _selectedObjects.Count == 0 ? "" : "Delete";
 
-                rightControllerButtonMapping.ThumbUp.Text = "Beweeg vooruit" + (isEditor ? " (ArrowUp)" : "");
-                rightControllerButtonMapping.ThumbDown.Text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
-                rightControllerButtonMapping.ThumbLeft.Text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
-                rightControllerButtonMapping.ThumbRight.Text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
+                rightControllerButtonMapping.ThumbUp.Text = "Forward";
+                rightControllerButtonMapping.ThumbDown.Text = "Backward";
+                rightControllerButtonMapping.ThumbLeft.Text = "Left";
+                rightControllerButtonMapping.ThumbRight.Text = "Right";
             }
         }
 

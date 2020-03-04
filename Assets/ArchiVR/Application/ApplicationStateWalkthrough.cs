@@ -349,19 +349,19 @@ namespace ArchiVR
 
                 if (buttonMapping != null)
                 {
-                    buttonMapping.HandTrigger.Text = "Edit" + (isEditor ? " (F)" : "");
+                    buttonMapping.HandTrigger.Text = "Edit";
 
-                    buttonMapping.IndexTrigger.Text = "Back" + (isEditor ? " (R)" : "");
+                    buttonMapping.IndexTrigger.Text = "Back";
 
-                    buttonMapping.ButtonStart.Text = "Toggle menu" + (isEditor ? " (F11)" : "");
+                    buttonMapping.ButtonStart.Text = "Toggle menu";
 
-                    buttonMapping.ButtonX.Text = "Vorig project" + (isEditor ? " (F1)" : "");
-                    buttonMapping.ButtonY.Text = "Volgend project" + (isEditor ? " (F2)" : "");
+                    buttonMapping.ButtonX.Text = "Vorig project";
+                    buttonMapping.ButtonY.Text = "Volgend project";
 
                     if (m_application.EnableTrackingSpaceTranslationUpDown)
                     {
-                        buttonMapping.ThumbUp.Text = "Beweeg omhoog" + (isEditor ? " (Z)" : "");
-                        buttonMapping.ThumbDown.Text = "Beweeg omlaag" + (isEditor ? " (S)" : "");
+                        buttonMapping.ThumbUp.Text = "Beweeg omhoog";
+                        buttonMapping.ThumbDown.Text = "Beweeg omlaag";
                     }
                     else
                     {
@@ -369,8 +369,8 @@ namespace ArchiVR
                         buttonMapping.ThumbDown.Text = "";
                     }
 
-                    buttonMapping.ThumbLeft.Text = "< Tracking " + (isEditor ? " (Q)" : "");
-                    buttonMapping.ThumbRight.Text = "Tracking >" + (isEditor ? " (D)" : "");
+                    buttonMapping.ThumbLeft.Text = "< Tracking";
+                    buttonMapping.ThumbRight.Text = "Tracking >";
                 }
             }
 
@@ -381,17 +381,17 @@ namespace ArchiVR
                 if (buttonMapping != null)
                 {
                     buttonMapping.IndexTrigger.Text = "";
-                    buttonMapping.HandTrigger.Text = "Edit" + (isEditor ? " (RMB)" : "");
+                    buttonMapping.HandTrigger.Text = "Edit";
 
-                    buttonMapping.ButtonOculusStart.Text = "Exit" + (isEditor ? " ()" : "");
+                    buttonMapping.ButtonOculusStart.Text = "Exit";
 
-                    buttonMapping.ButtonXA.Text = "Vorige locatie" + (isEditor ? " (F3)" : "");
-                    buttonMapping.ButtonYB.Text = "Volgende locatie" + (isEditor ? " (F4)" : "");
+                    buttonMapping.ButtonXA.Text = "Vorige locatie";
+                    buttonMapping.ButtonYB.Text = "Volgende locatie";
 
-                    buttonMapping.ThumbUp.Text = "Beweeg vooruit" + (isEditor ? " (ArrowUp)" : "");
-                    buttonMapping.ThumbDown.Text = "Beweeg achteruit" + (isEditor ? " (ArrowDown)" : "");
-                    buttonMapping.ThumbLeft.Text = "Beweeg links" + (isEditor ? " (ArrowLeft)" : "");
-                    buttonMapping.ThumbRight.Text = "Beweeg rechts" + (isEditor ? " (ArrowRight)" : "");
+                    buttonMapping.ThumbUp.Text = "Forward";
+                    buttonMapping.ThumbDown.Text = "Backward";
+                    buttonMapping.ThumbLeft.Text = "Left";
+                    buttonMapping.ThumbRight.Text = "Right";
                 }
             }
         }
