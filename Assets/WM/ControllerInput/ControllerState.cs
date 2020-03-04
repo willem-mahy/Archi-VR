@@ -165,10 +165,10 @@ namespace WM
             rTouchConnected = OVRInput.IsControllerConnected(OVRInput.Controller.RTouch);
 
             // Get existing button presses.
-            this.aButtonPressed = OVRInput.Get(OVRInput.Button.One);
-            this.bButtonPressed = OVRInput.Get(OVRInput.Button.Two);
-            this.xButtonPressed = OVRInput.Get(OVRInput.Button.Three);
-            this.yButtonPressed = OVRInput.Get(OVRInput.Button.Four);
+            aButtonPressed = OVRInput.Get(OVRInput.Button.One);
+            bButtonPressed = OVRInput.Get(OVRInput.Button.Two);
+            xButtonPressed = OVRInput.Get(OVRInput.Button.Three);
+            yButtonPressed = OVRInput.Get(OVRInput.Button.Four);
             lHandTriggerPressed = OVRInput.Get(OVRInput.Button.PrimaryHandTrigger);
             rHandTriggerPressed = OVRInput.Get(OVRInput.Button.SecondaryHandTrigger);
             lIndexTriggerPressed = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger);
@@ -179,15 +179,18 @@ namespace WM
             buttonThumbstickPPressed = OVRInput.Get(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.Touch);
             buttonThumbstickSPressed = OVRInput.Get(OVRInput.Button.SecondaryThumbstick, OVRInput.Controller.Touch);
 
-            var lButton1Pressed = OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTrackedRemote);
-            var rButton1Pressed = OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTrackedRemote);
-            var lButton2Pressed = OVRInput.Get(OVRInput.Button.Two, OVRInput.Controller.LTrackedRemote);
-            var rButton2Pressed = OVRInput.Get(OVRInput.Button.Two, OVRInput.Controller.LTrackedRemote);
+            lThumbstickPressed = buttonThumbstickPPressed;
+            rThumbstickPressed = buttonThumbstickSPressed;
 
-            var aButtonPressed = OVRInput.Get(OVRInput.RawButton.A);
-            var bButtonPressed = OVRInput.Get(OVRInput.RawButton.B);
-            var xButtonPressed = OVRInput.Get(OVRInput.RawButton.X);
-            var yButtonPressed = OVRInput.Get(OVRInput.RawButton.Y);
+            //var lButton1Pressed = OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTrackedRemote);
+            //var rButton1Pressed = OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTrackedRemote);
+            //var lButton2Pressed = OVRInput.Get(OVRInput.Button.Two, OVRInput.Controller.LTrackedRemote);
+            //var rButton2Pressed = OVRInput.Get(OVRInput.Button.Two, OVRInput.Controller.LTrackedRemote);
+
+            //var aButtonPressed = OVRInput.Get(OVRInput.RawButton.A);
+            //var bButtonPressed = OVRInput.Get(OVRInput.RawButton.B);
+            //var xButtonPressed = OVRInput.Get(OVRInput.RawButton.X);
+            //var yButtonPressed = OVRInput.Get(OVRInput.RawButton.Y);
 
             // returns true if the left index finger trigger has been pressed more than halfway.  
             // (Interpret the trigger as a button).
