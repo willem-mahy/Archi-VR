@@ -269,6 +269,7 @@ namespace WM
         ///     D       lThumbStickRight
         ///     S       lThumbStickDown
         ///     Z       lThumbStickUp
+        ///     A       rThumbstick Pressed
         ///     
         /// Right Controller
         ///     F3      button3 (A)
@@ -276,11 +277,11 @@ namespace WM
         ///     RMB     button6 (Hand trigger)
         ///     LMB     button8 (Index trigger)
         ///     F12     buttonOculus
-        ///     A       rThumbstick Pressed
         ///     Left    rThumbStickLeft
         ///     Right   rThumbStickRight
         ///     Down    rThumbStickDown
         ///     Up      rThumbStickUp
+        ///     Plus    rThumbstick Pressed
         /// </summary>
         public void Update_Editor(ControllerState prevState)
         {
