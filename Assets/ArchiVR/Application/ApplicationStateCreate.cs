@@ -287,6 +287,11 @@ namespace ArchiVR.Application
                 Vector3.zero,
                 Quaternion.identity);
 
+            if (null != _previewGO.GetComponent<BoxCollider>())
+            {
+                _previewGO.AddComponent<PlacementGuides>();
+            }
+
             m_application.m_leftControllerText.text = ActiveObjectPrefabDefinition.Name;
             m_application.m_leftControllerText.gameObject.SetActive(true);
         }
