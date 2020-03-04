@@ -245,7 +245,6 @@ GameObject:
   - component: {fileID: 198794206819614493}
   - component: {fileID: 6831372030258845513}
   - component: {fileID: 5250817249685418982}
-  - component: {fileID: 3378347455404650977}
   m_Layer: 0
   m_Name: Group 308
   m_TagString: Untagged
@@ -331,19 +330,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &3378347455404650977
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2471213304544590235}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.4622793, y: 1.3671002, z: 0.09201465}
-  m_Center: {x: 0.23252885, y: 0.6835501, z: 0.048620064}
 --- !u!1 &2565009171466084247
 GameObject:
   m_ObjectHideFlags: 0
@@ -666,6 +652,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8963973371175034428}
   - component: {fileID: 3826409217634929368}
+  - component: {fileID: 3023327185570953718}
   m_Layer: 0
   m_Name: Radiator_Electric_Acova_Regate_El_Air_(50x135cm)
   m_TagString: Untagged
@@ -701,6 +688,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PickInitializationTypes: 02000000
+--- !u!65 &3023327185570953718
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5082897869076335609}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.5056243, y: 1.3598573, z: 0.11134529}
+  m_Center: {x: -0.0033878163, y: 0.68732035, z: 0.05533132}
 --- !u!1 &5693491871945638494
 GameObject:
   m_ObjectHideFlags: 0
