@@ -231,6 +231,13 @@ namespace ArchiVR.Application
             }
         }
 
+        /// <summary>
+        /// Gets a descriptive text for the current selection.
+        /// In case of nothing selected => the empty string.
+        /// In case of single object selected => the object name.
+        /// In case of multiple object selected => "Selected 2 Props", "Selected 3 POIs", Selected 1000 Lights".
+        /// </summary>
+        /// <returns></returns>
         private string GetSelectionText()
         {
             switch (_selectedObjects.Count)
@@ -314,7 +321,9 @@ namespace ArchiVR.Application
                 if (bounds.HasValue)
                 {
                     _hoverBoxGO.transform.position = bounds.Value.center;
-                    _hoverBox.Size = gameObject.transform.InverseTransformVector(bounds.Value.size);
+                    _hoverBox.Size =
+                        //gameObject.transform.InverseTransformVector(bounds.Value.size);
+                        bounds.Value.size;
                 }
             }
         }

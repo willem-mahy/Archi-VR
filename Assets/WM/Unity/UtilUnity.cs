@@ -11,9 +11,8 @@ namespace WM
     public class UtilUnity
     {
         /// <summary>
-        /// 
+        /// Calculates the AA bounding box, in world space, of the given game object and everything below it.
         /// </summary>
-        /// <param name="go"></param>
         public static Bounds? CalculateBounds(GameObject go)
         {
             var colliders = go.GetComponentsInChildren<Collider>();
