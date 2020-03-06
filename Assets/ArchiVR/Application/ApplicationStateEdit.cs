@@ -316,14 +316,26 @@ namespace ArchiVR.Application
             {
                 _hoverBoxGO.SetActive(true);
 
-                var bounds = UtilUnity.CalculateBounds(_hoveredObject);
+                var boxCollider = _hoveredObject.gameObject.GetComponent<Collider>() as BoxCollider;
 
-                if (bounds.HasValue)
+                if (null == boxCollider)
                 {
-                    _hoverBoxGO.transform.position = bounds.Value.center;
-                    _hoverBox.Size =
-                        //gameObject.transform.InverseTransformVector(bounds.Value.size);
-                        bounds.Value.size;
+                    // The top-level go does not have a box collider => compute bounds recursively.
+                    var bounds = UtilUnity.CalculateBounds(_hoveredObject);
+
+                    if (bounds.HasValue)
+                    {
+                        _hoverBoxGO.transform.position = bounds.Value.center;
+                        _hoverBoxGO.transform.rotation = Quaternion.identity;
+                        _hoverBox.Size = bounds.Value.size;
+                    }
+                }
+                else
+                {
+                    // The top-level has a box collider => use that as input for our hoverbox definition.
+                    _hoverBoxGO.transform.position = _hoveredObject.gameObject.transform.TransformPoint(boxCollider.center);
+                    _hoverBoxGO.transform.rotation = _hoveredObject.gameObject.transform.rotation;
+                    _hoverBox.Size = boxCollider.size;
                 }
             }
         }
