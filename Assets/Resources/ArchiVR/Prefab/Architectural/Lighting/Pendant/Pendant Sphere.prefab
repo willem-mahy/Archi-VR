@@ -200,6 +200,7 @@ GameObject:
   - component: {fileID: 8642114032534299482}
   - component: {fileID: 781695823301867922}
   - component: {fileID: 2485001040980634122}
+  - component: {fileID: -7805390594800176707}
   m_Layer: 0
   m_Name: Pendant Sphere
   m_TagString: Untagged
@@ -249,6 +250,20 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.2, y: 0.2, z: 0.7}
   m_Center: {x: 0, y: 0, z: 0.35}
+--- !u!114 &-7805390594800176707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4190609793561294941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc25a4ef3f9fd44cb5f607870fb41d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LightSources:
+  - {fileID: 7209679038534365750}
 --- !u!1 &7209679038534365748
 GameObject:
   m_ObjectHideFlags: 0

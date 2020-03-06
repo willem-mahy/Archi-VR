@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using ArchiVR.Application.Properties;
+using System.Collections.Generic;
 using UnityEngine;
 using WM;
 using WM.Application;
@@ -109,6 +110,8 @@ namespace ArchiVR.Application
             // Hide the Edit menu.
             m_application.EditMenuPanel.gameObject.SetActive(false);
             m_application.AddPickRaySelectionTarget(m_application.EditMenuPanel.gameObject);
+
+            m_application.PropertiesMenuPanel.gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -361,6 +364,26 @@ namespace ArchiVR.Application
                 }
 
                 _selectBoxes.Add(selectedObjectBoundingBox);
+            }
+
+            if (_selectedObjects.Count == 1)
+            {
+                var selectedObject = _selectedObjects[0];
+                var properties = selectedObject.GetComponent<PropertiesBase>();
+
+                if (null == properties)
+                {
+                    m_application.PropertiesMenuPanel.gameObject.SetActive(false);
+                }
+                else
+                {
+                    m_application.PropertiesMenuPanel.Properties = properties;
+                    m_application.PropertiesMenuPanel.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                m_application.PropertiesMenuPanel.gameObject.SetActive(false);
             }
         }
 

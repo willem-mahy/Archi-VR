@@ -1,4 +1,5 @@
 ﻿using ArchiVR.Application.PrefabDefinition;
+using ArchiVR.Application.Properties;
 using ArchiVR.Command;
 using ArchiVR.Net;
 using ArchiVR.UI;
@@ -1953,6 +1954,16 @@ namespace ArchiVR.Application
 
         public ProjectData ProjectData = new ProjectData();
 
+        /// <summary>
+        /// The edit menu.
+        /// This belly-attached menu is shown while in 'Edit' mode.
+        /// </summary>
         public EditMenuPanel EditMenuPanel;
+
+        /// <summary>
+        /// The properties menu.
+        /// This player-front attached menu is shown while editing object properties.
+        /// </summary>
+        public PropertiesMenu PropertiesMenuPanel;
     };
 }

@@ -383,6 +383,7 @@ GameObject:
   - component: {fileID: 1435622720806538005}
   - component: {fileID: 5310477744294825676}
   - component: {fileID: -7458077118712025513}
+  - component: {fileID: 6056057150869619584}
   m_Layer: 0
   m_Name: Wall Cube
   m_TagString: Untagged
@@ -433,6 +434,21 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.12, y: 0.12, z: 0.11}
   m_Center: {x: 0, y: 0, z: 0.055}
+--- !u!114 &6056057150869619584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5591593317780142876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc25a4ef3f9fd44cb5f607870fb41d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LightSources:
+  - {fileID: 4008314565901823090}
+  - {fileID: 6641374988119056228}
 --- !u!1 &6504284359961546551
 GameObject:
   m_ObjectHideFlags: 0

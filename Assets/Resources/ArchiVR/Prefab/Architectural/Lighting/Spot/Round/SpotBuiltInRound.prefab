@@ -89,6 +89,7 @@ GameObject:
   - component: {fileID: 1847303476991030243}
   - component: {fileID: 5604303934342451627}
   - component: {fileID: 7150064199430192671}
+  - component: {fileID: -8543068322141445286}
   m_Layer: 0
   m_Name: SpotBuiltInRound
   m_TagString: Untagged
@@ -138,6 +139,20 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.07, y: 0.07, z: 0.004}
   m_Center: {x: 0, y: 0, z: 0.002}
+--- !u!114 &-8543068322141445286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847303476991030240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc25a4ef3f9fd44cb5f607870fb41d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LightSources:
+  - {fileID: 3384562401911178784}
 --- !u!1 &2023985242027699648
 GameObject:
   m_ObjectHideFlags: 0
