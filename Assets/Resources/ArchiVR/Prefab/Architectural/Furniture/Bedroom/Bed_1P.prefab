@@ -608,7 +608,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6344599322151853213}
-  - component: {fileID: 1425358464434628742}
   m_Layer: 0
   m_Name: Mesh
   m_TagString: Untagged
@@ -623,8 +622,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3259395233735839702}
-  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.6, y: 0, z: 0}
+  m_LocalRotation: {x: 0.5, y: 0.5, z: 0.5, w: 0.5}
+  m_LocalPosition: {x: -0.6, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 8247445416335923791}
@@ -636,20 +635,7 @@ Transform:
   - {fileID: 4186757099039140475}
   m_Father: {fileID: 8974411099759218137}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
---- !u!65 &1425358464434628742
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3259395233735839702}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.1053274, y: 0.69670916, z: 1.2089336}
-  m_Center: {x: 1.0311893, y: 0.32688022, z: 0.603212}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 90}
 --- !u!1 &3302826875828036254
 GameObject:
   m_ObjectHideFlags: 0
@@ -770,7 +756,6 @@ GameObject:
   - component: {fileID: 4995827735108293559}
   - component: {fileID: 3266549572727480441}
   - component: {fileID: 7774046043746951760}
-  - component: {fileID: 6501776645842750526}
   m_Layer: 0
   m_Name: Group 392
   m_TagString: Untagged
@@ -838,19 +823,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &6501776645842750526
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4284630294655304623}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.05, y: 1.1, z: 1.2}
-  m_Center: {x: 0.025, y: 0.55, z: 0.6}
 --- !u!1 &6178517518160303249
 GameObject:
   m_ObjectHideFlags: 0
@@ -971,7 +943,6 @@ GameObject:
   - component: {fileID: 4679016778174508439}
   - component: {fileID: 8311640344651753999}
   - component: {fileID: 8841795851391043375}
-  - component: {fileID: 7724705941917482033}
   m_Layer: 0
   m_Name: Queen Mattress
   m_TagString: Untagged
@@ -1039,19 +1010,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &7724705941917482033
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6629796202385053974}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.032, y: 0.3048, z: 1.5239998}
-  m_Center: {x: 1.016, y: 0.1524, z: 0.7619999}
 --- !u!1 &6647818153586047496
 GameObject:
   m_ObjectHideFlags: 0
@@ -1063,7 +1021,6 @@ GameObject:
   - component: {fileID: 19776072269087998}
   - component: {fileID: 8101440383354396389}
   - component: {fileID: 5238262641128349890}
-  - component: {fileID: 977462081398026768}
   m_Layer: 0
   m_Name: Queen Box Spring
   m_TagString: Untagged
@@ -1131,19 +1088,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &977462081398026768
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6647818153586047496}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.032, y: 0.2286, z: 1.5239998}
-  m_Center: {x: 1.016, y: 0.1143, z: 0.7619999}
 --- !u!1 &8551664903404045579
 GameObject:
   m_ObjectHideFlags: 0
@@ -1310,6 +1254,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8974411099759218137}
   - component: {fileID: 4606851797436494497}
+  - component: {fileID: 232215528856293763}
   m_Layer: 0
   m_Name: Bed_1P
   m_TagString: Untagged
@@ -1345,3 +1290,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PickInitializationTypes: 01000000
+--- !u!65 &232215528856293763
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8974411099759218142}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.2, y: 2.06, z: 0.5}
+  m_Center: {x: 0, y: 1.03, z: 0.25}
