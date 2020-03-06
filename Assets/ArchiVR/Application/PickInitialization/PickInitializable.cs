@@ -13,7 +13,9 @@ namespace ArchiVR.Application.PickInitialization
         {
             Ceiling,
             Floor,
-            Wall
+            Wall,
+            POI,
+            Default
         };
 
         private static IPickInitializationType GetPickInitializationTypeInstance(PickInitializationType t)
@@ -21,11 +23,15 @@ namespace ArchiVR.Application.PickInitialization
             switch (t)
             {
                 case PickInitializationType.Floor:
-                    return new PickInitializationType_HorizontalPlane(PickClassifier.PickClassification.Floor);
+                    return new PickInitializationType_Plane(PickClassifier.PickClassification.Floor);
                 case PickInitializationType.Ceiling:
-                    return new PickInitializationType_HorizontalPlane(PickClassifier.PickClassification.Ceiling);
+                    return new PickInitializationType_Plane(PickClassifier.PickClassification.Ceiling);
                 case PickInitializationType.Wall:
-                    return new PickInitializationType_Wall();
+                    return new PickInitializationType_Plane(PickClassifier.PickClassification.Wall);
+                case PickInitializationType.POI:
+                    return new PickInitializationType_POI();
+                case PickInitializationType.Default:
+                    return new PickInitializationType_Default();
                 default:
                     return null;
             }
@@ -34,10 +40,38 @@ namespace ArchiVR.Application.PickInitialization
 
         public void Awake()
         {
+            InitPickInitializationTypes();
+        }
+        
+        private void InitPickInitializationTypes()
+        {
+            _pickInitializationTypes.Clear();
+
             foreach (var t in PickInitializationTypes)
             {
                 _pickInitializationTypes.Add(GetPickInitializationTypeInstance(t));
             }
+        }
+
+        public void AddPickInitializationType(PickInitializationType type)
+        {
+            if (PickInitializationTypes.Contains(type))
+            {
+                return;
+            }
+            
+            PickInitializationTypes.Add(type);
+            _pickInitializationTypes.Add(GetPickInitializationTypeInstance(type));
+        }
+
+        public Vector3 GetAnchoringAxis_Local(List<RaycastHit> picks)
+        {
+            return GetBestPickInitializationType(picks)?.AnchoringAxis_Local ?? Vector3.forward;
+        }
+
+        public Vector3 GetUpAxis_Local(List<RaycastHit> picks)
+        {
+            return GetBestPickInitializationType(picks)?.UpAxis_Local ?? Vector3.up;
         }
 
         /// <summary>
@@ -45,29 +79,44 @@ namespace ArchiVR.Application.PickInitialization
         /// </summary>
         /// <param name="picks"></param>
         /// <returns></returns>
-        public bool Initialize(List<RaycastHit> picks)
+        private IPickInitializationType GetBestPickInitializationType(
+            List<RaycastHit> picks)
         {
             float maxQuality = 0;
-            int bestPitIndex = -1;
 
-            for (int i = 0; i < this._pickInitializationTypes.Count; ++i)
+            IPickInitializationType best = null;
+
+            for (int i = 0; i < _pickInitializationTypes.Count; ++i)
             {
                 var pit = _pickInitializationTypes[i];
                 var quality = pit.GetQuality(picks);
                 if (quality > maxQuality)
                 {
                     maxQuality = quality;
-                    bestPitIndex = i;
+                    best = pit;
                 }
             }
 
-            if (bestPitIndex == -1)
+            return best;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="picks"></param>
+        /// <returns></returns>
+        public bool Initialize(
+            List<RaycastHit> picks,
+            float rotation)
+        {
+            var bestPit = GetBestPickInitializationType(picks);
+
+            if (null == bestPit)
             {
                 return false;
             }
-            
-            var bestPit = _pickInitializationTypes[bestPitIndex];
-            bestPit.Initialize(gameObject, picks);
+
+            bestPit.Initialize(gameObject, picks, rotation);
             return true;
         }
 

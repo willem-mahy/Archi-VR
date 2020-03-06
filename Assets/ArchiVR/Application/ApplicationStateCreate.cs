@@ -31,6 +31,7 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Enter()
         {
+            // Load all prefabs.
             foreach (var objectPrefabDefinition in _editSettings.ObjectPrefabDefinitions)
             {
                 _objectPrefabs.Add(Resources.Load<GameObject>(objectPrefabDefinition.PrefabPath));
@@ -72,6 +73,31 @@ namespace ArchiVR.Application
         }
 
         /// <summary>
+        /// The rotation of the preview along its anchoring axis, as defined by 'B' button presses.
+        /// </summary>
+        private int _rotationIndex = 0;
+
+        /// <summary>
+        /// The step with which the rotation of the preview along its anchoring axis is increased, with each 'B' button press.
+        /// </summary>
+        private float _rotationStep = 45;
+
+        /// <summary>
+        /// Rotation of the preview around its anchoring axis.
+        /// </summary>
+        private float Rotation { get; set; } = 0;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private bool _pressToDefineRotation = true;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private bool PositionPinned => _pickedInfos.Count >= 1;
+
+        /// <summary>
         /// <see cref="ApplicationState{T}.Update"/> implementation.
         /// </summary>
         public override void Update()
@@ -80,12 +106,12 @@ namespace ArchiVR.Application
 
             m_application.Fly();
             //m_application.UpdateTrackingSpace();  // Tempoarily disabled manipulation of the tracking space, since it collides with the input mapping for toggling active prefab type below.
-             
+
             var controllerState = m_application.m_controllerInput.m_controllerState;
 
             // Exiting edit mode is done by:
             // - Pressing left controller index trigger.
-            var returnToParentState =controllerState.lIndexTriggerDown;
+            var returnToParentState = controllerState.lIndexTriggerDown;
 
             if (returnToParentState)
             {
@@ -93,36 +119,165 @@ namespace ArchiVR.Application
                 return;
             }
 
-            // Removing a picked point is performed by:
-            // - Pressing the R controller hand trigger.
-            if (m_application.m_controllerInput.m_controllerState.rHandTriggerDown)
-            {
-                if (_pickedInfos.Count > 0) _pickedInfos.RemoveAt(_pickedInfos.Count - 1);
-            }
-
-            // Activating the previous prefab type is performed by:
-            // - Flipping the L controller thumb stick Left.
+            // - Flip L controller thumb stick Left => Activate previous prefab type
             if (controllerState.lThumbstickDirectionLeftDown)
             {
                 ActivatePreviousObjectType();
+                return;
             }
 
-            // Activating the next prefab type is performed by:
-            // - Flipping the L controller thumb stick Right.
+            // - Flip L controller thumb stick Right => Activate next prefab type
             if (controllerState.lThumbstickDirectionRightDown)
             {
                 ActivateNextObjectType();
+                return;
             }
 
-            #region Update picked position
+            // Controller 'B' button pressed => Rotate preview 90 deg.
+            if (m_application.m_controllerInput.m_controllerState.bButtonDown)
+            {
+                _rotationIndex = (int)(Math.Floor((Rotation + _rotationStep) / _rotationStep));
 
+                Rotation = _rotationIndex * _rotationStep;
+
+                UpdatePreview();
+                return;
+            }
+
+            UpdateHoveredPoint();
+
+            if (!PositionPinned)
+            {
+                UpdatePreview();
+
+                // R Index trigger down => Pick a point:
+                if (m_application.m_controllerInput.m_controllerState.rIndexTriggerDown)
+                {
+                    AddHoveredPointAsPickedPoint();
+                }
+            }
+            else
+            {
+                // R controller hand trigger down => Unpin position.
+                if (controllerState.rHandTriggerDown)
+                {
+                    UnpinPosition();
+                    return;
+                }
+                
+                if (_pressToDefineRotation)
+                {
+                    // R Index trigger down => update preview, so that it rotates to the hovered position
+                    if (controllerState.rIndexTriggerPressed)
+                    {
+                        UpdateRotationFromHoveredPoint();
+                    }
+                }
+                else
+                {
+                    // Continuously update preview, so that it rotates to the hovered position
+                    UpdateRotationFromHoveredPoint();
+                }
+
+                // Controller 'A' button pressed => Create object from preview
+                if (m_application.m_controllerInput.m_controllerState.aButtonDown)
+                {
+                    CreateObject();
+                }
+            }
+        }
+
+        private void UpdateRotationFromHoveredPoint()
+        {
+            if (!_hitInfo.HasValue)
+            {
+                return;
+            }
+
+            var offset_World = (_hitInfo.Value.point - _previewGO.transform.position).normalized;
+
+            var offset_Local = _previewGO.transform.InverseTransformDirection(offset_World);
+
+            var p = _previewGO.GetComponent<PickInitializable>();
+
+            var anchoringAxis = p.GetAnchoringAxis_Local(_pickedInfos);
+            var upAxis = p.GetUpAxis_Local(_pickedInfos);
+
+            var anchorPlane = new Plane(anchoringAxis, 0);
+
+            offset_Local = anchorPlane.ClosestPointOnPlane(offset_Local);
+            
+            offset_Local = offset_Local.normalized;
+
+            var angle = (float)ToDegrees(Math.Asin(Vector3.Dot(offset_Local, upAxis)));
+            
+            var c = Vector3.Cross(offset_Local, upAxis);
+
+            if (c.magnitude == 0)
+            {
+                return;
+            }
+
+            var pos = Vector3.Dot(c, anchoringAxis) > 0;
+
+            if (pos)
+                Rotation += angle;
+            else
+                Rotation -= angle;
+
+            UpdatePreview();
+        }
+
+        double ToDegrees(double radians)
+        {
+            double s_factor = 180.0 / Math.PI;
+
+            return radians * s_factor;
+        }
+
+        double ToRadians(double degrees)
+        {
+            double s_factor = Math.PI / 180.0;
+
+            return degrees * s_factor;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void UnpinPosition()
+        {
+            while (PositionPinned)
+            {
+                RemovePickedPoint();
+            }
+        }
+
+        /// <summary>
+        /// Removes the last added picked point (if any).
+        /// </summary>
+        private void RemovePickedPoint()
+        {
+            if (_pickedInfos.Count == 0)
+            {
+                return;
+            }
+
+            _pickedInfos.RemoveAt(_pickedInfos.Count - 1);
+        }
+
+        /// <summary>
+        /// Update the hovered point.
+        /// </summary>
+        private void UpdateHoveredPoint()
+        {
             var pickRay = m_application.RPickRay.GetRay();
 
             var hitInfo = new RaycastHit();
             hitInfo.distance = float.NaN;
 
             GameObject pickedGO = null;
-            
+
             foreach (var layer in m_application.GetModelLayers())
             {
                 UtilUnity.PickRecursively(
@@ -143,62 +298,72 @@ namespace ArchiVR.Application
             {
                 _hitInfo = null;
             }
+        }
 
-            #endregion Update picked position
-
-            // Picking a point is performed by:
-            //  - Pressing the R controller index trigger.
-            if (m_application.m_controllerInput.m_controllerState.rIndexTriggerDown)
+        /// <summary>
+        /// If there is a hovered point, add it as a picked point.
+        /// </summary>
+        private void AddHoveredPointAsPickedPoint()
+        {
+            if (!_hitInfo.HasValue)
             {
-                if (_hitInfo.HasValue)
-                {
-                    _pickedInfos.Add(_hitInfo.Value);
-
-                    if (null != _previewGO)
-                    {
-                        var pi = _previewGO.GetComponent<PickInitializable>();
-
-                        if (null == pi)
-                        {
-                            CreateObject();
-                            return;
-                        }
-                    }
-                }
+                return;
             }
+
+            _pickedInfos.Add(_hitInfo.Value);
 
             if (null != _previewGO)
             {
-                var picks = new List<RaycastHit>(_pickedInfos);
+                var pi = _previewGO.GetComponent<PickInitializable>();
 
+                // If the prefab has no pick init logic,
+                if (null == pi)
+                {
+                    // instantiate it at the first picked position with identity rotation.
+                    CreateObject();
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void UpdatePreview()
+        {
+            if (null == _previewGO)
+            {
+                return;
+            }
+
+            // Compose a list of picks, including the currently hovered point (if any)
+            var picks = new List<RaycastHit>(_pickedInfos);
+
+            if (picks.Count == 0)
+            {
                 if (_hitInfo.HasValue)
                 {
                     picks.Add(_hitInfo.Value);
                 }
-
-                _previewGO.SetActive(0 != picks.Count);
-
-                if (0 != picks.Count)
-                {
-                    var pi = _previewGO.GetComponent<PickInitializable>();
-
-                    if (null != pi)
-                    {
-                        pi.Initialize(picks);
-                    }
-                    else
-                    {
-                        _previewGO.transform.position = _hitInfo.Value.point;
-                        _previewGO.transform.LookAt(_hitInfo.Value.point + _hitInfo.Value.normal, Vector3.up);
-                    }
-                }
             }
 
-            // Creating an object is performed by:
-            //  - Pressing the controller 'X' button.
-            if (m_application.m_controllerInput.m_controllerState.aButtonDown)
+            if (0 == picks.Count)
             {
-                CreateObject();
+                // Without picks, the object cannot be located => hide preview.
+                _previewGO.SetActive(false);
+            }
+            else
+            {
+                // Locate the object.
+                var pi = _previewGO.GetComponent<PickInitializable>();
+
+                if (null != pi)
+                {
+                    pi.Initialize(picks, Rotation);
+                }
+
+                // Show preview.
+                _previewGO.SetActive(true);
             }
         }
 
@@ -240,7 +405,7 @@ namespace ArchiVR.Application
 
                 rightControllerButtonMapping.ButtonOculusStart.Text = "";
 
-                rightControllerButtonMapping.ButtonA.Text = "Place";
+                rightControllerButtonMapping.ButtonA.Text = _pickedInfos.Count == 0 ? "" : "Place";
                 rightControllerButtonMapping.ButtonB.Text = "";
 
                 rightControllerButtonMapping.ThumbUp.Text = "Forward";
@@ -294,6 +459,19 @@ namespace ArchiVR.Application
 
             m_application.m_leftControllerText.text = ActiveObjectPrefabDefinition.Name;
             m_application.m_leftControllerText.gameObject.SetActive(true);
+
+            var pi = _previewGO.GetComponent<PickInitializable>();
+
+            if (pi == null)
+            {
+                m_application.m_leftControllerText.color = Color.red;
+                pi = _previewGO.AddComponent<PickInitializable>();
+                pi.PickInitializationTypes.Add(PickInitializable.PickInitializationType.Default);
+            }
+            else
+            {
+                m_application.m_leftControllerText.color = Color.black;
+            }
         }
 
         /// <summary>
@@ -307,23 +485,11 @@ namespace ArchiVR.Application
 
             var objectGO = GameObject.Instantiate(
                 ActiveObjectPrefab,
-                Vector3.zero,
-                Quaternion.identity);
+                _previewGO.transform.position,
+                _previewGO.transform.rotation);
 
             // Give the new object a unique name.
             objectGO.name = ActiveObjectPrefab.name + " (" + Guid.NewGuid().ToString() + ")";
-
-            var pi = objectGO.GetComponent<PickInitializable>();
-
-            if (null != pi)
-            {
-                pi.Initialize(_pickedInfos);
-            }
-            else
-            {
-                objectGO.transform.position = _hitInfo.Value.point;
-                objectGO.transform.LookAt(_hitInfo.Value.point + _hitInfo.Value.normal, Vector3.up);
-            }
 
             _gameObjects.Add(objectGO);
 
