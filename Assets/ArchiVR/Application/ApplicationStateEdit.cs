@@ -180,7 +180,14 @@ namespace ArchiVR.Application
 
             if (returnToParentState)
             {
-                m_application.PopApplicationState();
+                if (!m_application.PropertiesMenuPanel.gameObject.activeSelf)
+                {
+                    m_application.PopApplicationState();
+                }
+                else
+                {
+                    CloseProperties();
+                }
                 return;
             }
 
@@ -217,7 +224,10 @@ namespace ArchiVR.Application
 
             if (m_application.m_controllerInput.m_controllerState.rIndexTriggerDown)
             {
-                OnSelect(_hoveredObject);
+                if (!m_application.PropertiesMenuPanel.gameObject.activeSelf) // Do not select/unselect objects while properties menu is open.
+                {
+                    OnSelect(_hoveredObject);
+                }
             }
         }
 
@@ -366,25 +376,7 @@ namespace ArchiVR.Application
                 _selectBoxes.Add(selectedObjectBoundingBox);
             }
 
-            if (_selectedObjects.Count == 1)
-            {
-                var selectedObject = _selectedObjects[0];
-                var properties = selectedObject.GetComponent<PropertiesBase>();
-
-                if (null == properties)
-                {
-                    m_application.PropertiesMenuPanel.gameObject.SetActive(false);
-                }
-                else
-                {
-                    m_application.PropertiesMenuPanel.Properties = properties;
-                    m_application.PropertiesMenuPanel.gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                m_application.PropertiesMenuPanel.gameObject.SetActive(false);
-            }
+            ShowProperties();
         }
 
         /// <summary>
@@ -405,6 +397,35 @@ namespace ArchiVR.Application
                 _objects.Remove(selectedObject);
                 UtilUnity.Destroy(selectedObject);
             }   
+        }
+        
+        /// <summary>
+        /// Closes the properties menu.
+        /// </summary>
+        public void CloseProperties()
+        {
+            m_application.PropertiesMenuPanel.gameObject.SetActive(false);
+            m_application.EditMenuPanel.gameObject.SetActive(true);
+        }
+
+        /// <summary>
+        /// Shows the properties menu (if having a single object selected).
+        /// </summary>
+        public void ShowProperties()
+        {
+            if (_selectedObjects.Count != 1)
+            {
+                return;
+            }
+            var selectedObject = _selectedObjects[0];
+            var properties = selectedObject.GetComponent<PropertiesBase>();
+
+            if (null != properties)
+            {
+                m_application.PropertiesMenuPanel.Properties = properties;
+                m_application.PropertiesMenuPanel.gameObject.SetActive(true);
+                m_application.EditMenuPanel.gameObject.SetActive(false);
+            }
         }
 
         /// <summary>

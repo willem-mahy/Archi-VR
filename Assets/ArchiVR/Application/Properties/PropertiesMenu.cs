@@ -2,11 +2,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 using WM;
+using WM.UI;
 
 namespace ArchiVR.Application.Properties
 {
     public class PropertiesMenu
-        : MonoBehaviour
+        : MenuPanel<ApplicationArchiVR>
     {
         public StringPropertyPanel StringPropertyPanel;
         public ColorPropertyPanel ColorPropertyPanel;
@@ -30,18 +31,6 @@ namespace ArchiVR.Application.Properties
             }
         }
 
-        // Start is called before the first frame update
-        void Start()
-        {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-        
         #region Private API
 
         /// <summary>
@@ -86,6 +75,8 @@ namespace ArchiVR.Application.Properties
             propertyPanel.SetActive(true);
 
             _yOffset -= rectTransform.rect.height;
+
+            _propertyPanels.Add(propertyPanel);
         }
 
         float _yOffset = 0;
@@ -106,6 +97,18 @@ namespace ArchiVR.Application.Properties
             }
         }
 
+        /// <summary>
+        /// 'On Click' event handler for the 'Close' button.
+        /// </summary>
+        public void OnClickCloseButton()
+        {
+            Application.Logger.Debug("PropertiesMenu.OnClickCloseButton()");
+
+            ApplicationState.CloseProperties();
+        }
+
         #endregion Private API
+
+        public ApplicationStateEdit ApplicationState;
     }
 }

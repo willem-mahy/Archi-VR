@@ -48,7 +48,7 @@ namespace ArchiVR.UI
         /// </summary>
         public void OnClickLightButton()
         {
-            Application.Logger.Debug("OnClickLightButton()");
+            Application.Logger.Debug("EditMenuPanel.OnClickLightButton()");
 
             ApplicationState.ActiveObjectTypeIndex = 0;
         }
@@ -58,7 +58,7 @@ namespace ArchiVR.UI
         /// </summary>
         public void OnClickPropButton()
         {
-            Application.Logger.Debug("OnClickPropButton()");
+            Application.Logger.Debug("EditMenuPanel.OnClickPropButton()");
 
             ApplicationState.ActiveObjectTypeIndex = 1;
         }
@@ -68,9 +68,19 @@ namespace ArchiVR.UI
         /// </summary>
         public void OnClickDeleteButton()
         {
-            Application.Logger.Debug("OnClickDeleteButton()");
+            Application.Logger.Debug("EditMenuPanel.OnClickDeleteButton()");
 
             ApplicationState.Delete();
+        }
+
+        /// <summary>
+        /// 'On Click' event handler for the 'Properties' button.
+        /// </summary>
+        public void OnClickPropertiesButton()
+        {
+            Application.Logger.Debug("EditMenuPanel.OnClickPropertiesButton()");
+
+            ApplicationState.ShowProperties();
         }
 
         #endregion UI Event Handlers
