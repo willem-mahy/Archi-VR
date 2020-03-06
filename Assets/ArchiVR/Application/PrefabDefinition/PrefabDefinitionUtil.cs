@@ -17,8 +17,8 @@ namespace ArchiVR.Application.PrefabDefinition
                 new ObjectPrefabDefinition("Radiator_Electric_Acova_Regate_El_Air_(50x135cm)",  "ArchiVR/Prefab/Architectural/Furniture/Bathroom/Radiator_Electric_Acova_Regate_El_Air_(50x135cm)" ),
                 new ObjectPrefabDefinition("Douche 1",                                          "ArchiVR/Prefab/Architectural/Furniture/Bathroom/Douche/Douche 1" ),
 
-                new ObjectPrefabDefinition("Bed 1P", "ArchiVR/Prefab/Architectural/Furniture/Bedroom/Bed_2P_01" ),
-                new ObjectPrefabDefinition("Bed 2P", "ArchiVR/Prefab/Architectural/Furniture/Bedroom/Bed_1P" ),
+                new ObjectPrefabDefinition("Bed 1P", "ArchiVR/Prefab/Architectural/Furniture/Bedroom/Bed_1P" ),
+                new ObjectPrefabDefinition("Bed 2P", "ArchiVR/Prefab/Architectural/Furniture/Bedroom/Bed_2P_01" ),                
 
                 new ObjectPrefabDefinition("Chair 01",  "ArchiVR/Prefab/Architectural/Furniture/Dining Area/Chair 01" ),
                 new ObjectPrefabDefinition("Table 01",  "ArchiVR/Prefab/Architectural/Furniture/Dining Area/Table 01" ),
