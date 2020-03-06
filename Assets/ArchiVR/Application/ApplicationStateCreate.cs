@@ -189,43 +189,55 @@ namespace ArchiVR.Application
 
         private void UpdateRotationFromHoveredPoint()
         {
-            if (!_hitInfo.HasValue)
+            var angle = GetRotationAngleFromHoveredPoint();
+
+            if (float.IsNaN(angle))
             {
                 return;
             }
 
-            var offset_World = (_hitInfo.Value.point - _previewGO.transform.position).normalized;
+            Rotation += angle;
 
-            var offset_Local = _previewGO.transform.InverseTransformDirection(offset_World);
+            UpdatePreview();
+        }
+        
+        private float GetRotationAngleFromHoveredPoint()
+        {
+            if (!_hitInfo.HasValue)
+            {
+                return float.NaN;
+            }
 
-            var p = _previewGO.GetComponent<PickInitializable>();
+            var offset = (_hitInfo.Value.point - _previewGO.transform.position).normalized;
 
-            var anchoringAxis = p.GetAnchoringAxis_Local(_pickedInfos);
-            var upAxis = p.GetUpAxis_Local(_pickedInfos);
+            var offset_Local = _previewGO.transform.InverseTransformDirection(offset);
 
-            var anchorPlane = new Plane(anchoringAxis, 0);
+            var pi = _previewGO.GetComponent<PickInitializable>();
+
+            var anchoringAxis_Local = pi.GetAnchoringAxis_Local(_pickedInfos);
+            var upAxis_Local = pi.GetUpAxis_Local(_pickedInfos);
+
+            var anchorPlane = new Plane(anchoringAxis_Local, 0);
 
             offset_Local = anchorPlane.ClosestPointOnPlane(offset_Local);
-            
+
             offset_Local = offset_Local.normalized;
 
-            var angle = (float)ToDegrees(Math.Asin(Vector3.Dot(offset_Local, upAxis)));
-            
-            var c = Vector3.Cross(offset_Local, upAxis);
+            var angle = (float)ToDegrees(Math.Acos(Vector3.Dot(offset_Local, upAxis_Local)));
+
+            var c = Vector3.Cross(offset_Local, upAxis_Local);
 
             if (c.magnitude == 0)
             {
-                return;
+                return float.NaN;
             }
 
-            var pos = Vector3.Dot(c, anchoringAxis) > 0;
+            if (Vector3.Dot(c, anchoringAxis_Local) > 0)
+            {
+                angle = -angle;
+            }
 
-            if (pos)
-                Rotation += angle;
-            else
-                Rotation -= angle;
-
-            UpdatePreview();
+            return angle;
         }
 
         double ToDegrees(double radians)
