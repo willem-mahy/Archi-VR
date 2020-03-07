@@ -9,14 +9,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7149584036776523759}
-  - component: {fileID: 7149584036776523757}
-  - component: {fileID: 7149584036776523758}
+  - component: {fileID: 2317945271141970563}
+  - component: {fileID: 8663423948466695470}
   m_Layer: 0
-  m_Name: Droogkast
+  m_Name: Dryer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &7149584036776523759
 Transform:
@@ -25,29 +25,88 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7149584036776523752}
-  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 11.294276, y: 0.45, z: 9.18404}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 7149584037062299542}
+  - {fileID: 4520026749670096022}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &7149584036776523757
+--- !u!114 &2317945271141970563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7149584036776523752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 681920dd4123fef4381e2714652e9088, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PickInitializationTypes: 01000000
+--- !u!65 &8663423948466695470
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7149584036776523752}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.63157254, y: 0.7472224, z: 0.9287174}
+  m_Center: {x: -0.00082603097, y: 0.037173152, z: 0.46607852}
+--- !u!1 &7225870390829216126
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4520026749670096022}
+  - component: {fileID: 3051014104503950748}
+  - component: {fileID: 5989514125122501733}
+  m_Layer: 0
+  m_Name: Mesh
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4520026749670096022
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7225870390829216126}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: -0.315, y: 0.41, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 4068002711537569494}
+  m_Father: {fileID: 7149584036776523759}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!33 &3051014104503950748
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7149584036776523752}
+  m_GameObject: {fileID: 7225870390829216126}
   m_Mesh: {fileID: 2356852466972437592, guid: 6a9fa23b63baf5749acbbee8674f682a, type: 3}
---- !u!23 &7149584036776523758
+--- !u!23 &5989514125122501733
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7149584036776523752}
+  m_GameObject: {fileID: 7225870390829216126}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -85,7 +144,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!1 &7149584037062299543
+--- !u!1 &8958529123764580909
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -93,45 +152,45 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7149584037062299542}
-  - component: {fileID: 7149584037062299540}
-  - component: {fileID: 7149584037062299541}
+  - component: {fileID: 4068002711537569494}
+  - component: {fileID: 5909879286020026449}
+  - component: {fileID: 1103781132748121941}
   m_Layer: 0
   m_Name: Logo Electrolux
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7149584037062299542
+--- !u!4 &4068002711537569494
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7149584037062299543}
+  m_GameObject: {fileID: 8958529123764580909}
   m_LocalRotation: {x: 0.07148831, y: 0.015951369, z: -0.0011434084, w: 0.99731326}
   m_LocalPosition: {x: 0.04504478, y: 0.89186686, z: 0.05969825}
   m_LocalScale: {x: 0.99999994, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 7149584036776523759}
+  m_Father: {fileID: 4520026749670096022}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &7149584037062299540
+--- !u!33 &5909879286020026449
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7149584037062299543}
+  m_GameObject: {fileID: 8958529123764580909}
   m_Mesh: {fileID: -3508476424510716665, guid: 6a9fa23b63baf5749acbbee8674f682a, type: 3}
---- !u!23 &7149584037062299541
+--- !u!23 &1103781132748121941
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7149584037062299543}
+  m_GameObject: {fileID: 8958529123764580909}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1

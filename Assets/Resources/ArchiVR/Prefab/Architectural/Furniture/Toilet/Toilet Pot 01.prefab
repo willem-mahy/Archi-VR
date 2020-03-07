@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7482837714520285101}
   - component: {fileID: 8841923962975445680}
+  - component: {fileID: 8042389291529559868}
   m_Layer: 0
   m_Name: Toilet Pot 01
   m_TagString: Untagged
@@ -45,6 +46,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PickInitializationTypes: 02000000
+--- !u!65 &8042389291529559868
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3468007592108789338}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.43886665, y: 0.42753077, z: 1}
+  m_Center: {x: 0.0009445995, y: 0.26356256, z: 0}
 --- !u!1 &8396254506537524883
 GameObject:
   m_ObjectHideFlags: 0
@@ -56,13 +70,12 @@ GameObject:
   - component: {fileID: 8396254506537524886}
   - component: {fileID: 8396254506537524881}
   - component: {fileID: 8396254506537524880}
-  - component: {fileID: 2278923803740340003}
   m_Layer: 0
   m_Name: Toilet Pot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &8396254506537524886
 Transform:
@@ -124,16 +137,3 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &2278923803740340003
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8396254506537524883}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 3.666904, y: 3.564587, z: 4.940584}
-  m_Center: {x: 0.0000005364418, y: 1.7822936, z: 0.0016409159}

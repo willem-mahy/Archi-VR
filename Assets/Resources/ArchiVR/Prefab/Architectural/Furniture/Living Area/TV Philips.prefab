@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2202567741845057010}
   - component: {fileID: 7761992274950058199}
+  - component: {fileID: 3445024805559320052}
   m_Layer: 0
   m_Name: TV Philips
   m_TagString: Untagged
@@ -44,7 +45,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 681920dd4123fef4381e2714652e9088, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PickInitializationTypes: 0100000002000000
+  PickInitializationTypes: 02000000
+--- !u!65 &3445024805559320052
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2296725965272601443}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.5457587, y: 0.6960284, z: 0.02979156}
+  m_Center: {x: -0.0014340878, y: 0.36100534, z: 0.01489578}
 --- !u!1 &6519917474473944806
 GameObject:
   m_ObjectHideFlags: 0
@@ -54,7 +68,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6519917474473944801}
-  - component: {fileID: 2198159853106598930}
   m_Layer: 0
   m_Name: Body
   m_TagString: Untagged
@@ -78,19 +91,6 @@ Transform:
   m_Father: {fileID: 2202567741845057010}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &2198159853106598930
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6519917474473944806}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 3.07477, y: 1.4386258, z: 0.101861715}
-  m_Center: {x: 1.5386717, y: 0.72059965, z: 0.031330235}
 --- !u!1 &6519917474828627233
 GameObject:
   m_ObjectHideFlags: 0

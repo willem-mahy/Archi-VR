@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3266656639820283808}
   - component: {fileID: 2462152501199396217}
+  - component: {fileID: 3812307719113731916}
   m_Layer: 0
   m_Name: Toilet Roll Holder 01
   m_TagString: Untagged
@@ -45,6 +46,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PickInitializationTypes: 02000000
+--- !u!65 &3812307719113731916
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1002943993134171767}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.16301215, y: 0.14079091, z: 0.11179476}
+  m_Center: {x: 0.06251663, y: -0.031401023, z: 0.055763874}
 --- !u!1 &1934005155214944941
 GameObject:
   m_ObjectHideFlags: 0
@@ -56,7 +70,6 @@ GameObject:
   - component: {fileID: 1934005155214944942}
   - component: {fileID: 1934005155214944943}
   - component: {fileID: 1934005155214944940}
-  - component: {fileID: 1551683496217624166}
   m_Layer: 0
   m_Name: Toilet Roll Holder
   m_TagString: Untagged
@@ -72,7 +85,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1934005155214944941}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0.176, y: 0, z: 0.06}
+  m_LocalPosition: {x: 0.1785, y: -0.677, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 3266656639820283808}
@@ -126,16 +139,3 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &1551683496217624166
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1934005155214944941}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.16293062, y: 0.14013356, z: 0.112015665}
-  m_Center: {x: 0.11619241, y: 0.645949, z: 0.0042372216}
