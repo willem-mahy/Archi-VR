@@ -290,7 +290,7 @@ namespace ArchiVR.Application
             if (rightControllerButtonMapping != null)
             {
                 rightControllerButtonMapping.IndexTrigger.Text = "Select";
-                rightControllerButtonMapping.HandTrigger.Text = _selectedObjects.Count == 0 ? "" : "Additive selection";
+                rightControllerButtonMapping.HandTrigger.Text = "Additive selection";
 
                 rightControllerButtonMapping.ButtonOculusStart.Text = "";
 
