@@ -418,7 +418,7 @@ namespace ArchiVR.Application
                 rightControllerButtonMapping.ButtonOculusStart.Text = "";
 
                 rightControllerButtonMapping.ButtonA.Text = _pickedInfos.Count == 0 ? "" : "Place";
-                rightControllerButtonMapping.ButtonB.Text = "";
+                rightControllerButtonMapping.ButtonB.Text = "Step Rotate";
 
                 rightControllerButtonMapping.ThumbUp.Text = "Forward";
                 rightControllerButtonMapping.ThumbDown.Text = "Backward";
