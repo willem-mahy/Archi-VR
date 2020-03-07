@@ -88,6 +88,7 @@ namespace ArchiVR.Application.Properties
                 panel.transform.SetParent(null);
                 UtilUnity.Destroy(panel);
             }
+            _propertyPanels.Clear();
 
             _yOffset = 0;
 
