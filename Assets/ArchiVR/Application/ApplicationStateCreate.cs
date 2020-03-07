@@ -290,7 +290,7 @@ namespace ArchiVR.Application
 
             GameObject pickedGO = null;
 
-            foreach (var layer in m_application.GetModelLayers())
+            foreach (var layer in m_application.GetLayers())
             {
                 UtilUnity.PickRecursively(
                     layer.Model,

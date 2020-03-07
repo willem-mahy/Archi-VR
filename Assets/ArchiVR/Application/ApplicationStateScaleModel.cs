@@ -168,7 +168,7 @@ namespace ArchiVR
                     else
                     {
                         int layerIndex = 0;
-                        foreach (var layer in m_application.GetModelLayers())
+                        foreach (var layer in m_application.GetLayers())
                         {
                             m_application.SetModelLayerVisible(layerIndex, true);
                             ++layerIndex;
@@ -263,7 +263,7 @@ namespace ArchiVR
 
                 pickedLayer = null;
                 
-                foreach (var layer in m_application.GetModelLayers())
+                foreach (var layer in m_application.GetLayers())
                 {
                     UtilUnity.PickRecursively(
                         layer.Model,
@@ -280,7 +280,7 @@ namespace ArchiVR
                 else
                 {
                     int layerIndex = 0;
-                    foreach (var layer in m_application.GetModelLayers())
+                    foreach (var layer in m_application.GetLayers())
                     {
                         if (pickedLayer == layer.Model)
                         {

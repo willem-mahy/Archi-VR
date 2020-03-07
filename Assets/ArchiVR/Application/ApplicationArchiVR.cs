@@ -3,10 +3,12 @@ using ArchiVR.Application.Properties;
 using ArchiVR.Command;
 using ArchiVR.Net;
 using ArchiVR.UI;
+using Assets.ArchiVR.Application.Editable;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -131,49 +133,9 @@ namespace ArchiVR.Application
         #region Layers
 
         /// <summary>
-        /// Represents a layer (eg. "Kelder", "Gelijkvloers", "Verdiep", "Zolder")
-        /// </summary>
-        public class Layer
-        {
-            /// <summary>
-            /// The gameobject containing the basic model geometry (as imported from sketchup).
-            /// </summary>
-            public GameObject Model;
-
-            /// <summary>
-            /// The gameobject containing the furniture geometry.
-            /// </summary>
-            public GameObject Furniture;
-
-            /// <summary>
-            /// The gameobject containing the lighting definitions and geometry.
-            /// </summary>
-            public GameObject Lighting;
-
-            /// <summary>
-            /// 
-            /// </summary>
-            /// <param name="active"></param>
-            public void SetActive(bool active)
-            {
-                Model.SetActive(active);
-                
-                if (Furniture != null)
-                {
-                    Furniture.SetActive(active);
-                }
-
-                if (Lighting != null)
-                {
-                    Lighting.SetActive(active);
-                }
-            }
-        };
-
-        /// <summary>
         /// The layers.
         /// </summary>
-        private Dictionary<string, Layer> m_layers = new Dictionary<string, Layer>();
+        private Dictionary<string, ArchiVRLayer> m_layers = new Dictionary<string, ArchiVRLayer>();
         
         #endregion
 
@@ -1060,23 +1022,7 @@ namespace ArchiVR.Application
             //}
         }
 
-        #endregion
-
-        public void SetModelLayerVisible(
-            int layerIndex,
-            bool visible)
-        {
-            var command = new SetModelLayerVisibilityCommand(layerIndex, visible);
-
-            if (NetworkMode == NetworkMode.Server)
-            {
-                Server.BroadcastCommand(command);
-            }
-            else
-            {
-                command.Execute(this);
-            }
-        }
+        #endregion Immersion Mode management
 
         #region Project management
 
@@ -1138,7 +1084,9 @@ namespace ArchiVR.Application
             }
         }
 
-        //! Gets the active project's name, or null if no project active.
+        /// <summary>
+        /// Gets the active project's name, or null if no project active.
+        /// </summary>
         public string ActiveProjectName
         {
             get
@@ -1149,7 +1097,9 @@ namespace ArchiVR.Application
             }
         }
 
-        //! Gets the active project.
+        /// <summary>
+        /// Gets the active project.
+        /// </summary>
         public GameObject ActiveProject
         {
             get
@@ -1172,6 +1122,23 @@ namespace ArchiVR.Application
                 throw new Exception("Project loaded, but project scene does not contain a 'Project' GameObject!");
             }
         }
+
+        /// <summary>
+        /// Activates a project, by index.
+        /// </summary>
+        void SetActiveProject(int projectIndex)
+        {
+            var tc = GetTeleportCommandForProject(projectIndex);
+
+            if (tc != null)
+            {
+                Teleport(tc);
+            }
+        }
+
+        #endregion Project management
+
+        #region Teleport
 
         /// <summary>
         /// Get the TeleportCommand to activate a project, by index.
@@ -1268,20 +1235,7 @@ namespace ArchiVR.Application
             return tc;
         }
 
-        /// <summary>
-        /// Activates a project, by index.
-        /// </summary>
-        void SetActiveProject(int projectIndex)
-        {
-            var tc = GetTeleportCommandForProject(projectIndex);
-
-            if (tc != null)
-            {
-                Teleport(tc);
-            }
-        }
-
-        #endregion
+        #endregion Teleport
 
         #region POI management
 
@@ -1363,14 +1317,18 @@ namespace ArchiVR.Application
         /// <summary>
         /// Gets a list containing a handle to the layers.
         /// </summary>
-        /// <returns></returns>
-        public List<Layer> GetModelLayers()
+        public List<ArchiVRLayer> GetLayers()
         {
-            return new List<Layer>(m_layers.Values);
+            return new List<ArchiVRLayer>(m_layers.Values);
         }
 
         /// <summary>
-        /// Unhides all model layers.
+        /// Gets an array with the names of all existing layers.
+        /// </summary>
+        public string[] LayerNames() => m_layers.Keys.ToArray();
+
+        /// <summary>
+        /// Unhides all layers.
         /// </summary>
         public void UnhideAllModelLayers()
         {
@@ -1381,7 +1339,7 @@ namespace ArchiVR.Application
         }
 
         /// <summary>
-        /// Gathers all model layers for the currently active project.
+        /// Gathers all layers for the currently active project.
         /// </summary>
         public void GatherActiveProjectLayers()
         {
@@ -1394,7 +1352,7 @@ namespace ArchiVR.Application
                 return;
             }
 
-            // Gather model layers.
+            // Gather layers from model.
             {
                 var modelTransform = activeProject.transform.Find("Model");
 
@@ -1414,81 +1372,35 @@ namespace ArchiVR.Application
                 {
                     var layerModelGO = layerTransform.gameObject;
 
-                    var layer = new Layer();
-                    layer.Model = layerModelGO;
+                    var layer = new ArchiVRLayer(layerModelGO);
 
                     m_layers.Add(layerModelGO.name, layer);
                 }
             }
+        }
 
-            // Gather lighting layers.
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="layerIndex"></param>
+        /// <param name="visible"></param>
+        public void SetModelLayerVisible(
+            int layerIndex,
+            bool visible)
+        {
+            var command = new SetModelLayerVisibilityCommand(layerIndex, visible);
+
+            if (NetworkMode == NetworkMode.Server)
             {
-                var lightingTransform = activeProject.transform.Find("Lighting");
-
-                if (lightingTransform == null)
-                {
-                    Logger.Warning("Active project does not contain a child named 'Lighting'.");
-                }
-                else
-                {
-                    var layers = lightingTransform.Find("Layers");
-
-                    if (layers == null)
-                    {
-                        Logger.Warning("Active project's 'Lighting' does not contain a child named 'Layers'.");
-                    }
-
-                    foreach (Transform layerTransform in layers.transform)
-                    {
-                        var layerLightingGO = layerTransform.gameObject;
-
-                        if (m_layers.ContainsKey(layerLightingGO.name))
-                        {
-                            m_layers[layerLightingGO.name].Lighting = layerLightingGO;
-                        }
-                        else
-                        {
-                            var warning = string.Format("No corresponding layer '{0}' found for lighting layer.", layerLightingGO.name);
-                            Logger.Warning(warning);
-                        }
-                    }
-                }
+                Server.BroadcastCommand(command);
             }
-
-            // Gather furniture layers.
+            else
             {
-                var lightingTransform = activeProject.transform.Find("Furniture");
-
-                if (lightingTransform == null)
-                {
-                    Logger.Warning("Active project does not contain a child named 'Furniture'.");
-                }
-                else
-                {
-                    var layers = lightingTransform.Find("Layers");
-
-                    if (layers == null)
-                    {
-                        Logger.Warning("Active project's 'Furniture' does not contain a child named 'Layers'.");
-                    }
-
-                    foreach (Transform layerTransform in layers.transform)
-                    {
-                        var layerFurnitureGO = layerTransform.gameObject;
-
-                        if (m_layers.ContainsKey(layerFurnitureGO.name))
-                        {
-                            m_layers[layerFurnitureGO.name].Furniture = layerFurnitureGO;
-                        }
-                        else
-                        {
-                            var warning = string.Format("No corresponding layer '{0}' found for furniture layer.", layerFurnitureGO.name);
-                            Logger.Warning(warning);
-                        }
-                    }
-                }
+                command.Execute(this);
             }
         }
+
+        #endregion Layer Management
 
         /// <summary>
         /// 
@@ -1542,10 +1454,12 @@ namespace ArchiVR.Application
             }
         }
 
+        #region Project Visible
+
         private bool _projectVisible = true;
 
         /// <summary>
-        /// Whether the project is visible, or not.
+        /// Whether the project (Model and Content) is visible, or not.
         /// </summary>
         public bool ProjectVisible
         {
@@ -1568,6 +1482,10 @@ namespace ArchiVR.Application
             }
         }
 
+        #endregion Project Visible
+
+        #region OVR State caching
+
         /// <summary>
         /// Temporary caches the OVRManager headpose rotation while EnableInput is false.
         /// </summary>
@@ -1577,6 +1495,10 @@ namespace ArchiVR.Application
         /// Temporary caches the OVRManager headpose translation while EnableInput is false.
         /// </summary>
         Vector3 t;
+
+        #endregion OVR State caching
+
+        #region Application settings
 
         /// <summary>
         /// 
@@ -1643,6 +1565,59 @@ namespace ArchiVR.Application
 
             SaveSettings(settings);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="settings"></param>
+        private void SaveSettings(ApplicationArchiVRSettings settings)
+        {
+            try
+            {
+                var serializer = new XmlSerializer(typeof(ApplicationArchiVRSettings));
+
+                using (var writer = new StreamWriter(SettingsFilePath))
+                {
+                    serializer.Serialize(writer, settings);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Warning("Failed to save settings file!" + e.Message);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private ApplicationArchiVRSettings GetApplicationSettings()
+        {
+            var settings = new ApplicationArchiVRSettings();
+
+            settings.NetworkSettings.ColocationEnabled = ColocationEnabled;
+            settings.NetworkSettings.SharedReferencePosition = SharedReferenceSystem.transform.localPosition;
+            settings.NetworkSettings.SharedReferenceRotation = SharedReferenceSystem.transform.localRotation;
+
+            settings.DebugLogSettings.LoggingEnabled = Logger.Enabled;
+
+            settings.GraphicsSettings.QualityLevel = QualitySettings.GetQualityLevel();
+            settings.GraphicsSettings.ShowFPS = FpsPanelHUD.activeSelf;
+            settings.GraphicsSettings.ShowReferenceFrames = ShowReferenceSystems;
+            settings.GraphicsSettings.WorldScaleMenuSize = WorldSpaceMenu.gameObject.transform.localScale.x;
+            settings.GraphicsSettings.WorldScaleMenuHeight = WorldSpaceMenu.Offset.y;
+
+            settings.PlayerNames = _playerNames;
+
+            settings.PlayerSettings.name = Player.Name;
+            settings.PlayerSettings.avatarID = Player.AvatarID;
+
+            return settings;
+        }
+
+        #endregion Application settings
+
+        #region Project Data
 
         /// <summary>
         /// 
@@ -1720,8 +1695,7 @@ namespace ArchiVR.Application
                 Logger.Warning("Failed to save project data file!" + e.Message);
             }
         }
-
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -1872,56 +1846,7 @@ namespace ArchiVR.Application
             #endregion Prop Objects
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="settings"></param>
-        private void SaveSettings(ApplicationArchiVRSettings settings)
-        {
-            try
-            {
-                var serializer = new XmlSerializer(typeof(ApplicationArchiVRSettings));
-
-                using (var writer = new StreamWriter(SettingsFilePath))
-                {
-                    serializer.Serialize(writer, settings);
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Warning("Failed to save settings file!" + e.Message);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        private ApplicationArchiVRSettings GetApplicationSettings()
-        {
-            var settings = new ApplicationArchiVRSettings();
-
-            settings.NetworkSettings.ColocationEnabled = ColocationEnabled;
-            settings.NetworkSettings.SharedReferencePosition = SharedReferenceSystem.transform.localPosition;
-            settings.NetworkSettings.SharedReferenceRotation = SharedReferenceSystem.transform.localRotation;
-
-            settings.DebugLogSettings.LoggingEnabled = Logger.Enabled;
-            
-            settings.GraphicsSettings.QualityLevel = QualitySettings.GetQualityLevel();
-            settings.GraphicsSettings.ShowFPS = FpsPanelHUD.activeSelf;
-            settings.GraphicsSettings.ShowReferenceFrames = ShowReferenceSystems;
-            settings.GraphicsSettings.WorldScaleMenuSize = WorldSpaceMenu.gameObject.transform.localScale.x;
-            settings.GraphicsSettings.WorldScaleMenuHeight = WorldSpaceMenu.Offset.y;
-
-            settings.PlayerNames = _playerNames;
-
-            settings.PlayerSettings.name = Player.Name;
-            settings.PlayerSettings.avatarID = Player.AvatarID;
-
-            return settings;
-        }
-
-        #endregion
+        #endregion Project Data
 
         /// <summary>
         /// The surroundings in which the maquette is previewed.

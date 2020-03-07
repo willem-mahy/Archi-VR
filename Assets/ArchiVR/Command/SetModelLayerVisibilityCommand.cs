@@ -54,7 +54,7 @@ namespace ArchiVR.Command
 
             //immersionModeMaquette.SetModelLayerVisibility(ModelLayerIndex, Visible);
 
-            var layer = applicationArchiVR.GetModelLayers()[ModelLayerIndex];
+            var layer = applicationArchiVR.GetLayers()[ModelLayerIndex];
 
             layer.SetActive(Visible);
         }
