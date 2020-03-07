@@ -10,27 +10,6 @@ namespace ArchiVR.UI
     /// </summary>
     public class EditMenuPanel : MenuPanel<ApplicationArchiVR>
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public void Update()
-        {
-            if (null != ApplicationState)
-            {
-                var colors = ButtonLight.colors;
-                colors.normalColor = (0 == ApplicationState.ActiveObjectTypeIndex) ? ActiveButtonColor : InactiveButtonColor;
-                ButtonLight.colors = colors;
-
-                colors = ButtonProp.colors;
-                colors.normalColor  = (1 == ApplicationState.ActiveObjectTypeIndex) ? ActiveButtonColor : InactiveButtonColor;
-                ButtonProp.colors = colors;
-
-                colors = ButtonPOI.colors;
-                colors.normalColor   = (2 == ApplicationState.ActiveObjectTypeIndex) ? ActiveButtonColor : InactiveButtonColor;
-                ButtonPOI.colors = colors;
-            }
-        }
-        
         #region UI Event Handlers
 
         /// <summary>
@@ -40,7 +19,7 @@ namespace ArchiVR.UI
         {
             Application.Logger.Debug("OnClickPoiButton()");
 
-            ApplicationState.ActiveObjectTypeIndex = 2;
+            ApplicationState.StartCreatePOI();
         }
 
         /// <summary>
@@ -50,7 +29,7 @@ namespace ArchiVR.UI
         {
             Application.Logger.Debug("EditMenuPanel.OnClickLightButton()");
 
-            ApplicationState.ActiveObjectTypeIndex = 0;
+            ApplicationState.StartCreateLight();
         }
 
         /// <summary>
@@ -60,7 +39,7 @@ namespace ArchiVR.UI
         {
             Application.Logger.Debug("EditMenuPanel.OnClickPropButton()");
 
-            ApplicationState.ActiveObjectTypeIndex = 1;
+            ApplicationState.StartCreateProp();
         }
 
         /// <summary>

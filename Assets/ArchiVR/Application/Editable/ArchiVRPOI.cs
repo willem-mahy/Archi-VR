@@ -4,6 +4,8 @@ namespace ArchiVR.Application.Editable
 {
     public class ArchiVRPOI
         : PropertiesBase
+        , IObjectDefinitionSupplier<POIDefinition>
+        , IPrefabInstantiation
 
     {
         public readonly string[] DefaultNames =
@@ -89,6 +91,27 @@ namespace ArchiVR.Application.Editable
                 new ObjectNameProperty(gameObject, DefaultNames)
             };
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public POIDefinition GetObjectDefinition()
+        {
+            var definition = new POIDefinition();
+
+            definition.Name = gameObject.name;
+            definition.PrefabPath = PrefabPath;
+            definition.Position = gameObject.transform.position;
+            definition.Rotation = gameObject.transform.rotation;
+
+            return definition;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string PrefabPath { get; set; }
     }
 }
 

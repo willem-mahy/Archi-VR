@@ -12,6 +12,7 @@ namespace ArchiVR.Application.PrefabDefinition
                 new ObjectPrefabDefinition("Mirror 142x70",                                     "ArchiVR/Prefab/Architectural/Furniture/Bathroom/Mirror 142x70"),
                 new ObjectPrefabDefinition("Radiator_Electric_Acova_Regate_El_Air_(50x135cm)",  "ArchiVR/Prefab/Architectural/Furniture/Bathroom/Radiator_Electric_Acova_Regate_El_Air_(50x135cm)"),
                 new ObjectPrefabDefinition("Douche 1",                                          "ArchiVR/Prefab/Architectural/Furniture/Bathroom/Douche/Douche 1"),
+                new ObjectPrefabDefinition("Bath",                                              "ArchiVR/Prefab/Architectural/Furniture/Bathroom/Bath/Bad Vrijstaand Modern Rechthoeking 01 190x90"),
 
                 new ObjectPrefabDefinition("Cooking Plates",            "ArchiVR/Prefab/Architectural/Furniture/Kitchen/Cooking Plates"),
                 new ObjectPrefabDefinition("Dampkap",                   "ArchiVR/Prefab/Architectural/Furniture/Kitchen/Dampkap"),

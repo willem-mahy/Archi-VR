@@ -1,4 +1,5 @@
-﻿using ArchiVR.Application.Properties;
+﻿using ArchiVR.Application.Editable;
+using ArchiVR.Application.Properties;
 using System.Collections.Generic;
 using UnityEngine;
 using WM;
@@ -30,11 +31,6 @@ namespace ArchiVR.Application
         public override void Enter()
         {
             Resume();
-
-            if (ActiveObjectTypeIndex == 2)
-            {
-                m_application.PoiContainerGameObject.SetActive(true);
-            }
         }
 
         /// <summary>
@@ -62,11 +58,7 @@ namespace ArchiVR.Application
             {
                 UtilUnity.Destroy(_hoverBoxGO);
                 _hoverBoxGO = null;
-            }
-
-            if (ActiveObjectTypeIndex == 2)
-            {
-                m_application.PoiContainerGameObject.SetActive(false);
+                _hoverBox = null;
             }
 
             m_application.SaveProjectData();
@@ -78,6 +70,11 @@ namespace ArchiVR.Application
         public override void Resume()
         {
             m_application.LocomotionEnabled = true;// false;
+
+            // Make all editable objects visible
+            m_application.PoiEditData.ContainerGameObject.SetActive(true);
+            m_application.PropEditData.ContainerGameObject.SetActive(true);
+            m_application.LightEditData.ContainerGameObject.SetActive(true);
 
             // Show the Edit menu.
             m_application.EditMenuPanel.gameObject.SetActive(true);
@@ -105,6 +102,9 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Pause()
         {
+            // Make all POI editable objects invisible
+            m_application.PoiEditData.ContainerGameObject.SetActive(false);
+
             _hoverBoxGO.SetActive(false);
 
             // Hide the Edit menu.
@@ -130,35 +130,21 @@ namespace ArchiVR.Application
             // - Pressing 'L' on the keyboard.
             if (Input.GetKeyDown(KeyCode.L))
             {
-                ActiveObjectTypeIndex = 0;
+                StartCreateLight();
             }
 
             // Setting props as the active object type is done by:
             // - Pressing 'F' on the keyboard.
             if (Input.GetKeyDown(KeyCode.F))
             {
-                ActiveObjectTypeIndex = 1;
+                StartCreateProp();
             }
 
             // Setting POI as the active object type is done by:
             // - Pressing 'P' on the keyboard.
             if (Input.GetKeyDown(KeyCode.P))
             {
-                ActiveObjectTypeIndex = 2;
-            }
-
-            // Starting creation of an object is done by:
-            //  - Pressing the controller 'A' button.
-            var startCreateMode = controllerState.aButtonDown;
-            
-            if (startCreateMode)
-            {
-                var applicationState = new ApplicationStateCreate(
-                    m_application,
-                    ActiveObjectTypeIndex);
-
-                m_application.PushApplicationState(applicationState);
-                return;
+                StartCreatePOI();
             }
 
             // Delete selected lights is performed by:
@@ -197,24 +183,27 @@ namespace ArchiVR.Application
 
             var pickRay = m_application.RPickRay.GetRay();
 
-            foreach (var gameObject in _objects)
+            foreach (var editData in m_application.EditDatas)
             {
-                var hitInfo = new RaycastHit();
-                hitInfo.distance = float.NaN;
-
-                GameObject pickedGO = null;
-
-                UtilUnity.PickRecursively(
-                    gameObject,
-                    pickRay,
-                    gameObject,
-                    ref pickedGO,
-                    ref hitInfo);
-
-                if (null != pickedGO)
+                foreach (var gameObject in editData.GameObjects)
                 {
-                    hoveredObject = gameObject;
-                    break;
+                    var hitInfo = new RaycastHit();
+                    hitInfo.distance = float.NaN;
+
+                    GameObject pickedGO = null;
+
+                    UtilUnity.PickRecursively(
+                        gameObject,
+                        pickRay,
+                        gameObject,
+                        ref pickedGO,
+                        ref hitInfo);
+
+                    if (null != pickedGO)
+                    {
+                        hoveredObject = gameObject;
+                        break;
+                    }
                 }
             }
 
@@ -247,7 +236,7 @@ namespace ArchiVR.Application
                 case 1:
                     return "Selected: " + _selectedObjects[0].name;
                 default:
-                    return "Selected: " + _selectedObjects.Count + " " + EditData.Settings.ObjectTypeName + "s.";
+                    return "Selected " + _selectedObjects.Count + " objects";
             }
         }
 
@@ -260,7 +249,7 @@ namespace ArchiVR.Application
 
             var isEditor = UnityEngine.Application.isEditor;
 
-            m_application.HudInfoText.text = "Edit " + EditData.Settings.ObjectTypeName;
+            m_application.HudInfoText.text = "Edit";
 
             m_application.m_leftControllerText.text = GetSelectionText();
             m_application.m_rightControllerText.text = (null == _hoveredObject) ? "" : _hoveredObject.name;
@@ -412,11 +401,14 @@ namespace ArchiVR.Application
 
             foreach (var selectedObject in selectedObjects)
             {
-                var objectDefinition = EditData.GetObjectDefinition(selectedObject);
-                _objectDefinitions.Remove(objectDefinition);
-
-                _objects.Remove(selectedObject);
-                UtilUnity.Destroy(selectedObject);
+                foreach (var editData in m_application.EditDatas)
+                {
+                    if (editData.GameObjects.Contains(selectedObject))
+                    {
+                        editData.GameObjects.Remove(selectedObject);
+                    }
+                    UtilUnity.Destroy(selectedObject);
+                }
             }   
         }
         
@@ -458,47 +450,48 @@ namespace ArchiVR.Application
             OnSelect(null);
         }
 
-        #region Fields
-
-        private int _activeObjectTypeIndex = 0;
-
-        public int ActiveObjectTypeIndex
+        public void StartCreateLight()
         {
-            get
-            {
-                return _activeObjectTypeIndex;
-            }
-            set
-            {
-                if (_activeObjectTypeIndex == 2)
-                {
-                    m_application.PoiContainerGameObject.SetActive(false);
-                }
+            var applicationState = new ApplicationStateCreate<ArchiVRLight, LightDefinition>(
+                m_application,
+                m_application.LightEditData);
 
-                _activeObjectTypeIndex = value;
-
-                if (_activeObjectTypeIndex == 2)
-                {
-                    m_application.PoiContainerGameObject.SetActive(true);
-                }
-
-                OnActiveObjectTypeChanged();
-            }
+            m_application.PushApplicationState(applicationState);
         }
 
-        private ApplicationArchiVR.EditData EditData => m_application.EditDatas[_activeObjectTypeIndex];
+        public void StartCreatePOI()
+        {
+            var applicationState = new ApplicationStateCreate<ArchiVRPOI, POIDefinition>(
+                m_application,
+                m_application.PoiEditData);
 
-        private List<GameObject> _objects => EditData.GameObjects;
+            m_application.PushApplicationState(applicationState);
+        }
 
-        private List<ObjectDefinition> _objectDefinitions => EditData.ObjectDefinitions;
+        public void StartCreateProp()
+        {
+            var applicationState = new ApplicationStateCreate<ArchiVRProp, PropDefinition>(
+                m_application,
+                m_application.PropEditData);
 
-        private ApplicationArchiVR.ObjectEditSettings _editSettings => EditData.Settings;
+            m_application.PushApplicationState(applicationState);
+        }
 
+        #region Fields
 
+        /// <summary>
+        /// Flags whether additive selection is enabled.
+        /// </summary>
         private bool _addToSelection = false;
 
+        /// <summary>
+        /// The game object of the editable object we are currently hovering with the pick ray.
+        /// </summary>
         private GameObject _hoveredObject;
         
+        /// <summary>
+        /// The bounding box shown around the currently hovered editable object.
+        /// </summary>
         private GameObject _hoverBoxGO;
 
         private LineRendererBox _hoverBox;

@@ -6,15 +6,49 @@ using UnityEngine;
 
 namespace ArchiVR.Application
 {
+    /// <summary>
+    /// Data structure used to serialize project content to XML.
+    /// </summary>
     [Serializable]
     [XmlRoot("ArchiVRProjectData")]
     public class ProjectData
     {
-        public POIData POIData = new POIData(); 
-        
-        public LightingData LightingData = new LightingData();
+        /// <summary>
+        /// POI data.
+        /// </summary>
+        public /*readonly*/ POIData POIData = new POIData();
 
-        public PropData PropData = new PropData();
+        /// <summary>
+        /// Lighting data.
+        /// </summary>
+        public /*readonly*/ LightingData LightingData = new LightingData();
+
+        /// <summary>
+        /// Prop data.
+        /// </summary>
+        public /*readonly*/ PropData PropData = new PropData();
+
+        #region Constructors
+
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public ProjectData() { }
+
+        /// <summary>
+        /// Parametrized constructor.
+        /// </summary>
+        public ProjectData(
+            List<LightDefinition> lightDefinitions,
+            List<PropDefinition> propDefinitions,
+            List<POIDefinition> poiDefinitions)
+        {
+            LightingData.lightDefinitions = lightDefinitions;
+            PropData.propDefinitions = propDefinitions;
+            POIData.poiDefinitions = poiDefinitions;
+        }
+
+        #endregion Constructors
     }
 
     [Serializable]
@@ -49,9 +83,6 @@ namespace ArchiVR.Application
         public SerializableQuaternion Rotation;
 
         public string Name;
-
-        [XmlIgnoreAttribute]
-        public GameObject GameObject;
     }
 
     [Serializable]

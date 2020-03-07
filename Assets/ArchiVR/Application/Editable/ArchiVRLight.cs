@@ -7,6 +7,8 @@ namespace ArchiVR.Application.Editable
     public class ArchiVRLight
         : PropertiesBase
         , ILayerContent
+        , IObjectDefinitionSupplier<LightDefinition>
+        , IPrefabInstantiation
     {
         public List<Light> LightSources = new List<Light>();
 
@@ -43,6 +45,30 @@ namespace ArchiVR.Application.Editable
                 }
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public LightDefinition GetObjectDefinition()
+        {
+            var definition = new LightDefinition();
+            
+            definition.Name = gameObject.name;
+            definition.PrefabPath = PrefabPath;
+            definition.Position = gameObject.transform.position;
+            definition.Rotation = gameObject.transform.rotation;
+
+            definition.LayerName = LayerName;
+            definition.LightColor = Color;
+
+            return definition;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string PrefabPath { get; set; }
     }
 }
 

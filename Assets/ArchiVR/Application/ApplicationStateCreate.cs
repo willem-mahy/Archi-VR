@@ -1,4 +1,5 @@
-﻿using ArchiVR.Application.PickInitialization;
+﻿using ArchiVR.Application.Editable;
+using ArchiVR.Application.PickInitialization;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,13 +11,13 @@ namespace ArchiVR.Application
     /// <summary>
     /// Application state in which the user creates an object.
     /// </summary>
-    public class ApplicationStateCreate : ApplicationState<ApplicationArchiVR>
+    public class ApplicationStateCreate<E, D> : ApplicationState<ApplicationArchiVR>
     {
         public ApplicationStateCreate(
             ApplicationArchiVR application,
-            int objectTypeIndex) : base(application)
+            ApplicationArchiVR.TypedEditData<E, D> EditData) : base(application)
         {
-            _objectTypeIndex = objectTypeIndex;
+            this.EditData = EditData;
         }
 
         /// <summary>
@@ -62,6 +63,9 @@ namespace ArchiVR.Application
         public override void Resume()
         {
             m_application.LocomotionEnabled = true;// false;
+
+            // Make editable objects visible
+            EditData.ContainerGameObject.SetActive(true);
 
             // Enable only R pickray.
             m_application.RPickRay.gameObject.SetActive(true);
@@ -493,80 +497,41 @@ namespace ArchiVR.Application
         /// </summary>
         private void CreateObject()
         {
-            #region 1) Create the new object's GameObject
-
+            // Create the new editable object.
             var objectGO = GameObject.Instantiate(
                 ActiveObjectPrefab,
                 _previewGO.transform.position,
                 _previewGO.transform.rotation);
 
-            // Give the new object a unique name.
+            var editable = objectGO.GetComponent<E>();
+
+            if (editable is IPrefabInstantiation prefabInstantiation)
+            {
+                prefabInstantiation.PrefabPath = ActiveObjectPrefabDefinition.PrefabPath;
+            }
+            else
+            {
+                m_application.Logger.Error("Trying to create an editable that is not an IPrefabInstantiation!" + editable.ToString());
+
+                UtilUnity.Destroy(objectGO);
+                return;
+            }
+
+            // Give the new editable object a unique name.
             objectGO.name = ActiveObjectPrefab.name + " (" + Guid.NewGuid().ToString() + ")";
 
-            _gameObjects.Add(objectGO);
+            // Add the new editable object to the project content.
+            EditData.Add(objectGO);
 
-            #endregion 1) Create the new object's GameObject
-
-            #region 2) Create the new object's ObjectDefinition
-
-            ObjectDefinition objectDefinition; // TODO: = ActiveObjectPrefab.GetDefinition();
-
-            switch (_objectTypeIndex) // Design defect!
-            {
-                case 0:
-                    objectDefinition = new LightDefinition();
-                    break;
-                case 1:
-                    objectDefinition = new PropDefinition();
-                    break;
-                case 2:
-                    objectDefinition = new POIDefinition();
-                    break;
-                default:
-                    objectDefinition = new ObjectDefinition();
-                    break;
-            }
-
-            objectDefinition.Name = objectGO.name;
-            objectDefinition.Position = objectGO.transform.position;
-            objectDefinition.Rotation = objectGO.transform.rotation;
-            objectDefinition.PrefabPath = ActiveObjectPrefabDefinition.PrefabPath;
-            objectDefinition.GameObject = objectGO;
-
-            if (objectDefinition is LightDefinition lightDefinition)
-            {
-                //lightDefinition.LayerName = ;
-                //lightDefinition.LightColor = ;
-                //lightDefinition.BodyColor1 = ;
-                //lightDefinition.BodyColor2 = ;
-            }
-
-            if (objectDefinition is PropDefinition propDefinition)
-            {   
-                //propDefinition.LayerName = ;
-            }
-
-            if (objectDefinition is POIDefinition poiDefinition)
-            {
-                //poiDefinition.LayerName = ;
-            }
-
-            _objectDefinitions.Add(objectDefinition);
-
-            #endregion 2) Create the new object's ObjectDefinition
-
+            // Clear the picked points.
             _pickedInfos.Clear();
         }
 
         #region Fields
 
-        private int _objectTypeIndex;
-
-        private ApplicationArchiVR.EditData EditData => m_application.EditDatas[_objectTypeIndex];
+        private ApplicationArchiVR.TypedEditData<E, D> EditData;
 
         private List<GameObject> _gameObjects => EditData.GameObjects;
-
-        private List<ObjectDefinition> _objectDefinitions => EditData.ObjectDefinitions;
 
         private ApplicationArchiVR.ObjectEditSettings _editSettings => EditData.Settings;
 

@@ -136,7 +136,7 @@ namespace ArchiVR.Application
         /// The layers.
         /// </summary>
         private Dictionary<string, ArchiVRLayer> m_layers = new Dictionary<string, ArchiVRLayer>();
-        
+
         #endregion
 
         #region POI
@@ -171,16 +171,14 @@ namespace ArchiVR.Application
                     return null;
                 }
 
-                if (ActivePOIIndex >= PoiObjects.Count)
+                if (ActivePOIIndex >= PoiEditData.GameObjects.Count)
                 {
                     return null;
                 }
 
-                return PoiObjects[ActivePOIIndex];
+                return PoiEditData.GameObjects[ActivePOIIndex];
             }
         }
-
-        public List<GameObject> PoiObjects => EditDatas[2].GameObjects;
 
         /// <summary>
         /// The currently active POI's name.
@@ -247,51 +245,122 @@ namespace ArchiVR.Application
         public class EditData
         {
             /// <summary>
-            /// Whether the objets should be visible.
+            /// Parametrized constructor.
+            /// </summary>
+            public EditData(GameObject containerGameObject)
+            {
+                ContainerGameObject = containerGameObject;
+            }
+
+            /// <summary>
+            /// Whether the objects should be visible.
             /// </summary>
             public bool ShouldBeVisible = true;
 
+            /// <summary>
+            /// 
+            /// </summary>
             public ObjectEditSettings Settings;
 
-            public List<ObjectDefinition> ObjectDefinitions = new List<ObjectDefinition>();
-
             /// <summary>
-            /// The game object to which all game objects of the related object type are parented.
+            /// The game object to which all Editables of the related type are parented.
             /// </summary>
-            public GameObject ContainerGameObject;
+            public GameObject ContainerGameObject
+            {
+                get;
+                private set;
+            }
 
             /// <summary>
             /// The list of game objects of the related object type.
             /// </summary>
-            public List<GameObject> GameObjects = new List<GameObject>();
+            public List<GameObject> GameObjects
+            {
+                get;
+                private set;
+            } = new List<GameObject>();
 
             /// <summary>
-            /// Get the object definition associated to the given game object.
+            /// 
             /// </summary>
-            /// <param name="gameObject"></param>
-            /// <returns></returns>
-            public ObjectDefinition GetObjectDefinition(GameObject gameObject)
+            public void Add(GameObject editableGO)
             {
-                foreach (var objectDefinition in ObjectDefinitions)
-                {
-                    if (objectDefinition.GameObject == gameObject)
-                    {
-                        return objectDefinition;
-                    }
-                }
-
-                return null;
+                GameObjects.Add(editableGO);
+                editableGO.transform.SetParent(ContainerGameObject.transform, true);
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public readonly List<EditData> EditDatas = new List<EditData>();
+        public class TypedEditData<E, D> : EditData
+        {
+            /// <summary>
+            /// Parametrized constructor.
+            /// </summary>
+            public TypedEditData(GameObject containerGameObject) : base(containerGameObject) {}
 
-        public EditData LightEditData;
-        public EditData PropEditData;
-        public EditData PoiEditData;
+            /// <summary>
+            /// Get the object definition associated to the given game object.
+            /// </summary>
+            /// <param name="gameObject"></param>
+            /// <returns></returns>
+            public List<D> ObjectDefinitions
+            {
+                get
+                {
+                    var objectDefinitions = new List<D>();
+
+                    foreach (var editable in ContainerGameObject.GetComponentsInChildren<E>())
+                    {
+                        var objectDefinitionSupplier = editable as IObjectDefinitionSupplier<D>;
+
+                        if (null != objectDefinitionSupplier)
+                        {
+                            objectDefinitions.Add(objectDefinitionSupplier.GetObjectDefinition());
+                        }
+                        else
+                        {
+                            Debug.LogError(typeof(E).ToString() + "is not a IObjectDefinitionSupplier<" + typeof(D).ToString() + ">");
+                        }
+                    }
+
+                    return objectDefinitions;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public TypedEditData<ArchiVRLight, LightDefinition> LightEditData
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public TypedEditData<ArchiVRProp, PropDefinition> PropEditData
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public TypedEditData<ArchiVRPOI, POIDefinition> PoiEditData
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public EditData[] EditDatas => new EditData[] { LightEditData, PoiEditData, PropEditData };
 
         #endregion
 
@@ -361,20 +430,18 @@ namespace ArchiVR.Application
         /// </summary>
         public override void Init()
         {
-            LightEditData = new EditData();
+            #region Initialize Edit data
+
+            LightEditData = new TypedEditData<ArchiVRLight, LightDefinition>(LightingContainerGameObject);
             LightEditData.Settings = LightingEditSettings;
-            LightEditData.ContainerGameObject = LightingContainerGameObject;
-            EditDatas.Add(LightEditData);
 
-            PropEditData = new EditData();
+            PropEditData = new TypedEditData<ArchiVRProp, PropDefinition>(PropContainerGameObject);
             PropEditData.Settings = PropEditSettings;
-            PropEditData.ContainerGameObject = PropContainerGameObject;
-            EditDatas.Add(PropEditData);
 
-            PoiEditData = new EditData();
+            PoiEditData = new TypedEditData<ArchiVRPOI, POIDefinition>(PoiContainerGameObject);
             PoiEditData.Settings = POIEditSettings;
-            PoiEditData.ContainerGameObject = PoiContainerGameObject;
-            EditDatas.Add(PoiEditData);
+
+            #endregion Initialize Edit data
 
             EnvironmentalLighting = UtilUnity.FindGameObjectElseError(gameObject.scene, "EnvironmentalLighting").GetComponent<EnvironmentalLighting>();
 
@@ -786,7 +853,7 @@ namespace ArchiVR.Application
 
             if (newPOIIndex == -1)
             {
-                if (PoiObjects.Count > 0)
+                if (PoiEditData.GameObjects.Count > 0)
                 {
                     newPOIIndex = 0;
                 }
@@ -1200,13 +1267,13 @@ namespace ArchiVR.Application
         public TeleportInitiatedCommand GetTeleportInitCommandForPOI(int poiIndex)
         {
             // Determine the new POI index.
-            if (PoiObjects.Count == 0)
+            if (PoiEditData.GameObjects.Count == 0)
             {
                 poiIndex = -1;
                 return null;
             }
 
-            poiIndex = UtilIterate.MakeCycle(poiIndex, 0, PoiObjects.Count);
+            poiIndex = UtilIterate.MakeCycle(poiIndex, 0, PoiEditData.GameObjects.Count);
 
             var tic = new TeleportInitiatedCommand();
 
@@ -1219,18 +1286,18 @@ namespace ArchiVR.Application
         public TeleportCommand GetTeleportCommandForPOI(int poiIndex)
         {
             // Determine the new POI index.
-            if (PoiObjects.Count == 0)
+            if (PoiEditData.GameObjects.Count == 0)
             {
                 poiIndex = -1;
                 return null;
             }
 
-            poiIndex = UtilIterate.MakeCycle(poiIndex, 0, PoiObjects.Count);
+            poiIndex = UtilIterate.MakeCycle(poiIndex, 0, PoiEditData.GameObjects.Count);
 
             var tc = new TeleportCommand();
 
             tc.ProjectIndex = ActiveProjectIndex;
-            tc.POIName = PoiObjects[poiIndex].name;
+            tc.POIName = PoiEditData.GameObjects[poiIndex].name;
 
             return tc;
         }
@@ -1242,7 +1309,7 @@ namespace ArchiVR.Application
         //! Gathers all POI for the currently active project.
         public void GatherActiveProjectPOI()
         {
-            PoiObjects.Clear();
+            PoiEditData.GameObjects.Clear();
 
             var activeProject = ActiveProject;
 
@@ -1263,24 +1330,11 @@ namespace ArchiVR.Application
 
                     foreach (Transform childOfPOIs in POIs.transform)
                     {
-                        PoiObjects.Add(childOfPOIs.gameObject);
+                        PoiEditData.GameObjects.Add(childOfPOIs.gameObject);
                     }
 
                     break;
                 }
-            }
-        }
-
-        /*! Gets the default POI index.
-         *
-         * If a project is activated, and there is a POI with the same name as the active POI, that POI is activated.
-         * Else the POI at the default POI index is activated.
-         */
-        public int DefaultPOIIndex
-        {
-            get
-            {
-                return PoiObjects.Count == 0 ? -1 : 0;
             }
         }
 
@@ -1298,7 +1352,7 @@ namespace ArchiVR.Application
         int GetPOIIndex(string poiName)
         {
             int poiIndex = 0;
-            foreach (var poi in PoiObjects)
+            foreach (var poi in PoiEditData.GameObjects)
             {
                 if (poi.name == poiName)
                 {
@@ -1637,49 +1691,10 @@ namespace ArchiVR.Application
         {
             Logger.Debug("ApplicationArchiVR.SaveProjectData(" + ProjectDataFilePath + ")");
 
-            ProjectData = new ProjectData();
-
-            foreach (var od in EditDatas[0].ObjectDefinitions)
-            {
-                var ld = od as LightDefinition;
-
-                if (null != ld)
-                {
-                    ProjectData.LightingData.lightDefinitions.Add(ld);
-                }
-                else
-                {
-                    Logger.Error("ApplicationArchiVR.SaveProjectData(): Expected LightingDefinition!");
-                }
-            }
-
-            foreach (var od in EditDatas[1].ObjectDefinitions)
-            {
-                var pd = od as PropDefinition;
-
-                if (null != pd)
-                {
-                    ProjectData.PropData.propDefinitions.Add(pd);
-                }
-                else
-                {
-                    Logger.Error("ApplicationArchiVR.SaveProjectData(): Expected PropDefinition!");
-                }
-            }
-
-            foreach (var od in EditDatas[2].ObjectDefinitions)
-            {
-                var pd = od as POIDefinition;
-
-                if (null != pd)
-                {
-                    ProjectData.POIData.poiDefinitions.Add(pd);
-                }
-                else
-                {
-                    Logger.Error("ApplicationArchiVR.SaveProjectData(): Expected PoiDefinition!");
-                }
-            }
+            var projectData = new ProjectData(
+                LightEditData.ObjectDefinitions,
+                PropEditData.ObjectDefinitions,
+                PoiEditData.ObjectDefinitions);
 
             try
             {
@@ -1687,7 +1702,7 @@ namespace ArchiVR.Application
 
                 using (var writer = new StreamWriter(ProjectDataFilePath))
                 {
-                    serializer.Serialize(writer, ProjectData);
+                    serializer.Serialize(writer, projectData);
                 }
             }
             catch (Exception e)
@@ -1704,7 +1719,22 @@ namespace ArchiVR.Application
         {
             Logger.Debug("ApplicationArchiVR.LoadProjectData(" + ProjectDataFilePath + ")");
 
-            ProjectData = null;
+            #region Clear old editable objects
+
+            foreach (var editData in EditDatas)
+            {
+                foreach (var go in editData.GameObjects)
+                {
+                    UtilUnity.Destroy(go);
+                }
+                editData.GameObjects.Clear();
+            }
+
+            #endregion Clear old editable Objects
+
+            #region Load the ProjectData XML file
+
+            ProjectData projectData = null;
 
             if (File.Exists(ProjectDataFilePath))
             {
@@ -1714,35 +1744,28 @@ namespace ArchiVR.Application
 
                     using (var reader = new StreamReader(ProjectDataFilePath))
                     {
-                        ProjectData = serializer.Deserialize(reader) as ProjectData;
+                        projectData = serializer.Deserialize(reader) as ProjectData;
                     }
                 }
                 catch (Exception e)
                 {
                     Logger.Warning("Failed to load project data file!" + e.Message);
+                    return;
                 }
             }
 
-            if (ProjectData == null)
+            #endregion Load the ProjectData XML file
+
+            if (null == projectData)
             {
-                ProjectData = new ProjectData();
+                projectData = new ProjectData();
             }
 
-            #region Prop Objects
+            #region Insert new editable Objects
 
-            #region Clear old POI Objects
+            #region POI Objects
 
-            foreach (var poiGO in PoiObjects)
-            {
-                UtilUnity.Destroy(poiGO);
-            }
-            PoiObjects.Clear();
-
-            #endregion Clear old POI Objects
-
-            #region Import POI Objects
-
-            foreach (var poiDefinition in ProjectData.POIData.poiDefinitions)
+            foreach (var poiDefinition in projectData.POIData.poiDefinitions)
             {
                 var poiPrefab = Resources.Load<GameObject>(poiDefinition.PrefabPath);
 
@@ -1751,37 +1774,34 @@ namespace ArchiVR.Application
                     Vector3.zero,
                     Quaternion.identity);
 
+                var poi = poiGO.GetComponent<ArchiVRPOI>();
+
+                if (null != poi)
+                {
+                    poi.PrefabPath = poiDefinition.PrefabPath;
+                }
+                else
+                {
+                    Logger.Error("Not an ArchiVRPOI!" + poiGO.ToString());
+
+                    UtilUnity.Destroy(poiGO);
+                    return;
+                }
+
                 poiGO.name = poiDefinition.Name;
                 poiGO.transform.position = poiDefinition.Position;
                 poiGO.transform.rotation = poiDefinition.Rotation;
 
                 poiGO.transform.SetParent(PoiEditData.ContainerGameObject.transform, false);
 
-                poiDefinition.GameObject = poiGO;
-
                 PoiEditData.GameObjects.Add(poiGO);
-                PoiEditData.ObjectDefinitions.Add(poiDefinition);
             }
-
-            #endregion Import POI Objects
 
             #endregion POI Objects
 
             #region Lighting Objects
 
-            #region Clear old Lighting Objects
-
-            foreach (var lightGO in EditDatas[0].GameObjects)
-            {
-                UtilUnity.Destroy(lightGO);
-            }
-            LightEditData.GameObjects.Clear();
-
-            #endregion Clear old Lighting Objects
-
-            #region Import Lighting Objects
-
-            foreach (var lightDefinition in ProjectData.LightingData.lightDefinitions)
+            foreach (var lightDefinition in projectData.LightingData.lightDefinitions)
             {
                 var lightPrefab = Resources.Load<GameObject>(lightDefinition.PrefabPath);
 
@@ -1790,37 +1810,34 @@ namespace ArchiVR.Application
                     Vector3.zero,
                     Quaternion.identity);
 
+                var light = lightGO.GetComponent<ArchiVRLight>();
+
+                if (null != light)
+                {
+                    light.PrefabPath = lightDefinition.PrefabPath;
+                }
+                else
+                {
+                    Logger.Error("Not an ArchiVRLight!" + lightGO.ToString());
+
+                    UtilUnity.Destroy(lightGO);
+                    return;
+                }
+
                 lightGO.name = lightDefinition.Name;
                 lightGO.transform.position = lightDefinition.Position;
                 lightGO.transform.rotation = lightDefinition.Rotation;
 
                 lightGO.transform.SetParent(LightEditData.ContainerGameObject.transform, false);
 
-                lightDefinition.GameObject = lightGO;
-
                 LightEditData.GameObjects.Add(lightGO);
-                LightEditData.ObjectDefinitions.Add(lightDefinition);
             }
-
-            #endregion Import Lighting Objects
 
             #endregion Lighting Objects
 
             #region Prop Objects
 
-            #region Clear old Prop Objects
-
-            foreach (var propGO in EditDatas[1].GameObjects)
-            {
-                UtilUnity.Destroy(propGO);
-            }
-            EditDatas[1].GameObjects.Clear();
-
-            #endregion Clear old Prop Objects
-
-            #region Import Prop Objects
-
-            foreach (var propDefinition in ProjectData.PropData.propDefinitions)
+            foreach (var propDefinition in projectData.PropData.propDefinitions)
             {
                 var propPrefab = Resources.Load<GameObject>(propDefinition.PrefabPath);
 
@@ -1829,21 +1846,32 @@ namespace ArchiVR.Application
                     Vector3.zero,
                     Quaternion.identity);
 
+                var prop = propGO.GetComponent<ArchiVRProp>();
+
+                if (null != prop)
+                {
+                    prop.PrefabPath = propDefinition.PrefabPath;
+                }
+                else
+                {
+                    Logger.Error("Not an ArchiVRProp!" + propGO.ToString());
+
+                    UtilUnity.Destroy(propGO);
+                    return;
+                }
+
                 propGO.name = propDefinition.Name;
                 propGO.transform.position = propDefinition.Position;
                 propGO.transform.rotation = propDefinition.Rotation;
 
                 propGO.transform.SetParent(PropEditData.ContainerGameObject.transform, false);
 
-                propDefinition.GameObject = propGO;
-
                 PropEditData.GameObjects.Add(propGO);
-                PropEditData.ObjectDefinitions.Add(propDefinition);
             }
 
-            #endregion Import Prop Objects
-
             #endregion Prop Objects
+
+            #endregion Insert new editable Objects
         }
 
         #endregion Project Data
@@ -1876,8 +1904,6 @@ namespace ArchiVR.Application
         public readonly Color SelectionColor = new Color(1, 0, 0);
 
         public readonly Color HoverColor = new Color(1, 1, 0);
-
-        public ProjectData ProjectData = new ProjectData();
 
         /// <summary>
         /// The edit menu.

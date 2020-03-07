@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1206448791216036000}
   - component: {fileID: 182116257171513433}
+  - component: {fileID: 8415502982006959039}
+  - component: {fileID: 353792187345535952}
   m_Layer: 0
   m_Name: TV Meubel 600x2800x500
   m_TagString: Untagged
@@ -45,6 +47,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PickInitializationTypes: 02000000
+--- !u!114 &8415502982006959039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6984618833936317861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45ebc4932062e2b408f06b9e78ac94a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!65 &353792187345535952
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6984618833936317861}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.8, y: 0.6, z: 0.5}
+  m_Center: {x: 0, y: -0.3, z: 0.25}
 --- !u!1 &8192406767841235237
 GameObject:
   m_ObjectHideFlags: 0
