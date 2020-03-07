@@ -8,17 +8,19 @@ using ArchiVR.Application;
 namespace ArchiVR
 {
     /// <summary>
-    /// In this immersion mode, the user can walk around the model,
-    /// which is visualized at a 1/25 scale (The usual scale for construction model maquettes).
-    /// The user can pick parts of the model with his right hand, to hide them.
-    /// To unhide the entire model, the user can pick into empty space.
+    /// In this immersion mode, the project is visualized as a scale model at a 1/25 scale.
+    /// This usual scale for scale models in construction.
     /// 
-    /// The Maquette can also be manipulated:
+    /// The user can hide and unhide model layers using picking:
+    /// * pick a visible model layer to hide it
+    /// * pick into 'nothing' to unhide all model layers.
     /// 
-    /// 1) rotated in the horizontal plane, around its anchor point.
+    /// The user can also manipulate the location of the scale model:
+    /// 
+    /// 1) rotate in the horizontal plane, around its anchor point.
     ///     - Using the left thumb Left/Right directions.
     ///     - The anchor point is predefined in the project and usually located in the middle of the construction model.
-    /// 2) translated up or down along the vertical axis.
+    /// 2) translate up or down along the vertical axis.
     ///     - Using the left thumb stick Up/Down directions.
     ///     - Translation is limited to a sensible range of [0, 2] meter height offset.
     ///     
@@ -32,61 +34,77 @@ namespace ArchiVR
     /// (because of unwanted rotations/translations being triggered
     /// by small accidental offsets on the other thumbstick axis).
     /// </summary>
-    public class ApplicationStateMaquette : ApplicationState<ApplicationArchiVR>
+    public class ApplicationStateScaleModel : ApplicationState<ApplicationArchiVR>
     {
         #region variables
 
-        // The maquette translational manipulation speed.
-        float maquetteMoveSpeed = 1.0f;
-
-        // The maquette rotational manipulation speed.
-        float maquetteRotateSpeed = 60.0f;
-
-        // The translational offset distance along the up vector.
-        private float m_maquetteOffset = 0;
-
-        // The rotational offset angle around the up vector.
-        private float m_maquetteRotation = 0;
+        /// <summary>
+        /// The translational model manipulation speed.
+        /// </summary>
+        private float _modelMoveSpeed = 1.0f;
 
         /// <summary>
-        /// The layer currently being picked.
+        /// The rotational model manipulation speed.
+        /// </summary>
+        private float _modelRotateSpeed = 60.0f;
+
+        /// <summary>
+        /// The translational offset distance of the model along the up vector.
+        /// </summary>
+        private float _modelOffset = 0;
+
+        /// <summary>
+        /// The rotational offset angle of the model around the up vector.
+        /// </summary>
+        private float _modelRotation = 0;
+
+        /// <summary>
+        /// The model layer currently being picked.
         /// </summary>
         private GameObject pickedLayer;
 
         /// <summary>
-        /// The index of the layer currently being picked.
+        /// The index of the model layer currently being picked.
         /// </summary>
         private int pickedLayerIndex = -1;
 
-        enum MaquetteManipulationMode
+        enum ModelManipulationMode
         {
             None = 0,
             Translate,
             Rotate
         };
 
-        private MaquetteManipulationMode maquetteManipulationMode = MaquetteManipulationMode.None;
+        private ModelManipulationMode maquetteManipulationMode = ModelManipulationMode.None;
 
         #endregion
 
-        public ApplicationStateMaquette(ApplicationArchiVR application) : base(application)
+        #region Constructors
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="application"></param>
+        public ApplicationStateScaleModel(ApplicationArchiVR application) : base(application)
         {
         }
 
+        #endregion Constructors
+
         /// <summary>
-        /// <see cref="ImmersionMode.Init()"/> implementation.
+        /// <see cref="ApplicationState{T}.Init()"/> implementation.
         /// </summary>
         public override void Init()
         {
-            m_application.Logger.Debug("ImmersionModeMaquette.Init()");
+            m_application.Logger.Debug("ApplicationStateScaleModel.Init()");
         }
 
         /// <summary>
-        /// <see cref="ImmersionMode.Enter()"/> implementation.
+        /// <see cref="ApplicationState{T}.Enter()"/> implementation.
         /// </summary>
         public override void Enter()
         {
-            m_application.Logger.Debug("ImmersionModeMaquette.Enter()");
+            m_application.Logger.Debug("ApplicationStateScaleModel.Enter()");
 
             m_application.MaquettePreviewContext.SetActive(true);
 
@@ -96,18 +114,18 @@ namespace ArchiVR
             // Enable only R pickray.
             m_application.RPickRay.gameObject.SetActive(true);
 
-            maquetteManipulationMode = MaquetteManipulationMode.None;
+            maquetteManipulationMode = ModelManipulationMode.None;
 
             UpdateModelLocationAndScale();
             UpdateTrackingSpacePosition();
         }
 
         /// <summary>
-        /// <see cref="ImmersionMode.Exit()"/> implementation.
+        /// <see cref="ApplicationState{T}.Exit()"/> implementation.
         /// </summary>
         public override void Exit()
         {
-            m_application.Logger.Debug("ImmersionModeMaquette.Exit()");
+            m_application.Logger.Debug("ApplicationStateScaleModel.Exit()");
 
             m_application.MaquettePreviewContext.SetActive(false);
 
@@ -118,11 +136,11 @@ namespace ArchiVR
         }
 
         /// <summary>
-        /// <see cref="ImmersionMode.Update()"/> implementation.
+        /// <see cref="ApplicationState{T}.Update()"/> implementation.
         /// </summary>
         public override void Update()
         {
-            //WM.Logger.Debug("ImmersionModeMaquette.Update()");
+            //WM.Logger.Debug("ApplicationStateScaleModel.Update()");
 
             UpdateControllerUI();
 
@@ -180,43 +198,43 @@ namespace ArchiVR
 
                 bool manipulating = (Mathf.Abs(magnitudeRotateMaquette) > 0.1f) || (Mathf.Abs(magnitudeTranslateMaquette) > 0.1f);
                    
-                if (maquetteManipulationMode == MaquetteManipulationMode.None)
+                if (maquetteManipulationMode == ModelManipulationMode.None)
                 {
                     if (manipulating)
                     {
                         maquetteManipulationMode = (Mathf.Abs(magnitudeRotateMaquette) > Mathf.Abs(magnitudeTranslateMaquette))
-                            ? MaquetteManipulationMode.Rotate
-                            : MaquetteManipulationMode.Translate;
+                            ? ModelManipulationMode.Rotate
+                            : ModelManipulationMode.Translate;
                     }
                     else
-                        maquetteManipulationMode = MaquetteManipulationMode.None;
+                        maquetteManipulationMode = ModelManipulationMode.None;
                 }
                 else
                 {
                     if (!manipulating)
-                        maquetteManipulationMode = MaquetteManipulationMode.None;
+                        maquetteManipulationMode = ModelManipulationMode.None;
                 }
 
                 #endregion
 
-                float positionOffset = m_maquetteOffset;
-                float rotationOffset = m_maquetteRotation;
+                float positionOffset = _modelOffset;
+                float rotationOffset = _modelRotation;
 
                 switch (maquetteManipulationMode)
                 {
-                    case MaquetteManipulationMode.Translate:
+                    case ModelManipulationMode.Translate:
                         {
-                            positionOffset = Mathf.Clamp(m_maquetteOffset + magnitudeTranslateMaquette * maquetteMoveSpeed * Time.deltaTime, -1.0f, 0.6f);
+                            positionOffset = Mathf.Clamp(_modelOffset + magnitudeTranslateMaquette * _modelMoveSpeed * Time.deltaTime, -1.0f, 0.6f);
                         }
                         break;
-                    case MaquetteManipulationMode.Rotate:
+                    case ModelManipulationMode.Rotate:
                         {
-                            rotationOffset += magnitudeRotateMaquette * maquetteRotateSpeed * Time.deltaTime;
+                            rotationOffset += magnitudeRotateMaquette * _modelRotateSpeed * Time.deltaTime;
                         }
                         break;
                 }
 
-                if (maquetteManipulationMode != MaquetteManipulationMode.None)
+                if (maquetteManipulationMode != ModelManipulationMode.None)
                 {
                     var command = new SetModelLocationCommand(positionOffset, rotationOffset);
 
@@ -299,8 +317,8 @@ namespace ArchiVR
             float positionOffset,
             float rotationOffset)
         {
-            m_maquetteOffset = positionOffset;
-            m_maquetteRotation = rotationOffset;
+            _modelOffset = positionOffset;
+            _modelRotation = rotationOffset;
             UpdateModelLocationAndScale();
         }
 
@@ -309,7 +327,7 @@ namespace ArchiVR
         /// </summary>
         public override void UpdateModelLocationAndScale()
         {
-            //Logger.Debug("ImmersionModeMaquette.UpdateModelLocationAndScale()");
+            //Logger.Debug("ApplicationStateScaleModel.UpdateModelLocationAndScale()");
 
             var activeProject = m_application.ActiveProject;
 
@@ -340,11 +358,11 @@ namespace ArchiVR
 
             // Add height offset.
             var pos = activeProject.transform.position;
-            pos.y = 1 + m_maquetteOffset;
+            pos.y = 1 + _modelOffset;
             activeProject.transform.position = pos;
 
             // Rotate it.
-            activeProject.transform.RotateAround(m_application.OffsetPerID, Vector3.up, m_maquetteRotation);
+            activeProject.transform.RotateAround(m_application.OffsetPerID, Vector3.up, _modelRotation);
 
             foreach (var editData in m_application.EditDatas)
             {
@@ -360,7 +378,7 @@ namespace ArchiVR
         /// </summary>
         public override void UpdateTrackingSpacePosition()
         {
-            m_application.Logger.Debug("ImmersionModeMaquette.UpdateTrackingSpacePosition()");
+            m_application.Logger.Debug("ApplicationStateScaleModel.UpdateTrackingSpacePosition()");
 
             m_application.ResetTrackingSpacePosition(); // Center around model.
 
@@ -375,7 +393,7 @@ namespace ArchiVR
         /// </summary>
         public /*override*/ void UpdateControllerUI()
         {
-            m_application.Logger.Debug("ImmersionModeMaquette.InitButtonMappingUI()");
+            //m_application.Logger.Debug("ApplicationStateScaleModel.UpdateControllerUI()");
 
             var isEditor = UnityEngine.Application.isEditor;
 

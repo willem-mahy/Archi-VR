@@ -62,7 +62,7 @@ namespace ArchiVR.Application
 
             if (controllerState.rHandTriggerDown)
             {
-                m_application.PushApplicationState(new ApplicationStateMaquette(m_application));
+                m_application.PushApplicationState(new ApplicationStateScaleModel(m_application));
             }
         }
 
