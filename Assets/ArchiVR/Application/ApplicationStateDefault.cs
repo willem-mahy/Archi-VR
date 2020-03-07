@@ -71,7 +71,7 @@ namespace ArchiVR.Application
         /// </summary>
         public /*override*/ void UpdateControllerUI()
         {
-            m_application.Logger.Debug("ApplicationStateDefault.InitButtonMappingUI()");
+            //m_application.Logger.Debug("ApplicationStateDefault.UpdateControllerUI()");
 
             var isEditor = UnityEngine.Application.isEditor;
 
