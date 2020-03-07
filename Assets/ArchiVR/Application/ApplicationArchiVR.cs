@@ -1,9 +1,9 @@
-﻿using ArchiVR.Application.PrefabDefinition;
+﻿using ArchiVR.Application.Editable;
+using ArchiVR.Application.PrefabDefinition;
 using ArchiVR.Application.Properties;
 using ArchiVR.Command;
 using ArchiVR.Net;
 using ArchiVR.UI;
-using Assets.ArchiVR.Application.Editable;
 using System;
 using System.Collections;
 using System.Collections.Generic;

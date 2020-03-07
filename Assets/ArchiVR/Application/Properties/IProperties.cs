@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using ArchiVR.Application.Editable;
+using UnityEngine;
 
 namespace ArchiVR.Application.Properties
 {
@@ -24,6 +25,9 @@ namespace ArchiVR.Application.Properties
         public T[] DefaultValues { get; set; }
     }
 
+    /// <summary>
+    /// 'GameObject.name' property.
+    /// </summary>
     public class ObjectNameProperty
         : Property<string>
     {
@@ -31,38 +35,84 @@ namespace ArchiVR.Application.Properties
             GameObject gameObject,
             string[] defaultValues)
         {
-            GameObject = gameObject;
+            _gameObject = gameObject;
             DefaultValues = defaultValues;
         }
 
-        public GameObject GameObject;
-
+        /// <summary>
+        /// <see cref="IProperty.Name"/> implementation.
+        /// </summary>
         public string Name => "Name";
 
+        /// <summary>
+        /// <see cref="Property{String}"/> implementation.
+        /// </summary>
         override public string Value
         {
-            get { return GameObject.name; }
-            set { GameObject.name = value; }
+            get { return _gameObject.name; }
+            set { _gameObject.name = value; }
         }
+
+        private GameObject _gameObject;
     }
 
+    /// <summary>
+    /// 'LayerContent.LayerName' property.
+    /// </summary>
+    public class LayerProperty
+        : Property<string>
+    {
+        public LayerProperty(
+            ILayerContent obj,
+            string[] defaultValues)
+        {
+            _obj = obj;
+            DefaultValues = defaultValues;
+        }
+
+        /// <summary>
+        /// <see cref="IProperty.Name"/> implementation.
+        /// </summary>
+        public string Name => "Name";
+
+        /// <summary>
+        /// <see cref="Property{String}"/> implementation.
+        /// </summary>
+        override public string Value
+        {
+            get { return _obj.LayerName; }
+            set { _obj.LayerName = value; }
+        }
+
+        private ILayerContent _obj;
+    }
+
+    /// <summary>
+    /// 'Light.Color' property.
+    /// </summary>
     public class LightColorProperty
         : Property<Color>
     {
         public LightColorProperty(ArchiVRLight light)
         {
-            Light = light;
+            _light = light;
         }
 
-        private ArchiVRLight Light;
-
+        /// <summary>
+        /// <see cref="IProperty.Name"/> implementation.
+        /// </summary>
         public string Name => "Color";
 
+        /// <summary>
+        /// <see cref="Property{Color}"/> implementation.
+        /// </summary>
         override public Color Value
         {
-            get { return Light.Color; }
-            set { Light.Color = value; }
+            get { return _light.Color; }
+            set { _light.Color = value; }
         }
+
+        private ArchiVRLight _light;
     }
 }
 
