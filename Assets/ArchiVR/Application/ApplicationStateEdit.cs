@@ -383,7 +383,12 @@ namespace ArchiVR.Application
                 _selectBoxes.Add(selectedObjectBoundingBox);
             }
 
-            ShowProperties();
+            bool autoShowPropertiesOnSingleObjectSelected = false;
+
+            if (autoShowPropertiesOnSingleObjectSelected)
+            {
+                ShowProperties();
+            }
         }
 
         /// <summary>
