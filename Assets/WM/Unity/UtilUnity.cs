@@ -10,6 +10,8 @@ namespace WM
     /// </summary>
     public class UtilUnity
     {
+        #region Bounds and Collider utility functions
+
         /// <summary>
         /// Calculates the AA bounding box, in world space, of the given game object and everything below it.
         /// </summary>
@@ -23,7 +25,7 @@ namespace WM
             }
 
             var bounds = new Bounds(colliders[0].bounds.center, colliders[0].bounds.size);
-         
+
             foreach (var col in colliders)
             {
                 bounds.Encapsulate(col.bounds);
@@ -82,6 +84,28 @@ namespace WM
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="collider"></param>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        public static bool PointInside(
+            BoxCollider collider,
+            Vector3 point)
+        { 
+            Vector3 offset = collider.bounds.center - point;
+            
+            Ray inputRay = new Ray(point, offset.normalized);
+
+            RaycastHit rHit;
+
+            bool inside = (!collider.Raycast(inputRay, out rHit, offset.magnitude * 1.1f));
+                
+            return inside;
+        }
+
+        #endregion
         /// <summary>
         /// Returns a string representation of the given Vector3.
         /// </summary>

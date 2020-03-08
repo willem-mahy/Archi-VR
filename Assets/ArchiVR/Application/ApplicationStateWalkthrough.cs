@@ -176,8 +176,6 @@ namespace ArchiVR
 
             m_application.Fly();
 
-            m_application.m_rightControllerText.text = m_application.ActivePOIName ?? "";
-
             m_application.UpdateTrackingSpace();
 
             // Starting the SRF measurement procedure is done by (editor-mode shortcut only)
@@ -342,6 +340,11 @@ namespace ArchiVR
 
             // Update left controller UI displaying the project name.
             m_application.m_leftControllerText.text = (m_application.ActiveProjectName != null) ? m_application.GetProjectName(m_application.ActiveProjectName) : "No project loaded.";
+
+
+            m_application.m_rightControllerText.text =
+                //m_application.ActivePOIName ?? "";
+                m_application.EstimateLayer(m_application.m_centerEyeAnchor);
 
             // Left controller
             {

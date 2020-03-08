@@ -1370,7 +1370,7 @@ namespace ArchiVR.Application
 
         #endregion
 
-        #region Model Layer management
+        #region Layer management
 
         /// <summary>
         /// Gets a list containing a handle to the layers.
@@ -1456,6 +1456,64 @@ namespace ArchiVR.Application
             {
                 command.Execute(this);
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="gameObject"></param>
+        /// <returns></returns>
+        public string EstimateLayer(GameObject gameObject)
+        {
+            string layerName = null;
+
+            var containingLayers = new List<string>();
+            var containingLayerSizes = new List<float>();
+            var gameObjectPosition = gameObject.transform.position;
+
+            foreach (var layer in this.m_layers)
+            {
+                var layerModelGO = layer.Value.Model;
+
+                var rootLevelBoxCollider = layerModelGO.GetComponent<BoxCollider>();
+
+                if (null != rootLevelBoxCollider)
+                {
+                    if (UtilUnity.PointInside(rootLevelBoxCollider, gameObjectPosition))
+                    {
+                        containingLayers.Add(layer.Key);
+                        containingLayerSizes.Add(rootLevelBoxCollider.size.x * rootLevelBoxCollider.size.z);
+                    }
+                }
+                else
+                {
+                    var boundsNullable = UtilUnity.CalculateBounds(layerModelGO);
+
+                    if (boundsNullable.HasValue)
+                    {
+                        var bounds = boundsNullable.Value;
+
+                        if (bounds.Contains(gameObjectPosition))
+                        {
+                            containingLayers.Add(layer.Key);
+                            containingLayerSizes.Add(bounds.extents.x * bounds.extents.z);
+                        }
+                    }
+                }
+            }
+
+            float minSize = float.MaxValue;
+
+            for (int i = 0; i < containingLayers.Count; ++i)
+            {
+                if (containingLayerSizes[i] < minSize)
+                {
+                    minSize = containingLayerSizes[i];
+                    layerName = containingLayers[i];
+                }
+            }
+
+            return layerName;
         }
 
         #endregion Layer Management
