@@ -54,18 +54,12 @@ namespace ArchiVR
                 m_application._teleportAreaGO.SetActive(false);
             }
 
-            // Restore default moving up/down.
-            m_application.m_flySpeedUpDown = 1.0f;
-
-            m_application.UnhideAllModelLayers();
-
             if (activePoiReferenceSystem == null)
             {
                 activePoiReferenceSystem = m_application.CreateReferenceSystem("POI", null);
             }
 
-            UpdateModelLocationAndScale();
-            UpdateTrackingSpacePosition();
+            Resume();
         }
 
         /// <summary>

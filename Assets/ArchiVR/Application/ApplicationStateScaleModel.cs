@@ -163,18 +163,10 @@ namespace ArchiVR
                     if (pickedLayer != null)
                     {
                         m_application.SetModelLayerVisible(pickedLayerIndex, !pickedLayer.activeSelf);
-                        //pickedLayer.SetActive(!pickedLayer.activeSelf);
                     }
                     else
                     {
-                        int layerIndex = 0;
-                        foreach (var layer in m_application.GetLayers())
-                        {
-                            m_application.SetModelLayerVisible(layerIndex, true);
-                            ++layerIndex;
-                        }
-
-                        //Application.UnhideAllModelLayers();
+                        m_application.UnhideAllModelLayers1();
                     }
                 }
             }

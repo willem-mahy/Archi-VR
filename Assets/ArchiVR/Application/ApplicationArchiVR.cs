@@ -300,7 +300,7 @@ namespace ArchiVR.Application
             /// <summary>
             /// Parametrized constructor.
             /// </summary>
-            public TypedEditData(GameObject containerGameObject) : base(containerGameObject) {}
+            public TypedEditData(GameObject containerGameObject) : base(containerGameObject) { }
 
             /// <summary>
             /// Get the object definition associated to the given game object.
@@ -465,7 +465,7 @@ namespace ArchiVR.Application
 
             // Maquette preview context is disabled, by default.
             MaquettePreviewContext.SetActive(false);
-            
+
             if (!UnitTestModeEnabled && (OVRManager.instance == null))
             {
                 Instantiate(ovrManagerPrefab, Vector3.zero, Quaternion.identity);
@@ -476,7 +476,7 @@ namespace ArchiVR.Application
             var settings = LoadSettings();
 
             Logger.Enabled = settings.DebugLogSettings.LoggingEnabled;
-            
+
             #region Apply Network settings
 
             ColocationEnabled = settings.NetworkSettings.ColocationEnabled;
@@ -501,7 +501,7 @@ namespace ArchiVR.Application
             // Initialize application states
             TeleportationSystem = new TeleportationSystemArchiVR(this);
             applicationStateTeleporting = new ApplicationStateTeleporting(this, TeleportationSystem);
-            
+
             base.Init();
 
             #region Apply Graphics settings
@@ -546,7 +546,7 @@ namespace ArchiVR.Application
             SetActiveProject(0);
 
             PushApplicationState(new ApplicationStateDefault(this));
-            
+
             //TestLoadAvatarPrefabsFromResources();
             //TestLoadGeometryPrefabsFromResources();
             //TestRegisteredAvatars();
@@ -559,7 +559,7 @@ namespace ArchiVR.Application
         /// </summary>
         void OnApplicationFocus(bool hasFocus)
         {
-            Logger.Debug("ApplicationArchiVR.OnApplicationFocus(" + hasFocus + ")");        
+            Logger.Debug("ApplicationArchiVR.OnApplicationFocus(" + hasFocus + ")");
         }
 
         /// <summary>
@@ -567,7 +567,7 @@ namespace ArchiVR.Application
         /// </summary>
         void OnApplicationPause(bool pauseStatus)
         {
-            Logger.Debug("ApplicationArchiVR.OnApplicationPause("+pauseStatus+")");
+            Logger.Debug("ApplicationArchiVR.OnApplicationPause(" + pauseStatus + ")");
 
             if (pauseStatus)
             {
@@ -600,10 +600,10 @@ namespace ArchiVR.Application
             set;
         } = AvatarMarioID;
 
-        public static readonly Guid AvatarMarioID       = new Guid("{160AB06A-8A58-42AF-BF40-E42CC5E3DD98}");
-        public static readonly Guid AvatarWillSmithID   = new Guid("{25871844-B6DD-4AEC-B205-71C811D5960E}");
-        public static readonly Guid AvatarTuxID         = new Guid("{354CC70A-1F01-49DC-8CFF-35FFF0CB6D38}");
-        public static readonly Guid AvatarIronManID     = new Guid("{4B3C96EB-C854-49AE-BACC-3145CDF743AF}");
+        public static readonly Guid AvatarMarioID = new Guid("{160AB06A-8A58-42AF-BF40-E42CC5E3DD98}");
+        public static readonly Guid AvatarWillSmithID = new Guid("{25871844-B6DD-4AEC-B205-71C811D5960E}");
+        public static readonly Guid AvatarTuxID = new Guid("{354CC70A-1F01-49DC-8CFF-35FFF0CB6D38}");
+        public static readonly Guid AvatarIronManID = new Guid("{4B3C96EB-C854-49AE-BACC-3145CDF743AF}");
 
         public class AvatarDefinition
         {
@@ -745,7 +745,7 @@ namespace ArchiVR.Application
             Logger.Debug("ApplicationArchiVR::OnTeleportFadeInComplete()");
 
             m_fadeAnimator.ResetTrigger("FadeIn");
-            
+
             // This denotifies that we are no longer teleporting, and makes the command processor resume.
             TeleportCommand = null;
 
@@ -815,7 +815,7 @@ namespace ArchiVR.Application
                 SetActiveProject(ActiveProjectIndex - 1);
                 return true;
             }
-            
+
             if (ActivateNextProject)
             {
                 SetActiveProject(ActiveProjectIndex + 1);
@@ -1184,7 +1184,7 @@ namespace ArchiVR.Application
                 {
                     var project = UtilUnity.FindGameObject(go, "Project");
 
-                    if (project!= null)
+                    if (project != null)
                     {
                         return project;
                     }
@@ -1246,16 +1246,16 @@ namespace ArchiVR.Application
                 projectIndex = -1;
                 return null;
             }
-            
+
             projectIndex = UtilIterate.MakeCycle(projectIndex, 0, _projectSceneNames.Count);
-            
+
             if (projectIndex == ActiveProjectIndex)
             {
                 return null;
             }
 
             var tic = new TeleportInitiatedCommand();
-            
+
             return tic;
 
             //var tc = new TeleportCommand();
@@ -1386,6 +1386,19 @@ namespace ArchiVR.Application
         public string[] LayerNames() => m_layers.Keys.ToArray();
 
         /// <summary>
+        /// Unhides all layers. (sends commands to clients in multiplay session)
+        /// </summary>
+        public void UnhideAllModelLayers1()
+        {
+            int layerIndex = 0;
+            foreach (var layer in m_layers)
+            {
+                SetModelLayerVisible(layerIndex, true);
+                ++layerIndex;
+            }
+        }
+
+        /// <summary>
         /// Unhides all layers.
         /// </summary>
         public void UnhideAllModelLayers()
@@ -1438,10 +1451,8 @@ namespace ArchiVR.Application
         }
 
         /// <summary>
-        /// 
+        /// Shows(true) or hides(false) the layer at given index.
         /// </summary>
-        /// <param name="layerIndex"></param>
-        /// <param name="visible"></param>
         public void SetModelLayerVisible(
             int layerIndex,
             bool visible)
