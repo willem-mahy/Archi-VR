@@ -411,10 +411,7 @@ namespace ArchiVR.Application
                 rightControllerButtonMapping.ButtonA.Text = _pickedInfos.Count == 0 ? "" : "Place";
                 rightControllerButtonMapping.ButtonB.Text = "Step Rotate";
 
-                rightControllerButtonMapping.ThumbUp.Text = "Forward";
-                rightControllerButtonMapping.ThumbDown.Text = "Backward";
-                rightControllerButtonMapping.ThumbLeft.Text = "Left";
-                rightControllerButtonMapping.ThumbRight.Text = "Right";
+                m_application.DisplayFlyControls();
             }
         }
 

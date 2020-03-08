@@ -390,9 +390,9 @@ namespace WM.Application
 
         #endregion Application state
 
-#region Controller UI
+        #region Controller UI
 
-#region Button mapping UI
+        #region Button mapping UI
 
 public ButtonMappingUI leftControllerButtonMapping = null;
         public ButtonMappingUI rightControllerButtonMapping = null;
@@ -408,6 +408,21 @@ public ButtonMappingUI leftControllerButtonMapping = null;
         public PickRay LPickRay = null;
 
         #endregion
+
+        #region Controller UI utility functions.
+
+        /// <summary>
+        /// Displays the controls for fly behavior in the ControllerUI.
+        /// </summary>
+        public void DisplayFlyControls()
+        {
+            rightControllerButtonMapping.ThumbUp.Text = "Forward";
+            rightControllerButtonMapping.ThumbDown.Text = "Backward";
+            rightControllerButtonMapping.ThumbLeft.Text = "Left";
+            rightControllerButtonMapping.ThumbRight.Text = "Right";
+        }
+
+        #endregion Controller UI utility functions.
 
         #endregion
 

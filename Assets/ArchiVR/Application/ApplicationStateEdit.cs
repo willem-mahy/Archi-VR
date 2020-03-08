@@ -286,10 +286,7 @@ namespace ArchiVR.Application
                 rightControllerButtonMapping.ButtonA.Text = "Create";
                 rightControllerButtonMapping.ButtonB.Text = _selectedObjects.Count == 0 ? "" : "Delete";
 
-                rightControllerButtonMapping.ThumbUp.Text = "Forward";
-                rightControllerButtonMapping.ThumbDown.Text = "Backward";
-                rightControllerButtonMapping.ThumbLeft.Text = "Left";
-                rightControllerButtonMapping.ThumbRight.Text = "Right";
+                m_application.DisplayFlyControls();
             }
         }
 

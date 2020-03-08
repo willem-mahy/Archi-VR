@@ -304,10 +304,7 @@ namespace WM.Colocation
                 }
                 rightControllerButtonMapping.ButtonB.Text = "";
 
-                rightControllerButtonMapping.ThumbUp.Text = "Forward";
-                rightControllerButtonMapping.ThumbDown.Text = "Backward";
-                rightControllerButtonMapping.ThumbLeft.Text = "Left";
-                rightControllerButtonMapping.ThumbRight.Text = "Right";
+                m_application.DisplayFlyControls();
             }
         }
 
@@ -352,10 +349,7 @@ namespace WM.Colocation
                 rightControllerButtonMapping.ButtonA.Text = "Erase Point 2";
                 rightControllerButtonMapping.ButtonB.Text = "";
 
-                rightControllerButtonMapping.ThumbUp.Text = "Forward";
-                rightControllerButtonMapping.ThumbDown.Text = "Backward";
-                rightControllerButtonMapping.ThumbLeft.Text = "Left";
-                rightControllerButtonMapping.ThumbRight.Text = "Right";
+                m_application.DisplayFlyControls();
             }
         }
 

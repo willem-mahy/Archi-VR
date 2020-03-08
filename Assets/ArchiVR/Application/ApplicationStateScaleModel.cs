@@ -197,7 +197,7 @@ namespace ArchiVR
                 #region Update MaquetteManipulationMode
 
                 bool manipulating = (Mathf.Abs(magnitudeRotateMaquette) > 0.1f) || (Mathf.Abs(magnitudeTranslateMaquette) > 0.1f);
-                   
+
                 if (maquetteManipulationMode == ModelManipulationMode.None)
                 {
                     if (manipulating)
@@ -262,7 +262,7 @@ namespace ArchiVR
                 hitInfo.distance = float.NaN;
 
                 pickedLayer = null;
-                
+
                 foreach (var layer in m_application.GetLayers())
                 {
                     UtilUnity.PickRecursively(
@@ -426,10 +426,7 @@ namespace ArchiVR
                 m_application.rightControllerButtonMapping.ButtonXA.Text = "";
                 m_application.rightControllerButtonMapping.ButtonYB.Text = "";
 
-                m_application.rightControllerButtonMapping.ThumbUp.Text = "Forward";
-                m_application.rightControllerButtonMapping.ThumbDown.Text = "Backward";
-                m_application.rightControllerButtonMapping.ThumbLeft.Text = "Left";
-                m_application.rightControllerButtonMapping.ThumbRight.Text = "Right";
+                m_application.DisplayFlyControls();
             }
         }
     }
