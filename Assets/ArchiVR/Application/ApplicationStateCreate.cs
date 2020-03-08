@@ -517,6 +517,11 @@ namespace ArchiVR.Application
                 return;
             }
 
+            if (editable is ILayerContent layerContent)
+            {
+                layerContent.LayerName = m_application.EstimateLayer(objectGO);
+            }
+
             // Give the new editable object a unique name.
             objectGO.name = ActiveObjectPrefab.name + " (" + Guid.NewGuid().ToString() + ")";
 
