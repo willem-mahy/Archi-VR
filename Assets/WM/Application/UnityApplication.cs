@@ -422,6 +422,18 @@ public ButtonMappingUI leftControllerButtonMapping = null;
             rightControllerButtonMapping.ThumbRight.Text = "Right";
         }
 
+        /// <summary>
+        /// Displays the controls for tracking space manipulation behavior in the ControllerUI.
+        /// </summary>
+        public void DisplayTrackingSpaceManipulationControls()
+        {
+            leftControllerButtonMapping.ThumbUp.Text = EnableTrackingSpaceTranslationUpDown ? "Beweeg omhoog" : "";
+            leftControllerButtonMapping.ThumbDown.Text = EnableTrackingSpaceTranslationUpDown ? "Beweeg omlaag" : "";
+
+            leftControllerButtonMapping.ThumbLeft.Text = "< Tracking";
+            leftControllerButtonMapping.ThumbRight.Text = "Tracking >";
+        }
+
         #endregion Controller UI utility functions.
 
         #endregion

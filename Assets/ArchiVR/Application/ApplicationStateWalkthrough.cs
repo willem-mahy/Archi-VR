@@ -357,19 +357,7 @@ namespace ArchiVR
                     buttonMapping.ButtonX.Text = "Vorig project";
                     buttonMapping.ButtonY.Text = "Volgend project";
 
-                    if (m_application.EnableTrackingSpaceTranslationUpDown)
-                    {
-                        buttonMapping.ThumbUp.Text = "Beweeg omhoog";
-                        buttonMapping.ThumbDown.Text = "Beweeg omlaag";
-                    }
-                    else
-                    {
-                        buttonMapping.ThumbUp.Text = "";
-                        buttonMapping.ThumbDown.Text = "";
-                    }
-
-                    buttonMapping.ThumbLeft.Text = "< Tracking";
-                    buttonMapping.ThumbRight.Text = "Tracking >";
+                    m_application.DisplayTrackingSpaceManipulationControls();
                 }
             }
 
