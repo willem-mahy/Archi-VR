@@ -1938,6 +1938,30 @@ namespace ArchiVR.Application
 
         #endregion Project Data
 
+        #region Controller UI utility functions.
+
+        /// <summary>
+        /// Update left controller text, to displaying the project name.
+        /// </summary>
+        public void DisplayActiveProject()
+        {
+            m_leftControllerText.text = (ActiveProjectName != null) ? GetProjectName(ActiveProjectName) : "No project loaded.";
+        }
+
+        /// <summary>
+        /// Update right controller text, to display:
+        /// - by default: the POI name
+        /// - while the R thumb is pressed: the estimated containing layer for the user head. (for debugging purposes)
+        /// </summary>
+        public void DisplayActivePOI()
+        {
+            var showContainingLayer = m_controllerInput.m_controllerState.rThumbstickPressed;
+
+            m_rightControllerText.text = showContainingLayer ? EstimateLayer(m_centerEyeAnchor) : ActivePOIName ?? "";
+        }
+
+        #endregion Controller UI utility functions.
+
         /// <summary>
         /// The surroundings in which the maquette is previewed.
         /// </summary>

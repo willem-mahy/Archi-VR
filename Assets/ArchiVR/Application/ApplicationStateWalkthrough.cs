@@ -338,16 +338,9 @@ namespace ArchiVR
 
             var isEditor = UnityEngine.Application.isEditor;
 
-            // Update left controller text, to displaying the project name.
-            m_application.m_leftControllerText.text = (m_application.ActiveProjectName != null) ? m_application.GetProjectName(m_application.ActiveProjectName) : "No project loaded.";
+            m_application.DisplayActiveProject();
 
-            // Update right controller text, to display:
-            // - by default: the POI name
-            // - while the R thumb is pressed: the estimated containing layer for the user head. (for debugging purposes)
-            var showContainingLayer = m_application.m_controllerInput.m_controllerState.rThumbstickPressed;
-            m_application.m_rightControllerText.text = showContainingLayer
-                ? m_application.EstimateLayer(m_application.m_centerEyeAnchor)
-                : m_application.ActivePOIName ?? "";
+            m_application.DisplayActivePOI();
 
             // Left controller
             {
