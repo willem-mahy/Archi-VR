@@ -166,7 +166,7 @@ namespace ArchiVR
                     }
                     else
                     {
-                        m_application.UnhideAllModelLayers1();
+                        m_application.UnhideAllModelLayers();
                     }
                 }
             }

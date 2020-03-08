@@ -1388,24 +1388,13 @@ namespace ArchiVR.Application
         /// <summary>
         /// Unhides all layers. (sends commands to clients in multiplay session)
         /// </summary>
-        public void UnhideAllModelLayers1()
+        public void UnhideAllModelLayers()
         {
             int layerIndex = 0;
             foreach (var layer in m_layers)
             {
                 SetModelLayerVisible(layerIndex, true);
                 ++layerIndex;
-            }
-        }
-
-        /// <summary>
-        /// Unhides all layers.
-        /// </summary>
-        public void UnhideAllModelLayers()
-        {
-            foreach (var layer in m_layers.Values)
-            {
-                layer.SetActive(true);
             }
         }
 
