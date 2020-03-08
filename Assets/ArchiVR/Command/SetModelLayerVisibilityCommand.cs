@@ -1,4 +1,5 @@
 ﻿using ArchiVR.Application;
+using ArchiVR.Application.Editable;
 using System;
 using System.Xml.Serialization;
 using UnityEngine;
@@ -50,13 +51,33 @@ namespace ArchiVR.Command
 
             var applicationArchiVR = application as ApplicationArchiVR;
 
-            //var immersionModeMaquette = applicationArchiVR.ImmersionModeMaquette;
-
-            //immersionModeMaquette.SetModelLayerVisibility(ModelLayerIndex, Visible);
-
             var layer = applicationArchiVR.GetLayers()[ModelLayerIndex];
 
             layer.SetActive(Visible);
+
+            var layerName = layer.Name;
+
+            // Update visibility of lights in the layer.
+            foreach (var go in applicationArchiVR.LightEditData.GameObjects)
+            {
+                var light = go.GetComponent<ArchiVRLight>();
+
+                if (light.LayerName == layerName)
+                {
+                    go.SetActive(Visible);
+                }
+            }
+
+            // Update visibility of props in the layer.
+            foreach (var go in applicationArchiVR.PropEditData.GameObjects)
+            {
+                var prop = go.GetComponent<ArchiVRProp>();
+
+                if (prop.LayerName == layerName)
+                {
+                    go.SetActive(Visible);
+                }
+            }
         }
     }
 }
