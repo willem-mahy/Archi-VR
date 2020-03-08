@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using WM;
 using WM.Application;
+using WM.Util;
 
 namespace ArchiVR.Application
 {
@@ -227,7 +228,7 @@ namespace ArchiVR.Application
 
             offset_Local = offset_Local.normalized;
 
-            var angle = (float)ToDegrees(Math.Acos(Vector3.Dot(offset_Local, upAxis_Local)));
+            var angle = (float)UtilMath.ToDegrees(Math.Acos(Vector3.Dot(offset_Local, upAxis_Local)));
 
             var c = Vector3.Cross(offset_Local, upAxis_Local);
 
@@ -242,20 +243,6 @@ namespace ArchiVR.Application
             }
 
             return angle;
-        }
-
-        double ToDegrees(double radians)
-        {
-            double s_factor = 180.0 / Math.PI;
-
-            return radians * s_factor;
-        }
-
-        double ToRadians(double degrees)
-        {
-            double s_factor = Math.PI / 180.0;
-
-            return degrees * s_factor;
         }
 
         /// <summary>
