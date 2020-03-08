@@ -387,10 +387,7 @@ namespace ArchiVR
                     buttonMapping.ButtonXA.Text = "Vorige locatie";
                     buttonMapping.ButtonYB.Text = "Volgende locatie";
 
-                    buttonMapping.ThumbUp.Text = "Forward";
-                    buttonMapping.ThumbDown.Text = "Backward";
-                    buttonMapping.ThumbLeft.Text = "Left";
-                    buttonMapping.ThumbRight.Text = "Right";
+                    m_application.DisplayFlyControls();
                 }
             }
         }
