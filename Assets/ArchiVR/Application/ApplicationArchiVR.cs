@@ -190,6 +190,8 @@ namespace ArchiVR.Application
 
         #endregion
 
+        #region Editing
+
         /// <summary>
         /// 
         /// </summary>
@@ -361,6 +363,8 @@ namespace ArchiVR.Application
         /// 
         /// </summary>
         public EditData[] EditDatas => new EditData[] { LightEditData, PoiEditData, PropEditData };
+
+        #endregion Editing
 
         #endregion
 
